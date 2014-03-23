@@ -1,0 +1,4 @@
+main.o: main.cpp string_ext.hpp
+output.o: output.cpp
+score.o: score.cpp score.hpp
+string_ext.o: string_ext.cpp string_ext.hpp

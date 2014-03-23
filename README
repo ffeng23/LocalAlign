@@ -1,0 +1,9 @@
+README  ----  LocalAlign
+
+	by Feng Feng @ Boston University. 03/08/2014
+
+This project is to rewrite the local alignment function following the example of Matlab localalign function It looks at the two input sequences and runs the smith waterman algorithm to return all the nonintersecting local alignments in the order of scores. It also extends the matlab localalign function by incoporating of the affine gap model compared with matlab's uniform gap model.
+
+It is written in a format that can be made into a c++ library through MS visual studio, and then can be called by c#. 
+
+ 
