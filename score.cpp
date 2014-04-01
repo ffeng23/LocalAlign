@@ -166,9 +166,7 @@ void ScoreMatrix::SetScaledScoreFlag(const bool& flag)
   this->_scaledScoreFlag=flag;
 }
 
-//the actually nuc44 matrix
-//the scale information is from matlab. not sure where this is coming from, but
-//the score are from ncbi.
+//the tsm1 matrix
 //order is A   T   C H K
 static int tsm1Int_1d[] ={  10,  -4,  -4,  -4,  -4,
 			     -4,   5,  -4,  -4,   5,
@@ -183,3 +181,19 @@ static const char tsm1Alphabet[]={ 'A' , 'C',   'H',    'K', 'T'   };
 //of course, another alternative is to define template and then do it.
 ScoreMatrix tsm1(tsm1Int,1, tsm1Alphabet,5);//again not sure where this scale come from by Matlab.
 //***************
+
+//the tsm2 matrix
+//order is A   T   C  G
+static int tsm2Int_1d[] ={  10,  -9,  -9,  -9,
+			    -9,  10,   -9,   -9,
+			    -9,  -9,   10,   -9,
+			    -9,  -9,   -9,   10
+};
+static const int* tsm2Int[] ={tsm2Int_1d,tsm2Int_1d+4*1,tsm2Int_1d+4*2,tsm2Int_1d+4*3                };
+static const char tsm2Alphabet[]={ 'A' , 'T', 'C',   'G'   };
+//the reason we have to do it this way is because we can not do it simply by passing 
+//a two D array to the function. it is not supported. you have to know the size of
+//the dimension size except the first one.
+//of course, another alternative is to define template and then do it.
+ScoreMatrix tsm2(tsm2Int,1, tsm2Alphabet,4);//again not sure where this scale come from by Matlab.
+//this matrix is used to test the example in the reference:Barton,G. 1993. CABIO. An efficient Algorithm to locate all locally ptimal alignments between two sequences alowing for gaps. Vol 9. no.6. 1993 P729-34

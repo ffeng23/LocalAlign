@@ -169,6 +169,17 @@ void LocalAlignment::traceBackMultiple()
     }
   c_alignmentArr=new AlignmentString[c_numOfAlignments];
   c_scoreArr=new double[c_numOfAlignments];
+
+  //showing the vector information
+
+  cout<<"******************SHOWING PATH INFO**************"<<endl;
+  cout<<"\ttotal num of path:"<<c_path_vec.size()<<endl;
+  for(unsigned int i=0;i<c_path_vec.size();i++)
+    {
+      cout<<i<<"/"<<c_path_vec.size()<<": start at ("<<c_path_vec.at(i)->GetStartIndex()[0]<<","
+	  <<c_path_vec.at(i)->GetStartIndex()[1]<<") and end at ("<<c_path_vec.at(i)->GetOptimalIndex()[0]
+	  <<","<<c_path_vec.at(i)->GetOptimalIndex()[1]<<");\n";
+    }
   //now sort the vector
   sort(c_path_vec.begin(), c_path_vec.end(), comparePathElement);
   
@@ -446,11 +457,12 @@ void LocalAlignment::align()
 		  else //not a zero, it was a larger than zero one, it has to be on a path
 		    {
 		      //first get the path from the vector
-		      cout<<"\t\t\t***********ffound a maximum one for the existing path, update info"<<endl;
+		     
 		      Path* tempPath=c_path_vec.at(pathElementTable[i-1+(j-1)*(lenP+1)]);
 		      //now compare to update or not
 		      if(compval>tempPath->GetOptimalValue())
 			{
+			  cout<<"\t\t\t***********ffound a maximum one for the existing path, update info::path index"<<pathElementTable[i-1+(j-1)*(lenP+1)]<<endl;
 			  unsigned int tempIndexArr[2];tempIndexArr[0]=i;tempIndexArr[1]=j;
 			  tempPath->SetOptimalIndex(tempIndexArr);
 			  tempPath->SetOptimalValue(compval);
@@ -467,7 +479,7 @@ void LocalAlignment::align()
 		  
 		  if(tempLink==UP)
 		    {
-		      pathElementTable[i+j*(lenP+1)]=pathElementTable[i+(j-c_traceback_table[i+j*(lenP+1)].GetNumOfIndels())*(lenP-1)];
+		      pathElementTable[i+j*(lenP+1)]=pathElementTable[i+(j-c_traceback_table[i+j*(lenP+1)].GetNumOfIndels())*(lenP+1)];
 		    }
 		  else
 		    {
@@ -478,7 +490,7 @@ void LocalAlignment::align()
 		    }
 		}  
 	    }
-	  
+	  cout<<"This current element is from path index:"<<pathElementTable[i+j*(lenP+1)];
 	  
 	  switch (c_traceback_table[i+j*(lenP+1)].GetLinks())
 	    {

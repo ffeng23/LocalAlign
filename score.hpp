@@ -46,4 +46,5 @@ extern ScoreMatrix nuc44 ;
 extern ScoreMatrix blosum50;
 
 extern ScoreMatrix tsm1;
+extern ScoreMatrix tsm2;
 #endif

@@ -32,9 +32,9 @@ static enum SeqType
     AminoAcid,
     Nucleotide
   } seqtype=Nucleotide; //by default
-static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1"};
+static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1", "tsm2"};
 
-static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1};
+static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1, &tsm2};
 
 static double scale=1; //this is the one on top of matrix, the programe will run score and use the 
 //matrix specified scale first and then apply the scale set by this one.
@@ -103,24 +103,38 @@ int main(int argc, char* argv[])
   cout<<"Testing ScoreMatrix:\n";
   cout<<"\tthe index: "<<scoreMatrixIndex<<endl;
   ScoreMatrix* sm= ScoreMatrixArr[scoreMatrixIndex];
-  char c1='J', c2='N';
+  char c1='C', c2='C';
+
   cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore(c1,c2)<<endl;
+  
+  //aminoacid
+  
+  //SequenceString Seq1("seq1","VSPAGMASGYDPGKA");
+  //SequenceString Seq2("seq2", "IPGKATREYDVSPAG");
+
+  //SequenceString Seq1("seq1","ASGYDPGKA");
+  //SequenceString Seq2("seq2", "ATREYDVSPAG");
+
 
   //testing local alignment
   //SequenceString Seq1("seq1","AGCTAGAGACCAGTCTGAGGTAGA");
   //SequenceString Seq2 ("seq2", "AGCTAGAGACCAGCTATCTAGAGGTAGA");
+
+  SequenceString Seq1("seq1","CCAATCTACTACTGCTTGCAGTAC");
+  SequenceString Seq2 ("seq2", "AGTCCGAGGGCTACTCTACTGAAC");
+
   
   //SequenceString Seq1("seq1","ATCGA");
   //SequenceString Seq2 ("seq2", "GATTGA");
 
-  SequenceString Seq1("seq1","ATAT");
-  SequenceString Seq2 ("seq2", "ACHKAT");
+  //SequenceString Seq1("seq1","ATAT");
+  //SequenceString Seq2 ("seq2", "ACHKAT");
 
   cout<<"showing sequence string\n"<<Seq1.toString()<<Seq2.toString()<<endl;
   
   //now testing alignment
   cout<<"Testing alignment:"<<endl;
-  LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 5);
+  LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 100);
   cout<<"\tdone and the score is "<<la.GetScore()<<endl;
   cout<<"\t"<<la.GetAlignment().toString()<<endl;
 
