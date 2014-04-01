@@ -9,17 +9,21 @@ class SequenceString
 public:
   SequenceString();
 
-  SequenceString(string _name, string _seq);
+  SequenceString(const string& _name, const string& _seq);
 
-  void SetName(string _name);
-  void SetSequence(string _seq);
+  void SetName(const string& _name);
+  void SetSequence(const string& _seq);
 
-  string GetName();
-  string GetSequence();
+  const string GetName();
+  const string GetSequence();
+  const unsigned GetLength();
+
+  string toString(bool _fasta=false);
 
 private:
   string c_name;
   string c_seq;
+  //unsigned int c_len;
 
 };
 #endif

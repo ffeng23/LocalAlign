@@ -12,7 +12,7 @@ LOADFLAG=-s -lm
 
 CXXFLAG=${CFLAG}
 
-SRCS_0=main.cpp string_ext.cpp score.cpp
+SRCS_0=main.cpp string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp LocalAlignment.cpp GlobalAlignment.cpp
 #SRCS_1=	rm_x_s_probes.cpp string_ext.cpp
 #SRCS_2=remove_replicates.cpp string_ext.cpp 
 

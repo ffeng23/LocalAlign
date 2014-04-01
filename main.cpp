@@ -9,11 +9,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "score.hpp"
+#include "SequenceString.hpp"
+#include "LocalAlignment.hpp"
+#include "GlobalAlignment.hpp"
 
 using namespace std;
 
 static void printUsage(int argc, char* argv[]);
 static void parseArguments(int argc, char **argv, const char *opts);
+static int lookUpScoreMatrix(const string* _scoreMatrixNameArray,const int& len, const string& scoreMatrixName);
 
 static string inputFile1_name; //the input file for seq1
 static string inputFile2_name;//input ifle for seq2  
@@ -21,35 +26,120 @@ static string inputFile2_name;//input ifle for seq2
 
 static string outputFile_name("localalignment.txt"); //the output file for the local alignment results with scores
 
-static string scoreMatrixName; //name as an input for specifing the name of the score matrix. for example nuc44
+static string scoreMatrixName="nuc44"; //name as an input for specifing the name of the score matrix. for example nuc44
+static enum SeqType
+  {
+    AminoAcid,
+    Nucleotide
+  } seqtype=Nucleotide; //by default
+static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1"};
 
+static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1};
+
+static double scale=1; //this is the one on top of matrix, the programe will run score and use the 
+//matrix specified scale first and then apply the scale set by this one.
+
+double gapopen=-8;
+double gapextension=-8;
+bool gapextensionFlag=false;
 //static int read_gene_sequence(const string& temp_seq, vector<string>& promoter_sequence);
-
 
 
 int main(int argc, char* argv[])
 {
   //for parsing commandline arguement
-  const char *opts = "hvf:co:";
+
+  const char *opts = "hvg:e:o:s:t:k:am:";
   //f: the input file name containing the fasta format gene sequence
   //c: flag to indicate to count each gene length.
   //o: output file name
 
   parseArguments(argc, argv, opts);
   
-  /*if(inputFile_name.size()==0)
+  if(inputFile1_name.size()==0)
     {
-      cout<<"please specify the input fasta file name.......\n";
-      printUsage(argc, argv);
+      cout<<"please specify the seq1 input fasta file name.......\n";
+      cout<<"type \"./localalign -h\" for usage help\n";
+      exit(-1);
+      //printUsage(argc, argv);
     }
-  if(!flag_countLength)
+  if(inputFile2_name.size()==0)
     {
-      cout<<">>>>>>WARNING:no action has been specified, quit...........\n";
+      cout<<"please specify the seq2 input fasta file name.......\n";
+      //printUsage(argc, argv);
+      cout<<"type \"./localalign -h \" for usage help\n";
       exit(-1);
     }
 
-  cout<<"The output file name is \""<<outputFile_name<<".\n";
-  ifstream ifs1_p(inputFile1_name.c_str());
+  cout<<"***Input parameters Summary:\n";
+  cout<<"\tSeq1 file name:\""<<inputFile1_name<<"\".\n";
+  cout<<"\tSeq2 file name:\""<<inputFile2_name<<"\".\n";
+  cout<<"\tThe output file name : \""<<outputFile_name<<"\".\n";
+  if(seqtype==AminoAcid)
+    cout<<"\tSequency Type:Amino Acids\n";
+  else
+    cout<<"\tSequency Type:Nucleotides\n";
+
+  //look up the score matix
+  int scoreMatrixIndex=lookUpScoreMatrix(supportedScoreMatrixNameArr, sizeof(supportedScoreMatrixNameArr)/sizeof(supportedScoreMatrixNameArr[0]),scoreMatrixName);
+  if(scoreMatrixIndex==-1)
+    {
+      cout<<"\tscore matrix specified by input was not found. Using the default scorematrix.\n";
+      scoreMatrixName="nuc44";
+      if(seqtype==AminoAcid)
+	{
+	  scoreMatrixName="blosum50";
+	}
+      scoreMatrixIndex=lookUpScoreMatrix(supportedScoreMatrixNameArr, sizeof(supportedScoreMatrixNameArr)/sizeof(supportedScoreMatrixNameArr[0]), scoreMatrixName);
+    }
+  cout<<"\tscore matrix:"<<scoreMatrixName<<"\n";
+  
+  cout<<"\tscale matrix scale:"<<scale<<"\n";
+  
+  cout<<"\tgap open penalty:"<<gapopen<<"\n";
+  cout<<"\tgap extension penalty:"<<gapextension<<"\n";
+  cout<<"  ****************\n";
+
+  cout<<"Testing ScoreMatrix:\n";
+  cout<<"\tthe index: "<<scoreMatrixIndex<<endl;
+  ScoreMatrix* sm= ScoreMatrixArr[scoreMatrixIndex];
+  char c1='J', c2='N';
+  cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore(c1,c2)<<endl;
+
+  //testing local alignment
+  //SequenceString Seq1("seq1","AGCTAGAGACCAGTCTGAGGTAGA");
+  //SequenceString Seq2 ("seq2", "AGCTAGAGACCAGCTATCTAGAGGTAGA");
+  
+  //SequenceString Seq1("seq1","ATCGA");
+  //SequenceString Seq2 ("seq2", "GATTGA");
+
+  SequenceString Seq1("seq1","ATAT");
+  SequenceString Seq2 ("seq2", "ACHKAT");
+
+  cout<<"showing sequence string\n"<<Seq1.toString()<<Seq2.toString()<<endl;
+  
+  //now testing alignment
+  cout<<"Testing alignment:"<<endl;
+  LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 5);
+  cout<<"\tdone and the score is "<<la.GetScore()<<endl;
+  cout<<"\t"<<la.GetAlignment().toString()<<endl;
+
+  //testing multiple alignment
+  cout<<"Total number of local aligments:"<<la.GetNumberOfAlignments()<<endl;
+  for(unsigned int i=0;i<la.GetNumberOfAlignments();i++)
+    {
+      cout<<i<<"/"<<la.GetNumberOfAlignments()<<":"<<endl;
+      cout<<la.GetAlignmentArr()[i].toString()<<endl;
+    }
+
+
+  //testing globalAlignment
+  cout<<"Testing global alignment:"<<endl;
+  GlobalAlignment gla(&Seq1,&Seq2,sm, gapopen, gapextension,1);
+  cout<<"\tdone and the score is "<<gla.GetScore()<<endl;
+  cout<<"\t"<<gla.GetAlignment().toString()<<endl;
+
+  /*ifstream ifs1_p(inputFile1_name.c_str());
   
   ofstream ofs((outputFile2_name).c_str());
   
@@ -177,7 +267,6 @@ static void parseArguments(int argc, char **argv, const char *opts)
     {
       switch(char(optchar))
 	{
-	  
 	case 's':
 	  inputFile1_name=optarg;
 	  break;
@@ -190,32 +279,25 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	  outputFile_name=optarg;
 	break;
 
-
 	case 'm':
-	 ScoreMatrixName=optarg;
-	break;
+	  scoreMatrixName=optarg;
+	  break;
 	  
-	
-	  /*case '':
-	  refSeq_size= atoi(optarg);
+	case 'a':
+	  seqtype=AminoAcid;
 	  break;
-	  	case 'e':
-	  to_id = atoi(optarg);
+	case 'k':
+	  scale=atoi(optarg);
 	  break;
-	
-	  case 'p':
-	  delimitor=optarg[1];
+	case 'e':
+	  gapextension=atoi(optarg);
+	  gapextensionFlag=true;
 	  break;
-	    
-	case 'x':
-	  if(parseNumberString(optarg, unknown_fields)!=0)
-	    {
-	      printUsage(argc,argv);
-	      exit(-1);
-	    }
-	  //commond_field_flag=1;	  
+	case 'g':
+	  gapopen=atoi(optarg);
+	  if(!gapextensionFlag)
+	    gapextension=gapopen;
 	  break;
-	  */
 	  
 	case '?':
 	  /*if(optopt == 't')
@@ -241,9 +323,10 @@ static void parseArguments(int argc, char **argv, const char *opts)
 static void printUsage(int argc, char* argv[])
 {
   cout<<"Usage:\n";
-  cout<<"\t"<<argv[0]<<"-s first sequence file -t second sequence file \n"
-      <<"[-o output filename] [-m score matrix] [-a (protein alignment)] \n"
-      <<"[-k scale] [-g gapopen panelty] [-e gap extension] [-n number of local alignment returned]"
+  cout<<"\t"<<argv[0]<<" -s first sequence file -t second sequence file \n"
+      <<"\t [-o output filename] [-m score matrix] [-a (protein alignment)] \n"
+      <<"\t [-k scale] [-g gapopen panelty] [-e gap extension]\n"
+      <<"\t [-n number of local alignment returned]"
     ;
 
   cout<<"\t\t-s filename -- the first sequence fasta filenames \n"
@@ -255,23 +338,25 @@ static void printUsage(int argc, char* argv[])
   cout<<"\t\t-o filename -- the filenames contains the local alignments \n"
       <<"\n";
   
-  cout<<"\t\t-m scorematrix -- the socre matrix name used for the alignment, only support nuc44 and \n"
-      <<"\t\t\t nuc44 by default for nucleotide alignment and pam50 by default for protein alignment  \n"
+  cout<<"\t\t-m scorematrix -- the socre matrix name used for the alignment, \n"
+      <<"\t\t\tonly support nuc44 and blosum50. nuc44 by default for nucleotide\n"
+      <<"\t\t\tand pam50 by default for protein alignment  \n"
       <<"\n";
 
-  cout<<"\t\t-a  -- the type of alignment a for protein alignment, aa; without setting this one,\n"
-      <<"\t\t\t it is by default doing nucleotide alignment. This type decides which default matrix will be used\n"
-      <<"\n";
+  cout<<"\t\t-a  -- the type of alignment a for protein alignment, aa; \n"
+      <<"\t\t\t without this one, it is by default doing nucleotide alignment.\n"
+      <<"\t\t\t  This type decides which default matrix will be used\n\n";
 
-  cout<<"\t\t-k scale -- the scale factor used to set the returned score to be of correct unit, by default 1\n"
-      <<"\t\t\t the programe first used the scale factor coming with matrix to the return score and the the scale set by this option\n"
-      <<"\n";
+  cout<<"\t\t-k scale -- the scale factor used to set the returned score to the correct unit,\n"
+      <<"\t\t\t 1 by default. The programe first uses the scale factor coming with matrix\n"
+      <<"\t\t\t  to the return score and the the scale set by this option\n\n";
 
   cout<<"\t\t-g gapopen -- the second sequence fasta filenames\n"
       <<"\n";
     
   cout<<"\t\t-h -- help\n";
-  cout<<"\n\t\tv0.1 this code is used to count the gene lenghth in the fasta file @11/12/2013\n"
+  cout<<"\n\t\tv0.1 this code is used to do the alignment in the fasta file\n"
+    <<"\t\t\t @11/12/2013\n"
      ;
 
   //cout<<"\n\t**************************"<<endl;
@@ -279,5 +364,20 @@ static void printUsage(int argc, char* argv[])
 
 
   exit(-1);
+}
+//return the index that could be used to pick up the ScoreMatrix object from ScoreMatrixArr
+//-1 for can not find
+static int lookUpScoreMatrix(const string* _scoreMatrixNameArray,const int& len, const string& scoreMatrixName)
+{
+  //int index=-1;
+  //int size=sizeof(_scoreMatrixNameArray)/sizeof(_scoreMatrixNameArray[0]);
+  for(int i=0;i<len;i++)
+    {
+      if(scoreMatrixName.compare(_scoreMatrixNameArray[i])==0)
+	{
+	  return i;
+	}
+    }
+  return -1;
 }
 

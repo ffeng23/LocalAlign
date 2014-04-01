@@ -1,6 +1,28 @@
 #ifndef LOCALALIGNMENT_HPP
 #define LOCALALIGNMENT_HPP
 #include "pairwiseAlignment.hpp"
+#include <vector>
+using namespace std;
+
+//this entry class is used to define each local alignment entry/path
+class Path
+{
+public:
+  Path();
+  Path( unsigned int _OptimalIndex[2], unsigned int _startIndex [2], const double& _optimalValue );
+  void SetOptimalIndex(unsigned int _OptimalIndex[2]);
+  void SetStartIndex(unsigned int _startIndex [2]);
+  void SetOptimalValue(const double& _optimalValue);
+  int* GetOptimalIndex();
+  int* GetStartIndex();
+  double GetOptimalValue();
+private:
+  unsigned int c_optimalIndex[2];
+  unsigned int c_startIndex[2];
+  double c_optimalValue;
+};
+
+
 
 class LocalAlignment: public PairwiseAlignment
 {
@@ -29,8 +51,9 @@ protected:
   //then delete it upon destruction. so the outside caller need to take care(copy)
   //if they need to use the score or alignment after the alignment scope expires.
 
-  
-  
+  vector<Path*> c_path_vec;
 
 };
+
+
 #endif
