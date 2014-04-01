@@ -1,0 +1,14 @@
+#
+# This matrix was created by Feng   3/31/2014
+# to test a  case of 
+# referece paper:Barton, G 1993. CABIO vol9 no6 P729-34
+# this is no real biology. just for testing
+# Lowest score = -9, Highest score = 10
+# GapOpen=-0  GapExtension=-20
+    A   T   C   G
+A  10  -9  -9  -9
+T  -9  10  -9  -9
+C  -9  -9  10  -9
+G  -9  -9  -9  10
+
+

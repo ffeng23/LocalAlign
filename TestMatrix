@@ -1,0 +1,15 @@
+#
+# This matrix was created by Feng   3/31/2014
+# to test a special case of 
+# "AT"
+# "ACHK"
+# this is no real biology. just for testing
+# Lowest score = -4, Highest score = 10
+# GapOpen=-8  GapExtension=-1
+    A   C   H   K   T
+A  10  -4  -4  -4  -4
+C  -4   5  -4  -4   5
+H  -4  -4   5  -4   6
+K  -4  -4  -4  -4  -4
+T  -4   5   6  -4   5
+
