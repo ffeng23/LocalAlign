@@ -177,8 +177,6 @@ void GlobalAlignment::align()
     {	//now we are starting a new column, we need to
       //1)first exchange the curr and prev col(actually, it is better to do this one at end of each loop, otherwise it will be trouble in the beginning of the first loop
       //2)reset the curr_col first one to gap, it should be zero anyway.
-      
-      
       dp_table_curr_col[0]=c_gapOpen+i*c_gapExtension;
       
       //now, we go through each element and do the job
@@ -190,10 +188,6 @@ void GlobalAlignment::align()
 	  //{				//if current sequence values are the same
 	  cout<<"\tcalling score matrix:score("<<strP.at(i-1)<<","<<strS.at(j-1)<<")="<<c_sm->GetScore(strP.at(i-1),strS.at(j-1))<<endl;
 	  cout<<"\t\tdp table is dp("<<i-1<<","<<j-1<<")="<<dp_table_prev_col[j-1]<<endl;
-	  compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));	//compval = diagonal + match score
-	  //}
-	  cout<<"\t\tcompval after match/mismatch:"<<compval<<";";
-	  c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);//for this one, we don't have to set the #numOfIndels, since there is none
 	  
 	  //here to make the affine linear model works, we need to keep a running max gap value for row across,
 	  //since don't keep all the rows in the memory,
@@ -218,13 +212,13 @@ void GlobalAlignment::align()
 	      //the maximumGapInde[j] unchaned, keep the same
 	    }
 	  
-	  if(compval < maximumGapValue[j]) 
-	    {	    //if cell above has a greater value 
+	  //if(compval < maximumGapValue[j]) 
+	  //  {	    //if cell above has a greater value 
 	      
 	      compval = maximumGapValue[j];		//set compval to that square
 	      c_traceback_table[i+j*(lenP+1)].SetLinks(LEFT);
 	      c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(i-maximumGapIndex[j]);
-	    }
+	      //  }
 	  cout<<"maximumGapValue[j]:"<<maximumGapValue[j]<<",";
 	  cout<<"campval after rowGap:"<<compval<<";";
 
@@ -242,6 +236,21 @@ void GlobalAlignment::align()
 		}
 	    }		
 	  cout<<"compval afer col gap:"<<compval<<endl;		
+
+	  //Match/mismatch
+	  if(compval < (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)))) 
+	  {	    //if cell above has a greater value 
+	      
+	      compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));		//set compval to that square
+	      c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);
+	      c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(0);
+	  }
+	  //compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));	//compval = diagonal + match score
+	  //}
+	  cout<<"\t\tcompval after match/mismatch:"<<compval<<";";
+	  //c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);//for this one, we don't have to set the #numOfIndels, since there is none
+	  
+
 	  /*if((compval-0) < 1E-10) 
 	    {
 	      compval = 0;

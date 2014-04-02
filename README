@@ -6,4 +6,19 @@ This project is to rewrite the local alignment function following the example of
 
 It is written in a format that can be made into a c++ library through MS visual studio, and then can be called by c#. 
 
+04/02/2014
+so far, it has been finished with 
+   local alignment
+   global alignment
+   overlap alignment
+
+global and overlap alignment has been following R style. {library("Biostrings")} pairwiseAlignment
+local alignment is following R style too, but it is expanded to return all the local alignment, nonintersecting.
+
+The code has been tested but need conituing tested. It works OK so far.
+
+***********
+main.cpp is for testing purpose.
+
+
  

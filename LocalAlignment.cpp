@@ -37,7 +37,7 @@ LocalAlignment::~LocalAlignment()
   //taking care of Path vector
   for(unsigned int i=0;i<c_path_vec.size();i++)
     {
-      cout<<"deleting path vecs"<<endl;
+      //cout<<"deleting path vecs"<<endl;
       delete c_path_vec.at(i);
     }
 }

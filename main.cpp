@@ -13,7 +13,8 @@
 #include "SequenceString.hpp"
 #include "LocalAlignment.hpp"
 #include "GlobalAlignment.hpp"
-
+#include "OverlapAlignment.hpp"
+#include "FastaHandler.hpp"
 using namespace std;
 
 static void printUsage(int argc, char* argv[]);
@@ -59,7 +60,7 @@ int main(int argc, char* argv[])
   if(inputFile1_name.size()==0)
     {
       cout<<"please specify the seq1 input fasta file name.......\n";
-      cout<<"type \"./localalign -h\" for usage help\n";
+      cout<<"type \"./testalign -h\" for usage help\n";
       exit(-1);
       //printUsage(argc, argv);
     }
@@ -67,7 +68,7 @@ int main(int argc, char* argv[])
     {
       cout<<"please specify the seq2 input fasta file name.......\n";
       //printUsage(argc, argv);
-      cout<<"type \"./localalign -h \" for usage help\n";
+      cout<<"type \"./testalign -h \" for usage help\n";
       exit(-1);
     }
 
@@ -120,12 +121,19 @@ int main(int argc, char* argv[])
   //SequenceString Seq1("seq1","AGCTAGAGACCAGTCTGAGGTAGA");
   //SequenceString Seq2 ("seq2", "AGCTAGAGACCAGCTATCTAGAGGTAGA");
 
-  SequenceString Seq1("seq1","CCAATCTACTACTGCTTGCAGTAC");
-  SequenceString Seq2 ("seq2", "AGTCCGAGGGCTACTCTACTGAAC");
+  //SequenceString Seq1("seq1","CCAATCTACTACTGCTTGCAGTACTTGT");
+  //SequenceString Seq2 ("seq2", "AGTCCGAGGGCTACTCTACTGAAC");
 
-  
+  SequenceString Seq1("seq1","AGACGCACTCGTTCGGGAAGTAGTCCTTGACCAGGCAGCCCACGGCGCTGTC");
+  //SequenceString Seq2 ("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTGTTCGGGGAAGTAGTCCTTGAC");
+  //SequenceString Seq2("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTCAGGAGACGAGGGGGAA");
+  SequenceString Seq2("seq2","CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTACGTTGGGTGGTACCCAGTTAT");
+  //SequenceString Seq2("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTACGACTCACTATAGGGCAAGCAGTGGTAACAACGCAGAGTACGCGGG");
   //SequenceString Seq1("seq1","ATCGA");
   //SequenceString Seq2 ("seq2", "GATTGA");
+
+  //SequenceString Seq1("seq1","CGAA");
+  //SequenceString Seq2 ("seq2", "CGGAA");
 
   //SequenceString Seq1("seq1","ATAT");
   //SequenceString Seq2 ("seq2", "ACHKAT");
@@ -153,6 +161,24 @@ int main(int argc, char* argv[])
   cout<<"\tdone and the score is "<<gla.GetScore()<<endl;
   cout<<"\t"<<gla.GetAlignment().toString()<<endl;
 
+  //testing overlapAlignment
+  /*
+  cout<<"Testing overlap alignment:"<<endl;
+  OverlapAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
+  cout<<"\tdone and the score is "<<ola.GetScore()<<endl;
+  cout<<"\t"<<ola.GetAlignment().toString()<<endl;
+  */
+  cout<<"done"<<endl;
+
+
+  //testing fasta handler
+  vector<SequenceString> vec_seq;
+  cout<<"reading in "<<ReadFasta(inputFile1_name, vec_seq)<<endl;
+
+  cout<<"1/1000:"<<vec_seq.at(0).toString()<<endl;
+  cout<<"999/1000;"<<vec_seq.at(999).toString()<<endl;
+
+  WriteFasta("feng.fa",vec_seq);
   /*ifstream ifs1_p(inputFile1_name.c_str());
   
   ofstream ofs((outputFile2_name).c_str());
@@ -264,14 +290,6 @@ int main(int argc, char* argv[])
     }
     }*/
 
-//here in this function, we append the sequece into the gene sequece vector
-//-1 for error,
-//0 for good.
-/*static int read_gene_sequence(const string& temp_seq, vector<string>& gene_sequence)
-{
-  gene_sequence.push_back(temp_seq);
-  return 0;
-  }*/
 
 static void parseArguments(int argc, char **argv, const char *opts)
 {

@@ -1,11 +1,11 @@
-#include "GlobalAlignment.hpp"
+#include "OverlapAlignment.hpp"
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
 
 using namespace std;
 
-GlobalAlignment::GlobalAlignment(SequenceString* _pattern, SequenceString* _subject, 
+OverlapAlignment::OverlapAlignment(SequenceString* _pattern, SequenceString* _subject, 
 			       ScoreMatrix* _m, const double& _gopen, 
 			       const double& _gextension, const double& _scale):
   PairwiseAlignment(_pattern, _subject, _m, _gopen, _gextension, _scale)
@@ -19,7 +19,7 @@ GlobalAlignment::GlobalAlignment(SequenceString* _pattern, SequenceString* _subj
   this->traceBack();
 }
   
-GlobalAlignment::~GlobalAlignment()
+OverlapAlignment::~OverlapAlignment()
 {
   //the base class destructor is called automatically
 
@@ -27,7 +27,7 @@ GlobalAlignment::~GlobalAlignment()
   
 }
 
-void GlobalAlignment::traceBack()
+void OverlapAlignment::traceBack()
 {
   //vector<unsigned int[2]> OptimalValueIndex; //the index that current best score resides
   //vector<unsigned int[2]> startIndex;//where the 
@@ -109,7 +109,7 @@ void GlobalAlignment::traceBack()
 //but instead we keep only one column (in fact for coding
 //purpose, we keep two columns to make the algorithm working
 //efficient;
-void GlobalAlignment::align()
+void OverlapAlignment::align()
 {
   	//Create empty dynamic programming table
   unsigned lenP=c_pattern->GetLength();
@@ -119,18 +119,17 @@ void GlobalAlignment::align()
 
   //here we keep two columns, to effieciently and easily manipulate the column. it cold be only one
   c_traceback_table=new TracebackTableEntry[(lenP+1)*(lenS+1)];
-  //the following is not necessary, 
-  
+  //the following is to set all the first rows and cols to zero. 
   c_traceback_table[0].SetLinks(ZERO);
   for(unsigned int i=1;i<=lenP;i++)
     {
-      c_traceback_table[i+0*(lenP+1)].SetLinks(LEFT);
-      c_traceback_table[i+0*(lenP+1)].SetNumOfIndels(i);
+      c_traceback_table[i+0*(lenP+1)].SetLinks(ZERO);
+      c_traceback_table[i+0*(lenP+1)].SetNumOfIndels(0);
     }
   for(unsigned int j=1;j<=lenS;j++)
     {
-      c_traceback_table[0+j*(lenP+1)].SetLinks(UP);
-      c_traceback_table[0+j*(lenP+1)].SetNumOfIndels(j);
+      c_traceback_table[0+j*(lenP+1)].SetLinks(ZERO);
+      c_traceback_table[0+j*(lenP+1)].SetNumOfIndels(0);
     }
   
 
@@ -138,12 +137,12 @@ void GlobalAlignment::align()
   
   //intialize the dp table, the first row=gapsExtended and first column=gapsExtended
   //the row is Pattern, column is Subject. 
-  dp_table_curr_col[0]=c_gapOpen+1*c_gapExtension;//this is the first row
+  dp_table_curr_col[0]=0;//this is the first row
 
   dp_table_prev_col[0]=0;
   for(unsigned int i=1;i<=lenS;++i)
     {
-      dp_table_prev_col[i]=c_gapOpen+i*c_gapExtension;//this is the first column
+      dp_table_prev_col[i]=0;//this is the first column
     }
 
   cout<<"successfully created the empty tables and now go to get the score!\n";
@@ -167,6 +166,9 @@ void GlobalAlignment::align()
       //maximumGapIndex[1]=1;//to the
     } 
 
+  double maximumValueLastRowCol=-1E70;
+  unsigned int maximumIndexLastRowCol[]={0,0};
+
   //we have to be very careful here
   //the dimension of the dp table and the strings are not same.
   //dp table is one row/col more than the strings, since we need to 
@@ -179,7 +181,7 @@ void GlobalAlignment::align()
       //2)reset the curr_col first one to gap, it should be zero anyway.
       
       
-      dp_table_curr_col[0]=c_gapOpen+i*c_gapExtension;
+      dp_table_curr_col[0]=0;
       
       //now, we go through each element and do the job
       for(unsigned int j = 1; j <= lenS; ++j) 
@@ -190,11 +192,8 @@ void GlobalAlignment::align()
 	  //{				//if current sequence values are the same
 	  cout<<"\tcalling score matrix:score("<<strP.at(i-1)<<","<<strS.at(j-1)<<")="<<c_sm->GetScore(strP.at(i-1),strS.at(j-1))<<endl;
 	  cout<<"\t\tdp table is dp("<<i-1<<","<<j-1<<")="<<dp_table_prev_col[j-1]<<endl;
-	  compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));	//compval = diagonal + match score
-	  //}
-	  cout<<"\t\tcompval after match/mismatch:"<<compval<<";";
-	  c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);//for this one, we don't have to set the #numOfIndels, since there is none
-	  
+	 
+	  //***********do gap first*********
 	  //here to make the affine linear model works, we need to keep a running max gap value for row across,
 	  //since don't keep all the rows in the memory,
 	  //but for the column across, we are fine, since we keep all the columns till this elements
@@ -217,14 +216,14 @@ void GlobalAlignment::align()
 	      maximumGapValue[j]=maxGapExtendedValue;
 	      //the maximumGapInde[j] unchaned, keep the same
 	    }
-	  
-	  if(compval < maximumGapValue[j]) 
-	    {	    //if cell above has a greater value 
+	  compval=maximumGapValue[j];
+	  //if(compval < maximumGapValue[j]) 
+	  //  {	    //if cell above has a greater value 
 	      
-	      compval = maximumGapValue[j];		//set compval to that square
+	  //  compval = maximumGapValue[j];		//set compval to that square
 	      c_traceback_table[i+j*(lenP+1)].SetLinks(LEFT);
 	      c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(i-maximumGapIndex[j]);
-	    }
+	      // }
 	  cout<<"maximumGapValue[j]:"<<maximumGapValue[j]<<",";
 	  cout<<"campval after rowGap:"<<compval<<";";
 
@@ -241,7 +240,23 @@ void GlobalAlignment::align()
 		  c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(j-k);
 		}
 	    }		
-	  cout<<"compval afer col gap:"<<compval<<endl;		
+	  cout<<"compval afer col gap:"<<compval<<endl;
+
+	  //*********do Macth/Mismatch now
+	  if(compval < (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)))) 
+	  {	    //if cell upleft leads to a greater value 
+	      
+	  //  compval = maximumGapValue[j];		//set compval to that square
+	    compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));
+	    c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);
+	    c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(0);
+	  }
+	  //compval = diagonal + match score
+	  //}
+	  cout<<"\t\tcompval after match/mismatch:"<<compval<<";";
+	  //c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);//for this one, we don't have to set the #numOfIndels, since there is none
+
+	  
 	  /*if((compval-0) < 1E-10) 
 	    {
 	      compval = 0;
@@ -272,7 +287,7 @@ void GlobalAlignment::align()
 	  dp_table_curr_col[j] = compval;	//set current cell to highest possible score and move on
 	  cout<<"\t\trunning score:"<<compval<<endl;
 
-	  c_score=compval;
+	  //c_score=compval;
 	  //find a best one so far
 	  /*if(c_score<compval)
 	    {
@@ -281,17 +296,37 @@ void GlobalAlignment::align()
 	      }*/
 
 	}//end of col
-      
+      //at the end of row, we need to keep track of biggest one on the last row.
+      if(maximumValueLastRowCol<dp_table_curr_col[lenS])
+	{
+	  //cout<<"&&&&&&found a maximum score ("<<i<<","<<lenS<<"0="<<dp_table_curr_col[lenS]<<endl;
+	  maximumValueLastRowCol=dp_table_curr_col[lenS];
+	  maximumIndexLastRowCol[0]=i;
+	  maximumIndexLastRowCol[1]=lenS;
+	}
       //reset the prev one to curr col and make it ready for next loop
       double* tempP=dp_table_curr_col;
       dp_table_curr_col=dp_table_prev_col;
       dp_table_prev_col=tempP;
     }//end of row
 
+  //now need to go through the col to get the biggest one
+  for(unsigned int k=1;k<=lenS;k++)
+    {
+      if(maximumValueLastRowCol<dp_table_prev_col[k]) //using prev col becase we have switched the prev and curr col
+	{
+	  //cout<<"&&&&&&found a maximum score ("<<lenP<<","<<k<<"0="<<dp_table_prev_col[k]<<endl;
+	  maximumValueLastRowCol=dp_table_prev_col[k];
+	  maximumIndexLastRowCol[0]=lenP;
+	  maximumIndexLastRowCol[1]=k;
+	}
+    }
   //for the global alignment,we always traceback from the lowerright corner
-  c_optimalIndex[0]=lenP;
-  c_optimalIndex[1]=lenS;
+  c_optimalIndex[0]=maximumIndexLastRowCol[0];
+  c_optimalIndex[1]=maximumIndexLastRowCol[1];
   
+  c_score=maximumValueLastRowCol;
+
   //clean up
   delete[] dp_table_prev_col;
   delete[] dp_table_curr_col;

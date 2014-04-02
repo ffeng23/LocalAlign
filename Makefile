@@ -12,7 +12,7 @@ LOADFLAG=-s -lm
 
 CXXFLAG=${CFLAG}
 
-SRCS_0=main.cpp string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp LocalAlignment.cpp GlobalAlignment.cpp
+SRCS_0=main.cpp string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp LocalAlignment.cpp GlobalAlignment.cpp OverlapAlignment.cpp FastaHandler.cpp
 #SRCS_1=	rm_x_s_probes.cpp string_ext.cpp
 #SRCS_2=remove_replicates.cpp string_ext.cpp 
 
@@ -20,7 +20,7 @@ OBJS_0=${SRCS_0:.cpp=.o}
 #OBJS_1=${SRCS_1:.cpp=.o}
 #OBJS_2=${SRCS_2:.cpp=.o}
 
-PROG_0=localalign
+PROG_0=testalign
 #PROG_1=rmxs_at
 #PROG_2=remove_replicate
 DEPEND=$(GXX) $(CFLAG) -MM
