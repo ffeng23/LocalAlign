@@ -1,15 +1,23 @@
 AlignmentString.o: AlignmentString.cpp AlignmentString.hpp
-FastaHandler.o: FastaHandler.cpp FastaHandler.hpp SequenceString.hpp
+FastaHandler.o: FastaHandler.cpp FastaHandler.hpp SequenceString.hpp \
+ string_ext.hpp
 GlobalAlignment.o: GlobalAlignment.cpp GlobalAlignment.hpp \
  pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp
 LocalAlignment.o: LocalAlignment.cpp LocalAlignment.hpp \
  pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp
+NGSMapping_main.o: NGSMapping_main.cpp string_ext.hpp score.hpp \
+ SequenceString.hpp OverlapAlignment.hpp pairwiseAlignment.hpp \
+ AlignmentString.hpp FastaHandler.hpp SequenceHandler.hpp
 OverlapAlignment.o: OverlapAlignment.cpp OverlapAlignment.hpp \
  pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp
+SequenceHandler.o: SequenceHandler.cpp SequenceHandler.hpp \
+ SequenceString.hpp score.hpp FastaHandler.hpp OverlapAlignment.hpp \
+ pairwiseAlignment.hpp AlignmentString.hpp
 SequenceString.o: SequenceString.cpp SequenceString.hpp
 main.o: main.cpp string_ext.hpp score.hpp SequenceString.hpp \
  LocalAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
- GlobalAlignment.hpp OverlapAlignment.hpp FastaHandler.hpp
+ GlobalAlignment.hpp OverlapAlignment.hpp FastaHandler.hpp \
+ SequenceHandler.hpp
 output.o: output.cpp
 pairwiseAlignment.o: pairwiseAlignment.cpp pairwiseAlignment.hpp \
  score.hpp SequenceString.hpp AlignmentString.hpp

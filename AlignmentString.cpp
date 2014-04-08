@@ -62,19 +62,19 @@ void AlignmentString::SetSubjectIndex(const int& _start, const int& _end)
   c_subject_end=_end;
 }
 
-int AlignmentString::GetPatternIndexStart()
+unsigned int AlignmentString::GetPatternIndexStart()
 {
   return c_pattern_start;
 }
-int AlignmentString::GetPatternIndexEnd()
+unsigned int AlignmentString::GetPatternIndexEnd()
 {
   return c_pattern_end;
 }
-int AlignmentString::GetSubjectIndexStart()
+unsigned int AlignmentString::GetSubjectIndexStart()
 {
   return c_subject_start;
 }
-int AlignmentString::GetSubjectIndexEnd()
+unsigned int AlignmentString::GetSubjectIndexEnd()
 {
   return c_subject_end;
 }

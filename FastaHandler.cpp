@@ -2,8 +2,9 @@
 #include <stdlib.h>
 //#include <stdio.h>
 #include <fstream>
+#include "string_ext.hpp"
 using namespace std;
-unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec)
+unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec, bool toUpper)
 {
   ifstream ifs_p(_fname.c_str());
       
@@ -53,7 +54,7 @@ unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec)
 	  if(gene_number>0) //we already read something, so we have to store it to the vector
 	    {
 
-	      SequenceString ss(gene_info,temp_seq);
+	      SequenceString ss(gene_info,to_upper_str(temp_seq));
 	      _seqStrVec.push_back(ss);
 	      
 	    }//otherwise, we are doing the first one, so do bother
@@ -72,7 +73,7 @@ unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec)
   
   //here we have to update/add the last gene
   //read_gene_sequence(temp_seq, gene_sequence)==-1)
-  SequenceString ss(gene_info,temp_seq);
+  SequenceString ss(gene_info,to_upper_str(temp_seq));
   _seqStrVec.push_back(ss);
   
 
@@ -85,9 +86,9 @@ unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec)
   return gene_number;
 }
 
-void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const unsigned int _width )
+void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const unsigned int _width,  ios_base::openmode mode)
 {
-  ofstream ofs((_fname).c_str());
+  ofstream ofs((_fname).c_str(), mode);
   
   if(!ofs.is_open())
     {
@@ -105,5 +106,33 @@ void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const 
     }
 
   ofs.close();
+}
+
+void WriteTextFile(const string& _fname, vector<int>& _seqStrVec, const char& c, const unsigned int _width, ios_base::openmode mode)
+{
+  ofstream ofs((_fname).c_str(), mode);
+  
+  if(!ofs.is_open())
+    {
+      cout<<">>>>>>ERROR:the output file \""<<_fname<<"\" can not be opened, quit....\n";
+      exit(-1);
+    }
+  
+  for(unsigned int i=0;i<_seqStrVec.size();i++)
+    {
+      //ofs<<">"<<_seqStrVec.at(i).GetName()<<"\n";
+      ofs<<_seqStrVec.at(i);
+      if((i+1)%_width==0||i==_seqStrVec.size()-1)
+	{
+	  ofs<<"\n";
+	}
+      else
+	{
+	  ofs<<c;
+	}
+    }
+
+  ofs.close();
+  
 }
 

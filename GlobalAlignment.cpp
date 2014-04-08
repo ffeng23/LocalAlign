@@ -95,7 +95,7 @@ void GlobalAlignment::traceBack()
   c_alignment.SetPattern(c_pattern->GetSequence().substr(i,c_optimalIndex[0]-i), false);
   
   c_alignment.SetSubject(c_subject_wg, true);
-  c_alignment.SetPattern(c_subject->GetSequence().substr(j,c_optimalIndex[1]-j), false);
+  c_alignment.SetSubject(c_subject->GetSequence().substr(j,c_optimalIndex[1]-j), false);
   
   c_alignment.SetPatternIndex(i, c_optimalIndex[0]-1);
   c_alignment.SetSubjectIndex(j,c_optimalIndex[1]-1);

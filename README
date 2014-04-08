@@ -18,7 +18,24 @@ local alignment is following R style too, but it is expanded to return all the l
 The code has been tested but need conituing tested. It works OK so far.
 
 ***********
-main.cpp is for testing purpose.
+main.cpp is for testing purpose, and can be called to do alignment (local, global and overlap).
+	 Todo: need to add the input to specify what type? 1)global;2)local;3)overlap;
+	       also need to read in the fasta sequences. it has the ability to read/write fasta, but just need take them as input and output yet.
 
+change main.cpp compiled program to align
+
+**************
+add code to take the processing/mapping of Deepsequencing data
+    1)map the adaptor+barcode+GS primer. need to build a text database
+    2)trim off
+    3)map the constant region. need to build a text database
+    4)analysis the distribution of i)forward;2)both;3)reverse;4)none
+    	       	   		for forward only truncated(?, how? by library preparation or reading?), 
+    				for reverse(?) 454?? definitely something wrong;   MiSeq, it is fine(?)
+				for both, a)could be primer dimer-- short ones b)or good ones.
+				for none, something wrong.
+    5)analysis of the constant region length distribution. Any trend? uniformly?? 
+    6)analysis of different population, IgG vs. IgM.
+    	       	  	    MiSeq vs. 454
 
  

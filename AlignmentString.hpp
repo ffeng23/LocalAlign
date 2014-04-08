@@ -22,10 +22,10 @@ public:
   void SetPatternIndex(const int& _start, const int& _end);
   void SetSubjectIndex(const int& _start, const int& _end);
 
-  int GetPatternIndexStart();
-  int GetPatternIndexEnd();
-  int GetSubjectIndexStart();
-  int GetSubjectIndexEnd();
+  unsigned int GetPatternIndexStart();
+  unsigned int GetPatternIndexEnd();
+  unsigned int GetSubjectIndexStart();
+  unsigned int GetSubjectIndexEnd();
 
   string toString();
   void SetScore(const double& _s);

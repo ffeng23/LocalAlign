@@ -11,11 +11,13 @@
 using namespace std;
 
 //return total number of sequeces read in.
-unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec);
+//toUpper =true : convert the character to upper case. false: keep the original letter
+unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec, bool toUpper=false);
 
 
-void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const unsigned int _width=50 );
+void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const unsigned int _width=50, ios_base::openmode mode=ios_base::out);
 
+void WriteTextFile(const string& _fname, vector<int>& _seqStrVec, const char& c='\t', const unsigned int _width=1, ios_base::openmode mode=ios_base::out);
 
 
 

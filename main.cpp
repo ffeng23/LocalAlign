@@ -15,6 +15,8 @@
 #include "GlobalAlignment.hpp"
 #include "OverlapAlignment.hpp"
 #include "FastaHandler.hpp"
+#include "SequenceHandler.hpp"
+
 using namespace std;
 
 static void printUsage(int argc, char* argv[]);
@@ -124,10 +126,10 @@ int main(int argc, char* argv[])
   //SequenceString Seq1("seq1","CCAATCTACTACTGCTTGCAGTACTTGT");
   //SequenceString Seq2 ("seq2", "AGTCCGAGGGCTACTCTACTGAAC");
 
-  SequenceString Seq1("seq1","AGACGCACTCGTTCGGGAAGTAGTCCTTGACCAGGCAGCCCACGGCGCTGTC");
+  //SequenceString Seq1("seq1","AGACGCACTCGTTCGGGAAGTAGTCCTTGACCAGGCAGCCCACGGCGCTGTC");
   //SequenceString Seq2 ("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTGTTCGGGGAAGTAGTCCTTGAC");
   //SequenceString Seq2("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTCAGGAGACGAGGGGGAA");
-  SequenceString Seq2("seq2","CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTACGTTGGGTGGTACCCAGTTAT");
+  //SequenceString Seq2("seq2","CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTACGTTGGGTGGTACCCAGTTAT");
   //SequenceString Seq2("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTACGACTCACTATAGGGCAAGCAGTGGTAACAACGCAGAGTACGCGGG");
   //SequenceString Seq1("seq1","ATCGA");
   //SequenceString Seq2 ("seq2", "GATTGA");
@@ -137,12 +139,15 @@ int main(int argc, char* argv[])
 
   //SequenceString Seq1("seq1","ATAT");
   //SequenceString Seq2 ("seq2", "ACHKAT");
+  SequenceString Seq1("seq","AGACGCACTCGTTCGGGAAGTAGTCCTTGACCAGGCAGCCCACGGCGCTGTC");
+  SequenceString Seq2("Adaptor","CGTATCGCCTCCCTCGCGCCATCAGAGACGCACTCGTTCGGGGAAGTAGTCCTTGAC");
 
   cout<<"showing sequence string\n"<<Seq1.toString()<<Seq2.toString()<<endl;
   
   //now testing alignment
   cout<<"Testing alignment:"<<endl;
   LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 100);
+  //LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 100);
   cout<<"\tdone and the score is "<<la.GetScore()<<endl;
   cout<<"\t"<<la.GetAlignment().toString()<<endl;
 
@@ -157,9 +162,10 @@ int main(int argc, char* argv[])
 
   //testing globalAlignment
   cout<<"Testing global alignment:"<<endl;
-  GlobalAlignment gla(&Seq1,&Seq2,sm, gapopen, gapextension,1);
-  cout<<"\tdone and the score is "<<gla.GetScore()<<endl;
-  cout<<"\t"<<gla.GetAlignment().toString()<<endl;
+  //GlobalAlignment gla(&Seq1,&Seq2,sm, gapopen, gapextension,1);
+OverlapAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
+  cout<<"\tdone and the score is "<<ola.GetScore()<<endl;
+  cout<<"\t"<<ola.GetAlignment().toString()<<endl;
 
   //testing overlapAlignment
   /*
@@ -179,6 +185,20 @@ int main(int argc, char* argv[])
   cout<<"999/1000;"<<vec_seq.at(999).toString()<<endl;
 
   WriteFasta("feng.fa",vec_seq);
+
+  //testing reverseComp
+  cout<<"Testing reverse comp:"<<endl;
+  SequenceString tempSString=ReverseComplement(vec_seq.at(0));
+
+  cout<<"rev comp 0/1000"<<tempSString.toString()<<endl;
+
+  cout<<"Test substr()"<<endl;
+  string tempString("feng");
+  cout<<"0,1 : "<<tempString.substr(0,1)<<endl;
+  cout<<"0,-100: "<<tempString.substr(0,100)<<endl;
+  cout<<"length is "<<tempString.length()<<endl;
+  cout<<"4,1 :" <<tempString.substr(4)<<endl;
+
   /*ifstream ifs1_p(inputFile1_name.c_str());
   
   ofstream ofs((outputFile2_name).c_str());
@@ -269,8 +289,6 @@ int main(int argc, char* argv[])
   */
   //ifs_p.close();
   cout<<"writing output........."<<endl;
-
-  //write_output(ofs, gene_info, gene_sequence);
 
   cout<<"Done!!!"<<endl;
   //ofs.close();
