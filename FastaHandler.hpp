@@ -15,9 +15,9 @@ using namespace std;
 unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec, bool toUpper=false);
 
 
-void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const unsigned int _width=50, ios_base::openmode mode=ios_base::out);
+void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const unsigned int& _width=50, ios_base::openmode mode=ios_base::out);
 
-void WriteTextFile(const string& _fname, vector<int>& _seqStrVec, const char& c='\t', const unsigned int _width=1, ios_base::openmode mode=ios_base::out);
+void WriteTextFile(const string& _fname, vector<unsigned int>& _seqStrVec, const char& c='\t', const unsigned int& _width=1, ios_base::openmode mode=ios_base::out);
 
 
 

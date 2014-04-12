@@ -5,6 +5,13 @@ GlobalAlignment.o: GlobalAlignment.cpp GlobalAlignment.hpp \
  pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp
 LocalAlignment.o: LocalAlignment.cpp LocalAlignment.hpp \
  pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp
+NGSMapping_Adaptor_main.o: NGSMapping_Adaptor_main.cpp string_ext.hpp \
+ score.hpp SequenceString.hpp OverlapAlignment.hpp pairwiseAlignment.hpp \
+ AlignmentString.hpp FastaHandler.hpp SequenceHandler.hpp
+NGSMapping_PrimerDimer_main.o: NGSMapping_PrimerDimer_main.cpp \
+ string_ext.hpp score.hpp SequenceString.hpp OverlapAlignment.hpp \
+ pairwiseAlignment.hpp AlignmentString.hpp FastaHandler.hpp \
+ SequenceHandler.hpp
 NGSMapping_main.o: NGSMapping_main.cpp string_ext.hpp score.hpp \
  SequenceString.hpp OverlapAlignment.hpp pairwiseAlignment.hpp \
  AlignmentString.hpp FastaHandler.hpp SequenceHandler.hpp

@@ -52,13 +52,14 @@ static double gapopen=-8;
 static double gapextension=-8;
 static bool gapextensionFlag=false;
 
-static int trim=1;
+static int trim=0;
+static bool isotype_flag=false;
 
 int main(int argc, char* argv[])
 {
   //for parsing commandline arguement
 
-  const char *opts = "hva:b:f:r:g:e:t:m:s:k:n:p:q:l:";
+  const char *opts = "hva:b:f:r:g:e:m:s:k:n:p:q:l:";
   //a: the input file name adaptor
   //b: the input file name barcode
   //f: the input file name forward primer
@@ -68,13 +69,16 @@ int main(int argc, char* argv[])
   //e: gap extension
   //m: score matrix
   //s: sequece data file
-  //t: get trimmed data file (1) or no trimmed data (0)
+  //t: ***No trimmed data !!!get trimmed data file (1) or no trimmed data (0), no trimmed data
   //k: scale factor
 
   //n: mismatch ratio threshold 
   //p: offset in for the forward
   //q: offset for the reverse end
   //l: minimum overlap length
+  //i: **********set to true if want to write up output by isotypes or false by not specify it
+  //   always by isotype
+
   parseArguments(argc, argv, opts);
   
   
@@ -132,35 +136,32 @@ int main(int argc, char* argv[])
       <<"\toffset on reverse end:"<<OffsetReverse<<"\n"
       <<"\tmismatch rate threshold:"<<MismatchRateThreshold<<"\n"
       <<"\tminimum overlap length:"<<MinimumOverlapLength<<"\n";
+  
   cout<<"  ****************\n";
 
-  cout<<"Testing ScoreMatrix:\n";
-  cout<<"\tthe index: "<<scoreMatrixIndex<<endl;
   ScoreMatrix* sm= ScoreMatrixArr[scoreMatrixIndex];
-  char c1='C', c2='C';
 
-  cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore(c1,c2)<<endl;
-  
-  
-  //testing fasta handler
+  //fasta handler:reading fasta
   vector<SequenceString> vec_seq;
   vector<SequenceString> vec_forward_seq;//this will hold processed sequences on the forward end
   vector<SequenceString> vec_reverse_seq;//this will hold processed sequences on the reverse end
   
   cout<<"reading sequence data file: "<<ReadFasta(sequenceFile_name, vec_seq)<<endl;
-  
-  
   cout<<"1/1000:"<<vec_seq.at(0).toString()<<endl;
-  //cout<<"1000/1000;"<<vec_seq.at(999).toString()<<endl;
-
+  
   cout<<"reading and processing adaptor sequences for mapping......"<<endl;
+  /*if(trim==1) 
+    SetUpTrimFlag(true);
+  */
+  SetUpByIsotypeOutputFlag(isotype_flag);
   ProcessAdaptorSequences(adaptorFile_name, barcodeFile_name, forwardFile_name, reverseFile_name, vec_forward_seq, vec_reverse_seq);
 
   
   
-  WriteFasta("forward_adaptor_sequnces_set.fa",vec_forward_seq);
-  WriteFasta("reverse_adaptor_sequnces_set.fa",vec_reverse_seq);  
+  //WriteFasta("forward_adaptor_sequnces_set.fa",vec_forward_seq);
+  //WriteFasta("reverse_adaptor_sequnces_set.fa",vec_reverse_seq);  
 
+  //SetupConstantPrimerInfo(1,forwardFile_name);
 //now we have everything, we just need to do the job, I mean mapping, here.
   MappingAdaptors(vec_forward_seq, vec_reverse_seq, vec_seq, 
 		  sm, gapopen, gapextension, trim,
@@ -210,9 +211,13 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	  scoreMatrixName=optarg;
 	  break;
 	  
-	case 't':
-	  trim=atoi(optarg);
-	  break;
+	  //case 't':
+	  //trim=atoi(optarg);
+	  //break;
+	  //case 'i':
+	  //isotype_flag=true;
+	  //break;
+
 	case 'k':
 	  scale=atof(optarg);
 	  break;
@@ -267,6 +272,7 @@ static void printUsage(int argc, char* argv[])
       <<"\t [-t reverse primer filename] [-f forward primer filename]\n"
       <<"\t  [-m score matrix] [-t trim ] [-l MinimumOverlapLength]\n"
       <<"\t [-k scale] [-g gapopen panelty] [-e gap extension]\n"
+      <<"\t [-i]\n"
       <<"\t [-n Mismatch rate threshold] [-p offset on forward end] [-q offset on reverse end]\n"     
       <<"\t [-h] [-v]\n\n"
     ;
@@ -290,8 +296,8 @@ static void printUsage(int argc, char* argv[])
       <<"\t\t\tonly support nuc44. nuc44 by default for nucleotide\n"
       <<"\n";
 
-  cout<<"\t\t-t # -- the number 0 indicate no trimmed data to be saved; \n"
-      <<"\t\t\t  All other number means to save the trimmed data to file\n\n";
+  //cout<<"\t\t-t # -- the number 0 indicate no trimmed data to be saved; \n"
+  //    <<"\t\t\t  All other number means to save the trimmed data to file\n\n";
 
   cout<<"\t\t-k scale -- the scale factor used to set the returned score to the correct unit,\n"
       <<"\t\t\t 1 by default. The programe first uses the scale factor coming with matrix\n"
@@ -299,6 +305,9 @@ static void printUsage(int argc, char* argv[])
 
   cout<<"\t\t-g gapopen -- the gap open value\n"
       <<"\n";
+
+  //cout<<"\t\t-i -- set to output data by isotypes\n"
+  //    <<"\n";
 
   cout<<"\t\t-e gapextension -- the gap extension value\n"
       <<"\n";

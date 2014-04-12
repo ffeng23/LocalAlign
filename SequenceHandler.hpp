@@ -30,5 +30,7 @@ SequenceString ReverseComplement(SequenceString& seq);
 
 unsigned int CompareStrings(const string& str1, const string& str2);
 
+void SetUpTrimFlag(const bool& _f);
+void SetUpByIsotypeOutputFlag(const bool& _f);
 #endif
 

@@ -37,5 +37,6 @@ add code to take the processing/mapping of Deepsequencing data
     5)analysis of the constant region length distribution. Any trend? uniformly?? 
     6)analysis of different population, IgG vs. IgM.
     	       	  	    MiSeq vs. 454
-
- 
+change NGSMapping.cpp to NGSMapping_Adaptor_main.cpp
+       and executable to NGSMapping_Adaptor
+       2014 04 10, add functions to output results by isotypes, so far only IgG and IgM

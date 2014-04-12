@@ -86,7 +86,7 @@ unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec,
   return gene_number;
 }
 
-void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const unsigned int _width,  ios_base::openmode mode)
+void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const unsigned int& _width,  ios_base::openmode mode)
 {
   ofstream ofs((_fname).c_str(), mode);
   
@@ -108,7 +108,7 @@ void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const 
   ofs.close();
 }
 
-void WriteTextFile(const string& _fname, vector<int>& _seqStrVec, const char& c, const unsigned int _width, ios_base::openmode mode)
+void WriteTextFile(const string& _fname, vector<unsigned int>& _seqStrVec, const char& c, const unsigned int& _width, ios_base::openmode mode)
 {
   ofstream ofs((_fname).c_str(), mode);
   
