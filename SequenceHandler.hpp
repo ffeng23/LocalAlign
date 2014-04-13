@@ -19,6 +19,12 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 		     const string& _mapBoth_fname, const string& _mapForward_fname,
 		     const string& _mapReverse_fname, const string& _mapNone_fname); 
 
+void MappingPrimerDimers(vector<SequenceString>& _vecForward, vector<SequenceString>& _vecReverse, vector<SequenceString>& _vecSeq, 
+		     ScoreMatrix* _sm, const double& _gapOpen, const double& _gapExtension,
+		     const double& _mismatchRateThreshold, const unsigned _minmumOverlapLength, const unsigned int& _offsetForward, const unsigned int& _offsetReverse, 
+		     const string& _mapBoth_fname, const string& _mapForward_fname,
+		     const string& _mapReverse_fname, const string& _mapNone_fname); 
+
 SequenceString ReverseComplement(SequenceString& seq);
 
 //compare two strings character by character, return # of chars that are different. if two strings are of different size, 

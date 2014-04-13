@@ -12,9 +12,6 @@ NGSMapping_PrimerDimer_main.o: NGSMapping_PrimerDimer_main.cpp \
  string_ext.hpp score.hpp SequenceString.hpp OverlapAlignment.hpp \
  pairwiseAlignment.hpp AlignmentString.hpp FastaHandler.hpp \
  SequenceHandler.hpp
-NGSMapping_main.o: NGSMapping_main.cpp string_ext.hpp score.hpp \
- SequenceString.hpp OverlapAlignment.hpp pairwiseAlignment.hpp \
- AlignmentString.hpp FastaHandler.hpp SequenceHandler.hpp
 OverlapAlignment.o: OverlapAlignment.cpp OverlapAlignment.hpp \
  pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp
 SequenceHandler.o: SequenceHandler.cpp SequenceHandler.hpp \

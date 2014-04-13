@@ -27,6 +27,9 @@ public:
   unsigned int GetSubjectIndexStart();
   unsigned int GetSubjectIndexEnd();
 
+  //this is the method 
+  //unsigned int FoundAlignedIndexOnOppositeStrand(const byte& _strand, const unsigned int& _index);
+
   string toString();
   void SetScore(const double& _s);
   double GetScore();

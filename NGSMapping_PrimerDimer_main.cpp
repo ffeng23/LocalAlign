@@ -52,8 +52,8 @@ static double gapopen=-8;
 static double gapextension=-8;
 static bool gapextensionFlag=false;
 
-static int trim=0;
-static bool isotype_flag=false;
+//static int trim=0;
+//static bool isotype_flag=false;
 
 int main(int argc, char* argv[])
 {
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
   /*if(trim==1) 
     SetUpTrimFlag(true);
   */
-  SetUpByIsotypeOutputFlag(isotype_flag);
+  SetUpByIsotypeOutputFlag(true);
   ProcessAdaptorSequences(adaptorFile_name, barcodeFile_name, forwardFile_name, reverseFile_name, vec_forward_seq, vec_reverse_seq);
 
   
@@ -163,8 +163,8 @@ int main(int argc, char* argv[])
 
   //SetupConstantPrimerInfo(1,forwardFile_name);
 //now we have everything, we just need to do the job, I mean mapping, here.
-  MappingAdaptors(vec_forward_seq, vec_reverse_seq, vec_seq, 
-		  sm, gapopen, gapextension, trim,
+  MappingPrimerDimers(vec_forward_seq, vec_reverse_seq, vec_seq, 
+		  sm, gapopen, gapextension,
 		  MismatchRateThreshold, MinimumOverlapLength, OffsetForward, OffsetReverse, 
 		  outputFileBoth_name, outputFileForward_name, outputFileReverse_name,outputFileNone_name
 		  ); 
