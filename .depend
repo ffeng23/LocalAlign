@@ -8,6 +8,9 @@ LocalAlignment.o: LocalAlignment.cpp LocalAlignment.hpp \
 NGSMapping_Adaptor_main.o: NGSMapping_Adaptor_main.cpp string_ext.hpp \
  score.hpp SequenceString.hpp OverlapAlignment.hpp pairwiseAlignment.hpp \
  AlignmentString.hpp FastaHandler.hpp SequenceHandler.hpp
+NGSMapping_Constant_main.o: NGSMapping_Constant_main.cpp string_ext.hpp \
+ score.hpp SequenceString.hpp OverlapAlignment.hpp pairwiseAlignment.hpp \
+ AlignmentString.hpp FastaHandler.hpp SequenceHandlerConstant.hpp
 NGSMapping_PrimerDimer_main.o: NGSMapping_PrimerDimer_main.cpp \
  string_ext.hpp score.hpp SequenceString.hpp OverlapAlignment.hpp \
  pairwiseAlignment.hpp AlignmentString.hpp FastaHandler.hpp \
@@ -17,6 +20,10 @@ OverlapAlignment.o: OverlapAlignment.cpp OverlapAlignment.hpp \
 SequenceHandler.o: SequenceHandler.cpp SequenceHandler.hpp \
  SequenceString.hpp score.hpp FastaHandler.hpp OverlapAlignment.hpp \
  pairwiseAlignment.hpp AlignmentString.hpp
+SequenceHandlerConstant.o: SequenceHandlerConstant.cpp \
+ SequenceHandler.hpp SequenceString.hpp score.hpp FastaHandler.hpp \
+ SequenceHandlerConstant.hpp OverlapAlignment.hpp pairwiseAlignment.hpp \
+ AlignmentString.hpp LocalAlignment.hpp
 SequenceString.o: SequenceString.cpp SequenceString.hpp
 main.o: main.cpp string_ext.hpp score.hpp SequenceString.hpp \
  LocalAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
