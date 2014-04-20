@@ -33,30 +33,31 @@ void OverlapAlignment::traceBack()
   //vector<unsigned int[2]> startIndex;//where the 
   //vector<double[2]> curr_and_max;
 
-  //cout<<"doing trace back in the global alignment"<<endl;
+  cout<<"doing trace back in the local alignment"<<endl;
   
   //starting from optimalIndex going backing
   unsigned int i=c_optimalIndex[0];
   unsigned int j=c_optimalIndex[1];
 
-  //cout<<"starting from ("<<i<<","<<j<<")"<<endl;
+  cout<<"starting from ("<<i<<","<<j<<")"<<endl;
   string c_pattern_wg;//aligned string with gap
   string c_subject_wg;//aligend string with gap
 
   
   //the while criteria, could be this or i==0&&j==0
-  while(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks()!=ZERO)  //keep going till we reach a zero
+  //while(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks()!=ZERO)  //keep going till we reach a zero
+  while (c_traceback_table->GetLink(i, j)!=ZERO)
     {
-      //cout<<"\t("<<i<<","<<j<<"):";
+      cout<<"\t("<<i<<","<<j<<"):";
       unsigned int currentIndex;
       //check the link table, decide where to go
-      switch(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks())
+      switch(c_traceback_table->GetLink(i, j))//(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks())
 	{
 	case UP:
-	  //cout<<"UP:"<<endl;
+	  cout<<"UP:"<<endl;
 	  //now we have to check how many indels
 	  currentIndex=j;
-	  for(unsigned int k =0;k<c_traceback_table[i+currentIndex*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
+	  for(unsigned int k =0;k<c_traceback_table->GetNumOfIndels(i, currentIndex);k++)//c_traceback_table[i+currentIndex*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
 	    {
 	      c_pattern_wg="-"+c_pattern_wg;
 	  
@@ -65,10 +66,10 @@ void OverlapAlignment::traceBack()
 	    }
 	  break;
 	case LEFT:
-	  //cout<<"LEFT"<<endl;
+	  cout<<"LEFT"<<endl;
 	  //need to check how many indels
 	  currentIndex=i;
-	  for(unsigned int k=0;k<c_traceback_table[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
+	  for(unsigned int k=0;k<c_traceback_table->GetNumOfIndels(currentIndex, j);k++)//c_traceback_table[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
 	    {
 
 	      c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
@@ -77,7 +78,7 @@ void OverlapAlignment::traceBack()
 	    }
 	  break;
 	case UPLEFT:
-	  //cout<<"UPLEFT"<<endl;
+	  cout<<"UPLEFT"<<endl;
 	  c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
 	  c_subject_wg=c_subject->GetSequence().at(j-1)+c_subject_wg;
 	  i--;
@@ -118,9 +119,9 @@ void OverlapAlignment::align()
   double* dp_table_curr_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
 
   //here we keep two columns, to effieciently and easily manipulate the column. it cold be only one
-  c_traceback_table=new TracebackTableEntry[(lenP+1)*(lenS+1)];
+  c_traceback_table=new TracebackTable(c_pattern, c_subject, 1);//[(lenP+1)*(lenS+1)];
   //the following is to set all the first rows and cols to zero. 
-  c_traceback_table[0].SetLinks(ZERO);
+  /*c_traceback_table[0].SetLinks(ZERO);
   for(unsigned int i=1;i<=lenP;i++)
     {
       c_traceback_table[i+0*(lenP+1)].SetLinks(ZERO);
@@ -131,7 +132,7 @@ void OverlapAlignment::align()
       c_traceback_table[0+j*(lenP+1)].SetLinks(ZERO);
       c_traceback_table[0+j*(lenP+1)].SetNumOfIndels(0);
     }
-  
+  */
 
   c_score=-1E9;
   
@@ -221,8 +222,8 @@ void OverlapAlignment::align()
 	  //  {	    //if cell above has a greater value 
 	      
 	  //  compval = maximumGapValue[j];		//set compval to that square
-	      c_traceback_table[i+j*(lenP+1)].SetLinks(LEFT);
-	      c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(i-maximumGapIndex[j]);
+	  c_traceback_table->SetTableEntry(i, j, LEFT, i-maximumGapIndex[j]);//[i+j*(lenP+1)].SetLinks(LEFT);
+	  //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(i-maximumGapIndex[j]);
 	      // }
 	      //cout<<"maximumGapValue[j]:"<<maximumGapValue[j]<<",";
 	      //cout<<"campval after rowGap:"<<compval<<";";
@@ -236,8 +237,9 @@ void OverlapAlignment::align()
 		  //if square to the left has the highest valu
 					
 		  compval = ((dp_table_curr_col[k]) + (c_gapOpen + (c_gapExtension *(j- k))));    //set compval to that square
-		  c_traceback_table[i+j*(lenP+1)].SetLinks(UP);
-		  c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(j-k);
+		  //c_traceback_table[i+j*(lenP+1)].SetLinks(UP);
+		  //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(j-k);
+		  c_traceback_table->SetTableEntry(i,j, UP, j-k);
 		}
 	    }		
 	  //cout<<"compval afer col gap:"<<compval<<endl;
@@ -248,8 +250,9 @@ void OverlapAlignment::align()
 	      
 	  //  compval = maximumGapValue[j];		//set compval to that square
 	    compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));
-	    c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);
-	    c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(0);
+	    //c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);
+	    //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(0);
+	    c_traceback_table->SetTableEntry(i,j, UPLEFT, 0);
 	  }
 	  //compval = diagonal + match score
 	  //}

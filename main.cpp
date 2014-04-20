@@ -120,8 +120,8 @@ int main(int argc, char* argv[])
 
 
   //testing local alignment
-  //SequenceString Seq1("seq1","AGCTAGAGACCAGTCTGAGGTAGA");
-  //SequenceString Seq2 ("seq2", "AGCTAGAGACCAGCTATCTAGAGGTAGA");
+  SequenceString Seq1("seq1","AGCTAGAGACCAGTCTGAGGTAGA");
+  SequenceString Seq2 ("seq2", "AGCTAGAGACCAGCTATCTAGAGGTAGA");
 
   //SequenceString Seq1("seq1","CCAATCTACTACTGCTTGCAGTACTTGT");
   //SequenceString Seq2 ("seq2", "AGTCCGAGGGCTACTCTACTGAAC");
@@ -139,16 +139,16 @@ int main(int argc, char* argv[])
 
   //SequenceString Seq1("seq1","ATAT");
   //SequenceString Seq2 ("seq2", "ACHKAT");
-  SequenceString Seq1("seq","AGACGCACTGTTCGGGAAGTAGTCCTTGACCAGGCAGCCACCCATGTACTCTGCGTTGATACCACTGCTTGCCCTATAGTGAGTCGTGAGTGCGTCTCTGACGGGCTGGCAAGGCGCATAG");
-  SequenceString Seq2("Constant","cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgagagcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgtggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcaggactctactccctcagcagcgtggtgaccgtgacctccagcaacttcggcacccagacctacacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg");
+  //SequenceString Seq1("seq","AGACGCACTGTTCGGGAAGTAGTCCTTGACCAGGCAGCCACCCATGTACTCTGCGTTGATACCACTGCTTGCCCTATAGTGAGTCGTGAGTGCGTCTCTGACGGGCTGGCAAGGCGCATAG");
+  //SequenceString Seq2("Constant","cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgagagcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgtggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcaggactctactccctcagcagcgtggtgaccgtgacctccagcaacttcggcacccagacctacacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg");
 
   cout<<"showing sequence string\n"<<Seq1.toString()<<Seq2.toString()<<endl;
   
   //now testing alignment
   cout<<"Testing alignment:"<<endl;
   SequenceString tempSStr=ReverseComplement(Seq2);
-  LocalAlignment la(&Seq1,&tempSStr,sm, gapopen, gapextension,1, 10);
-  //LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 100);
+  //LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 10);
+  LocalAlignment la(&Seq1,&tempSStr,sm, gapopen, gapextension,1, 100);
   cout<<"\tdone and the score is "<<la.GetScore()<<endl;
   cout<<"\t"<<la.GetAlignment().toString()<<endl;
 
@@ -163,10 +163,10 @@ int main(int argc, char* argv[])
 
   //testing globalAlignment
   cout<<"Testing global alignment:"<<endl;
-  //GlobalAlignment gla(&Seq1,&Seq2,sm, gapopen, gapextension,1);
-OverlapAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
+  GlobalAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
+  //OverlapAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
   cout<<"\tdone and the score is "<<ola.GetScore()<<endl;
-  cout<<"\t"<<ola.GetAlignment().toString()<<endl;
+  cout<<"\t********"<<ola.GetAlignment().toString()<<endl;
 
   //testing overlapAlignment
   /*

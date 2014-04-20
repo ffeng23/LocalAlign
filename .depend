@@ -1,6 +1,10 @@
+AffineGapModel.o: AffineGapModel.cpp AffineGapModel.hpp \
+ pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp
 AlignmentString.o: AlignmentString.cpp AlignmentString.hpp
 FastaHandler.o: FastaHandler.cpp FastaHandler.hpp SequenceString.hpp \
  string_ext.hpp
+GapModel.o: GapModel.cpp GapModel.hpp pairwiseAlignment.hpp score.hpp \
+ SequenceString.hpp AlignmentString.hpp
 GlobalAlignment.o: GlobalAlignment.cpp GlobalAlignment.hpp \
  pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp
 LocalAlignment.o: LocalAlignment.cpp LocalAlignment.hpp \

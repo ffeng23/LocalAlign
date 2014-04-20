@@ -45,18 +45,18 @@ void GlobalAlignment::traceBack()
 
   
   //the while criteria, could be this or i==0&&j==0
-  while(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks()!=ZERO)  //keep going till we reach a zero
+  while(c_traceback_table->GetLink(i,j)!=ZERO)  //keep going till we reach a zero
     {
       cout<<"\t("<<i<<","<<j<<"):";
       unsigned int currentIndex;
       //check the link table, decide where to go
-      switch(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks())
+      switch(c_traceback_table->GetLink(i,j))
 	{
 	case UP:
 	  cout<<"UP:"<<endl;
 	  //now we have to check how many indels
 	  currentIndex=j;
-	  for(unsigned int k =0;k<c_traceback_table[i+currentIndex*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
+	  for(unsigned int k =0;k<c_traceback_table->GetNumOfIndels(i, currentIndex);k++)
 	    {
 	      c_pattern_wg="-"+c_pattern_wg;
 	  
@@ -68,7 +68,7 @@ void GlobalAlignment::traceBack()
 	  cout<<"LEFT"<<endl;
 	  //need to check how many indels
 	  currentIndex=i;
-	  for(unsigned int k=0;k<c_traceback_table[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
+	  for(unsigned int k=0;k<c_traceback_table->GetNumOfIndels(currentIndex, j);k++)//[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
 	    {
 
 	      c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
@@ -118,9 +118,10 @@ void GlobalAlignment::align()
   double* dp_table_curr_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
 
   //here we keep two columns, to effieciently and easily manipulate the column. it cold be only one
-  c_traceback_table=new TracebackTableEntry[(lenP+1)*(lenS+1)];
+
+  c_traceback_table=new TracebackTable(c_pattern, c_subject, 0);
   //the following is not necessary, 
-  
+  /* 
   c_traceback_table[0].SetLinks(ZERO);
   for(unsigned int i=1;i<=lenP;i++)
     {
@@ -132,7 +133,7 @@ void GlobalAlignment::align()
       c_traceback_table[0+j*(lenP+1)].SetLinks(UP);
       c_traceback_table[0+j*(lenP+1)].SetNumOfIndels(j);
     }
-  
+  */
 
   c_score=-1E9;
   
@@ -216,8 +217,8 @@ void GlobalAlignment::align()
 	  //  {	    //if cell above has a greater value 
 	      
 	      compval = maximumGapValue[j];		//set compval to that square
-	      c_traceback_table[i+j*(lenP+1)].SetLinks(LEFT);
-	      c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(i-maximumGapIndex[j]);
+	      c_traceback_table->SetTableEntry(i,j,LEFT, i-maximumGapIndex[j]);
+	      //c_traceback_table[i+j].SetNumOfIndels(i-maximumGapIndex[j]);
 	      //  }
 	  cout<<"maximumGapValue[j]:"<<maximumGapValue[j]<<",";
 	  cout<<"campval after rowGap:"<<compval<<";";
@@ -231,8 +232,9 @@ void GlobalAlignment::align()
 		  //if square to the left has the highest valu
 					
 		  compval = ((dp_table_curr_col[k]) + (c_gapOpen + (c_gapExtension *(j- k))));    //set compval to that square
-		  c_traceback_table[i+j*(lenP+1)].SetLinks(UP);
-		  c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(j-k);
+		  //c_traceback_table[i+j*(lenP+1)].SetLinks(UP);
+		  //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(j-k);
+		  c_traceback_table->SetTableEntry(i, j, UP, j-k);
 		}
 	    }		
 	  cout<<"compval afer col gap:"<<compval<<endl;		
@@ -242,8 +244,9 @@ void GlobalAlignment::align()
 	  {	    //if cell above has a greater value 
 	      
 	      compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));		//set compval to that square
-	      c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);
-	      c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(0);
+	      //c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);
+	      //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(0);
+	      c_traceback_table->SetTableEntry(i, j, UPLEFT, 0);
 	  }
 	  //compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));	//compval = diagonal + match score
 	  //}
@@ -259,13 +262,13 @@ void GlobalAlignment::align()
 	      //we don't set numOfIndels;keep default
 	    }
 	  */
-	  switch (c_traceback_table[i+j*(lenP+1)].GetLinks())
+	  switch (c_traceback_table->GetLink(i, j))
 	    {
 	    case UP:
-	      cout<<"\t\tlink is UP;#indels is"<<c_traceback_table[i+j*(lenP+1)].GetNumOfIndels()<<endl;
+	      cout<<"\t\tlink is UP;#indels is"<<c_traceback_table->GetNumOfIndels(i,j)<<endl;
 	      break;
 	    case LEFT:
-	      cout<<"\t\tlink is LEFT;#indels is"<<c_traceback_table[i+j*(lenP+1)].GetNumOfIndels()<<endl;
+	      cout<<"\t\tlink is LEFT;#indels is"<<c_traceback_table->GetNumOfIndels(i,j)<<endl;
 	      break;
 	    case UPLEFT:
 	      cout<<"\t\tlink is UPLEFT"<<endl;

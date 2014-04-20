@@ -225,23 +225,25 @@ void LocalAlignment::traceBack()
   string c_pattern_wg;//aligned string with gap
   string c_subject_wg;//aligend string with gap
   cout<<"length of patten :"<<c_pattern->GetLength()<<endl;
-  if(c_traceback_table[0+4*(c_pattern->GetLength()+1)].GetLinks()==ZERO)
+  /*if(c_traceback_table[0+4*(c_pattern->GetLength()+1)].GetLinks()==ZERO)
     cout<<"======C_tracetable entry (0,4) is ZERO"<<endl;
   else
     cout<<"======C_tracetable entry (0,4) is NON-ZERO"<<endl;  
-
-  while(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks()!=ZERO)  //keep going till we reach a zero
+  */
+  // while(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks()!=ZERO)  //keep going till we reach a zero
+  while(c_traceback_table->GetLink(i,j)!=ZERO)  //keep going till we reach a zero
     {
       cout<<"\t("<<i<<","<<j<<"):";
       unsigned int currentIndex;
       //check the link table, decide where to go
-      switch(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks())
+      //switch(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks())
+      switch(c_traceback_table->GetLink(i,j))
 	{
 	case UP:
 	  cout<<"UP:"<<endl;
 	  //now we have to check how many indels
 	  currentIndex=j;
-	  for(unsigned int k =0;k<c_traceback_table[i+currentIndex*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
+	  for(unsigned int k =0;k<c_traceback_table->GetNumOfIndels(i, currentIndex);k++)//c_traceback_table[i+currentIndex*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
 	    {
 	      c_pattern_wg="-"+c_pattern_wg;
 	  
@@ -253,7 +255,7 @@ void LocalAlignment::traceBack()
 	  cout<<"LEFT"<<endl;
 	  //need to check how many indels
 	  currentIndex=i;
-	  for(unsigned int k=0;k<c_traceback_table[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
+	  for(unsigned int k=0;k<c_traceback_table->GetNumOfIndels(currentIndex,j);k++)//c_traceback_table[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
 	    {
 
 	      c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
@@ -303,9 +305,9 @@ void LocalAlignment::align()
   double* dp_table_curr_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
 
   //here we keep two columns, to effieciently and easily manipulate the column. it cold be only one
-  c_traceback_table=new TracebackTableEntry[(lenP+1)*(lenS+1)];
+  c_traceback_table=new TracebackTable(c_pattern, c_subject, 2);//(lenP+1)*(lenS+1)];
   //the following is not necessary, so we are defaulting all to zero
-  for(unsigned int i=0;i<=lenP;i++)
+  /*for(unsigned int i=0;i<=lenP;i++)
     {
       c_traceback_table[i+0*(lenP+1)].SetLinks(ZERO);
     }
@@ -313,12 +315,13 @@ void LocalAlignment::align()
     {
       c_traceback_table[0+j*(lenP+1)].SetLinks(ZERO);
     }
-
+  */
   cout<<"lenP is "<<lenP<<endl;
-  if(c_traceback_table[0+4*(lenP+1)].GetLinks()==ZERO)
+  /*if(c_traceback_table[0+4*(lenP+1)].GetLinks()==ZERO)
     cout<<"======C_tracetable entry (0,4) is ZERO"<<endl;
   else
     cout<<"======C_tracetable entry (0,4) is NON-ZERO"<<endl;
+  */
   c_score=-1E9;
   
   //intialize the dp table, the first row=0 and first column=0
@@ -379,13 +382,8 @@ void LocalAlignment::align()
 	  //{				//if current sequence values are the same
 	  cout<<"\tcalling score matrix:score("<<strP.at(i-1)<<","<<strS.at(j-1)<<")="<<c_sm->GetScore(strP.at(i-1),strS.at(j-1))<<endl;
 	  cout<<"\t\tdp table is dp("<<i-1<<","<<j-1<<")="<<dp_table_prev_col[j-1]<<endl;
-	  compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));	//compval = diagonal + match score
-	  //}
-	  cout<<"\t\tcompval after match/mismatch:"<<compval<<";";
-	  c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);//for this one, we don't have to set the #numOfIndels, since there is none
-	  
 
-	  //here to make the affine linear model works, we need to keep a running max gap value for row across,
+//here to make the affine linear model works, we need to keep a running max gap value for row across,
 	  //since don't keep all the rows in the memory,
 	  //but for the column across, we are fine, since we keep all the columns till this elements
 
@@ -408,13 +406,14 @@ void LocalAlignment::align()
 	      //the maximumGapInde[j] unchaned, keep the same
 	    }
 	  
-	  if(compval < maximumGapValue[j]) 
-	    {	    //if cell above has a greater value 
+	  //if(compval < maximumGapValue[j]) 
+	  //  {	    //if cell above has a greater value 
 	      
 	      compval = maximumGapValue[j];		//set compval to that square
-	      c_traceback_table[i+j*(lenP+1)].SetLinks(LEFT);
-	      c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(i-maximumGapIndex[j]);
-	    }
+	      //c_traceback_table[i+j*(lenP+1)].SetLinks(LEFT);
+	      //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(i-maximumGapIndex[j]);
+	      c_traceback_table->SetTableEntry(i, j, LEFT, i-maximumGapIndex[j]);
+	      //  }
 	  cout<<"maximumGapValue[j]:"<<maximumGapValue[j]<<",";
 	  cout<<"campval after rowGap:"<<compval<<";";
 
@@ -427,25 +426,38 @@ void LocalAlignment::align()
 		  //if square to the left has the highest valu
 					
 		  compval = ((dp_table_curr_col[k]) + (c_gapOpen + (c_gapExtension *(j- k))));    //set compval to that square
-		  c_traceback_table[i+j*(lenP+1)].SetLinks(UP);
-		  c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(j-k);
+		  //c_traceback_table[i+j*(lenP+1)].SetLinks(UP);
+		  //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(j-k);
+		  c_traceback_table->SetTableEntry(i,j, UP, j-k);
 		}
 	    }		
-	  cout<<"compval afer col gap:"<<compval<<endl;		
+	  cout<<"compval afer col gap:"<<compval<<endl;	
+
+	  //***************do Match/Mismatch now***********
+	  if(compval < (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1))))
+	    {
+	      compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));	//compval = diagonal + match score
+	      //}
+	      cout<<"\t\tcompval after match/mismatch:"<<compval<<";";
+	      c_traceback_table->SetTableEntry(i,j, UPLEFT,0);//c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);//for this one, we don't have to set the #numOfIndels, since there is none
+	    }
+	  
+	  //here, we try to update information after compare values 	
 	  if((compval-0) < 1E-10) //found a zero or smaller value
 	    {
 	      compval = 0;
 	      //The following is not necessary, since everything so far is default to ZERO
-	      c_traceback_table[i+j*(lenP+1)]=ZERO;
+	      //c_traceback_table[i+j*(lenP+1)]=ZERO;
+	      c_traceback_table->SetTableEntry(i,j, ZERO,0);
 	      //we don't set numOfIndels;keep default
 	    }
 	  else //found a larger than zero value, this is where we need to check whether this is good starting for a new path
 	    {
 	      //check its
-	      if(c_traceback_table[i+j*(lenP+1)].GetLinks()==UPLEFT)//it is possible that this is a new path start. 
+	      if(c_traceback_table->GetLink(i,j)==UPLEFT)//[i+j*(lenP+1)].GetLinks()==UPLEFT)//it is possible that this is a new path start. 
 		//there is no way that a path starting from an insertion, it has to be a match
 		{
-		  if(c_traceback_table[(i-1)+(j-1)*(lenP+1)].GetLinks()==ZERO)
+		  if(c_traceback_table->GetLink(i-1,j-1)==ZERO)//[(i-1)+(j-1)*(lenP+1)].GetLinks()==ZERO)
 		    {
 		      cout<<"\t\t&&&&&&&&&&&&ADDING A NEW PATH"<<endl;
 		      //this is new path starting. since it following a zero and then a match.
@@ -475,30 +487,32 @@ void LocalAlignment::align()
 		//a path 2)it is no way to the maximum one so far, we only need to update the pathElement table information, don't have
 		//update the path entry
 		{
-		  LinkBack tempLink=c_traceback_table[i+j*(lenP+1)].GetLinks();//it can not be ZERO, can not be UPPERLEFT
+		  LinkBack tempLink=c_traceback_table->GetLink(i,j);//[i+j*(lenP+1)].GetLinks();//it can not be ZERO, can not be UPPERLEFT
 		  
 		  if(tempLink==UP)
 		    {
-		      pathElementTable[i+j*(lenP+1)]=pathElementTable[i+(j-c_traceback_table[i+j*(lenP+1)].GetNumOfIndels())*(lenP+1)];
+		      //pathElementTable[i+j*(lenP+1)]=pathElementTable[i+(j-c_traceback_table[i+j*(lenP+1)].GetNumOfIndels())*(lenP+1)];
+		      pathElementTable[i+j*(lenP+1)]=pathElementTable[i+(j-c_traceback_table->GetNumOfIndels(i,j))*(lenP+1)];
 		    }
 		  else
 		    {
 		      if(tempLink==LEFT)
 			{
-			  pathElementTable[i+j*(lenP+1)]=pathElementTable[(i-c_traceback_table[i+j*(lenP+1)].GetNumOfIndels())+j*(lenP+1)];
+			  //pathElementTable[i+j*(lenP+1)]=pathElementTable[(i-c_traceback_table[i+j*(lenP+1)].GetNumOfIndels())+j*(lenP+1)];
+			  pathElementTable[i+j*(lenP+1)]=pathElementTable[(i-c_traceback_table->GetNumOfIndels(i,j))+j*(lenP+1)];
 			}
 		    }
 		}  
 	    }
 	  cout<<"This current element is from path index:"<<pathElementTable[i+j*(lenP+1)];
 	  
-	  switch (c_traceback_table[i+j*(lenP+1)].GetLinks())
+	  switch (c_traceback_table->GetLink(i,j))
 	    {
 	    case UP:
-	      cout<<"\t\tlink is UP;#indels is"<<c_traceback_table[i+j*(lenP+1)].GetNumOfIndels()<<endl;
+	      cout<<"\t\tlink is UP;#indels is"<<c_traceback_table->GetNumOfIndels(i,j)<<endl;
 	      break;
 	    case LEFT:
-	      cout<<"\t\tlink is LEFT;#indels is"<<c_traceback_table[i+j*(lenP+1)].GetNumOfIndels()<<endl;
+	      cout<<"\t\tlink is LEFT;#indels is"<<c_traceback_table->GetNumOfIndels(i,j)<<endl;
 	      break;
 	    case UPLEFT:
 	      cout<<"\t\tlink is UPLEFT"<<endl;

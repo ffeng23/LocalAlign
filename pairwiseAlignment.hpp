@@ -34,6 +34,22 @@ private:
   unsigned int c_numOfIndels;//this is only works for left or up(indels),using to indicate how indels leads to this,not necessarily only 1.
 };
 
+class TracebackTable
+{
+public:
+  //typeOfAlignment, 0, global;1, overlap; 2, local.
+  TracebackTable(SequenceString* _pattern, SequenceString* _subject, const short& _typeOfAlignment=0);
+  ~TracebackTable();
+  void SetTableEntry(const unsigned int& _patternIndex, const unsigned int& _subjectIndex, const LinkBack& _link, const unsigned int& _numOfIndels);
+
+  LinkBack GetLink(const unsigned int& _patternIndex, const unsigned int& _subjectIndex) const;
+  unsigned int GetNumOfIndels(const unsigned int& _patternIndex, const unsigned int& _subjectIndex) const ;
+private:
+  TracebackTableEntry* c_tbt;
+  unsigned int c_lenOfPattern;
+  unsigned int c_lenOfSubject;
+};
+
 
 //Abstract class
 class PairwiseAlignment
@@ -66,7 +82,7 @@ protected:
   unsigned int c_optimalIndex[2];
   
   //double* c_dp_table;
-  TracebackTableEntry* c_traceback_table;
+  TracebackTable* c_traceback_table;
 };
 
 #endif
