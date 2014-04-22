@@ -7,7 +7,7 @@ AffineGapModel::AffineGapModel(const double& _gopen, const double& _gextension):
   //empty
 }
 
-~AffineGapModel()
+AffineGapModel::~AffineGapModel()
 {
   //empty
 }
@@ -23,16 +23,14 @@ AffineGapModel::AffineGapModel(const double& _gopen, const double& _gextension):
 //Output
 //_MaxGapValue
 //_MaxGapIndex
-virtual double AffineGapModel::GapValue(TracebackTable* _tbTable, const unsigned int& _rowIndex, const unsigned int& _colIndex, const bool& _rowGap,
+double AffineGapModel::GapValue(TracebackTable* _tbTable, const unsigned int& _patternIndex, const unsigned int& _subjectIndex, const bool& _patternGap,
 			const double& _prevEntryValue,
-			  double& _MaxGapValue, unsigned int& _MaxGapIndex) const;
+			  double& _MaxGapValue, unsigned int& _MaxGapIndex) const
 {
   //are we doing it by row of by or by col
   //for affine gap value, we have to know this, we only need to 
   //get the maxiGapvalue and compare with the newly opened one to get 
   //the best ones
-  double tempMaxGapValue=_MaxGapValue;
-  
 
   //newly opened gap
   double newGapOpenValue=_prevEntryValue+c_gopen+c_gextension;
@@ -41,16 +39,16 @@ virtual double AffineGapModel::GapValue(TracebackTable* _tbTable, const unsigned
   if(newGapOpenValue>=extendedGapValue)
     {
       _MaxGapValue=newGapOpenValue;
-      if(_rowGap)//we are doing row gaps
+      if(_patternGap)//we are doing row gaps/pattern gaps
 	{
 	  //_colIndex--;
-	  _MaxGapIndex=_colIndex-1;
+	  _MaxGapIndex=_subjectIndex-1;
 	  
 	}
-      else
+      else  //row gaps/subject gaps
 	{
 	  //_rowIndex--;
-	  _MaxGapIndex=_rowIndex-1;
+	  _MaxGapIndex=_patternIndex-1;
 	}
       
     }
@@ -61,6 +59,7 @@ virtual double AffineGapModel::GapValue(TracebackTable* _tbTable, const unsigned
   //_tbTable[_rowIndex+_colIndex*
   return _MaxGapValue;
 }
+
 double AffineGapModel::GetGapOpenValue() const
 {
   return c_gopen;

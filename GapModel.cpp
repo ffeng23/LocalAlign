@@ -1,7 +1,7 @@
 #include "GapModel.hpp"
 
 
-GapModel:GapModel()
+GapModel::GapModel()
 {
   //empty
 }

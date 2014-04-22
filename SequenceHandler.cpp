@@ -621,7 +621,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 		{
 		  unsigned int found=LookUpVectorIndex(tempLstF.GetName(), g_vec_primer_isotype);
 		  //cout<<"**********found one"<<found<<endl;
-		  if(found != string::npos)
+		  if(((signed)found) != -1)//string::npos)
 		    {
 		      p_vec_map=&g_vec_mapBoth.at(found);
 		      p_vec_len_map=&g_vec_len_mapBoth.at(found);
@@ -659,7 +659,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 		{
 		  unsigned int found=LookUpVectorIndex(tempLstF.GetName(), g_vec_primer_isotype);
 		  //cout<<"**********found one"<<found<<endl;
-		  if(found != string::npos)
+		  if(((signed)found) !=-1)// string::npos)
 		    {
 		      p_vec_map=&g_vec_mapForward.at(found);
 		      p_vec_len_map=&g_vec_len_mapForward.at(found);
@@ -1231,7 +1231,7 @@ void MappingPrimerDimers(vector<SequenceString>& _vecForward, vector<SequenceStr
 		{
 		  unsigned int found=LookUpVectorIndex(tempLstF.GetName(), g_vec_primer_isotype);
 		  //cout<<"\t**********writing to vec now"<<found<<endl;
-		  if(found != string::npos)
+		  if(((signed)found) !=-1)// string::npos)
 		    {
 		      p_vec_map=&g_vec_mapBoth.at(found);  //g_vec_mapBoth is initilized in the processingAdaptor function above
 		      

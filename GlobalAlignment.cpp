@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include "GapModel.hpp"
+#include "AffineGapModel.hpp"
 
 using namespace std;
 
@@ -117,6 +119,8 @@ void GlobalAlignment::align()
   double* dp_table_prev_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
   double* dp_table_curr_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
 
+  GapModel* gm=new AffineGapModel(c_gapOpen, c_gapExtension);
+
   //here we keep two columns, to effieciently and easily manipulate the column. it cold be only one
 
   c_traceback_table=new TracebackTable(c_pattern, c_subject, 0);
@@ -154,19 +158,35 @@ void GlobalAlignment::align()
   string strP=c_pattern->GetSequence();
   string strS=c_subject->GetSequence();
   
-  double* maximumGapValue=new double[lenS+1]; //we still keep this same len as the curr/prev col, but we will never use the first one.
-  unsigned int* maximumGapIndex=new unsigned int[lenS+1];//just as above, this one is used to keep record of the maximum Gap Value so far, and the first one [0] is not used.
-  
+  //for subject gap ???
+  double* maximumGapValue_subject=new double[lenS+1]; //we still keep this same len as the curr/prev col, but we will never use the first one.
+  unsigned int* maximumGapIndex_subject=new unsigned int[lenS+1];//just as above, this one is used to keep record of the maximum Gap Value so far, and the first one [0] is not used.
   //maximumGapValue[0]=-1E9;
   //maximumGapValue[1]=c_gapOpen+c_gapExtension*1;
   //we will start doing the job at column 1, so set intial value of gapIndex=0 to infinity
   for(unsigned int i=0;i<=lenS;i++)
+    {
+      maximumGapValue_subject[i]=-1E60;
+      maximumGapIndex_subject[i]= 0;
+      //  maximumGapIndex[i]=0;
+      //maximumGapIndex[1]=1;//to the
+    } 
+
+  //for subject gap, for this maximumGapValue, a scalar is ok, since we keep this as running one,like the current column
+  double maximumGapValue_pattern=-1E60; //we still keep this same len as the curr/prev col, but we will never use the first one.
+  unsigned int maximumGapIndex_pattern=0;//just as above, this one is used to keep record of the maximum Gap Value so far, and the first one [0] is not used.
+  //maximumGapValue[0]=-1E9;
+  //maximumGapValue[1]=c_gapOpen+c_gapExtension*1;
+  //we will start doing the job at column 1, so set intial value of gapIndex=0 to infinity
+  /*for(unsigned int i=0;i<=lenP;i++)
     {
       maximumGapValue[i]=-1E60;
       maximumGapIndex[i]= 0;
       //  maximumGapIndex[i]=0;
       //maximumGapIndex[1]=1;//to the
     } 
+  */
+  
 
   //we have to be very careful here
   //the dimension of the dp table and the strings are not same.
@@ -179,6 +199,10 @@ void GlobalAlignment::align()
       //1)first exchange the curr and prev col(actually, it is better to do this one at end of each loop, otherwise it will be trouble in the beginning of the first loop
       //2)reset the curr_col first one to gap, it should be zero anyway.
       dp_table_curr_col[0]=c_gapOpen+i*c_gapExtension;
+      
+      //the pattern gap, gap on columns are updated every column
+      maximumGapValue_pattern=-1E60; 
+      maximumGapIndex_pattern=0;
       
       //now, we go through each element and do the job
       for(unsigned int j = 1; j <= lenS; ++j) 
@@ -194,12 +218,14 @@ void GlobalAlignment::align()
 	  //since don't keep all the rows in the memory,
 	  //but for the column across, we are fine, since we keep all the columns till this elements
 
+	  //***********doing subject gaps (the gap on the subject string)************
 	  //this is the one for all the sub rows, we need to keep a maximum one so far and update it with the information from this round.
 	  //now we don't have to go through every entry, we only need to compare the Max one with this current one and keep track it.
 	  //for(int k = i-1; k > 0; --k) 
 	  // {		//check all sub rows
-	
-	  double openNewGapValue=dp_table_prev_col[j]+c_gapOpen + c_gapExtension;
+	  
+	  gm->GapValue(c_traceback_table, i, j, false, dp_table_prev_col[j], maximumGapValue_subject[j], maximumGapIndex_subject[j]);
+	  /*double openNewGapValue=dp_table_prev_col[j]+c_gapOpen + c_gapExtension;
 	  double maxGapExtendedValue=maximumGapValue[j]+c_gapExtension;
 	  //check to update
 	  if(openNewGapValue>=maxGapExtendedValue)
@@ -212,19 +238,23 @@ void GlobalAlignment::align()
 	      maximumGapValue[j]=maxGapExtendedValue;
 	      //the maximumGapInde[j] unchaned, keep the same
 	    }
-	  
+	  */
 	  //if(compval < maximumGapValue[j]) 
 	  //  {	    //if cell above has a greater value 
 	      
-	      compval = maximumGapValue[j];		//set compval to that square
-	      c_traceback_table->SetTableEntry(i,j,LEFT, i-maximumGapIndex[j]);
-	      //c_traceback_table[i+j].SetNumOfIndels(i-maximumGapIndex[j]);
-	      //  }
-	  cout<<"maximumGapValue[j]:"<<maximumGapValue[j]<<",";
+	  compval = maximumGapValue_subject[j];		//set compval to that square
+	  c_traceback_table->SetTableEntry(i,j,LEFT, i-maximumGapIndex_subject[j]);
+	      
+	  cout<<"maximumGapValue[j]:"<<maximumGapValue_subject[j]<<",";
+	  cout<<"maximumGapIndex[j];"<<maximumGapIndex_subject[j]<<",";
 	  cout<<"campval after rowGap:"<<compval<<";";
+	  
 
+	  //***********pattern gaps (gaps on the patter strings, columns)***********
 	  //this is the column across, we keep it same as we are doing with the whole dp table
-	  for(int k=j-1; k>0; --k) 
+	  gm->GapValue(c_traceback_table, i, j, true, dp_table_curr_col[j-1], maximumGapValue_pattern, maximumGapIndex_pattern);
+
+	  /*for(int k=j-1; k>0; --k) 
 	    {		//check all sub columns
 				
 	      if(compval < ((dp_table_curr_col[k]) + (c_gapOpen + (c_gapExtension *(j- k))))) 
@@ -236,7 +266,15 @@ void GlobalAlignment::align()
 		  //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(j-k);
 		  c_traceback_table->SetTableEntry(i, j, UP, j-k);
 		}
-	    }		
+		}*/		
+	  if(compval < maximumGapValue_pattern)
+	    {
+	      //set compval to that square
+	      compval=maximumGapValue_pattern;
+	      c_traceback_table->SetTableEntry(i,j,UP, j-maximumGapIndex_pattern);
+	    }
+	  cout<<"maximumGapValue_pattern:"<<maximumGapValue_pattern<<",";
+	  cout<<"maximumGapIndex_patter:"<<maximumGapIndex_pattern<<",";
 	  cout<<"compval afer col gap:"<<compval<<endl;		
 
 	  //Match/mismatch
@@ -244,8 +282,6 @@ void GlobalAlignment::align()
 	  {	    //if cell above has a greater value 
 	      
 	      compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));		//set compval to that square
-	      //c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);
-	      //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(0);
 	      c_traceback_table->SetTableEntry(i, j, UPLEFT, 0);
 	  }
 	  //compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));	//compval = diagonal + match score
@@ -307,7 +343,7 @@ void GlobalAlignment::align()
   //clean up
   delete[] dp_table_prev_col;
   delete[] dp_table_curr_col;
-   delete [] maximumGapValue;
-  delete [] maximumGapIndex;
+   delete [] maximumGapValue_subject;
+  delete [] maximumGapIndex_subject;
   //traceback_table will be deleted upon destruction
 }//end of the localAlign

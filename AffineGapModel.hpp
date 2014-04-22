@@ -2,6 +2,7 @@
 #define AFFINEGAPMODEL_HPP
 
 #include "pairwiseAlignment.hpp"
+#include "GapModel.hpp"
 
 class AffineGapModel:public GapModel
 {
@@ -10,7 +11,8 @@ public:
   AffineGapModel(const double& _gopen, const double& _gextension);
 
   virtual ~AffineGapModel();
-  virtual double GapValue(TracebackTable* _tbTable, const unsigned int& _rowIndex, const unsigned int& _colIndex, const bool& _rowGap,
+  virtual double GapValue(TracebackTable* _tbTable, const unsigned int& _patternIndex, const unsigned int& _subjectIndex, const bool& _patternGap,
+			  const double& _prevEntryValue,
 			  double& _MaxGapValue, unsigned int& _MaxGapIndex) const;
 
   double GetGapOpenValue() const;
@@ -22,5 +24,5 @@ protected:
   double c_gopen;
   double c_gextension;
   
-}
+};
 #endif 

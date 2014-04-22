@@ -1,20 +1,21 @@
-#include "454_MarkovChainGapModel.hpp"
+#include "MarkovChainGapModel_454.hpp"
 
 //this model is for 454 sequencing reading, to model the umbiguity of stretch of identical nucleotides run. it is using affine model too
 
-454_MarkovChainGapModel::454_MarkovChainGapModel(const double& _gopen, const double& _gextension, 
+MarkovChainGapModel_454::MarkovChainGapModel_454(const double& _gopen, const double& _gextension, 
 						 const string& _patternStr, const string& _subjectStr)
 :AffineGapModel(_gopen, _gextension), c_patternString(_patternStr), c_subjectString(_subjectStr)
 {
   //empty
 }
 
-454_MarkovChainGapModel::~454_MarkovChainGapModel()
+MarkovChainGapModel_454::~MarkovChainGapModel_454()
 {
   //empty
 }
-double 454_MarkovChainGapModel::GapValue(const TracebackTable* _tbTable, const unsigned int& _patternIndex, const unsigned int& _subjectIndex, const bool& _patternGap,
-			  double& _MaxGapValue, unsigned int& _MaxGapIndex)
+double MarkovChainGapModel_454::GapValue(const TracebackTable* _tbTable, const unsigned int& _patternIndex, const unsigned int& _subjectIndex, const bool& _patternGap,
+					 const double& _prevEntryValue,
+					 double& _MaxGapValue, unsigned int& _MaxGapIndex) const
 {
   //to start, there are only two possible cases: 1) the extended from the MaxGapIndex;2)a new open gap
   //for both cases, we need to check whether this is a stretch of identical nucleotides and then decide how we 
@@ -66,7 +67,7 @@ double 454_MarkovChainGapModel::GapValue(const TracebackTable* _tbTable, const u
 	  unsigned int gapLen=_patternIndex-_MaxGapIndex;
 
 	  //get the cost
-	  extendedGapValue=GetMarkovChainGapValue(c_gextension, runLen, _gapLen);	  
+	  extendedGapValue=_MaxGapValue+GetMarkovChainGapValue(c_gopen, c_gextension, runLen, gapLen);	  
 	}
     }
   else //doing subject gap
@@ -111,12 +112,12 @@ double 454_MarkovChainGapModel::GapValue(const TracebackTable* _tbTable, const u
 	  unsigned int gapLen=_subjectIndex-_MaxGapIndex;
 
 	  //get the cost
-	  extendedGapValue=GetMarkovChainGapValue(c_gextension, runLen, _gapLen);	  
+	  extendedGapValue=_MaxGapValue+GetMarkovChainGapValue(c_gopen, c_gextension, runLen, gapLen);	  
 	}
     }//patterngap or subjectgap
 
   //now we want to solve the problem of figure out the open new gap value
-  runLen=0;
+  unsigned int runLen=0;
   if(_patternGap)//pattern gap
     {
       while(_tbTable->GetLink(_patternIndex-runLen,_subjectIndex-runLen-1 )==UPLEFT)
@@ -140,17 +141,21 @@ double 454_MarkovChainGapModel::GapValue(const TracebackTable* _tbTable, const u
   double newOpenGapValue;
   if(runLen==0) //regular one
     {
-      newOpenGapValue=c_gopen+c_extension;
+      newOpenGapValue=_prevEntryValue+c_gopen+c_gextension;
     }
   else
     {
-      newOpenGapValue =GetMarkovChainGapValue(c_gopen, c_gextension, runLen, 1);
+      newOpenGapValue =_prevEntryValue+GetMarkovChainGapValue(c_gopen, c_gextension, runLen, 1);
     }
   
+  if(extendedGapValue > newOpenGapValue)
+    return extendedGapValue;
+  else
+    return newOpenGapValue;
   
 }
 
-double 454_MarkovChainGapModel::GetMarkovChainGapValue(const double& _regularGapOpen, const double& _regularGapExtension, const unsigned int& _runLen, const unsigned int& _gapLen) const
+double MarkovChainGapModel_454::GetMarkovChainGapValue(const double& _regularGapOpen, const double& _regularGapExtension, const unsigned int& _runLen, const unsigned int& _gapLen) const
 {
   return (_regularGapOpen+_regularGapExtension)*(1/(1+20*exp(-20.0*(((double)_gapLen)/(_gapLen+_runLen)-0.5))));
 } 

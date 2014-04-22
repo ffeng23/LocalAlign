@@ -123,6 +123,9 @@ int main(int argc, char* argv[])
   SequenceString Seq1("seq1","AGCTAGAGACCAGTCTGAGGTAGA");
   SequenceString Seq2 ("seq2", "AGCTAGAGACCAGCTATCTAGAGGTAGA");
 
+  //SequenceString Seq1("seq1","TGAGGTAGA");
+  //SequenceString Seq2 ("seq2", "TAGAGGTAGA");
+
   //SequenceString Seq1("seq1","CCAATCTACTACTGCTTGCAGTACTTGT");
   //SequenceString Seq2 ("seq2", "AGTCCGAGGGCTACTCTACTGAAC");
 
@@ -143,7 +146,9 @@ int main(int argc, char* argv[])
   //SequenceString Seq2("Constant","cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgagagcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgtggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcaggactctactccctcagcagcgtggtgaccgtgacctccagcaacttcggcacccagacctacacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg");
 
   cout<<"showing sequence string\n"<<Seq1.toString()<<Seq2.toString()<<endl;
-  
+
+  /*  
+
   //now testing alignment
   cout<<"Testing alignment:"<<endl;
   SequenceString tempSStr=ReverseComplement(Seq2);
@@ -160,7 +165,7 @@ int main(int argc, char* argv[])
       cout<<la.GetAlignmentArr()[i].toString()<<endl;
     }
 
-
+  */
   //testing globalAlignment
   cout<<"Testing global alignment:"<<endl;
   GlobalAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
