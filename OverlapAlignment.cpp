@@ -118,6 +118,8 @@ void OverlapAlignment::align()
   double* dp_table_prev_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
   double* dp_table_curr_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
 
+  GapModel* gm=new AffineGapModel(c_gapOpen, c_gapExtension);
+
   //here we keep two columns, to effieciently and easily manipulate the column. it cold be only one
   c_traceback_table=new TracebackTable(c_pattern, c_subject, 1);//[(lenP+1)*(lenS+1)];
   //the following is to set all the first rows and cols to zero. 
@@ -153,19 +155,24 @@ void OverlapAlignment::align()
   string strP=c_pattern->GetSequence();
   string strS=c_subject->GetSequence();
   
-  double* maximumGapValue=new double[lenS+1]; //we still keep this same len as the curr/prev col, but we will never use the first one.
-  unsigned int* maximumGapIndex=new unsigned int[lenS+1];//just as above, this one is used to keep record of the maximum Gap Value so far, and the first one [0] is not used.
+  double* maximumGapValue_subject=new double[lenS+1]; //we still keep this same len as the curr/prev col, but we will never use the first one.
+  unsigned int* maximumGapIndex_subject=new unsigned int[lenS+1];//just as above, this one is used to keep record of the maximum Gap Value so far, and the first one [0] is not used.
   
   //maximumGapValue[0]=-1E9;
   //maximumGapValue[1]=c_gapOpen+c_gapExtension*1;
   //we will start doing the job at column 1, so set intial value of gapIndex=0 to infinity
   for(unsigned int i=0;i<=lenS;i++)
     {
-      maximumGapValue[i]=-1E60;
-      maximumGapIndex[i]= 0;
+      maximumGapValue_subject[i]=-1E60;
+      maximumGapIndex[i]_subject= 0;
       //  maximumGapIndex[i]=0;
       //maximumGapIndex[1]=1;//to the
     } 
+
+  //for pattern gap, this maximumGapValue, a scalar is OK. since we keep this as a running one, like the current column
+  double maximumGapValue_pattern=-1E60;
+  unsigned int maximumIndex_pattern=0;
+
 
   double maximumValueLastRowCol=-1E70;
   unsigned int maximumIndexLastRowCol[]={0,0};
@@ -183,6 +190,8 @@ void OverlapAlignment::align()
       
       
       dp_table_curr_col[0]=0;
+      maximumGapValue_pattern=-1E60;
+      maximumGapIndex_pattern=0;
       
       //now, we go through each element and do the job
       for(unsigned int j = 1; j <= lenS; ++j) 
@@ -203,8 +212,8 @@ void OverlapAlignment::align()
 	  //now we don't have to go through every entry, we only need to compare the Max one with this current one and keep track it.
 	  //for(int k = i-1; k > 0; --k) 
 	  // {		//check all sub rows
-	
-	  double openNewGapValue=dp_table_prev_col[j]+c_gapOpen + c_gapExtension;
+	  gm->GapValue(c_traceback_table, i,j,false, dp_table_prev_col[j], maximumGapValue_subjectp[j], maximumGapIndex_subject[j]);
+	  /*double openNewGapValue=dp_table_prev_col[j]+c_gapOpen + c_gapExtension;
 	  double maxGapExtendedValue=maximumGapValue[j]+c_gapExtension;
 	  //check to update
 	  if(openNewGapValue>=maxGapExtendedValue)
@@ -216,8 +225,8 @@ void OverlapAlignment::align()
 	    {
 	      maximumGapValue[j]=maxGapExtendedValue;
 	      //the maximumGapInde[j] unchaned, keep the same
-	    }
-	  compval=maximumGapValue[j];
+	      }*/
+	  compval=maximumGapValue_subject[j];
 	  //if(compval < maximumGapValue[j]) 
 	  //  {	    //if cell above has a greater value 
 	      
@@ -228,8 +237,9 @@ void OverlapAlignment::align()
 	      //cout<<"maximumGapValue[j]:"<<maximumGapValue[j]<<",";
 	      //cout<<"campval after rowGap:"<<compval<<";";
 
-	  //this is the column across, we keep it same as we are doing with the whole dp table
-	  for(int k=j-1; k>0; --k) 
+	  //this is the pattern/column gap, we keep it same as we are doing with the whole dp table
+	  gm->GapValue(c_traceback_table, i,j,true, dp_table_curr_col[j-1], maximumGapValue_pattern, maximumGapIndex_pattern);
+	  /*for(int k=j-1; k>0; --k) 
 	    {		//check all sub columns
 				
 	      if(compval < ((dp_table_curr_col[k]) + (c_gapOpen + (c_gapExtension *(j- k))))) 
@@ -241,7 +251,13 @@ void OverlapAlignment::align()
 		  //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(j-k);
 		  c_traceback_table->SetTableEntry(i,j, UP, j-k);
 		}
-	    }		
+		}	*/
+	  if(compVal<maximumGapValue_pattern)
+	    {
+	      //set compval to that square
+	      compval=maximumGapValue_pattern;
+	      c_traceback_table->SetTableEntry(i,j,UP, j-maximumGapIndex_pattern);
+	    }	
 	  //cout<<"compval afer col gap:"<<compval<<endl;
 
 	  //*********do Macth/Mismatch now
@@ -334,7 +350,9 @@ void OverlapAlignment::align()
   //clean up
   delete[] dp_table_prev_col;
   delete[] dp_table_curr_col;
-   delete [] maximumGapValue;
-  delete [] maximumGapIndex;
+   delete [] maximumGapValue_subject;
+  delete [] maximumGapIndex_subject;
+
+  delete gm;
   //traceback_table will be deleted upon destruction
 }//end of the localAlign

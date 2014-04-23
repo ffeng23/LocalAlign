@@ -172,7 +172,7 @@ void GlobalAlignment::align()
       //maximumGapIndex[1]=1;//to the
     } 
 
-  //for subject gap, for this maximumGapValue, a scalar is ok, since we keep this as running one,like the current column
+  //for pattern gap, for this maximumGapValue, a scalar is ok, since we keep this as running one,like the current column
   double maximumGapValue_pattern=-1E60; //we still keep this same len as the curr/prev col, but we will never use the first one.
   unsigned int maximumGapIndex_pattern=0;//just as above, this one is used to keep record of the maximum Gap Value so far, and the first one [0] is not used.
   //maximumGapValue[0]=-1E9;
@@ -345,5 +345,6 @@ void GlobalAlignment::align()
   delete[] dp_table_curr_col;
    delete [] maximumGapValue_subject;
   delete [] maximumGapIndex_subject;
+  delete gm;
   //traceback_table will be deleted upon destruction
 }//end of the localAlign
