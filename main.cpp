@@ -35,9 +35,10 @@ static enum SeqType
     AminoAcid,
     Nucleotide
   } seqtype=Nucleotide; //by default
-static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1", "tsm2"};
+static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1", "tsm2", "nuc44HP"};
+//tsm2: score matrix from Geoffrey Barton reference.
 
-static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1, &tsm2};
+static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1, &tsm2, &nuc44HP};
 
 static double scale=1; //this is the one on top of matrix, the programe will run score and use the 
 //matrix specified scale first and then apply the scale set by this one.
@@ -87,7 +88,8 @@ int main(int argc, char* argv[])
   int scoreMatrixIndex=lookUpScoreMatrix(supportedScoreMatrixNameArr, sizeof(supportedScoreMatrixNameArr)/sizeof(supportedScoreMatrixNameArr[0]),scoreMatrixName);
   if(scoreMatrixIndex==-1)
     {
-      cout<<"\tscore matrix specified by input was not found. Using the default scorematrix.\n";
+      cout<<"\tscore matrix specified by input was not found(\""<<scoreMatrixName<<"\") . "
+	  <<"\n\tUsing the default scorematrix.\n";
       scoreMatrixName="nuc44";
       if(seqtype==AminoAcid)
 	{
@@ -120,12 +122,16 @@ int main(int argc, char* argv[])
 
 
   //testing local alignment
-  SequenceString Seq1("seq1","AGCTAGAGACCAGTCTGAGGTAGA");
-  SequenceString Seq2 ("seq2", "AGCTAGAGACCAGCTATCTAGAGGTAGA");
+  //SequenceString Seq2("seq1","AGCTAGAGACCCCAGTCTGAGGTAGA");
+  //SequenceString Seq1("seq2", "AGCTAGAGACCAGCTATCTAGAGGTAGA");
+  //SequenceString Seq1("seq1","ACCCCAG");
+  //SequenceString Seq2("seq2", "ACCAG");
+
 
   //SequenceString Seq1("seq1","TGAGGTAGA");
   //SequenceString Seq2 ("seq2", "TAGAGGTAGA");
 
+  //****the sequences from the "Geoffrey Barton reference"
   //SequenceString Seq1("seq1","CCAATCTACTACTGCTTGCAGTACTTGT");
   //SequenceString Seq2 ("seq2", "AGTCCGAGGGCTACTCTACTGAAC");
 
@@ -137,23 +143,27 @@ int main(int argc, char* argv[])
   //SequenceString Seq1("seq1","ATCGA");
   //SequenceString Seq2 ("seq2", "GATTGA");
 
-  //SequenceString Seq1("seq1","CGAA");
-  //SequenceString Seq2 ("seq2", "CGGAA");
+  //SequenceString Seq2("seq1","CGGGA");
+  //SequenceString Seq1 ("seq2", "CGGA");
 
   //SequenceString Seq1("seq1","ATAT");
   //SequenceString Seq2 ("seq2", "ACHKAT");
   //SequenceString Seq1("seq","AGACGCACTGTTCGGGAAGTAGTCCTTGACCAGGCAGCCACCCATGTACTCTGCGTTGATACCACTGCTTGCCCTATAGTGAGTCGTGAGTGCGTCTCTGACGGGCTGGCAAGGCGCATAG");
   //SequenceString Seq2("Constant","cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgagagcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgtggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcaggactctactccctcagcagcgtggtgaccgtgacctccagcaacttcggcacccagacctacacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg");
+  
+  SequenceString Seq1("seq1","ACGAGTGCGTCAGGAGACGAGGGGAAAGGGTTGGGGCGGATGCACTCTGCGTTGATACCACTGCTTGCCCTATAGTGAGTCGTACGCACTCGTCTGAGCGGGCTGGCAAGGCGCATAG");
+  SequenceString Seq2("seq2", "CCCGCGTACTCTGCGTTGTTACCACTGCTTGCCCTATAGTGAGTCGT");
+
 
   cout<<"showing sequence string\n"<<Seq1.toString()<<Seq2.toString()<<endl;
 
-  /*  
-
+  SequenceString tempSStr=ReverseComplement(Seq2);
+  
   //now testing alignment
   cout<<"Testing alignment:"<<endl;
-  SequenceString tempSStr=ReverseComplement(Seq2);
-  //LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 10);
-  LocalAlignment la(&Seq1,&tempSStr,sm, gapopen, gapextension,1, 100);
+  
+  LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 5);
+  //LocalAlignment la(&Seq1,&tempSStr,sm, gapopen, gapextension,1, 100);
   cout<<"\tdone and the score is "<<la.GetScore()<<endl;
   cout<<"\t"<<la.GetAlignment().toString()<<endl;
 
@@ -164,24 +174,27 @@ int main(int argc, char* argv[])
       cout<<i<<"/"<<la.GetNumberOfAlignments()<<":"<<endl;
       cout<<la.GetAlignmentArr()[i].toString()<<endl;
     }
-
-  */
+  
+  /*
   //testing globalAlignment
   cout<<"Testing global alignment:"<<endl;
-  GlobalAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
+  GlobalAlignment gla(&Seq1,&Seq2,sm, gapopen, gapextension,1);
   //OverlapAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
-  cout<<"\tdone and the score is "<<ola.GetScore()<<endl;
-  cout<<"\t********"<<ola.GetAlignment().toString()<<endl;
-
+  cout<<"\tdone and the score is "<<gla.GetScore()<<endl;
+  cout<<"\t********"<<gla.GetAlignment().toString()<<endl;
+  */
+  
   //testing overlapAlignment
-  /*
+  
   cout<<"Testing overlap alignment:"<<endl;
   OverlapAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
+  
+  //OverlapAlignment ola(&Seq1,&tempSStr,sm, gapopen, gapextension,1);
   cout<<"\tdone and the score is "<<ola.GetScore()<<endl;
   cout<<"\t"<<ola.GetAlignment().toString()<<endl;
-  */
+  
   cout<<"done"<<endl;
-
+  
 
   //testing fasta handler
   vector<SequenceString> vec_seq;

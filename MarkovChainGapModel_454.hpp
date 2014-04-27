@@ -16,6 +16,6 @@ protected:
   string c_patternString;
   string c_subjectString;
 
-  double GetMarkovChainGapValue(const double& _regularGapOpen, const double& _regularGapExtension, const unsigned int& _runLen, const unsigned int& _gapLen) const; 
+  double GetMarkovChainGapValue(const double& _regularGapOpen, const double& _regularGapExtension, const unsigned int& _runLen, const unsigned int& _gapLen, const bool& _extensionFlag) const; 
 };
 #endif

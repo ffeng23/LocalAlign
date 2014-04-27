@@ -1,4 +1,7 @@
 #include "AffineGapModel.hpp"
+#include <iostream>
+
+using namespace std;
 
 AffineGapModel::AffineGapModel(const double& _gopen, const double& _gextension):
   c_gopen(_gopen), c_gextension(_gextension)
@@ -23,7 +26,7 @@ AffineGapModel::~AffineGapModel()
 //Output
 //_MaxGapValue
 //_MaxGapIndex
-double AffineGapModel::GapValue(TracebackTable* _tbTable, const unsigned int& _patternIndex, const unsigned int& _subjectIndex, const bool& _patternGap,
+double AffineGapModel::GapValue(const TracebackTable* _tbTable, const unsigned int& _patternIndex, const unsigned int& _subjectIndex, const bool& _patternGap,
 			const double& _prevEntryValue,
 			  double& _MaxGapValue, unsigned int& _MaxGapIndex) const
 {
@@ -31,7 +34,7 @@ double AffineGapModel::GapValue(TracebackTable* _tbTable, const unsigned int& _p
   //for affine gap value, we have to know this, we only need to 
   //get the maxiGapvalue and compare with the newly opened one to get 
   //the best ones
-
+  
   //newly opened gap
   double newGapOpenValue=_prevEntryValue+c_gopen+c_gextension;
   double extendedGapValue=_MaxGapValue+c_gextension;

@@ -3,10 +3,10 @@
 
 #include <vector>
 #include <string>
+#include "SequenceHandlerCommon.hpp"
+
 #include "SequenceString.hpp"
 #include "score.hpp"
-
-using namespace std;
 
 //this translation unit is to define some function to take care of sequence mapping
 //in this function, we combine the adaptor+mid+primer
@@ -24,17 +24,6 @@ void MappingPrimerDimers(vector<SequenceString>& _vecForward, vector<SequenceStr
 		     const double& _mismatchRateThreshold, const unsigned _minmumOverlapLength, const unsigned int& _offsetForward, const unsigned int& _offsetReverse, 
 		     const string& _mapBoth_fname, const string& _mapForward_fname,
 		     const string& _mapReverse_fname, const string& _mapNone_fname); 
-
-SequenceString ReverseComplement(SequenceString& seq);
-
-//compare two strings character by character, return # of chars that are different. if two strings are of different size, 
-//the ones longer are also counted as different chars
-//for example: "abc" vs. "acc" return 1;
-//"abc" vs "acb" return 2
-//"abc" vs "ab" reurn 1
-//"abc" vs "cab" return 3
-
-unsigned int CompareStrings(const string& str1, const string& str2);
 
 void SetUpTrimFlag(const bool& _f);
 void SetUpByIsotypeOutputFlag(const bool& _f);

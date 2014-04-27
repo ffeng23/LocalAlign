@@ -4,6 +4,10 @@
 #include <vector>
 #include <algorithm>
 
+#include "GapModel.hpp"
+#include "AffineGapModel.hpp"
+#include "MarkovChainGapModel_454.hpp"
+
 using namespace std;
 bool comparePathElement(Path* p1, Path* p2)
 {
@@ -171,7 +175,7 @@ void LocalAlignment::traceBackMultiple()
   c_scoreArr=new double[c_numOfAlignments];
 
   //showing the vector information
-
+  /*
   cout<<"******************SHOWING PATH INFO**************"<<endl;
   cout<<"\ttotal num of path:"<<c_path_vec.size()<<endl;
   for(unsigned int i=0;i<c_path_vec.size();i++)
@@ -180,6 +184,7 @@ void LocalAlignment::traceBackMultiple()
 	  <<c_path_vec.at(i)->GetStartIndex()[1]<<") and end at ("<<c_path_vec.at(i)->GetOptimalIndex()[0]
 	  <<","<<c_path_vec.at(i)->GetOptimalIndex()[1]<<");\n";
     }
+  */
   //now sort the vector
   sort(c_path_vec.begin(), c_path_vec.end(), comparePathElement);
   
@@ -215,16 +220,16 @@ void LocalAlignment::traceBack()
   //vector<unsigned int[2]> startIndex;//where the 
   //vector<double[2]> curr_and_max;
 
-  cout<<"doing trace back in the local alignment"<<endl;
+  //cout<<"doing trace back in the local alignment"<<endl;
   
   //starting from optimalIndex going backing
   unsigned int i=c_optimalIndex[0];
   unsigned int j=c_optimalIndex[1];
 
-  cout<<"starting from ("<<i<<","<<j<<")"<<endl;
+  //cout<<"starting from ("<<i<<","<<j<<")"<<endl;
   string c_pattern_wg;//aligned string with gap
   string c_subject_wg;//aligend string with gap
-  cout<<"length of patten :"<<c_pattern->GetLength()<<endl;
+  //cout<<"length of patten :"<<c_pattern->GetLength()<<endl;
   /*if(c_traceback_table[0+4*(c_pattern->GetLength()+1)].GetLinks()==ZERO)
     cout<<"======C_tracetable entry (0,4) is ZERO"<<endl;
   else
@@ -233,14 +238,14 @@ void LocalAlignment::traceBack()
   // while(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks()!=ZERO)  //keep going till we reach a zero
   while(c_traceback_table->GetLink(i,j)!=ZERO)  //keep going till we reach a zero
     {
-      cout<<"\t("<<i<<","<<j<<"):";
+      //cout<<"\t("<<i<<","<<j<<"):";
       unsigned int currentIndex;
       //check the link table, decide where to go
       //switch(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks())
       switch(c_traceback_table->GetLink(i,j))
 	{
 	case UP:
-	  cout<<"UP:"<<endl;
+	  //cout<<"UP:"<<endl;
 	  //now we have to check how many indels
 	  currentIndex=j;
 	  for(unsigned int k =0;k<c_traceback_table->GetNumOfIndels(i, currentIndex);k++)//c_traceback_table[i+currentIndex*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
@@ -252,7 +257,7 @@ void LocalAlignment::traceBack()
 	    }
 	  break;
 	case LEFT:
-	  cout<<"LEFT"<<endl;
+	  //cout<<"LEFT"<<endl;
 	  //need to check how many indels
 	  currentIndex=i;
 	  for(unsigned int k=0;k<c_traceback_table->GetNumOfIndels(currentIndex,j);k++)//c_traceback_table[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
@@ -264,7 +269,7 @@ void LocalAlignment::traceBack()
 	    }
 	  break;
 	case UPLEFT:
-	  cout<<"UPLEFT"<<endl;
+	  //cout<<"UPLEFT"<<endl;
 	  c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
 	  c_subject_wg=c_subject->GetSequence().at(j-1)+c_subject_wg;
 	  i--;
@@ -276,7 +281,7 @@ void LocalAlignment::traceBack()
 	  break;
 	}
     }
-  cout<<"Done with alingment!!!"<<endl;
+  //cout<<"Done with alingment!!!"<<endl;
   //we are done
   c_alignment.SetPattern(c_pattern_wg, true);
   c_alignment.SetPattern(c_pattern->GetSequence().substr(i,c_optimalIndex[0]-i), false);
@@ -304,6 +309,8 @@ void LocalAlignment::align()
   double* dp_table_prev_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
   double* dp_table_curr_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
 
+  //GapModel* gm=new AffineGapModel(c_gapOpen, c_gapExtension);
+  //GapModel* gm=new MarkovChainGapModel_454(c_gapOpen, c_gapExtension, c_pattern->GetSequence(), c_subject->GetSequence());
   //here we keep two columns, to effieciently and easily manipulate the column. it cold be only one
   c_traceback_table=new TracebackTable(c_pattern, c_subject, 2);//(lenP+1)*(lenS+1)];
   //the following is not necessary, so we are defaulting all to zero
@@ -316,7 +323,7 @@ void LocalAlignment::align()
       c_traceback_table[0+j*(lenP+1)].SetLinks(ZERO);
     }
   */
-  cout<<"lenP is "<<lenP<<endl;
+  //cout<<"lenP is "<<lenP<<endl;
   /*if(c_traceback_table[0+4*(lenP+1)].GetLinks()==ZERO)
     cout<<"======C_tracetable entry (0,4) is ZERO"<<endl;
   else
@@ -333,26 +340,30 @@ void LocalAlignment::align()
       dp_table_prev_col[i]=0;//this is the first column
     }
 
-  cout<<"successfully created the empty tables and now go to get the score!\n";
+  //cout<<"successfully created the empty tables and now go to get the score!\n";
 
   //score table with S-W
   double compval = 0;
   string strP=c_pattern->GetSequence();
   string strS=c_subject->GetSequence();
   
-  double* maximumGapValue=new double[lenS+1]; //we still keep this same len as the curr/prev col, but we will never use the first one.
-  unsigned int* maximumGapIndex=new unsigned int[lenS+1];//just as above, this one is used to keep record of the maximum Gap Value so far, and the first one [0] is not used.
+  double* maximumGapValue_subject=new double[lenS+1]; //we still keep this same len as the curr/prev col, but we will never use the first one.
+  unsigned int* maximumGapIndex_subject=new unsigned int[lenS+1];//just as above, this one is used to keep record of the maximum Gap Value so far, and the first one [0] is not used.
   
   //maximumGapValue[0]=-1E9;
   //maximumGapValue[1]=c_gapOpen+c_gapExtension*1;
   //we will start doing the job at column 1, so set intial value of gapIndex=0 to infinity
   for(unsigned int i=0;i<=lenS;i++)
     {
-      maximumGapValue[i]=-1E50;
-      maximumGapIndex[i]=-0;
+      maximumGapValue_subject[i]=-1E50;
+      maximumGapIndex_subject[i]=-0;
       //  maximumGapIndex[i]=0;
       //maximumGapIndex[1]=1;//to the
     } 
+
+  //for pattern gap, this maximumGapValue, a scalar is OK. since we keep this as a running one, like the current column
+  double maximumGapValue_pattern=-1E60;
+  unsigned int maximumGapIndex_pattern=0;
 
   //a new table used to keep track how each entry in a dp table or tracebacktable related to the path element in the vector path
   unsigned int* pathElementTable=new unsigned int[(lenP+1)*(lenS+1)];
@@ -373,17 +384,21 @@ void LocalAlignment::align()
       
       dp_table_curr_col[0]=0;
       
+      maximumGapValue_pattern=-1E60;
+      maximumGapIndex_pattern=0;
+
       //now, we go through each element and do the job
       for(unsigned int j = 1; j <= lenS; ++j) 
 	{	//for all values of strB
-	  cout<<"****doing round ("<<i<<","<<j<<")."<<endl;	
+	  //cout<<"****doing round ("<<i<<","<<j<<")."<<endl;	
 	  //MATCH
 	  //if(strP.at(i-1) == strS.at(j-1)) 
 	  //{				//if current sequence values are the same
-	  cout<<"\tcalling score matrix:score("<<strP.at(i-1)<<","<<strS.at(j-1)<<")="<<c_sm->GetScore(strP.at(i-1),strS.at(j-1))<<endl;
-	  cout<<"\t\tdp table is dp("<<i-1<<","<<j-1<<")="<<dp_table_prev_col[j-1]<<endl;
+	  //cout<<"\tcalling score matrix:score("<<strP.at(i-1)<<","<<strS.at(j-1)<<")="<<c_sm->GetScore(strP.at(i-1),strS.at(j-1))<<endl;
+	  //cout<<"\t\tdp table is dp("<<i-1<<","<<j-1<<")="<<dp_table_prev_col[j-1]<<endl;
 
-//here to make the affine linear model works, we need to keep a running max gap value for row across,
+	  //***********do gap first*********
+	  //here to make the affine linear model works, we need to keep a running max gap value for row across,
 	  //since don't keep all the rows in the memory,
 	  //but for the column across, we are fine, since we keep all the columns till this elements
 
@@ -391,8 +406,10 @@ void LocalAlignment::align()
 	  //now we don't have to go through every entry, we only need to compare the Max one with this current one and keep track it.
 	  //for(int k = i-1; k > 0; --k) 
 	  // {		//check all sub rows
-	
-	  double openNewGapValue=dp_table_prev_col[j]+c_gapOpen + c_gapExtension;
+	  //cout<<"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&calling gm gapValue"<<endl;
+	  c_gm->GapValue(c_traceback_table, i,j,false, dp_table_prev_col[j], maximumGapValue_subject[j], maximumGapIndex_subject[j]);	
+
+	  /*double openNewGapValue=dp_table_prev_col[j]+c_gapOpen + c_gapExtension;
 	  double maxGapExtendedValue=maximumGapValue[j]+c_gapExtension;
 	  //check to update
 	  if(openNewGapValue>=maxGapExtendedValue)
@@ -405,19 +422,22 @@ void LocalAlignment::align()
 	      maximumGapValue[j]=maxGapExtendedValue;
 	      //the maximumGapInde[j] unchaned, keep the same
 	    }
-	  
+	  */
 	  //if(compval < maximumGapValue[j]) 
 	  //  {	    //if cell above has a greater value 
 	      
-	      compval = maximumGapValue[j];		//set compval to that square
-	      //c_traceback_table[i+j*(lenP+1)].SetLinks(LEFT);
-	      //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(i-maximumGapIndex[j]);
-	      c_traceback_table->SetTableEntry(i, j, LEFT, i-maximumGapIndex[j]);
-	      //  }
-	  cout<<"maximumGapValue[j]:"<<maximumGapValue[j]<<",";
-	  cout<<"campval after rowGap:"<<compval<<";";
+	  compval = maximumGapValue_subject[j];		//set compval to that square
+	  //c_traceback_table[i+j*(lenP+1)].SetLinks(LEFT);
+	  //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(i-maximumGapIndex[j]);
+	  c_traceback_table->SetTableEntry(i, j, LEFT, i-maximumGapIndex_subject[j]);
+	  //  }
+	  //cout<<"maximumGapValue[j]:"<<maximumGapValue_subject[j]<<",";
+	  //cout<<"campval after rowGap:"<<compval<<";";
 
-	  //this is the column across, we keep it same as we are doing with the whole dp table
+	  //this is the pattern/column gap, we keep it same as we are doing with the whole dp table
+	  c_gm->GapValue(c_traceback_table, i,j,true, dp_table_curr_col[j-1], maximumGapValue_pattern, maximumGapIndex_pattern);
+
+	  /*	  //this is the column across, we keep it same as we are doing with the whole dp table
 	  for(int k=j-1; k>0; --k) 
 	    {		//check all sub columns
 				
@@ -430,15 +450,23 @@ void LocalAlignment::align()
 		  //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(j-k);
 		  c_traceback_table->SetTableEntry(i,j, UP, j-k);
 		}
-	    }		
-	  cout<<"compval afer col gap:"<<compval<<endl;	
+		}*/	
+	  if(compval<maximumGapValue_pattern)
+	    {
+	      //set compval to that square
+	      compval=maximumGapValue_pattern;
+	      c_traceback_table->SetTableEntry(i,j,UP, j-maximumGapIndex_pattern);
+	    }	
+	  //cout<<"maximumGapValue[j]:"<<maximumGapValue_subject[j]<<",";
+	  //cout<<"campval after rowGap:"<<compval<<";";
+	  //cout<<"compval afer col gap:"<<compval<<endl;	
 
 	  //***************do Match/Mismatch now***********
 	  if(compval < (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1))))
 	    {
 	      compval = (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)));	//compval = diagonal + match score
 	      //}
-	      cout<<"\t\tcompval after match/mismatch:"<<compval<<";";
+	      //cout<<"\t\tcompval after match/mismatch:"<<compval<<";";
 	      c_traceback_table->SetTableEntry(i,j, UPLEFT,0);//c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);//for this one, we don't have to set the #numOfIndels, since there is none
 	    }
 	  
@@ -459,7 +487,7 @@ void LocalAlignment::align()
 		{
 		  if(c_traceback_table->GetLink(i-1,j-1)==ZERO)//[(i-1)+(j-1)*(lenP+1)].GetLinks()==ZERO)
 		    {
-		      cout<<"\t\t&&&&&&&&&&&&ADDING A NEW PATH"<<endl;
+		      //cout<<"\t\t&&&&&&&&&&&&ADDING A NEW PATH"<<endl;
 		      //this is new path starting. since it following a zero and then a match.
 		      //we need to add a entry to a path vec to keep track this new path
 		      unsigned int tempIndexArr[2];tempIndexArr[0]=i;tempIndexArr[1]=j;
@@ -474,7 +502,7 @@ void LocalAlignment::align()
 		      //now compare to update or not
 		      if(compval>tempPath->GetOptimalValue())
 			{
-			  cout<<"\t\t\t***********ffound a maximum one for the existing path, update info::path index"<<pathElementTable[i-1+(j-1)*(lenP+1)]<<endl;
+			  //cout<<"\t\t\t***********ffound a maximum one for the existing path, update info::path index"<<pathElementTable[i-1+(j-1)*(lenP+1)]<<endl;
 			  unsigned int tempIndexArr[2];tempIndexArr[0]=i;tempIndexArr[1]=j;
 			  tempPath->SetOptimalIndex(tempIndexArr);
 			  tempPath->SetOptimalValue(compval);
@@ -504,8 +532,8 @@ void LocalAlignment::align()
 		    }
 		}  
 	    }
-	  cout<<"This current element is from path index:"<<pathElementTable[i+j*(lenP+1)];
-	  
+	  //cout<<"This current element is from path index:"<<pathElementTable[i+j*(lenP+1)];
+	  /*
 	  switch (c_traceback_table->GetLink(i,j))
 	    {
 	    case UP:
@@ -525,8 +553,9 @@ void LocalAlignment::align()
 	      break;
 	      
 	    }
+	  */
 	  dp_table_curr_col[j] = compval;	//set current cell to highest possible score and move on
-	  cout<<"\t\trunning score:"<<compval<<endl;
+	  //cout<<"\t\trunning score:"<<compval<<endl;
 
 	  //find a best one so far
 	  if(c_score<compval)
@@ -535,7 +564,6 @@ void LocalAlignment::align()
 	      c_optimalIndex[0]=i;
 	      c_optimalIndex[1]=j;
 	    }
-
 	}//end of col
       
       //reset the prev one to curr col and make it ready for next loop
@@ -547,9 +575,10 @@ void LocalAlignment::align()
   //clean up
   delete[] dp_table_prev_col;
   delete[] dp_table_curr_col;
-  delete [] maximumGapValue;
-  delete [] maximumGapIndex;
-  delete [] pathElementTable;
+  delete[] maximumGapValue_subject;
+  delete[] maximumGapIndex_subject;
+  delete[] pathElementTable;
+  //delete gm;
   //traceback_table will be deleted upon destruction
 }//end of the localAlign
 

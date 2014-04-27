@@ -3,180 +3,42 @@
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
-#include "SequenceHandlerConstant.hpp"
+#include <sstream>
 
+#include "SequenceHandlerConstant.hpp"
 #include "OverlapAlignment.hpp"
 #include "AlignmentString.hpp"
 #include "LocalAlignment.hpp"
 
+
 //****global variable***********
 //variable vector will hold by isotypes the sequence stringa aligned for output
-vector<vector<SequenceString> > g_vec_mapBoth;
+/*vector<vector<SequenceString> > g_vec_mapBoth;
 vector<vector<SequenceString> > g_vec_mapForward;
 vector<vector<SequenceString> > g_vec_mapReverse;
 vector<vector<SequenceString> > g_vec_mapNone;
-
-vector<vector<SequenceString> > g_vec_mapBoth_trim;
+*/
+/*vector<vector<SequenceString> > g_vec_mapBoth_trim;
 vector<vector<SequenceString> > g_vec_mapForward_trim;
 vector<vector<SequenceString> > g_vec_mapReverse_trim;
 vector<vector<SequenceString> > g_vec_mapNone_trim;
-
+*/
 
 //variable vector will hold by isotypes the sequence stirng aligned for output 
-vector<vector<unsigned int> > g_vec_len_mapBoth;
+/*vector<vector<unsigned int> > g_vec_len_mapBoth;
 vector<vector<unsigned int> > g_vec_len_mapForward;
 vector<vector<unsigned int> > g_vec_len_mapReverse;
 vector<vector<unsigned int> > g_vec_len_mapNone;
-
+*/
 //forward primer set
-vector<SequenceString> g_vec_primer_isotype; //forward one
-vector<SequenceString> g_vec_primer_upm; //reverse one
+//vector<SequenceString> g_vec_primer_isotype; //forward one
+//vector<SequenceString> g_vec_primer_upm; //reverse one
 
 //by isotype output flag
-bool g_by_isotype_flag=false;
-bool g_trim_flag=false;
+//bool g_by_isotype_flag=false;
+//bool g_trim_flag=false;
 
 //**********************************************
-
-/*void SetUpByIsotypeOutputFlag(const bool& _f)
-{
-  g_by_isotype_flag=_f;
-}
-
-void SetUpTrimFlag(const bool& _f)
-{
-  g_trim_flag=_f;
-}
-
-//in this function, we also need to set up the primer information
-void ProcessAdaptorSequences(const string& _adaptorFile, const string& _barcodeFile, const string& _forwardFile, 
-			     const string& _reverseFile, vector<SequenceString>& _vecForward, 
-			     vector<SequenceString>& _vecReverse )
-{
-  //first, we need to read the sequeces
-  vector<SequenceString> adaptor;
-  vector<SequenceString> barcode;
-  //vector<SequenceString> forward;
-  //vector<SequenceString> reverse;
-  
-  //
-  ReadFasta(_adaptorFile, adaptor);
-  ReadFasta(_barcodeFile, barcode);
-  ReadFasta(_forwardFile, g_vec_primer_isotype);
-  ReadFasta(_reverseFile, g_vec_primer_upm);
-
-  SequenceString adaptorA(adaptor.at(0).GetName(), adaptor.at(0).GetSequence());
-  SequenceString adaptorB(adaptor.at(1).GetName(), adaptor.at(1).GetSequence());
-
-  //go combine them together
-  //forward set -- with adaptorA
-  string tempStr;
-  string tempName;
-  for(unsigned int i=0;i<barcode.size();i++)
-    {
-      for(unsigned int j=0;j<g_vec_primer_isotype.size();j++)
-	{
-	  tempStr=adaptorA.GetSequence();
-	  tempStr+=barcode.at(i).GetSequence();
-	  tempStr+=g_vec_primer_isotype.at(j).GetSequence();
-	  tempName=adaptorA.GetName();
-	  tempName+=barcode.at(i).GetName();
-	  tempName+=g_vec_primer_isotype.at(j).GetName();
-	  //
-	  SequenceString tempSS(tempName, tempStr);
-	  _vecForward.push_back(tempSS);
-	}
-    }
-
-  //reverse set
-  //with adaptor B
-  for(unsigned int i=0;i<barcode.size();i++)
-    {
-      for(unsigned int j=0;j<g_vec_primer_upm.size();j++)
-	{
-	  tempStr=adaptorB.GetSequence();
-	  tempStr+=barcode.at(i).GetSequence();
-	  tempStr+=g_vec_primer_upm.at(j).GetSequence();
-	  tempName=adaptorB.GetName();
-	  tempName+=barcode.at(i).GetName();
-	  tempName+=g_vec_primer_upm.at(j).GetName();
-	  //
-	  SequenceString tempSS(tempName, tempStr);
-	  _vecReverse.push_back(tempSS);
-	}
-    }
-  //we are seting up the forward primer information, IgG/M/D, we will 
-  //need this information to write output by different isotype
-  //initialize the vectors
-  if(g_by_isotype_flag)
-    {
-      for(unsigned int i=0;i<g_vec_primer_isotype.size();i++)
-	{
-	  vector<SequenceString> t_both;
-	  g_vec_mapBoth.push_back(t_both);
-	  vector<SequenceString> t_forward;
-	  g_vec_mapForward.push_back(t_forward);
-	  vector<SequenceString> t_reverse;
-	  g_vec_mapReverse.push_back(t_reverse);
-	  vector<SequenceString> t_none;
-	  g_vec_mapNone.push_back(t_none);
-
-	  vector<SequenceString> t_both_t;
-	  g_vec_mapBoth_trim.push_back(t_both_t);
-	  vector<SequenceString> t_forward_t;
-	  g_vec_mapForward_trim.push_back(t_forward_t);
-	  vector<SequenceString> t_reverse_t;
-	  g_vec_mapReverse_trim.push_back(t_reverse_t);
-	  vector<SequenceString> t_none_t;
-	  g_vec_mapNone_trim.push_back(t_none_t);
-      
-
-	  vector<unsigned int> t_len_both;
-	  g_vec_len_mapBoth.push_back(t_len_both);
-	  vector<unsigned int> t_len_forward;
-	  g_vec_len_mapForward.push_back(t_len_forward);
-	  vector<unsigned int> t_len_reverse;
-	  g_vec_len_mapReverse.push_back(t_len_reverse);
-	  vector<unsigned int> t_len_none;
-	  g_vec_len_mapNone.push_back(t_len_none);
-	}
-    }
-  else
-    {
-      vector<SequenceString> t_both;
-      g_vec_mapBoth.push_back(t_both);
-      vector<SequenceString> t_forward;
-      g_vec_mapForward.push_back(t_forward);
-      vector<SequenceString> t_reverse;
-      g_vec_mapReverse.push_back(t_reverse);
-      vector<SequenceString> t_none;
-      g_vec_mapNone.push_back(t_none);
-      
-      vector<SequenceString> t_both_t;
-      g_vec_mapBoth_trim.push_back(t_both_t);
-      vector<SequenceString> t_forward_t;
-      g_vec_mapForward_trim.push_back(t_forward_t);
-      vector<SequenceString> t_reverse_t;
-      g_vec_mapReverse_trim.push_back(t_reverse_t);
-      vector<SequenceString> t_none_t;
-      g_vec_mapNone_trim.push_back(t_none_t);
-      
-      
-      vector<unsigned int> t_len_both;
-      g_vec_len_mapBoth.push_back(t_len_both);
-      vector<unsigned int> t_len_forward;
-      g_vec_len_mapForward.push_back(t_len_forward);
-      vector<unsigned int> t_len_reverse;
-      g_vec_len_mapReverse.push_back(t_len_reverse);
-      vector<unsigned int> t_len_none;
-      g_vec_len_mapNone.push_back(t_len_none);
-    }
-
-  //for revere/upm arrays
-  
-
-}
-*/
 
 //the _adaptorname is the name for the aligned sequence we will be 
 // _adaptorName is of format "adaptor A:Barcode:IgM/G/D"
@@ -204,7 +66,7 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 		     ScoreMatrix* _sm, const double& _gapOpen, const double& _gapExtension,
 			 const double& _mismatchRateThreshold, const unsigned _minimumOverlapLength, /*const unsigned int& _offsetForward, const unsigned int& _offsetReverse,*/ 
 		     const string& _mapBoth_fname, const string& _mapForward_fname,
-		     const string& _mapReverse_fname, const string& _mapNone_fname)
+		      const string& _mapReverse_fname, const string& _mapNone_fname, const string& _mapCrossOver_fname, const string& _mapBreakOutsideCon_fname )
 {
   unsigned int numOfSeqsUnit=20000;
   unsigned int timeOfWriting=1;
@@ -212,36 +74,32 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
   //now we need to prepare the output vector, now we will prepare the outfile for each entry in _vecForward
   //they are the alleles for different isotypes (IgG/M), different subtypes (IgG1/2/3/4) and alleles IgG1*01/*02/*03, etc
   //
-  
-  vector<SequenceString>* pt_vec_mapBoth=new vector<SequenceString>[_vecFoward.size()];
-  vector<SequenceString>* pt_vec_mapForward=new vector<SequenceString>[_vecFoward.size()];
+  vector<SequenceString>* pt_vec_mapBoth=new vector<SequenceString>[_vecForward.size()];
+  vector<SequenceString>* pt_vec_mapForward=new vector<SequenceString>[_vecForward.size()];
   vector<SequenceString> vec_mapReverse;
   vector<SequenceString> vec_mapNone;
   
-  vector<SequenceString> vec_crossOver;//this is one holding some extra sequences that after alignment, has constant and upm mapping cross over each other.
+  vector<SequenceString> vec_mapBreakOutsideConstant; //this one holds the one that the break is longer than the costant region.
+  vector<SequenceString> vec_mapCrossOver;//this is one holding some extra sequences that after alignment, has constant and upm mapping cross over each other.
     // most of time, we don't expect cross over between them, but might have small chances there are. we want to write down them and take a look to see 
     //what is going on.
-    
-  /*vector<SequenceString> vec_mapBothTrim;
-  vector<SequenceString> vec_mapForwardTrim;
-  vector<SequenceString> vec_mapReverseTrim;
-  vector<SequenceString> vec_mapNoneTrim;
-  */
-
-  
+      
+  //holding the position where within the constant region the break is.
   vector<unsigned int>* pt_vec_mapBoth_pos_end=new vector<unsigned int>[_vecForward.size()];
   vector<unsigned int>* pt_vec_mapForward_pos_end=new vector<unsigned int>[_vecForward.size()];
-  
+
+  vector<unsigned int[2]> vec_mapCrossOver_pos_end;
+  vector<unsigned int>vec_mapBreakOutsideConstant_pos_end;
+
   //now, we need to prepare the output files
-  
   AlignmentString tempAS;
   AlignmentString* tempAS_arr;
-  unsigned int numOfLocalAlignments=10;
+  unsigned int numOfLocalAlignments=5;
   string strPattern;
   string strSubject;
   
   double mismatch_rate=0.0;
-  
+  cout<<"\n";
   for(unsigned int i=0;i<_vecSeq.size();i++)
     {
       //printing progress
@@ -263,6 +121,8 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
       bool 	foundForwardFlag=false;
       bool	foundReverseFlag=false;
       bool      foundCrossOverFlag=false;
+      bool foundBreakOutsideConstantFlag=false;
+
       //cout<<"Map forward set"<<endl;
       //forward has to be mapped to the beginning!!!
       for(unsigned int j=0;j<_vecForward.size();j++)
@@ -270,7 +130,7 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	  //cout<<"forward set:"<<j<<endl;
 	  //cout<<_vecForward.at(j).toString()<<endl;
 	  LocalAlignment lal (&(_vecSeq.at(i)), &(_vecForward.at(j)), _sm, _gapOpen, _gapExtension,1,numOfLocalAlignments);
-	  tempAS_arr=ola.GetAlignment();
+	  tempAS_arr=lal.GetAlignmentArr();
 	  //cout<<"\talignment score:"<<tempAS.GetScore()<<endl;
 	  //need to get the mismatch rate
 	  strPattern=tempAS_arr[0].GetPattern(true);
@@ -305,7 +165,8 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	  //cout<<"start doing k:"<<k<<endl;
 	  SequenceString reverseComplementReverse=ReverseComplement(_vecReverse.at(k));
 	  //cout<<"after revcomp"<<endl;
-	  OverlapAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension,1);
+	  //OverlapAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension,1);
+	  LocalAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension,1,1);
 	  //cout<<"after alignment:"<<k<<endl;
 	  //need to get the mismatch rate
 	  tempAS=ola.GetAlignment();
@@ -360,13 +221,28 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	}
       */
       //now, start the algorithm for the constant regions
-      if(foundForwardFlag&&foundReverseFlag&&(bestForwardAlign.GetPatternIndexEnd()<bestReverseAlign.GetPatternIndexStart())) //constant end
+      if(foundForwardFlag&&foundReverseFlag&&(bestReverseAlign.GetPatternIndexStart()+5<=bestForwardAlign.GetPatternIndexEnd())) //constant end
 	{//here, we might want to write out for debugging, we are not expecting the cross over between this 
 	  foundCrossOverFlag=true;
 	  //continue;
 	}
-      //cout<<"\t***found a dimer"<<endl;
-      //now we are finding the primer dimer.
+      
+      if(foundForwardFlag&&bestForwardAlign.GetSubjectIndexEnd()==_vecForward.at(bestForwardIndex).GetLength()-1)
+	{
+	  if(foundReverseFlag)//both side
+	    {
+	      if(bestReverseAlign.GetPatternIndexStart()-bestForwardAlign.GetPatternIndexEnd()>1)//no cross over
+		{
+		  foundBreakOutsideConstantFlag=true;
+		}
+	    }
+	  else //only forward mapped
+	    {
+	      if(_vecSeq.at(i).GetLength()>bestForwardAlign.GetPatternIndexEnd()+1)
+		foundBreakOutsideConstantFlag=true;
+	    }
+	}
+      
       //write down the stats
       //first look up what this sequence is from IgM or IgG or upm
       //isotype first
@@ -374,7 +250,7 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
       //unsigned int foundIndex=LookUpVectorIndex(_vecForward.at(bestForwardIndex).GetName(), g_vec_primer_isotype);
 	  unsigned int foundIndex=bestForwardIndex;//here we don't need to look up, because we did not precess adaptor/primer, we simply get sort them by each allel
 	//here, to keep track of positions, because we are running local alignment, so we can simply keep track the end position of alignment.
-	//we also have to check whether 
+	//we also have to check whether the break is in the constant
 	 if(foundForwardFlag)
 	 {
 	   if(foundReverseFlag)
@@ -383,8 +259,10 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	     {
 		pt_vec_mapBoth_pos_end[foundIndex].push_back(bestForwardAlign.GetSubjectIndexEnd());
 	     }
-	     else
+	     else  //cross over
 	     {
+	       
+	       //vec_mapCrossOver_pos_end.push_back();
 		//empty
 	       //here, for now we only go ahead write out the sequences for debugging, will do something more???
 	     }
@@ -554,122 +432,300 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	//tempLstR$seq<-paste(leadingSpaceOriginal, tempStr, sep="");
 	tempLstSeq.SetSequence(leadingSpaceOriginal+tempLstSeq.GetSequence());
 	
+	//******************write to vectors***************
 	//#now put the sequences to the correct vectors
 	//cout<<"\tready to output strings........"<<endl;
 	vector<SequenceString>* p_vec_map;
-	//vector<unsigned int>* p_vec_len_map;
-	//vector<SequenceString>* p_vec_map_trim=NULL;
-	
-	if(foundForwardFlag)
-	{
-	  if(foundReverseFlag)
-	    {
-	      //check to see whether we need to store the data by isotype
-	      if(g_by_isotype_flag)
-		{
-		  unsigned int found=LookUpVectorIndex(tempLstF.GetName(), g_vec_primer_isotype);
-		  //cout<<"\t**********writing to vec now"<<found<<endl;
-		  if(found != string::npos)
-		    {
-		      p_vec_map=&g_vec_mapBoth.at(found);  //g_vec_mapBoth is initilized in the processingAdaptor function above
-		      
-		    }
-		}
-	      
-	     
-	    }
-	  
-	}
+	if(foundCrossOverFlag)
+	  {
+	    p_vec_map=&vec_mapCrossOver;
+	    stringstream ss;
+	    ss<<tempLstF.GetName()<<":"<<bestForwardAlign.GetSubjectIndexStart()<<":"
+	      <<bestForwardAlign.GetSubjectIndexEnd()
+	      <<":"<<bestReverseAlign.GetSubjectIndexStart()
+	      <<":"<<bestReverseAlign.GetSubjectIndexEnd();
+	    tempLstF.SetName(ss.str());
+	  }
+	else
+	  {
+	    if(foundBreakOutsideConstantFlag)
+	      {
+		p_vec_map=&vec_mapBreakOutsideConstant;
+		stringstream ss;
+		ss<<tempLstF.GetName()<<":"<<bestForwardAlign.GetSubjectIndexStart()<<":"
+		  <<bestForwardAlign.GetSubjectIndexEnd();
+
+		tempLstF.SetName(ss.str());
+	      }
+	    else
+	      {
+		if(foundForwardFlag)
+		  {
+		    unsigned int found=LookUpVectorIndex(tempLstF.GetName(), _vecForward);
+		    if(foundReverseFlag)
+		      {
+			//check to see whether we need to store the data by isotype
+			//if(g_by_isotype_flag)
+			//	{
+			
+			//cout<<"\t**********writing to vec now"<<found<<endl;
+			if(((signed)found) != -1)//string::npos)
+			  {
+			    p_vec_map=&pt_vec_mapBoth[found];  //g_vec_mapBoth is initilized in the processingAdaptor function above
+			  }
+			else
+			  {
+			    cout<<"***ERROR:Can not find the forward primer name, something is wrong"<<endl;
+			  }
+			stringstream ss;
+			ss<<tempLstF.GetName()<<":"<<bestForwardAlign.GetSubjectIndexStart()<<":"
+			  <<bestForwardAlign.GetSubjectIndexEnd()
+			  <<":"<<bestReverseAlign.GetSubjectIndexStart()
+			  <<":"<<bestReverseAlign.GetSubjectIndexEnd();
+			tempLstF.SetName(ss.str());						
+		      }
+		    else
+		      {
+			if(((signed)found) != -1)//string::npos)
+			  {
+			    p_vec_map=&pt_vec_mapForward[found];  //g_vec_mapBoth is initilized in the processingAdaptor function above
+			  }
+			else
+			  {
+			    cout<<"***ERROR:Can not find the forward primer name, something is wrong"<<endl;
+			  }
+			stringstream ss;
+			ss<<tempLstF.GetName()<<":"<<bestForwardAlign.GetSubjectIndexStart()<<":"
+			  <<bestForwardAlign.GetSubjectIndexEnd();
+			
+			tempLstF.SetName(ss.str());
+		      }
+		  }
+		else
+		  {
+		    if((foundReverseFlag))
+		      {
+			p_vec_map=&vec_mapReverse;
+		      }
+		      else
+			p_vec_map=&vec_mapReverse;
+		  }
+	      }
+	  }
 	
 	//now we need to store the data into the correct vectors/files
 	p_vec_map->push_back(tempLstSeq); 
 	p_vec_map->push_back(tempLstF);
 	p_vec_map->push_back(tempLstR);
 	
-		
 	//cout<<"start writing output........"<<endl;
 	if(i>=timeOfWriting*numOfSeqsUnit) //#write once every 20000 sequences
-	{
+	  {
+	    timeOfWriting++;
+	    string t_fileName;
 	  //cout<<"i round:"<<i<<endl;
 	  //mapBoth
-	  for(unsigned int s=0;s<g_vec_mapBoth.size();s++)
+	  for(unsigned int s=0;s<_vecForward.size();s++)
 	    {
-	      if(g_vec_mapBoth.at(s).size()>0)
+	      if(pt_vec_mapBoth[s].size()>0)
 		{
 		  //cout<<"\t------writing files at i-----:"<<s<<endl;
 		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
-		  string t_fileName=_mapBoth_fname;
-		  if(g_by_isotype_flag)
-		    t_fileName=_mapBoth_fname+g_vec_primer_isotype.at(s).GetName();
-		  WriteFasta(t_fileName, g_vec_mapBoth.at(s),100, ofstream::app);
+		  		  
+		  t_fileName=_mapBoth_fname+ _vecForward.at(s).GetName();
+		  WriteFasta(t_fileName, pt_vec_mapBoth[s],100, ofstream::app);
 		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
-		  g_vec_mapBoth.at(s).clear();
+		  pt_vec_mapBoth[s].clear();
 		  //cout<<"vecBoth cleared:"<<vec_mapBoth.size()<<endl;
-		  WriteTextFile(t_fileName+"_primerdimerStat.txt", pt_vec_isotype_primerDimer_pos_cross[s], ' ', 1,ofstream::app);
-		  pt_vec_isotype_primerDimer_pos_cross[s].clear();//g_vec_len_mapBoth.at(s).clear();
+		  WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_mapBoth_pos_end[s], ' ', 1,ofstream::app);
+		  pt_vec_mapBoth_pos_end[s].clear();//g_vec_len_mapBoth.at(s).clear();
 		  /*if(g_trim_flag)
 		    {
 		      WriteFasta(t_fileName+"_trim.fas", g_vec_mapBoth_trim.at(s), 100,ofstream::app);
 		      g_vec_mapBoth_trim.at(s).clear();
 		      }*/
 		}
-	      
 	    }
-	  for(unsigned int t=0;t<g_vec_primer_upm.size();t++)
+	  //forward
+	  for(unsigned int s=0;s<_vecForward.size();s++)
 	    {
-	      if(pt_vec_upm_primerDimer_pos_cross[t].size()>0)
+	      if(pt_vec_mapForward[s].size()>0)
 		{
-		  //cout<<"\t.........writing upm"<<endl;
-		  string t_fileName=_mapBoth_fname;
-		  if(g_by_isotype_flag)
-		    t_fileName=_mapBoth_fname+g_vec_primer_upm.at(t).GetName();
-		  WriteTextFile(t_fileName+"_primerdimerStat.txt", pt_vec_upm_primerDimer_pos_cross[t], ' ', 1,ofstream::app);
-		  pt_vec_upm_primerDimer_pos_cross[t].clear();
+		  //cout<<"\t------writing files at i-----:"<<s<<endl;
+		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		  		  
+		  t_fileName=_mapForward_fname+ _vecForward.at(s).GetName();
+		  WriteFasta(t_fileName, pt_vec_mapForward[s],100, ofstream::app);
+		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+		  pt_vec_mapForward[s].clear();
+		  WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_mapForward_pos_end[s], ' ', 1,ofstream::app);
+		  pt_vec_mapForward_pos_end[s].clear();//g_vec_len_mapBoth.at(s).clear();
 		}
 	    }
+	  //reverse
+	  
+	      if(vec_mapReverse.size()>0)
+		{
+		  //cout<<"\t------writing files at i-----:"<<s<<endl;
+		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		  		  
+		  t_fileName=_mapReverse_fname;
+		  WriteFasta(t_fileName, vec_mapReverse,100, ofstream::app);
+		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+		  vec_mapReverse.clear();
+		}
+	    
+	  //none
+	      if(vec_mapNone.size()>0)
+		{
+		  //cout<<"\t------writing files at i-----:"<<s<<endl;
+		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		  		  
+		  t_fileName=_mapNone_fname;
+		  WriteFasta(t_fileName, vec_mapNone,100, ofstream::app);
+		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+		  vec_mapNone.clear();
+		}
+	  //crossover
+	      if(vec_mapCrossOver.size()>0)
+		{
+		  //cout<<"\t------writing files at i-----:"<<s<<endl;
+		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		  		  
+		  t_fileName=_mapCrossOver_fname;
+		  WriteFasta(t_fileName, vec_mapCrossOver,100, ofstream::app);
+		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+		  vec_mapCrossOver.clear();
+		}
+	  //break outside constant
+	      if(vec_mapBreakOutsideConstant.size()>0)
+		{
+		  //cout<<"\t------writing files at i-----:"<<s<<endl;
+		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		  		  
+		  t_fileName=_mapBreakOutsideCon_fname;
+		  WriteFasta(t_fileName, vec_mapBreakOutsideConstant,100, ofstream::app);
+		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+		  vec_mapBreakOutsideConstant.clear();
+		}
 	  //cout<<"done map both"<<endl;
 	}//end of each 1000 seqs read write
       
     }//end of for loop of sequence data vec
 
   //one last writing
-  //cout<<"start writing output........"<<endl;
+  cout<<"start writing last round of output........"<<endl;
 	
-  for(unsigned int s=0;s<g_vec_mapBoth.size();s++)
+  /*for(unsigned int s=0;s<vec_mapBoth.size();s++)
     {
-      if(g_vec_mapBoth.at(s).size()>0)
+      if(vec_mapBoth.at(s).size()>0)
 	{
 	  //cout<<"\t------writing files lastly:"<<s<<endl;
 	  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
 	  string t_fileName=_mapBoth_fname;
-	  if(g_by_isotype_flag)
-	    t_fileName=_mapBoth_fname+g_vec_primer_isotype.at(s).GetName();
-	  WriteFasta(t_fileName, g_vec_mapBoth.at(s),100, ofstream::app);
-	  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
-	  //g_vec_mapBoth.at(s).clear();
-	  //cout<<"vecBoth cleared:"<<vec_mapBoth.size()<<endl;
-	  WriteTextFile(t_fileName+"_primerdimerStat.txt", pt_vec_isotype_primerDimer_pos_cross[s], ' ', 1,ofstream::app);
-	  //pt_vec_isotype_primerDimer_pos_cross[s].clear();//g_vec_len_mapBoth.at(s).clear();
 	  
+	  t_fileName=_mapBoth_fname+g_vec_primer_isotype.at(s).GetName();
+	  WriteFasta(t_fileName, g_vec_mapBoth.at(s),100, ofstream::app);
 	}
       
     }
-  for(unsigned int t=0;t<g_vec_primer_upm.size();t++)
+  */
+  string t_fileName;
+  //mapBoth
+  for(unsigned int s=0;s<_vecForward.size();s++)
+	    {
+	      if(pt_vec_mapBoth[s].size()>0)
+		{
+		  //cout<<"\t------writing files at i-----:"<<s<<endl;
+		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		  		  
+		  t_fileName=_mapBoth_fname+ _vecForward.at(s).GetName();
+		  WriteFasta(t_fileName, pt_vec_mapBoth[s],100, ofstream::app);
+		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+		  pt_vec_mapBoth[s].clear();
+		  WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_mapBoth_pos_end[s], ' ', 1,ofstream::app);
+		  pt_vec_mapBoth_pos_end[s].clear();//g_vec_len_mapBoth.at(s).clear();
+		  //cout<<"vecBoth cleared:"<<vec_mapBoth.size()<<endl;
+		  //WriteTextFile(t_fileName+"_primerdimerStat.txt", pt_vec_isotype_primerDimer_pos_cross[s], ' ', 1,ofstream::app);
+		  //pt_vec_isotype_primerDimer_pos_cross[s].clear();//g_vec_len_mapBoth.at(s).clear();
+		  /*if(g_trim_flag)
+		    {
+		      WriteFasta(t_fileName+"_trim.fas", g_vec_mapBoth_trim.at(s), 100,ofstream::app);
+		      g_vec_mapBoth_trim.at(s).clear();
+		      }*/
+		}
+	    }
+	  //forward
+	  for(unsigned int s=0;s<_vecForward.size();s++)
+	    {
+	      if(pt_vec_mapForward[s].size()>0)
+		{
+		  //cout<<"\t------writing files at i-----:"<<s<<endl;
+		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		  		  
+		  t_fileName=_mapForward_fname+ _vecForward.at(s).GetName();
+		  WriteFasta(t_fileName, pt_vec_mapForward[s],100, ofstream::app);
+		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+		  pt_vec_mapForward[s].clear();
+		  WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_mapForward_pos_end[s], ' ', 1,ofstream::app);
+		  pt_vec_mapForward_pos_end[s].clear();//g_vec_len_mapBoth.at(s).clear();
+		}
+	    }
+  //reverse	  
+  if(vec_mapReverse.size()>0)
     {
-      //cout<<"\t%%%%%%%%tryingn......."<<endl;
-      if(pt_vec_upm_primerDimer_pos_cross[t].size()>0)
-	{
-	  //cout<<"....writing upm lastly"<<endl;
-	  string t_fileName=_mapBoth_fname;
-	  if(g_by_isotype_flag)
-		    t_fileName=_mapBoth_fname+g_vec_primer_upm.at(t).GetName();
-	  WriteTextFile(t_fileName+"_primerdimerStat.txt", pt_vec_upm_primerDimer_pos_cross[t], ' ', 1,ofstream::app);
-	  //pt_vec_upm_primerDimer_pos_cross[t].clear();
-	}
+      //cout<<"\t------writing files at i-----:"<<s<<endl;
+      //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+      
+      t_fileName=_mapReverse_fname;
+      WriteFasta(t_fileName, vec_mapReverse,100, ofstream::app);
+      //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+      vec_mapReverse.clear();
     }
-  cout<<"done map both"<<endl;
+  
+  //none
+  if(vec_mapNone.size()>0)
+    {
+      //cout<<"\t------writing files at i-----:"<<s<<endl;
+      //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		  		  
+      t_fileName=_mapNone_fname;
+      WriteFasta(t_fileName, vec_mapNone,100, ofstream::app);
+      //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+      vec_mapNone.clear();
+    }
+  //crossover
+  if(vec_mapCrossOver.size()>0)
+    {
+      //cout<<"\t------writing files at i-----:"<<s<<endl;
+      //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+      
+      t_fileName=_mapCrossOver_fname;
+      WriteFasta(t_fileName, vec_mapCrossOver,100, ofstream::app);
+      //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+      vec_mapCrossOver.clear();
+    }
+  //break outside constant
+  if(vec_mapBreakOutsideConstant.size()>0)
+    {
+      //cout<<"\t------writing files at i-----:"<<s<<endl;
+      //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+      
+      t_fileName=_mapBreakOutsideCon_fname;
+      WriteFasta(t_fileName, vec_mapBreakOutsideConstant,100, ofstream::app);
+      //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+      vec_mapBreakOutsideConstant.clear();
+    }
+  
+  cout<<"done with one last write"<<endl;
   
   cout<<endl;
+  //cleanup
 
+  delete [] pt_vec_mapBoth;
+  delete [] pt_vec_mapForward;
+
+  delete [] pt_vec_mapBoth_pos_end;
+  delete [] pt_vec_mapForward_pos_end;
 }
 

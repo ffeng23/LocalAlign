@@ -3,6 +3,10 @@
 #include <iostream>
 #include <vector>
 
+#include "GapModel.hpp"
+#include "AffineGapModel.hpp"
+#include "MarkovChainGapModel_454.hpp"
+
 using namespace std;
 
 OverlapAlignment::OverlapAlignment(SequenceString* _pattern, SequenceString* _subject, 
@@ -33,13 +37,13 @@ void OverlapAlignment::traceBack()
   //vector<unsigned int[2]> startIndex;//where the 
   //vector<double[2]> curr_and_max;
 
-  cout<<"doing trace back in the local alignment"<<endl;
+  //cout<<"doing trace back in the local alignment"<<endl;
   
   //starting from optimalIndex going backing
   unsigned int i=c_optimalIndex[0];
   unsigned int j=c_optimalIndex[1];
 
-  cout<<"starting from ("<<i<<","<<j<<")"<<endl;
+  //cout<<"starting from ("<<i<<","<<j<<")"<<endl;
   string c_pattern_wg;//aligned string with gap
   string c_subject_wg;//aligend string with gap
 
@@ -48,13 +52,13 @@ void OverlapAlignment::traceBack()
   //while(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks()!=ZERO)  //keep going till we reach a zero
   while (c_traceback_table->GetLink(i, j)!=ZERO)
     {
-      cout<<"\t("<<i<<","<<j<<"):";
+      //cout<<"\t("<<i<<","<<j<<"):";
       unsigned int currentIndex;
       //check the link table, decide where to go
       switch(c_traceback_table->GetLink(i, j))//(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks())
 	{
 	case UP:
-	  cout<<"UP:"<<endl;
+	  //cout<<"UP:"<<endl;
 	  //now we have to check how many indels
 	  currentIndex=j;
 	  for(unsigned int k =0;k<c_traceback_table->GetNumOfIndels(i, currentIndex);k++)//c_traceback_table[i+currentIndex*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
@@ -66,7 +70,7 @@ void OverlapAlignment::traceBack()
 	    }
 	  break;
 	case LEFT:
-	  cout<<"LEFT"<<endl;
+	  //cout<<"LEFT"<<endl;
 	  //need to check how many indels
 	  currentIndex=i;
 	  for(unsigned int k=0;k<c_traceback_table->GetNumOfIndels(currentIndex, j);k++)//c_traceback_table[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
@@ -78,7 +82,7 @@ void OverlapAlignment::traceBack()
 	    }
 	  break;
 	case UPLEFT:
-	  cout<<"UPLEFT"<<endl;
+	  //cout<<"UPLEFT"<<endl;
 	  c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
 	  c_subject_wg=c_subject->GetSequence().at(j-1)+c_subject_wg;
 	  i--;
@@ -118,7 +122,8 @@ void OverlapAlignment::align()
   double* dp_table_prev_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
   double* dp_table_curr_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
 
-  GapModel* gm=new AffineGapModel(c_gapOpen, c_gapExtension);
+  //GapModel* gm=new AffineGapModel(c_gapOpen, c_gapExtension);
+  //GapModel* gm=new MarkovChainGapModel_454(c_gapOpen, c_gapExtension, c_pattern->GetSequence(), c_subject->GetSequence());
 
   //here we keep two columns, to effieciently and easily manipulate the column. it cold be only one
   c_traceback_table=new TracebackTable(c_pattern, c_subject, 1);//[(lenP+1)*(lenS+1)];
@@ -164,14 +169,14 @@ void OverlapAlignment::align()
   for(unsigned int i=0;i<=lenS;i++)
     {
       maximumGapValue_subject[i]=-1E60;
-      maximumGapIndex[i]_subject= 0;
+      maximumGapIndex_subject[i]= 0;
       //  maximumGapIndex[i]=0;
       //maximumGapIndex[1]=1;//to the
     } 
 
   //for pattern gap, this maximumGapValue, a scalar is OK. since we keep this as a running one, like the current column
   double maximumGapValue_pattern=-1E60;
-  unsigned int maximumIndex_pattern=0;
+  unsigned int maximumGapIndex_pattern=0;
 
 
   double maximumValueLastRowCol=-1E70;
@@ -212,7 +217,7 @@ void OverlapAlignment::align()
 	  //now we don't have to go through every entry, we only need to compare the Max one with this current one and keep track it.
 	  //for(int k = i-1; k > 0; --k) 
 	  // {		//check all sub rows
-	  gm->GapValue(c_traceback_table, i,j,false, dp_table_prev_col[j], maximumGapValue_subjectp[j], maximumGapIndex_subject[j]);
+	  c_gm->GapValue(c_traceback_table, i,j,false, dp_table_prev_col[j], maximumGapValue_subject[j], maximumGapIndex_subject[j]);
 	  /*double openNewGapValue=dp_table_prev_col[j]+c_gapOpen + c_gapExtension;
 	  double maxGapExtendedValue=maximumGapValue[j]+c_gapExtension;
 	  //check to update
@@ -231,14 +236,14 @@ void OverlapAlignment::align()
 	  //  {	    //if cell above has a greater value 
 	      
 	  //  compval = maximumGapValue[j];		//set compval to that square
-	  c_traceback_table->SetTableEntry(i, j, LEFT, i-maximumGapIndex[j]);//[i+j*(lenP+1)].SetLinks(LEFT);
+	  c_traceback_table->SetTableEntry(i, j, LEFT, i-maximumGapIndex_subject[j]);//[i+j*(lenP+1)].SetLinks(LEFT);
 	  //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(i-maximumGapIndex[j]);
 	      // }
 	      //cout<<"maximumGapValue[j]:"<<maximumGapValue[j]<<",";
 	      //cout<<"campval after rowGap:"<<compval<<";";
 
 	  //this is the pattern/column gap, we keep it same as we are doing with the whole dp table
-	  gm->GapValue(c_traceback_table, i,j,true, dp_table_curr_col[j-1], maximumGapValue_pattern, maximumGapIndex_pattern);
+	  c_gm->GapValue(c_traceback_table, i,j,true, dp_table_curr_col[j-1], maximumGapValue_pattern, maximumGapIndex_pattern);
 	  /*for(int k=j-1; k>0; --k) 
 	    {		//check all sub columns
 				
@@ -252,7 +257,7 @@ void OverlapAlignment::align()
 		  c_traceback_table->SetTableEntry(i,j, UP, j-k);
 		}
 		}	*/
-	  if(compVal<maximumGapValue_pattern)
+	  if(compval<maximumGapValue_pattern)
 	    {
 	      //set compval to that square
 	      compval=maximumGapValue_pattern;
@@ -353,6 +358,6 @@ void OverlapAlignment::align()
    delete [] maximumGapValue_subject;
   delete [] maximumGapIndex_subject;
 
-  delete gm;
+  //delete gm;
   //traceback_table will be deleted upon destruction
 }//end of the localAlign

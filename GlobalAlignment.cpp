@@ -119,7 +119,7 @@ void GlobalAlignment::align()
   double* dp_table_prev_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
   double* dp_table_curr_col=new double[(lenS+1)];//one extra on this, to deal with the beging of the column
 
-  GapModel* gm=new AffineGapModel(c_gapOpen, c_gapExtension);
+  //GapModel* gm=new AffineGapModel(c_gapOpen, c_gapExtension);
 
   //here we keep two columns, to effieciently and easily manipulate the column. it cold be only one
 
@@ -224,7 +224,7 @@ void GlobalAlignment::align()
 	  //for(int k = i-1; k > 0; --k) 
 	  // {		//check all sub rows
 	  
-	  gm->GapValue(c_traceback_table, i, j, false, dp_table_prev_col[j], maximumGapValue_subject[j], maximumGapIndex_subject[j]);
+	  c_gm->GapValue(c_traceback_table, i, j, false, dp_table_prev_col[j], maximumGapValue_subject[j], maximumGapIndex_subject[j]);
 	  /*double openNewGapValue=dp_table_prev_col[j]+c_gapOpen + c_gapExtension;
 	  double maxGapExtendedValue=maximumGapValue[j]+c_gapExtension;
 	  //check to update
@@ -252,7 +252,7 @@ void GlobalAlignment::align()
 
 	  //***********pattern gaps (gaps on the patter strings, columns)***********
 	  //this is the column across, we keep it same as we are doing with the whole dp table
-	  gm->GapValue(c_traceback_table, i, j, true, dp_table_curr_col[j-1], maximumGapValue_pattern, maximumGapIndex_pattern);
+	  c_gm->GapValue(c_traceback_table, i, j, true, dp_table_curr_col[j-1], maximumGapValue_pattern, maximumGapIndex_pattern);
 
 	  /*for(int k=j-1; k>0; --k) 
 	    {		//check all sub columns
@@ -345,6 +345,6 @@ void GlobalAlignment::align()
   delete[] dp_table_curr_col;
    delete [] maximumGapValue_subject;
   delete [] maximumGapIndex_subject;
-  delete gm;
+  //delete gm;
   //traceback_table will be deleted upon destruction
 }//end of the localAlign

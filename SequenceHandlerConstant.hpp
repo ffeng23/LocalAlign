@@ -16,9 +16,11 @@ using namespace std;
 
 void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString>& _vecReverse, vector<SequenceString>& _vecSeq, 
 		     ScoreMatrix* _sm, const double& _gapOpen, const double& _gapExtension,
-		     const double& _mismatchRateThreshold, const unsigned _minmumOverlapLength, const unsigned int& _offsetForward, const unsigned int& _offsetReverse, 
+		      const double& _mismatchRateThreshold, const unsigned _minmumOverlapLength, /*const unsigned int& _offsetForward, const unsigned int& _offsetReverse,*/ 
 		     const string& _mapBoth_fname, const string& _mapForward_fname,
-		     const string& _mapReverse_fname, const string& _mapNone_fname); 
+		      const string& _mapReverse_fname, const string& _mapNone_fname,
+		      const string& _mapCrossOver_fname, const string& _mapBreakOutsideCon_fname
+		      ); 
 
 
 /*void SetUpTrimFlag(const bool& _f);*/

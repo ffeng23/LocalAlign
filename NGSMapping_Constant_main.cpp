@@ -13,6 +13,7 @@
 #include "OverlapAlignment.hpp"
 #include "FastaHandler.hpp"
 #include "SequenceHandlerConstant.hpp"
+#include "SequenceHandlerCommon.hpp"
 using namespace std;
 
 static void printUsage(int argc, char* argv[]);
@@ -20,10 +21,10 @@ static void parseArguments(int argc, char **argv, const char *opts);
 static int lookUpScoreMatrix(const string* _scoreMatrixNameArray,const int& len, const string& scoreMatrixName);
 
 //all file are in fasta format
-static string adaptorFile_name("454_adaptors.fa"); //the input file for adaptor
-static string barcodeFile_name("454_barcodes.fa");//input ifle for barcode
-static string forwardFile_name("IgH_CH1_lib.fas");//input ifle for forward constant 
-static string reverseFile_name("primer_reverseUPM.fa");//input ifle for reverse UPM
+//static string adaptorFile_name("454_adaptors.fa"); //the input file for adaptor
+//static string barcodeFile_name("454_barcodes.fa");//input ifle for barcode
+static string forwardFile_name("HumanIGConstant_Lib.fas");//input ifle for forward constant 
+static string reverseFile_name("primers_Nested_UPM_Reverse");//input ifle for reverse UPM
 static string sequenceFile_name;//input file for sequence data
 
 static double MismatchRateThreshold=0.8; //not too many mismatch 
@@ -33,23 +34,17 @@ static unsigned int MinimumOverlapLength=10;//not too short
 unsigned int OffsetForward=10;//###10 might too big????
 unsigned int OffsetReverse=10;//
 
-static string scoreMatrixName="nuc44"; //name as an input for specifing the name of the score matrix. for example nuc44
+static string scoreMatrixName="nuc44HP"; //name as an input for specifing the name of the score matrix. for example nuc44
 
-/*static enum SeqType
-  {
-    AminoAcid,
-    Nucleotide
-  } ; //by default
-*/
-static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1", "tsm2"};
+static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1", "tsm2", "nuc44HP"};
 
-static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1, &tsm2};
+static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1, &tsm2, &nuc44HP};
 
 static double scale=1; //this is the one on top of matrix, the programe will run score and use the 
 //matrix specified scale first and then apply the scale set by this one.
 
-static double gapopen=-8;
-static double gapextension=-8;
+static double gapopen=-15;
+static double gapextension=-10;
 static bool gapextensionFlag=false;
 
 //static int trim=0;
@@ -59,7 +54,7 @@ int main(int argc, char* argv[])
 {
   //for parsing commandline arguement
 
-  const char *opts = "hva:b:f:r:g:e:m:s:k:n:p:q:l:";
+  const char *opts = "hvf:r:g:e:m:s:k:n:p:q:l:";
   //a: the input file name adaptor
   //b: the input file name barcode
   //f: the input file name forward primer
@@ -80,8 +75,7 @@ int main(int argc, char* argv[])
   //   always by isotype
 
   parseArguments(argc, argv, opts);
-  
-  
+    
   if(sequenceFile_name.size()==0)
     {
       cout<<"please specify the sequece data input fasta file name.......\n";
@@ -96,26 +90,28 @@ int main(int argc, char* argv[])
   string outputFileReverse_name=(sequenceFile_name+".mapReverse.fasta");//map reverse
   string outputFileNone_name=(sequenceFile_name+".mapNone.fasta");//map none
 
-  string outputStatFileBoth_name=(sequenceFile_name+".mapBothStat.fasta"); //the output file for mapped both files
-  string outputStatFileForward_name=(sequenceFile_name+".mapForwardStat.fasta");//map forward
-  string outputStatFileReverse_name(sequenceFile_name+".mapReverseStat.fasta");//map reverse
-  string outputStatFileNone_name(sequenceFile_name+".mapNoneStat.fasta");//map none
+  string outputCrossOverFile_name=(sequenceFile_name+".mapCrossOver.fasta"); //the output file for mapped both files
+  string outputBreakOutsideConstantFile_name=(sequenceFile_name+".mapBreakOutsideCon.fasta");//map forward
+  //string outputStatFileReverse_name(sequenceFile_name+".mapReverseStat.fasta");//map reverse
+  //string outputStatFileNone_name(sequenceFile_name+".mapNoneStat.fasta");//map none
 
-  string outputTrimmedFile_name(sequenceFile_name+".trim.fasta");
+  //string outputCrossOverFile_name=(sequenceFile_name+".crossover.fasta");//for cross over sequences
+  //string outputBreakOutsideConstantFile_name=(sequenceFile_name+".BreakOutsideCon.fasta");
+
+  //string outputTrimmedFile_name(sequenceFile_name+".trim.fasta");
 
   cout<<"***Input parameters Summary:\n";
-  cout<<"\tAdaptor file name:\""<<adaptorFile_name<<"\".\n";
-  cout<<"\tBarcode file name:\""<<barcodeFile_name<<"\".\n";
+  //cout<<"\tAdaptor file name:\""<<adaptorFile_name<<"\".\n";
+  //cout<<"\tBarcode file name:\""<<barcodeFile_name<<"\".\n";
   cout<<"\tforward primer file name:\""<<forwardFile_name<<"\".\n";
   cout<<"\treverse primer file name:\""<<reverseFile_name<<"\".\n";
   cout<<"\tsequence data file name:\""<<sequenceFile_name<<"\".\n";
   
   cout<<"\tThe output file name : \""<<outputFileBoth_name<<"\",\""<< outputFileForward_name<<"\",\""<< outputFileReverse_name<<"\",\""
       <<outputFileNone_name<<"\";\n"
-      <<"\t\t"<<outputStatFileBoth_name<<"\",\""<< outputStatFileForward_name<<"\",\""<< outputStatFileReverse_name<<"\",\""
-      <<outputStatFileNone_name<<"\";\n\n";
-  cout<<"\t\t\""<<outputTrimmedFile_name<<"\"\n";
-  
+      << outputCrossOverFile_name<<"\",\""
+      <<outputBreakOutsideConstantFile_name<<"\";\n\n";
+    
   //look up the score matix
   int scoreMatrixIndex=lookUpScoreMatrix(supportedScoreMatrixNameArr, sizeof(supportedScoreMatrixNameArr)/sizeof(supportedScoreMatrixNameArr[0]),scoreMatrixName);
   if(scoreMatrixIndex==-1)
@@ -158,17 +154,19 @@ int main(int argc, char* argv[])
   cout<<"Reading reverse library file (UPM):"<<ReadFasta(reverseFile_name, vec_reverse_seq);
   //ProcessAdaptorSequences(adaptorFile_name, barcodeFile_name, forwardFile_name, reverseFile_name, vec_forward_seq, vec_reverse_seq);
 
-  
-  
-  //WriteFasta("forward_adaptor_sequnces_set.fa",vec_forward_seq);
-  //WriteFasta("reverse_adaptor_sequnces_set.fa",vec_reverse_seq);  
+  //reverse the Ig constant region sequence
+  for(unsigned int i=0;i<vec_forward_seq.size();i++)
+    {
+      vec_forward_seq[i]=ReverseComplement(vec_forward_seq.at(i));
+    }
 
   //SetupConstantPrimerInfo(1,forwardFile_name);
 //now we have everything, we just need to do the job, I mean mapping, here.
   MappingConstants(vec_forward_seq, vec_reverse_seq, vec_seq, 
 		  sm, gapopen, gapextension,
-		  MismatchRateThreshold, MinimumOverlapLength, OffsetForward, OffsetReverse, 
-		  outputFileBoth_name, outputFileForward_name, outputFileReverse_name,outputFileNone_name
+		   MismatchRateThreshold, MinimumOverlapLength, /*OffsetForward, OffsetReverse,*/ 
+		   outputFileBoth_name, outputFileForward_name, outputFileReverse_name,outputFileNone_name,
+		   outputCrossOverFile_name,outputBreakOutsideConstantFile_name
 		  ); 
   
 
@@ -189,13 +187,6 @@ static void parseArguments(int argc, char **argv, const char *opts)
     {
       switch(char(optchar))
 	{
-	case 'a':
-	  adaptorFile_name=optarg;
-	  break;
-
-	case 'b':
-	  barcodeFile_name=optarg;
-	  break;  
 	  
 	case 'f':
 	  forwardFile_name=optarg;

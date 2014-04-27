@@ -1,7 +1,7 @@
 #ifndef AFFINEGAPMODEL_HPP
 #define AFFINEGAPMODEL_HPP
 
-#include "pairwiseAlignment.hpp"
+//#include "pairwiseAlignment.hpp"
 #include "GapModel.hpp"
 
 class AffineGapModel:public GapModel
@@ -11,7 +11,7 @@ public:
   AffineGapModel(const double& _gopen, const double& _gextension);
 
   virtual ~AffineGapModel();
-  virtual double GapValue(TracebackTable* _tbTable, const unsigned int& _patternIndex, const unsigned int& _subjectIndex, const bool& _patternGap,
+  virtual double GapValue(const TracebackTable* _tbTable, const unsigned int& _patternIndex, const unsigned int& _subjectIndex, const bool& _patternGap,
 			  const double& _prevEntryValue,
 			  double& _MaxGapValue, unsigned int& _MaxGapIndex) const;
 

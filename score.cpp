@@ -7,6 +7,7 @@ using namespace std;
 //all matrix data are from ncbi ftp://ftp.ncbi.nih.gov/blast/matrices/
 //so far supports only BLOSUM50 and nuc4.4
 
+//********************NUC44***********************
 //the actually nuc44 matrix
 //the scale information is from matlab. not sure where this is coming from, but
 //the score are from ncbi.
@@ -39,6 +40,7 @@ const char ScoreMatrix::NucAlphabet[]={ 'A' ,  'T' ,  'G'  ,'C',   'S',   'W',  
 ScoreMatrix nuc44(nuc44Int,0.277316, ScoreMatrix::NucAlphabet,15);//again not sure where this scale come from by Matlab.
 //****************************************
 
+//*********************************************
 //BLOSUM50, aa
 //the scale information is from ncbi. not sure where this is coming from, but
 //the score are from ncbi.
@@ -79,7 +81,7 @@ ScoreMatrix blosum50(blosum50Int,log(2)/3,ScoreMatrix::AaAlphabet,24);//again no
                                            //it is from NCBI C toolkit cross reference
                                            //http://www.ncbi.nlm.nih.gov/IEB/ToolBox/C_DOC/lxr/source/data/BLOSUM50
 const char ScoreMatrix::AaAlphabet[]={'A','R','N','D','C','Q','E','G','H','I','L','K','M','F','P','S','T','W','Y','V','B','Z','X','*'};
-
+//****************************************************************
 
 
 
@@ -166,6 +168,7 @@ void ScoreMatrix::SetScaledScoreFlag(const bool& flag)
   this->_scaledScoreFlag=flag;
 }
 
+//***************************************************************
 //the tsm1 matrix
 //order is A   T   C H K
 static int tsm1Int_1d[] ={  10,  -4,  -4,  -4,  -4,
@@ -182,6 +185,7 @@ static const char tsm1Alphabet[]={ 'A' , 'C',   'H',    'K', 'T'   };
 ScoreMatrix tsm1(tsm1Int,1, tsm1Alphabet,5);//again not sure where this scale come from by Matlab.
 //***************
 
+//***************************************************
 //the tsm2 matrix
 //order is A   T   C  G
 static int tsm2Int_1d[] ={  10,  -9,  -9,  -9,
@@ -195,5 +199,40 @@ static const char tsm2Alphabet[]={ 'A' , 'T', 'C',   'G'   };
 //a two D array to the function. it is not supported. you have to know the size of
 //the dimension size except the first one.
 //of course, another alternative is to define template and then do it.
-ScoreMatrix tsm2(tsm2Int,1, tsm2Alphabet,4);//again not sure where this scale come from by Matlab.
+ScoreMatrix tsm2(tsm2Int,1, tsm2Alphabet,4);
 //this matrix is used to test the example in the reference:Barton,G. 1993. CABIO. An efficient Algorithm to locate all locally ptimal alignments between two sequences alowing for gaps. Vol 9. no.6. 1993 P729-34
+//******************************************
+
+//*************************NUC44 high penalty of MisMatch
+//the actually nuc44 matrix modified with high penalty of mismatch
+//the scale information is kept same as the original one from NUC44
+//the score are from ncbi.
+//order is A   T   G   C   S   W   R   Y   K   M   B   V   H   D   N
+static int factor=5;
+static int nuc44HPInt_1d[] ={ 5,  -4*factor,-4*factor,  -4*factor,  -4*factor, 1,   1,  -4*factor,  -4*factor,   1,    -4*factor,  -1*factor,  -1*factor,  -1*factor,  -2*factor,
+			    -4*factor,  5,  -4*factor,  -4*factor,  -4*factor,   1,  -4*factor,   1,   1,  -4*factor,  -1*factor,  -4*factor,  -1*factor,  -1*factor,  -2*factor,
+			    -4*factor, -4*factor,   5,  -4*factor,   1,  -4*factor,   1,  -4*factor,   1,  -4*factor,  -1*factor,  -1*factor,  -4*factor,  -1*factor,  -2*factor,
+			    -4*factor, -4*factor,  -4*factor,   5,   1,  -4*factor,  -4*factor,   1,  -4*factor,   1,  -1*factor,  -1*factor,  -1*factor,  -4*factor,  -2*factor,
+			    -4*factor, -4*factor,   1,   1,  -1*factor,  -4*factor,  -2*factor,  -2*factor, -2*factor,  -2*factor,  -1*factor,  -1*factor,  -3*factor,  -3*factor,  -1*factor,
+			    1,   1,  -4*factor,  -4*factor,  -4*factor,  -1*factor,  -2*factor,  -2*factor,  -2*factor,  -2*factor,  -3*factor,  -3*factor,  -1*factor,  -1*factor,  -1*factor,
+			    1,  -4*factor,   1,  -4*factor,  -2*factor,  -2*factor,  -1*factor,  -4*factor,  -2*factor,  -2*factor,  -3*factor,  -1*factor,  -3*factor,  -1*factor,  -1*factor,
+			    -4*factor,   1,  -4*factor,   1,  -2*factor,  -2*factor,  -4*factor,  -1*factor,  -2*factor,  -2*factor,  -1*factor,  -3*factor,  -1*factor,  -3*factor,  -1*factor,
+			    -4*factor,   1,   1,  -4*factor,  -2*factor,  -2*factor,  -2*factor,  -2*factor,  -1*factor,  -4*factor,  -1*factor,  -3*factor,  -3*factor,  -1*factor,  -1*factor,
+			    1,  -4*factor,  -4*factor,   1,  -2*factor,  -2*factor,  -2*factor,  -2*factor,  -4*factor,  -1*factor,  -3*factor,  -1*factor,  -1*factor,  -3*factor,  -1*factor,
+			    -4*factor,  -1*factor,  -1*factor,  -1*factor,  -1*factor,  -3*factor,  -3*factor,  -1*factor,  -1*factor,  -3*factor,  -1*factor,  -2*factor,  -2*factor,  -2*factor,  -1*factor,
+			    -1*factor,  -4*factor,  -1*factor,  -1*factor,  -1*factor,  -3*factor,  -1*factor,  -3*factor,  -3*factor,  -1*factor,  -2*factor,  -1*factor,  -2*factor,  -2*factor,  -1*factor,
+			    -1*factor,  -1*factor,  -4*factor,  -1*factor,  -3*factor,  -1*factor,  -3*factor,  -1*factor,  -3*factor,  -1*factor,  -2*factor,  -2*factor,  -1*factor,  -2*factor,  -1*factor , 
+			    -1*factor,  -1*factor,  -1*factor,  -4*factor,  -3*factor,  -1*factor,  -1*factor,  -3*factor,  -1*factor,  -3*factor,  -2*factor,  -2*factor,  -2*factor,  -1*factor,  -1*factor,
+			    -2*factor,  -2*factor,  -2*factor,  -2*factor,  -1*factor,  -1*factor,  -1*factor,  -1*factor,  -1*factor,  -1*factor,  -1*factor,  -1*factor,  -1*factor,  -1*factor,  -1*factor
+		            };
+static const int* nuc44HPInt[] ={nuc44HPInt_1d,nuc44HPInt_1d+15,nuc44HPInt_1d+30,nuc44HPInt_1d+45,nuc44HPInt_1d+60,nuc44HPInt_1d+75,
+			 nuc44HPInt_1d+90,nuc44HPInt_1d+105, nuc44HPInt_1d+120, nuc44HPInt_1d+135,nuc44HPInt_1d+150, 
+			 nuc44HPInt_1d+165, nuc44HPInt_1d+15*12,nuc44HPInt_1d+15*13, nuc44HPInt_1d+15*14 
+                };
+const char NucHPAlphabet[]={ 'A' ,  'T' ,  'G'  ,'C',   'S',   'W',   'R' ,  'Y',   'K',   'M',   'B' ,  'V' ,  'H' , 'D',   'N'};
+//the reason we have to do it this way is because we can not do it simply by passing 
+//a two D array to the function. it is not supported. you have to know the size of
+//the dimension size except the first one.
+//of course, another alternative is to define template and then do it.
+ScoreMatrix nuc44HP(nuc44HPInt,0.277316, NucHPAlphabet,15);//again not sure where this scale come from by Matlab.
+
