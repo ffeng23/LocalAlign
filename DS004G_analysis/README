@@ -1,0 +1,15 @@
+In this folder, it contains the code to run the mapping of UPM and Constant region to the sequences.
+Then, we trim the sequence to make it available for running for Matlab code of analyzing the generation probability.
+
+There is no new code for this analysis, we basically use the previous code ngsmapping_adaptor from the LocalAlign project and call it probabily.
+
+In the previous code we call this by running overlap alignment to map the 454 sequences. That is correct. since the sequence have to be started from both ends. 
+but for this project, we are dealing with Illumina. it is a bit different. 
+  1)no gapping???? (it seems this is not obsolutely true
+  2)the mapping could be in the middle of the sequence, due to the cross over read.
+  
+  so calling local alignment in the code. instead of overlap alignment
+  with much larger offset value and larger (? not very large)gap extension value.
+
+
+to call the command, please see the nohup.out.backup file for parameters.
