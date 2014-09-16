@@ -64,7 +64,7 @@ static unsigned int LookUpVectorIndex(const string& _adaptorName, vector<Sequenc
 
 void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString>& _vecReverse, vector<SequenceString>& _vecSeq, 
 		     ScoreMatrix* _sm, const double& _gapOpen, const double& _gapExtension,
-			 const double& _mismatchRateThreshold, const unsigned _minimumOverlapLength, /*const unsigned int& _offsetForward, const unsigned int& _offsetReverse,*/ 
+			 const double& _mismatchRateThreshold, const unsigned _minimumOverlapLength, const unsigned int& _offsetForward, const unsigned int& _offsetReverse, 
 		     const string& _mapBoth_fname, const string& _mapForward_fname,
 		      const string& _mapReverse_fname, const string& _mapNone_fname, const string& _mapCrossOver_fname, const string& _mapBreakOutsideCon_fname )
 {
@@ -139,8 +139,8 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	  //cout<<"\tstrSubject:"<<strSubject<<endl;
 
 	  mismatch_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
-	  //cout<<"\tcompare:"<<CompareStrings(strPattern, strSubject)<<";length():"<<strPattern.length()<<endl;
-	  //cout<<"\tmismatch_rate:"<<mismatch_rate<<endl;
+	  cout<<"\tcompare:"<<CompareStrings(strPattern, strSubject)<<";length():"<<strPattern.length()<<endl;
+	  cout<<"\tmismatch_rate:"<<mismatch_rate<<endl;
 		
 	  //check the best score and mismatch rate
 	  if(tempAS_arr[0].GetScore()>bestForwardScore&&mismatch_rate>_mismatchRateThreshold&&strPattern.length()>_minimumOverlapLength)
@@ -148,14 +148,14 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	      //we need to see the offset too, only important to the pattern, here the 
 	      //the pattern is the long one, we align the primer sequence against
 	      //the primer should be in the beginning, not too far,
-	      //if(tempAS.GetPatternIndexStart()<_offsetForward )
-	      //{//we good
+	      if(tempAS_arr[0].GetPatternIndexStart()<_offsetForward )
+	      {//we good
 		  //cout<<"\t***get one bigger"<<endl;
 		  bestForwardScore=tempAS_arr[0].GetScore();
 		  bestForwardAlign=tempAS_arr[0];//with name
 		  bestForwardIndex=j;
 		  foundForwardFlag=true;
-		  //}
+	      }
 	    }
 	}
       //cout<<"map reverse set"<<endl;

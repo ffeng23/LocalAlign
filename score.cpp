@@ -208,7 +208,7 @@ ScoreMatrix tsm2(tsm2Int,1, tsm2Alphabet,4);
 //the scale information is kept same as the original one from NUC44
 //the score are from ncbi.
 //order is A   T   G   C   S   W   R   Y   K   M   B   V   H   D   N
-static int factor=5;
+static int factor=4;
 static int nuc44HPInt_1d[] ={ 5,  -4*factor,-4*factor,  -4*factor,  -4*factor, 1,   1,  -4*factor,  -4*factor,   1,    -4*factor,  -1*factor,  -1*factor,  -1*factor,  -2*factor,
 			    -4*factor,  5,  -4*factor,  -4*factor,  -4*factor,   1,  -4*factor,   1,   1,  -4*factor,  -1*factor,  -4*factor,  -1*factor,  -1*factor,  -2*factor,
 			    -4*factor, -4*factor,   5,  -4*factor,   1,  -4*factor,   1,  -4*factor,   1,  -4*factor,  -1*factor,  -1*factor,  -4*factor,  -1*factor,  -2*factor,

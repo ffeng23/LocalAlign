@@ -59,6 +59,7 @@ unsigned int LocalAlignment::GetNumberOfAlignments()
 
 AlignmentString* LocalAlignment::GetAlignmentArr()
 {
+
   return c_alignmentArr;
 }
 
@@ -171,6 +172,9 @@ void LocalAlignment::traceBackMultiple()
     {//can only do what there are.
       c_numOfAlignments=c_path_vec.size();
     }
+  if(c_numOfAlignments==0)
+    c_numOfAlignments=1;
+
   c_alignmentArr=new AlignmentString[c_numOfAlignments];
   c_scoreArr=new double[c_numOfAlignments];
 
@@ -210,6 +214,18 @@ void LocalAlignment::traceBackMultiple()
       c_alignmentArr[i].SetScore(c_path_vec.at(i)->GetOptimalValue());
       c_scoreArr[i]=c_path_vec.at(i)->GetOptimalValue();
     }
+
+  //after set up everything, we want to set the c_alignment to the best alignment one
+c_alignment.SetPattern(c_alignmentArr[0].GetPattern(true), true);
+      c_alignment.SetPattern(c_alignmentArr[0].GetPattern(false), false);
+  
+      c_alignment.SetSubject(c_alignmentArr[0].GetSubject(true), true);
+      c_alignment.SetSubject(c_alignmentArr[0].GetSubject(false), false);
+  
+      c_alignment.SetPatternIndex(c_alignmentArr[0].GetPatternIndexStart(), c_alignmentArr[0].GetPatternIndexEnd());
+      c_alignment.SetSubjectIndex(c_alignmentArr[0].GetSubjectIndexStart(), c_alignmentArr[0].GetSubjectIndexEnd());
+      c_alignment.SetScore(c_path_vec.at(0)->GetOptimalValue());
+      c_score=c_path_vec.at(0)->GetOptimalValue();
   
   //done!!!
 }

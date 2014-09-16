@@ -53,3 +53,13 @@ string SequenceString::toString(bool _fasta)
     }
   return ss.str();
 }
+
+bool SequenceString::operator < (const SequenceString& other) const
+{
+	int ret=c_seq.compare(other.c_seq);
+	//cout<<"compare in the function:"<<ret<<endl;
+	if(ret<=0)
+		return true;
+	else
+		return false;
+}

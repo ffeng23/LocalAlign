@@ -14,4 +14,6 @@ SequenceString ReverseComplement(SequenceString& seq);
 //"abc" vs "cab" return 3
 unsigned int CompareStrings(const string& str1, const string& str2);
 
+SequenceString Reverse(SequenceString& seq);
+
 #endif

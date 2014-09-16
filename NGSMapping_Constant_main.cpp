@@ -27,11 +27,11 @@ static string forwardFile_name("HumanIGConstant_Lib.fas");//input ifle for forwa
 static string reverseFile_name("primers_Nested_UPM_Reverse");//input ifle for reverse UPM
 static string sequenceFile_name;//input file for sequence data
 
-static double MismatchRateThreshold=0.8; //not too many mismatch 
+static double MismatchRateThreshold=0.75; //not too many mismatch 
 static unsigned int MinimumOverlapLength=10;//not too short
 
 //how far we allow the alignment to be away from the ends. can not be too far, since they are supposed to be aligned on the ends.
-unsigned int OffsetForward=10;//###10 might too big????
+unsigned int OffsetForward=15;//###10 might too big????
 unsigned int OffsetReverse=10;//
 
 static string scoreMatrixName="nuc44HP"; //name as an input for specifing the name of the score matrix. for example nuc44
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 //now we have everything, we just need to do the job, I mean mapping, here.
   MappingConstants(vec_forward_seq, vec_reverse_seq, vec_seq, 
 		  sm, gapopen, gapextension,
-		   MismatchRateThreshold, MinimumOverlapLength, /*OffsetForward, OffsetReverse,*/ 
+		   MismatchRateThreshold, MinimumOverlapLength, OffsetForward, OffsetReverse, 
 		   outputFileBoth_name, outputFileForward_name, outputFileReverse_name,outputFileNone_name,
 		   outputCrossOverFile_name,outputBreakOutsideConstantFile_name
 		  ); 

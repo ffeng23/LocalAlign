@@ -118,3 +118,31 @@ SequenceString ReverseComplement(SequenceString& seq)
 
   return temp;
 }
+
+SequenceString Reverse(SequenceString& seq)
+{
+  string tempStr=seq.GetSequence();
+  SequenceString temp(seq.GetName(), "");
+  //string tempStrReturn(tempStr);
+	const char * cstr=tempStr.c_str();
+	char * cstr_ret=new char[tempStr.length()+1];
+unsigned int index1=0;
+unsigned int index2=tempStr.length()-1;
+  //cout<<"temStr (seq get sequence):"<<tempStr<<endl;
+  //cout<<"length:"<<tempStr.length()<<endl;
+  while(index2>=index1)
+    {
+	//char tempChar=tempStrReturn[index1];
+	cstr_ret[index1]=cstr[index2];
+	cstr_ret[index2]=cstr[index1];
+	index1++;
+	index2--;
+    }
+
+	cstr_ret[tempStr.length()]='\0';
+	string tempStrReturn(cstr_ret);
+  temp.SetSequence(tempStrReturn);
+	
+	delete [] cstr_ret;
+  return temp;
+}

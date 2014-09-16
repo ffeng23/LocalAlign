@@ -1,0 +1,3 @@
+This is the project to run statistical inference to estimate the generation event probability of the BCR/IGHV genes from sequencing data
+
+The first step is to run alignments and prepare the alignment data for the next step, EM step. The reason we write the C++ code is that we want the code take care of "any" data without setting too much require for the input data. So, the plan is that we run local alignment for D region alignment as Matlab original does, and alignment with fixed 

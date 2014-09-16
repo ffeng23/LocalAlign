@@ -6,6 +6,7 @@
 
 #include "OverlapAlignment.hpp"
 #include "AlignmentString.hpp"
+#include "LocalAlignment.hpp"
 
 //****global variable***********
 //variable vector will hold by isotypes the sequence stringa aligned for output
@@ -62,9 +63,15 @@ void ProcessAdaptorSequences(const string& _adaptorFile, const string& _barcodeF
   ReadFasta(_barcodeFile, barcode);
   ReadFasta(_forwardFile, g_vec_primer_isotype);
   ReadFasta(_reverseFile, g_vec_primer_upm);
+	SequenceString adaptorA;
+	SequenceString adaptorB;
+	if (adaptor.size()>2)
+	{
 
-  SequenceString adaptorA(adaptor.at(0).GetName(), adaptor.at(0).GetSequence());
-  SequenceString adaptorB(adaptor.at(1).GetName(), adaptor.at(1).GetSequence());
+	  adaptorA.SetName(adaptor.at(0).GetName()); adaptorA.SetSequence(adaptor.at(0).GetSequence());
+	  adaptorB.SetName(adaptor.at(1).GetName()); adaptorB.SetSequence(adaptor.at(1).GetSequence());
+	}
+	//else leave it to be empty strings
 
   //go combine them together
   //forward set -- with adaptorA
@@ -261,20 +268,23 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
       //forward has to be mapped to the beginning!!!
       for(unsigned int j=0;j<_vecForward.size();j++)
 	{
-	  //cout<<"forward set:"<<j<<endl;
+	  cout<<"forward set:"<<j<<endl;
 	  //cout<<_vecForward.at(j).toString()<<endl;
-	  OverlapAlignment ola (&(_vecSeq.at(i)), &(_vecForward.at(j)), _sm, _gapOpen, _gapExtension,1);
-	  tempAS=ola.GetAlignment();
-	  //cout<<"\talignment score:"<<tempAS.GetScore()<<endl;
+	  //OverlapAlignment ola (&(_vecSeq.at(i)), &(_vecForward.at(j)), _sm, _gapOpen, _gapExtension,1);
+		LocalAlignment la (&(_vecSeq.at(i)), &(_vecForward.at(j)), _sm, _gapOpen, _gapExtension,1);
+	  tempAS=la.GetAlignment();
+	  cout<<"\talignment score:"<<tempAS.GetScore()<<endl;
 	  //need to get the mismatch rate
 	  strPattern=tempAS.GetPattern(true);
 	  strSubject=tempAS.GetSubject(true);
-	  //cout<<"\tstrPattern:"<<strPattern<<endl;
-	  //cout<<"\tstrSubject:"<<strSubject<<endl;
+	  cout<<"\tstrPattern:"<<strPattern<<endl;
+	  cout<<"\tstrSubject:"<<strSubject<<endl;
 
 	  mismatch_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
 	  //cout<<"\tcompare:"<<CompareStrings(strPattern, strSubject)<<";length():"<<strPattern.length()<<endl;
-	  //cout<<"\tmismatch_rate:"<<mismatch_rate<<endl;
+	  cout<<"\tmismatch_rate:"<<mismatch_rate
+		<<";OverlapLength:"<<strPattern.length()<<";offset:"
+			<<tempAS.GetPatternIndexStart()<<endl;	//<<endl;
 		
 	  //check the best score and mismatch rate
 	  if(tempAS.GetScore()>bestForwardScore&&mismatch_rate>_mismatchRateThreshold&&strPattern.length()>_minimumOverlapLength)
@@ -296,18 +306,24 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
       //reverse side should be mapped on the end of the reads, need to reverse complement the sequence too
       for(unsigned int k=0;k< _vecReverse.size();k++)
 	{
-	  //cout<<"start doing k:"<<k<<endl;
+	  cout<<"start doing k:"<<k<<endl;
 	  SequenceString reverseComplementReverse=ReverseComplement(_vecReverse.at(k));
 	  //cout<<"after revcomp"<<endl;
-	  OverlapAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension,1);
+	  //OverlapAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension,1);
+		LocalAlignment la ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension,1);
 	  //cout<<"after alignment:"<<k<<endl;
 	  //need to get the mismatch rate
-	  tempAS=ola.GetAlignment();
+	  tempAS=la.GetAlignment();
+		cout<<tempAS.toString()<<endl;
 	  //need to get the mismatch rate
 	  strPattern=tempAS.GetPattern(true);
 	  strSubject=tempAS.GetSubject(true);
 	  mismatch_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
-	  	
+	  
+		cout<<"mismatch_rate:"<<mismatch_rate<<";score"<<tempAS.GetScore()
+			<<";OverlapLength:"<<strPattern.length()<<";offset:"
+			<<_vecSeq.at(i).GetLength()-tempAS.GetPatternIndexEnd()<<endl;
+cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempAS.GetPatternIndexEnd()<<endl;	
 	  //#check the best score
 	  if(tempAS.GetScore()>bestReverseScore&&mismatch_rate>_mismatchRateThreshold&&strPattern.length()>_minimumOverlapLength)
 	    {
@@ -324,7 +340,8 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 		}
 	    }
 	}
-
+	//done doing reverse mapping
+	//cout<<"done with reverse mapping"<<endl;
       //get trimmed original sequence
       //we will do it from reverse to forward
       string tempTrimSeq=_vecSeq.at(i).GetSequence();
@@ -332,14 +349,14 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
       unsigned tempReverseTrimIndex=tempTrimSeq.length()-1;
       if(foundReverseFlag)
 	{
-	  //cout<<"found reverse:"<<tempTrimSeq.length()<<":"<<bestReverseAlign.GetPatternIndexStart()<<endl;
+	  cout<<"found reverse:"<<tempTrimSeq.length()<<":"<<bestReverseAlign.GetPatternIndexStart()<<endl;
 	  tempTrimSeq=tempTrimSeq.substr(0, bestReverseAlign.GetPatternIndexStart());
 	  tempReverseTrimIndex=bestReverseAlign.GetPatternIndexStart();
 	}
       
       if(foundForwardFlag)
 	{
-	  //cout<<"found forward:"<<tempTrimSeq.length()<<":"<<bestForwardAlign.GetPatternIndexEnd()+1<<endl;
+	  cout<<"found forward:"<<tempTrimSeq.length()<<":"<<bestForwardAlign.GetPatternIndexEnd()+1<<endl;
 	  unsigned int tempIndex=bestForwardAlign.GetPatternIndexEnd()+1;
 	  if(tempIndex<tempReverseTrimIndex)//there are something in between
 	    {

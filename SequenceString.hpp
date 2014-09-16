@@ -20,6 +20,8 @@ public:
 
   string toString(bool _fasta=false);
 
+bool operator < (const SequenceString& other) const;
+
 private:
   string c_name;
   string c_seq;

@@ -1,0 +1,7 @@
+In this project, we try to read in the fasta sequences and then go through each sequences and then find the duplicated sequences. We don't simple remove the duplicated sequencce, but instead we count the abundence/multiplicity and output the file compatible with TCR generation probability paper.
+
+1. we read in the sequence fasta and then put into a vector in a format of sequence string
+2. sort the vector
+3. find the duplicated sequence 
+4. write output.
+
