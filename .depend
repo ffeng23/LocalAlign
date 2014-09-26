@@ -13,9 +13,20 @@ LocalAlignment.o: LocalAlignment.cpp LocalAlignment.hpp \
  pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp
+main.o: main.cpp string_ext.hpp score.hpp SequenceString.hpp \
+ LocalAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
+ AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
+ MarkovChainGapModel_454.hpp GlobalAlignment.hpp OverlapAlignment.hpp \
+ FastaHandler.hpp SequenceHandler.hpp SequenceHandlerCommon.hpp
 MarkovChainGapModel_454.o: MarkovChainGapModel_454.cpp \
  MarkovChainGapModel_454.hpp AffineGapModel.hpp GapModel.hpp \
  TracebackTable.hpp SequenceString.hpp
+NGSChecking_UPMGCG_ATG_main.o: NGSChecking_UPMGCG_ATG_main.cpp \
+ string_ext.hpp score.hpp SequenceString.hpp OverlapAlignment.hpp \
+ pairwiseAlignment.hpp AlignmentString.hpp AffineGapModel.hpp \
+ GapModel.hpp TracebackTable.hpp MarkovChainGapModel_454.hpp \
+ FastaHandler.hpp SequenceHandlerCommon.hpp \
+ SequenceHandlerCheckUPM_GCGvsATG.hpp
 NGSMapping_Adaptor_main.o: NGSMapping_Adaptor_main.cpp string_ext.hpp \
  score.hpp SequenceString.hpp OverlapAlignment.hpp pairwiseAlignment.hpp \
  AlignmentString.hpp AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
@@ -31,15 +42,20 @@ NGSMapping_PrimerDimer_main.o: NGSMapping_PrimerDimer_main.cpp \
  pairwiseAlignment.hpp AlignmentString.hpp AffineGapModel.hpp \
  GapModel.hpp TracebackTable.hpp MarkovChainGapModel_454.hpp \
  FastaHandler.hpp SequenceHandler.hpp SequenceHandlerCommon.hpp
+output.o: output.cpp
 OverlapAlignment.o: OverlapAlignment.cpp OverlapAlignment.hpp \
  pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp
-SequenceHandler.o: SequenceHandler.cpp SequenceHandler.hpp \
- SequenceHandlerCommon.hpp SequenceString.hpp score.hpp FastaHandler.hpp \
- OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
+pairwiseAlignment.o: pairwiseAlignment.cpp pairwiseAlignment.hpp \
+ score.hpp SequenceString.hpp AlignmentString.hpp AffineGapModel.hpp \
+ GapModel.hpp TracebackTable.hpp MarkovChainGapModel_454.hpp
+score.o: score.cpp score.hpp
+SequenceHandlerCheckUPM_GCGvsATG.o: SequenceHandlerCheckUPM_GCGvsATG.cpp \
+ FastaHandler.hpp SequenceString.hpp SequenceHandlerCheckUPM_GCGvsATG.hpp \
+ score.hpp OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
- MarkovChainGapModel_454.hpp
+ MarkovChainGapModel_454.hpp LocalAlignment.hpp SequenceHandlerCommon.hpp
 SequenceHandlerCommon.o: SequenceHandlerCommon.cpp \
  SequenceHandlerCommon.hpp SequenceString.hpp score.hpp
 SequenceHandlerConstant.o: SequenceHandlerConstant.cpp \
@@ -48,17 +64,12 @@ SequenceHandlerConstant.o: SequenceHandlerConstant.cpp \
  OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp LocalAlignment.hpp
+SequenceHandler.o: SequenceHandler.cpp SequenceHandler.hpp \
+ SequenceHandlerCommon.hpp SequenceString.hpp score.hpp FastaHandler.hpp \
+ OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
+ AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
+ MarkovChainGapModel_454.hpp LocalAlignment.hpp
 SequenceString.o: SequenceString.cpp SequenceString.hpp
+string_ext.o: string_ext.cpp string_ext.hpp
 TracebackTable.o: TracebackTable.cpp TracebackTable.hpp \
  SequenceString.hpp
-main.o: main.cpp string_ext.hpp score.hpp SequenceString.hpp \
- LocalAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
- AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
- MarkovChainGapModel_454.hpp GlobalAlignment.hpp OverlapAlignment.hpp \
- FastaHandler.hpp SequenceHandler.hpp SequenceHandlerCommon.hpp
-output.o: output.cpp
-pairwiseAlignment.o: pairwiseAlignment.cpp pairwiseAlignment.hpp \
- score.hpp SequenceString.hpp AlignmentString.hpp AffineGapModel.hpp \
- GapModel.hpp TracebackTable.hpp MarkovChainGapModel_454.hpp
-score.o: score.cpp score.hpp
-string_ext.o: string_ext.cpp string_ext.hpp
