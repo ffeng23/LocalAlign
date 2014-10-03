@@ -14,11 +14,11 @@ public:
   void SetName(const string& _name);
   void SetSequence(const string& _seq);
 
-  const string GetName();
-  const string GetSequence();
-  const unsigned GetLength();
+  const string GetName()const;
+  const string GetSequence()const;
+  const unsigned GetLength()const;
 
-  string toString(bool _fasta=false);
+  string toString(bool _fasta=false) const;
 
 bool operator < (const SequenceString& other) const;
 

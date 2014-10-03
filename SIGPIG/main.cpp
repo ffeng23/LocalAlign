@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "string_ext.hpp"
+#include "../string_ext.hpp"
 //#include "read_gene_info_func.hpp"
 
 //from on you need to specify the c libraries explicitly, 11/

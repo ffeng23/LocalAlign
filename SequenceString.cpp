@@ -24,23 +24,22 @@ void SequenceString::SetSequence(const string& _seq)
   //c_len=_seq.length()
 }
 
-const string SequenceString::GetName()
+const string SequenceString::GetName() const
 {
   return c_name;
 }
 
-const string SequenceString::GetSequence()
+const string SequenceString::GetSequence() const
 {
   return c_seq;
 }
 
-const unsigned int SequenceString::GetLength()
+const unsigned int SequenceString::GetLength() const
 {
   return c_seq.length();
 }
 
-
-string SequenceString::toString(bool _fasta)
+string SequenceString::toString(bool _fasta) const
 {
   ostringstream ss("");
   if(!_fasta)

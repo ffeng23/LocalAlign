@@ -15,7 +15,7 @@ AlignmentLibDir=../
 CXXFLAG=${CFLAG}
 
 
-SRCS_0=main.cpp string_ext.cpp ${AlignmentLibDir}score.cpp ${AlignmentLibDir}SequenceString.cpp ${AlignmentLibDir}AlignmentString.cpp ${AlignmentLibDir}AffineGapModel.cpp ${AlignmentLibDir}MarkovChainGapModel_454.cpp ${AlignmentLibDir}TracebackTable.cpp ${AlignmentLibDir}pairwiseAlignment.cpp ${AlignmentLibDir}OverlapAlignment.cpp ${AlignmentLibDir}GapModel.cpp ${AlignmentLibDir}FastaHandler.cpp ${AlignmentLibDir}LocalAlignment.cpp ${AlignmentLibDir}SequenceHandlerCommon.cpp ${AlignmentLibDir}GlobalAlignment.cpp
+SRCS_0=main.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}score.cpp ${AlignmentLibDir}SequenceString.cpp ${AlignmentLibDir}AlignmentString.cpp ${AlignmentLibDir}AffineGapModel.cpp ${AlignmentLibDir}MarkovChainGapModel_454.cpp ${AlignmentLibDir}TracebackTable.cpp ${AlignmentLibDir}pairwiseAlignment.cpp ${AlignmentLibDir}OverlapAlignment.cpp ${AlignmentLibDir}GapModel.cpp ${AlignmentLibDir}FastaHandler.cpp ${AlignmentLibDir}LocalAlignment.cpp ${AlignmentLibDir}SequenceHandlerCommon.cpp ${AlignmentLibDir}GlobalAlignment.cpp GenomicV.cpp genomicSegments.cpp
 
 #SRCS_1=	NGSMapping_Adaptor_main.cpp string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp TracebackTable.cpp SequenceHandlerCommon.cpp
 
