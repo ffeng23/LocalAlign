@@ -22,7 +22,7 @@
 #include "GenomicJ.hpp"
 #include "GenomicD.hpp"
 #include "GenomicV.hpp"
-#include "GenomicSegments.hpp"
+#include "genomicSegments.hpp"
 #include "LoadData.hpp"
 
 using namespace std;
