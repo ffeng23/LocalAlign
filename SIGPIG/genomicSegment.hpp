@@ -22,10 +22,15 @@ public:
   string Get_Sequence() const;
   string Get_Name() const;
   unsigned Get_GeneIndex() const;
-  unsigned Get_TotalNumberOfAlleles() const;
-  unsigned Get_AlleleNum() const;
-  
+  unsigned Get_n_alleles() const;
+  unsigned Get_Allele() const;
+  string Get_Gene() const;
 
+  void Set_Seq(const SequenceString& _seq);
+  void Set_GeneIndex(const unsigned int& _gene_index);
+  void Set_n_alleles(const unsigned int& _n_alleles);
+  void Set_Allele(const unsigned int& _allele);
+  void Set_Gene(const string& _gene); 
   /*
   //for v, we need two files, but D, J, we only need the first file containing segments
   virtual bool ReadGenomicSegments(const string& _fastaFileName, const string& _infoFileName="")=0;
@@ -33,6 +38,7 @@ public:
 //private
 private: 
   SequenceString c_seq;
+  string c_gene;//this is the gene name without allele number
   unsigned c_gene_index;
   unsigned c_n_alleles;  //this is the total number of alleles for this gene segment
   unsigned c_allele; //which allele in terms of number is this current one

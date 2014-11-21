@@ -255,10 +255,15 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	  break;
 	case 'e':
 	  gapextension=atoi(optarg);
+	  if(gapextension>0)
+	    gapextension*=-1;
+
 	  gapextensionFlag=true;
 	  break;
 	case 'g':
 	  gapopen=atoi(optarg);
+	  if(gapopen>=0)
+	    gapopen*=-1;
 	  if(!gapextensionFlag)
 	    gapextension=gapopen;
 	  break;
@@ -323,13 +328,13 @@ static void printUsage(int argc, char* argv[])
       <<"\t\t\t 1 by default. The programe first uses the scale factor coming with matrix\n"
       <<"\t\t\t  to the return score and the the scale set by this option\n\n";
 
-  cout<<"\t\t-g gapopen -- the gap open value\n"
+  cout<<"\t\t-g gapopen -- the gap open value.will be turned into negative if not\n"
       <<"\n";
 
   cout<<"\t\t-i -- set to output data by isotypes\n"
       <<"\n";
 
-  cout<<"\t\t-e gapextension -- the gap extension value\n"
+  cout<<"\t\t-e gapextension -- the gap extension value. will be turned into negative if not\n"
       <<"\n";
   cout<<"\t\t-l minimum overlap length\n"
       <<"\n"; 

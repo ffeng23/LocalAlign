@@ -7,9 +7,14 @@
 #include <string>
 
 #include "../SequenceString.hpp"
+#include "genomicSegment.hpp"
+#include "GenomicJ.hpp"
+#include "GenomicV.hpp"
+#include "GenomicD.hpp"
 
 using namespace std;
 
+/*
 //abstract class
 class Genomic_Segments
 {
@@ -34,5 +39,31 @@ private:
   unsigned c_n_alleles;  //this is the total number of alleles for this gene segment
   unsigned c_allele; //which allele in terms of number is this current one
   
-};
+  };*/
+/******here in this file, we are not doing any class, instead we simply define some functions to read the file and populate the genomic segments objects*/
+//this is the function to read all the similar things from
+//input:
+//   file name, fasta file name for gene segment sequence
+//   info filename, we need this only for geneV read, not others
+
+//Output: the pointer to the array of the segments
+//the caller doesn't initialize the array, because the caller doesn't know 
+//how many are there, so the callee will initialize the array,
+//but the caller has to clean up the memeory afterwards
+unsigned ReadGenomicV(const string& _fastaFileName, GenomicV** _gseg);
+
+//see the definition above
+
+unsigned ReadGenomicD(const string& _fastaFileName, GenomicD** _gseg);
+
+unsigned ReadGenomicJ(const string& _fastaFileName, GenomicJ** _gseg);
+
+//here we assume the name is arranged with a fix format
+//for example >Jxxxx|IGHJ1*01|Homo Sapiens|F|......
+string ParseName(const string& _seqName);
+
+string ParseGeneName(const string& _seqName);
+
+string ParseSequenceName(const string& _seqName);
+
 #endif

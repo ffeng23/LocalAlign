@@ -24,7 +24,7 @@ GenomicD::GenomicD(/*const string& _fastaFile, const string& _infoFile*/): Genom
   return true;
   }*/
 
-GenomicV::~GenomicV()
+GenomicD::~GenomicD()
 {
   //empty;
 }

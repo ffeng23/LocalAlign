@@ -17,7 +17,7 @@ void chomp_ext(string & s);
 
 //the caller has to deallocate the memory!!!
 //return the number of elements parsed
-int split_ext(const string& s, string** buf, const char& delim);
+int split_ext(const string& s, string* buf, const char& delim);
 
 //check whether the input str is a number format
 //return 1 for a good integer number or a float format with trailing zeros follow '.'
@@ -41,6 +41,11 @@ string to_lower_str(const string& s);
 //output --- vector vec, the vector contains the numbers parsed from string
 //           int, the whether there is error for the string
 int parseNumberString(const string& s, vector<int>& vec, char stopping_char1='-', char stopping_char2=':');
+
+
+//this is simply return the string class compare function, we need
+//this because we want to use it in the sort function
+bool stringCompare_ext(const string& s1, const string& s2);
 
 
 #endif

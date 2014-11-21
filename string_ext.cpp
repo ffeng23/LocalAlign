@@ -40,7 +40,7 @@ void chomp_ext(string & s)
 }
 
 //return the number of elements parsed.5
-int split_ext(const string& s, string** buf, const char& delim)
+int split_ext(const string& s, string* buf, const char& delim)
 {
   int len=0;
   
@@ -63,14 +63,14 @@ int split_ext(const string& s, string** buf, const char& delim)
       if(s[i]==delim)
 	{
 	  //len++;
-	  (*buf)[len]=s.substr(start_p,i-start_p);
+	  buf[len]=s.substr(start_p,i-start_p);
 	  start_p=i+1;
 	  //cout<<"len is "<<len<<";i is "<<i<<"buf now is :"<<(*buf)[len]<<endl;
 	  len++;
 	}
     }
   //after the run, we have to take care of the rest of string
-  (*buf)[len]=s.substr(start_p, s.length()-start_p);
+  buf[len]=s.substr(start_p, s.length()-start_p);
   return len+1;
 }
 
@@ -361,3 +361,17 @@ string to_lower_str(const string& s)
     }
   return ret_s;
 }
+
+bool stringCompare_ext(const string& s1, const string& s2)
+{
+  int ret=s1.compare(s2);
+  if(ret<=0)
+    {
+      return true;
+    }
+  else
+    {
+      return false;
+    }
+}
+

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include "../string_ext.hpp"
+
 //#include "read_gene_info_func.hpp"
 
 //from on you need to specify the c libraries explicitly, 11/
@@ -18,46 +19,76 @@
 #include "../SequenceHandler.hpp"
 #include "../AlignmentString.hpp"
 
+#include "GenomicJ.hpp"
+#include "GenomicD.hpp"
+#include "GenomicV.hpp"
+#include "GenomicSegments.hpp"
+#include "LoadData.hpp"
+
 using namespace std;
 
 static string scoreMatrixName="nuc44"; //name as an input for specifing the name of the score matrix. for example nuc44
-/*static enum SeqType
-  {
-    AminoAcid,
-    Nucleotide
-  } seqtype=Nucleotide; //by default
-*/
+
 static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1", "tsm2", "nuc44HP"};
 //tsm2: score matrix from Geoffrey Barton reference.
 
 static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1, &tsm2, &nuc44HP};
-
+double gapopen=-8;
+double gapextension=-8;
 //static double scale=1; //this is the one on top of matrix, the programe will run score and use the 
 //matrix specified scale first and then apply the scale set by this one.
 
-double gapopen=-8;
-double gapextension=-8;
-bool gapextensionFlag=false;
-//static int read_gene_sequence(const string& temp_seq, vector<string>& promoter_sequence);
+double errorCost=-4;
+string seqFileName;
+string vSegmentFileName("genomicVs_alleles.fasta");;
+string dSegmentFileName("genomicDs.fasta");
+string jSegmentFileName("genomicJs_all_curated.fasta");
 
+string outputFileNameBase;
+unsigned numberOfSeqProcessedEach=200;
+
+
+static void printUsage(int argc, char* argv[]);
+static void parseArguments(int argc, char **argv, const char *opts);
 
 int main(int argc, char* argv[])
 {
+  //for parsing commandline arguement
+
+  const char *opts = "hiv:d:j:c:s:o:n:";
+  //f: the input file name containing the fasta format gene sequence
+  //c: flag to indicate to count each gene length.
+  //o: output file name
+
+  parseArguments(argc, argv, opts);
+  
+  if(seqFileName.size()==0)
+    {
+      cout<<"please specify the seq input fasta file name.......\n";
+      cout<<"type \"./testalign -h\" for usage help\n";
+      exit(-1);
+      //printUsage(argc, argv);
+    }
+
+  if(outputFileNameBase.size()==0)
+    {
+      outputFileNameBase=seqFileName;
+    }
+  cout<<"***Input parameters Summary:\n";
+  cout<<"\tInput file name:\""<<seqFileName<<"\".\n";
+  cout<<"\tOutput file name (base):\""<<outputFileNameBase<<"\".\n";
+  cout<<"\tV gene segment file:\""<<vSegmentFileName<<"\"\n";
+  cout<<"\tD gene segment file:\""<<dSegmentFileName<<"\"\n";
+  cout<<"\tJ gene segment file:\""<<jSegmentFileName<<"\"\n";
+  cout<<"\tThe error cost: "<<errorCost<<"\n";
+  cout<<"\tThe number of sequences processed for each file: "<<numberOfSeqProcessedEach<<"\n";
+
   //testing the alignment string
   ScoreMatrix* sm= ScoreMatrixArr[0];
   char c1='A', c2='T';
 
   cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore(c1,c2)<<endl;
   
-  //aminoacid
-  
-  //SequenceString Seq1("seq1","VSPAGMASGYDPGKA");
-  //SequenceString Seq2("seq2", "IPGKATREYDVSPAG");
-
-  //SequenceString Seq1("seq1","ASGYDPGKA");
-  //SequenceString Seq2("seq2", "ATREYDVSPAG");
-
-
   //testing local alignment
   //SequenceString Seq2("seq1","AGCTAGAGACCCCAGTCTGAGGTAGA");
   //SequenceString Seq1("seq2", "AGCTAGAGACCAGCTATCTAGAGGTAGA");
@@ -67,35 +98,6 @@ int main(int argc, char* argv[])
 
   SequenceString Seq1("seq1","ATGAGGTAGA");
   SequenceString Seq2 ("seq2", "CTAGAGGTAGA");
-
-  //****the sequences from the "Geoffrey Barton reference"
-  //SequenceString Seq1("seq1","CCAATCTACTACTGCTTGCAGTACTTGT");
-  //SequenceString Seq2 ("seq2", "AGTCCGAGGGCTACTCTACTGAAC");
-
-  //SequenceString Seq1("seq1","AGACGCACTCGTTCGGGAAGTAGTCCTTGACCAGGCAGCCCACGGCGCTGTC");
-  //SequenceString Seq2 ("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTGTTCGGGGAAGTAGTCCTTGAC");
-  //SequenceString Seq2("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTCAGGAGACGAGGGGGAA");
-  //SequenceString Seq2("seq2","CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTACGTTGGGTGGTACCCAGTTAT");
-  //SequenceString Seq2("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTACGACTCACTATAGGGCAAGCAGTGGTAACAACGCAGAGTACGCGGG");
-  //SequenceString Seq1("seq1","ATCGA");
-  //SequenceString Seq2 ("seq2", "GATTGA");
-
-  //SequenceString Seq2("seq1","CGGGA");
-  //SequenceString Seq1 ("seq2", "CGGA");
-
-  //SequenceString Seq1("seq1","ATAT");
-  //SequenceString Seq2 ("seq2", "ACHKAT");
-  //SequenceString Seq1("seq","AGACGCACTGTTCGGGAAGTAGTCCTTGACCAGGCAGCCACCCATGTACTCTGCGTTGATACCACTGCTTGCCCTATAGTGAGTCGTGAGTGCGTCTCTGACGGGCTGGCAAGGCGCATAG");
-  //SequenceString Seq2("Constant","cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgagagcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgtggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcaggactctactccctcagcagcgtggtgaccgtgacctccagcaacttcggcacccagacctacacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg");
-  
-  //SequenceString Seq1("seq1","CCTATAGTGAGTCGTACGCACTCGTCTGAGCGGGCTGGCAAGGCGCATAG");
-  //SequenceString Seq2("seq2", "CCCGCGTACTCTGCGTTGTTACCACTGCTTGCCCTATAGTGAGTCGT");
-
-  //SequenceString Seq1("seq1", "AGTGCGTCAGGGACGAGGGGGTGGATTCACCCATGTACTCTGCGTTGATACCACTGCTTGCCCTATAGTGAGTCGTACGCACTCGTCTGANCGGGCTGGCAAGGCGCATAG");
-  //SequenceString Seq2("IgMCH1", "CTGGAAGAGGCACGTTCTTTTCTTTGTTGCCGTTGGGGTGCTGGACTTTGCACACCACGTGTTCGTCTGTGCCCTGCATGACGTCCTTGGAAGGCAGCAGCACCTGTGAGGTGGCTGCGTACTTGCCCCCTCTCAGGACTGATGGGAAGCCCCGGGTACTGCTGATGTCAGAGTTGTTCTTGTATTTCCAGGACAAAGTGATGGAGTCGGGAAGGAAGTCCTGTGCGAGGCAGCCAACGGCCACGCTGCTCGTATCCGACGGGGAATTCTCACAGGAGACGAGGGGGAAAAGGGTTGGGGCGGATGCACTCC");
-  //SequenceString Seq2("IgGCH1", "CAACTCTCTTGTCCACCTTGGTGTTGCTGGGCTTGTGATTCACGTTGCAGGTGTAGGTCTGGGTGCCCAAGCTGCTGGAGGGCACGGTCACCACGCTGCTGAGGGAGTAGAGTCCTGAGTACTGTAGGACAGCCGGGAAGGTGTGCACGCCGCTGGTCAGGGCGCCTGAGTTCCACGACACCGTCACCGGTTCGGGGAAGTAGTCCTTGACCAGGCAGCCCAGGGCCGCTGTGCCCCCAGAGGTGCTCCTGGAGCAGGGCGCCAGGGGGAAGACCGATGGGCCCTTGGTGGAAG");
-  //SequenceString Seq2("IgA1", "CTGGGCAGGGCACAGTCACATCCTGGCTGGGATTCGTGTAGTGCTTCACGTGGCATGTCACGGACTTGCCGGCTAGGCACTGTGTGGCCGGCAGGGTCAGCTGGCTGCTCGTGGTGTACAGGTCCCCGGAGGCATCCTGGCTGGGTGGGAAGTTTCTGGCGGTCACGCCCTGTCCGCTTTCGCTCCAGGTCACACTGAGTGGCTCCTGGGGGAAGAAGCCCTGGACCAGGCAGGCGATGACCACGTTCCCATCTGGCTGGGTGCTGCAGAGGCTCAGCGGGAAGACCTTGGGGCTGGTCGGGGATG");
-  //SequenceString Seq2("IgD1", "CTGGCCAGCGGAAGATCTCCTTCTTACTCTTGCTGGCGGTGTGCTGGACCACGCATTTGTACTCGCCTTGGCGCCACTGCTGGAGGGGGGTGGAGAGCTGGCTGCTTGTCATGTAGTAGCTGTCCCGTCTTTGTATCTCAGGGAAGGTTCTCTGGGGCTGGCTCTGTGTCCCCATGTACCAGGTGACAGTCACGGACGTTGGGTGGTACCCAGTTATCAAGCATGCCAGGACCACAGGGCTGTTATCCTTTGGGTGTCTGCACCCTGATATGATGGGGAACACATCCGGAGCCTTGGTGGGTG");
 
   cout<<"showing sequence string\n"<<Seq1.toString()<<Seq2.toString()<<endl;
 
@@ -164,7 +166,196 @@ int main(int argc, char* argv[])
   */
   cout<<"writing output........."<<endl;
 
+  //start doing the reading of genomic segments
+  //first we need to declare the genomic segments
+  GenomicV* genV=NULL;
+  GenomicJ* genJ=NULL;
+  GenomicD* genD=NULL;
+  
+  unsigned totalNumJ=  ReadGenomicJ("genomicJs_all_curated.fasta",&genJ);
+  
+  cout<<totalNumJ<<" J genomic segments are read in."<<endl; 
+
+  
+  unsigned totalNumD=  ReadGenomicD("genomicDs.fasta",&genD);
+  
+  cout<<totalNumD<<" D genomic segments are read in."<<endl; 
+
+  unsigned totalNumV=  ReadGenomicV("genomicVs_alleles.fasta",&genV);
+  
+  cout<<totalNumV<<" V genomic segments are read in."<<endl; 
+
+
+  //now testing load data
+  vector<SequenceString> data_vec;
+  vector<string> header_vec;
+  vector<unsigned> count_vec;
+  unsigned totalNumSequences=LoadData("sample.data", header_vec, data_vec, count_vec);
+  cout<<"Load Data: "<<totalNumSequences<<" sequences were read"<<endl;
+  
+  cout<<"header vector"<<endl;
+  for(unsigned int i=0;i<header_vec.size();i++)
+    {
+      cout<<"\t"<<i<<":"<<header_vec.at(i)<<endl;
+    }
+
+  cout<<"count vector"<<endl;
+  for(unsigned int i=0;i<count_vec.size();i++)
+    {
+      cout<<"\t"<<i<<":"<<count_vec.at(i)<<endl;
+    }
+  
+  cout<<"sequence vector"<<endl;
+  for(unsigned int i=0;i<data_vec.size();i++)
+    {
+      cout<<"\t"<<i<<":"<<data_vec.at(i).toString()<<endl;
+    }
+
+  //testing parse field function
+  cout<<"Testing parsefield function:\n";
+  unsigned N_read=data_vec.size();
+  vector<SequenceString>all_Sequences=data_vec;
+  unsigned Read_Length=ParseField(header_vec, "Read_Length");
+  cout<<"\tread length:"<<Read_Length<<endl;
+  cout<<"\tnumber of read:"<<N_read<<endl;
+
+  //clean up
+  cout<<"Clean up the memories....."<<endl;
+  if(genV!=NULL)
+    delete [] genV;
+  if(genD!=NULL)
+    delete [] genD;
+  if(genJ!=NULL)
+    delete [] genJ;
+
   cout<<"Done!!!"<<endl;
 
   return 0;
 }
+
+
+static void parseArguments(int argc, char **argv, const char *opts)
+{
+  int optchar;
+
+  while ((optchar = getopt(argc, argv, opts)) != -1)
+    {
+      switch(char(optchar))
+	{
+	case 's':
+	  seqFileName=optarg;
+	  break;
+
+	case 'v':
+	  vSegmentFileName=optarg;
+	  break;  
+
+	case 'd':
+	  dSegmentFileName=optarg;
+	  break;
+
+	case 'j':
+	  jSegmentFileName=optarg;
+	  break;
+	  
+	case 'o':
+	  outputFileNameBase=optarg;
+	break;
+
+	case 'n':
+	  numberOfSeqProcessedEach=atoi(optarg);
+	  break;
+	case 'c':
+	  errorCost=atoi(optarg);
+	  errorCost*=-1;
+	  break;
+	  /*case 'e':
+	  gapextension=atoi(optarg);
+	  if (gapextension>0)
+	    gapextension*=-1;
+	  gapextensionFlag=true;
+	  break;
+	case 'g':
+	  gapopen=atoi(optarg);
+	  if(gapopen>0)
+	    gapopen*=-1;
+	  if(!gapextensionFlag)
+	    gapextension=gapopen;
+	  break;
+	  */
+	case '?':
+	  /*if(optopt == 't')
+	    ;//cout<<"option"<<optopt<<" requires an argument.\n"<<endl;
+	    else*/
+	  if(isprint(optopt))
+	    {
+	      cout<<"Unknown option "<<optopt<<endl;
+	    }
+	  else
+	    cout<<"Unknown option character"<<endl;
+	
+	case 'i':  
+	case 'h': // usage or unknown
+	default:
+	  printUsage(argc, argv);
+	  exit(-1);
+	}
+    }
+}
+
+
+static void printUsage(int argc, char* argv[])
+{
+  cout<<"Usage:\n";
+  cout<<"\t"<<argv[0]<<"-s sequence inputfile [-v gene segment file] \n" 
+      <<"\t [-d D gene segment inputfile] [-j J gene segment file] \n"
+      <<"\t [-o base output filename] [-n number of sequences processed for each file] [-c error cost] \n"
+    //<<"\t [-k scale] [-g gapopen panelty] [-e gap extension]\n"
+    // <<"\t [-n number of local alignment returned]"
+    ;
+
+  cout<<"\t\t-s filename -- the sequence file as the input \n"
+      <<"\n";
+
+  cout<<"\t\t-v/d/j filename -- the V/D/J gene segment files, by default, \n"
+      <<"\t\t \"genomicVs_alleles.fasta\", \"geneomicJs_all_curated.fasta\" and "
+      <<"\t\t \"genomicDs.fasta\""
+      <<"\n";
+
+  cout<<"\t\t-o filename -- the files contains output alignments. this is \n"
+      <<"\t\t the base name. By default, it is the name of the input file.\n"
+      <<"\t\t will also be suffixed by the numbers based on the total number of sequences\n"
+      <<"\t\t as well as the number of processed for each file (-n option)\n"
+      <<"\n";
+  
+  cout<<"\t\t-n number -- the number of sequences processed by each file\n"
+      <<"\n";
+  /*
+  cout<<"\t\t-a  -- the type of alignment a for protein alignment, aa; \n"
+      <<"\t\t\t without this one, it is by default doing nucleotide alignment.\n"
+      <<"\t\t\t  This type decides which default matrix will be used\n\n";
+
+  cout<<"\t\t-k scale -- the scale factor used to set the returned score to the correct unit,\n"
+      <<"\t\t\t 1 by default. The programe first uses the scale factor coming with matrix\n"
+      <<"\t\t\t  to the return score and the the scale set by this option\n\n";
+  */
+  cout<<"\t\t-c error cost -- the cost for a miss match. will be turned into negative if not\n"
+      <<"\n";
+  /*  cout<<"\t\t-e gapextension -- the cost to open a gap.\n"
+      <<"\t\t\t -8 by default. The gap value has to negative.\n"
+      <<"\t\t\t if a non-negative value is specified, it will be\n"
+      <<"\t\t\t turned into negative (by being multiplied by -1)\n"
+      <<"\n";
+  */
+  cout<<"\t\t-h -- help\n";
+  cout<<"\n\t\tv0.1 this code is used to do the alignment\n"
+    <<"\t\t\t @10/20/2014\n"
+     ;
+
+  //cout<<"\n\t**************************"<<endl;
+  cout<<"\t\t\t*********by Feng @ BU 2014\n"; 
+
+
+  exit(-1);
+}
+

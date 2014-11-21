@@ -74,8 +74,8 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
   //now we need to prepare the output vector, now we will prepare the outfile for each entry in _vecForward
   //they are the alleles for different isotypes (IgG/M), different subtypes (IgG1/2/3/4) and alleles IgG1*01/*02/*03, etc
   //
-  vector<SequenceString>* pt_vec_mapBoth=new vector<SequenceString>[_vecForward.size()];
-  vector<SequenceString>* pt_vec_mapForward=new vector<SequenceString>[_vecForward.size()];
+  vector<SequenceString>* pt_vec_mapBoth=new vector<SequenceString>[_vecForward.size()+1]; //one more for holding unknown isotype
+  vector<SequenceString>* pt_vec_mapForward=new vector<SequenceString>[_vecForward.size()+1];//one more for holding unkown isotype
   vector<SequenceString> vec_mapReverse;
   vector<SequenceString> vec_mapNone;
   
@@ -193,7 +193,7 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	}
 
       //cout<<"Done with mapping:i="<<i<<endl;
-      //###done with mapping, now we need to check out primer dimer
+      //###done with mapping, now we need to check out constant region
       
 
       //for constant region, we only need to get the constant alignment and will write where the constant breaks
@@ -446,7 +446,7 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	      <<":"<<bestReverseAlign.GetSubjectIndexEnd();
 	    tempLstF.SetName(ss.str());
 	  }
-	else
+	else  //not crossover flag
 	  {
 	    if(foundBreakOutsideConstantFlag)
 	      {
@@ -457,25 +457,29 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 
 		tempLstF.SetName(ss.str());
 	      }
-	    else
+	    else  //'if' foundBreakOutsideConstantFlag
 	      {
 		if(foundForwardFlag)
 		  {
 		    unsigned int found=LookUpVectorIndex(tempLstF.GetName(), _vecForward);
 		    if(foundReverseFlag)
 		      {
+
 			//check to see whether we need to store the data by isotype
 			//if(g_by_isotype_flag)
 			//	{
 			
 			//cout<<"\t**********writing to vec now"<<found<<endl;
+
+			//here we always store by isotype
 			if(((signed)found) != -1)//string::npos)
 			  {
 			    p_vec_map=&pt_vec_mapBoth[found];  //g_vec_mapBoth is initilized in the processingAdaptor function above
 			  }
 			else
 			  {
-			    cout<<"***ERROR:Can not find the forward primer name, something is wrong"<<endl;
+			    cout<<"***WARNING:Can not find the forward primer name, something is wrong"<<endl;
+			    p_vec_map=&pt_vec_mapBoth[_vecForward.size()];
 			  }
 			stringstream ss;
 			ss<<tempLstF.GetName()<<":"<<bestForwardAlign.GetSubjectIndexStart()<<":"
@@ -493,6 +497,7 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 			else
 			  {
 			    cout<<"***ERROR:Can not find the forward primer name, something is wrong"<<endl;
+			    p_vec_map=&pt_vec_mapForward[_vecForward.size()];
 			  }
 			stringstream ss;
 			ss<<tempLstF.GetName()<<":"<<bestForwardAlign.GetSubjectIndexStart()<<":"
@@ -525,14 +530,20 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	    string t_fileName;
 	  //cout<<"i round:"<<i<<endl;
 	  //mapBoth
-	  for(unsigned int s=0;s<_vecForward.size();s++)
+	  for(unsigned int s=0;s<=_vecForward.size();s++)
 	    {
 	      if(pt_vec_mapBoth[s].size()>0)
 		{
 		  //cout<<"\t------writing files at i-----:"<<s<<endl;
 		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
-		  		  
-		  t_fileName=_mapBoth_fname+ _vecForward.at(s).GetName();
+		  if(s<_vecForward.size())
+		    {
+		      t_fileName=_mapBoth_fname+ _vecForward.at(s).GetName();
+		    }
+		  else
+		    {
+		      t_fileName=_mapBoth_fname+ "notFoundIsotype";
+		    }
 		  WriteFasta(t_fileName, pt_vec_mapBoth[s],100, ofstream::app);
 		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
 		  pt_vec_mapBoth[s].clear();
@@ -553,8 +564,15 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 		{
 		  //cout<<"\t------writing files at i-----:"<<s<<endl;
 		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
-		  		  
-		  t_fileName=_mapForward_fname+ _vecForward.at(s).GetName();
+		  if(s<_vecForward.size())
+		    {
+		      t_fileName=_mapForward_fname+ _vecForward.at(s).GetName();
+		    }
+		  else
+		    {
+		      t_fileName=_mapForward_fname+ "notFoundIsotype";
+		    }
+		  // t_fileName=_mapForward_fname+ _vecForward.at(s).GetName();
 		  WriteFasta(t_fileName, pt_vec_mapForward[s],100, ofstream::app);
 		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
 		  pt_vec_mapForward[s].clear();
@@ -638,8 +656,16 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 		{
 		  //cout<<"\t------writing files at i-----:"<<s<<endl;
 		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		 if(s<_vecForward.size())
+		    {
+		      t_fileName=_mapBoth_fname+ _vecForward.at(s).GetName();
+		    }
+		  else
+		    {
+		      t_fileName=_mapBoth_fname+ "notFoundIsotype";
+		    }
 		  		  
-		  t_fileName=_mapBoth_fname+ _vecForward.at(s).GetName();
+		 // t_fileName=_mapBoth_fname+ _vecForward.at(s).GetName();
 		  WriteFasta(t_fileName, pt_vec_mapBoth[s],100, ofstream::app);
 		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
 		  pt_vec_mapBoth[s].clear();
@@ -662,8 +688,16 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 		{
 		  //cout<<"\t------writing files at i-----:"<<s<<endl;
 		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		 if(s<_vecForward.size())
+		    {
+		      t_fileName=_mapForward_fname+ _vecForward.at(s).GetName();
+		    }
+		  else
+		    {
+		      t_fileName=_mapForward_fname+ "notFoundIsotype";
+		    }
 		  		  
-		  t_fileName=_mapForward_fname+ _vecForward.at(s).GetName();
+		 // t_fileName=_mapForward_fname+ _vecForward.at(s).GetName();
 		  WriteFasta(t_fileName, pt_vec_mapForward[s],100, ofstream::app);
 		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
 		  pt_vec_mapForward[s].clear();

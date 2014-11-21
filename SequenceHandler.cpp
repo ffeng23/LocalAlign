@@ -115,7 +115,8 @@ void ProcessAdaptorSequences(const string& _adaptorFile, const string& _barcodeF
   //initialize the vectors
   if(g_by_isotype_flag)
     {
-      for(unsigned int i=0;i<g_vec_primer_isotype.size();i++)
+      for(unsigned int i=0;i<=g_vec_primer_isotype.size();i++)  //here we initialize the vector one more than the isotypes,
+	//since we need to holding the one that could not found a match to any isotype specified in the primer, just in case!!!
 	{
 	  vector<SequenceString> t_both;
 	  g_vec_mapBoth.push_back(t_both);
@@ -200,7 +201,7 @@ static unsigned int LookUpVectorIndex(const string& _adaptorName, vector<Sequenc
 	}
     }
   cout<<"***ERROR: can not find which catogory to store data (IgM/G/D)"<<endl;
-  return -1;
+  return (unsigned)-1;
 }
 
 
@@ -256,7 +257,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 	}
       double bestForwardScore= -10000000;
       AlignmentString	bestForwardAlign;
-      double bestReverseScore= -1000000;
+      double bestReverseScore= -10000000;
       AlignmentString bestReverseAlign;
       
       unsigned int 	bestForwardIndex=0;
@@ -301,7 +302,8 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 		  foundForwardFlag=true;
 		}
 	    }
-	}
+	}//end of map forward
+
       //cout<<"map reverse set"<<endl;
       //reverse side should be mapped on the end of the reads, need to reverse complement the sequence too
       for(unsigned int k=0;k< _vecReverse.size();k++)
@@ -323,7 +325,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 		cout<<"mismatch_rate:"<<mismatch_rate<<";score"<<tempAS.GetScore()
 			<<";OverlapLength:"<<strPattern.length()<<";offset:"
 			<<_vecSeq.at(i).GetLength()-tempAS.GetPatternIndexEnd()<<endl;
-cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempAS.GetPatternIndexEnd()<<endl;	
+		cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempAS.GetPatternIndexEnd()<<endl;	
 	  //#check the best score
 	  if(tempAS.GetScore()>bestReverseScore&&mismatch_rate>_mismatchRateThreshold&&strPattern.length()>_minimumOverlapLength)
 	    {
@@ -342,8 +344,9 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 	}
 	//done doing reverse mapping
 	//cout<<"done with reverse mapping"<<endl;
+
       //get trimmed original sequence
-      //we will do it from reverse to forward
+      //we will do it from reverse side to forward side
       string tempTrimSeq=_vecSeq.at(i).GetSequence();
       //cout<<"i:"<<i<<endl;
       unsigned tempReverseTrimIndex=tempTrimSeq.length()-1;
@@ -371,7 +374,7 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 	    }
 	  
 	}
-      //cout<<"****DONE"<<endl;
+      //cout<<"****DONE wit trimming"<<endl;
       
       //vec_trimmed.push_back(SequenceString(_vecSeq.at(i).GetName(), tempTrimSeq));
       //cout<<"Done with mapping"<<endl;
@@ -546,7 +549,8 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 		names(tempStrSet)[1]=tempLstF$desc;
 		mappedReadsBoth<-append(mappedReadsBoth, tempStrSet);
 		tempStrSet<-DNAStringSet( tempLstR$seq);
-		names(tempStrSet)[1]=tempLstR$desc;*/
+		names(tempStrSet)[1]=tempLstR$desc;
+	      */
 	      
 	      //check to see whether we need to store the data by isotype
 	      if(g_by_isotype_flag)
@@ -560,8 +564,15 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 		      if(g_trim_flag)
 			p_vec_map_trim=&g_vec_mapBoth_trim.at(found);
 		    }
+		  else  //we are required to output the by isotype, but could not found the isotype for this one, what we need to do?
+		    {
+		      p_vec_map=&g_vec_mapBoth.at(g_vec_primer_isotype.size());
+		      p_vec_len_map=&g_vec_len_mapBoth.at(g_vec_primer_isotype.size());
+		      if(g_trim_flag)
+			p_vec_map_trim=&g_vec_mapBoth_trim.at(g_vec_primer_isotype.size());
+		    }
 		}
-	      else
+	      else //for 'if' by isotype
 		{
 		  p_vec_map=&g_vec_mapBoth.at(0);
 		  p_vec_len_map=&g_vec_len_mapBoth.at(0);
@@ -572,21 +583,21 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 	       
 	      //mappedBothLen_arr<-c(mappedBothLen_arr,tempLen);
 	    }
-	  else
+	  else //for 'if' reverse flag, this means we are only map forward
 	    {
 	      /*tempStrSet<-DNAStringSet(ff[[i]]);
-			names(tempStrSet)[1]=names(ff)[i];
-			mappedReadsForward<-append(mappedReadsForward, tempStrSet);
-			
-			tempStrSet<-DNAStringSet(tempLstF$seq);
-			names(tempStrSet)[1]=tempLstF$desc;
-			mappedReadsForward<-append(mappedReadsForward, tempStrSet);
-			
-			tempStrSet<-DNAStringSet( tempLstR$seq);
-			names(tempStrSet)[1]=tempLstR$desc;
-			mappedReadsForward<-append(mappedReadsForward, tempStrSet);
+		names(tempStrSet)[1]=names(ff)[i];
+		mappedReadsForward<-append(mappedReadsForward, tempStrSet);
+		
+		tempStrSet<-DNAStringSet(tempLstF$seq);
+		names(tempStrSet)[1]=tempLstF$desc;
+		mappedReadsForward<-append(mappedReadsForward, tempStrSet);
+		
+		tempStrSet<-DNAStringSet( tempLstR$seq);
+		names(tempStrSet)[1]=tempLstR$desc;
+		mappedReadsForward<-append(mappedReadsForward, tempStrSet);
 	      */
-	      	      //check to see whether we need to store the data by isotype
+	      //check to see whether we need to store the data by isotype
 	      if(g_by_isotype_flag)
 		{
 		  unsigned int found=LookUpVectorIndex(tempLstF.GetName(), g_vec_primer_isotype);
@@ -598,8 +609,16 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 		      if(g_trim_flag)
 			p_vec_map_trim=&g_vec_mapForward_trim.at(found);
 		    }
+		  else //not found, we need to add to the  
+		    {
+		      p_vec_map=&g_vec_mapForward.at(g_vec_primer_isotype.size());
+		      p_vec_len_map=&g_vec_len_mapForward.at(g_vec_primer_isotype.size());
+		      if(g_trim_flag)
+			p_vec_map_trim=&g_vec_mapForward_trim.at(g_vec_primer_isotype.size());
+		  
+		    }
 		}
-	      else
+	      else //'if' by isotype
 		{
 		  p_vec_map=&g_vec_mapForward.at(0);
 		  p_vec_len_map=&g_vec_len_mapForward.at(0);
@@ -615,12 +634,13 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 	      
 	      vec_mapForwardTrim.push_back(SequenceString(_vecSeq.at(i).GetName(),tempTrimSeq));
 
-	      vec_forward_len.push_back(_vecSeq.at(i).GetSequence().length());*/
+	      vec_forward_len.push_back(_vecSeq.at(i).GetSequence().length());
+	      */
 	      //#mappedReadsForward<-c(mappedReadsForward, list(ff[[i]], tempLstF, tempLstR));
 		//	mappedForwardLen_arr<-c(mappedForwardLen_arr,tempLen);
 	    }
 	}
-	else
+	else //'if' foundForwardFlag
 	  {
 	    if(foundReverseFlag)
 	      {
@@ -668,9 +688,10 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 		
 		vec_mapReverseTrim.push_back(SequenceString(_vecSeq.at(i).GetName(),tempTrimSeq));
 		
-		vec_reverse_len.push_back(_vecSeq.at(i).GetSequence().length());*/
+		vec_reverse_len.push_back(_vecSeq.at(i).GetSequence().length());
+		      */
 	      }
-	    else
+	    else //not foundReverseFlag
 	      {
 		/*tempStrSet<-DNAStringSet(ff[[i]]);
 		names(tempStrSet)[1]=names(ff)[i];
@@ -684,7 +705,8 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 			names(tempStrSet)[1]=tempLstR$desc;
 			mappedReadsNone<-append(mappedReadsNone, tempStrSet);
 		*/
-		
+		//could not map any adaptor, so no isotype information, we don't output by isotype, 
+		//dump everything to the first one anyway.
 		p_vec_map=&g_vec_mapNone.at(0);
 		p_vec_len_map=&g_vec_len_mapNone.at(0);
 		if(g_trim_flag)
@@ -704,6 +726,8 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 	      }
 	}
 
+	//we are done with found the correct storage place
+
 	//now we need to store the data into the correct vectors/files
 	p_vec_map->push_back(tempLstSeq); 
 	p_vec_map->push_back(tempLstF);
@@ -718,8 +742,8 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 	if(i%numOfSeqsUnit==0||i==_vecSeq.size()-1) //#write once every 1000 sequences
 	{
 	  //cout<<"i round:"<<i<<endl;
-	  //mapBoth
-	  for(unsigned int s=0;s<g_vec_mapBoth.size();s++)
+	  //mapBoth first, of course!!!
+	  for(unsigned int s=0;s<=g_vec_mapBoth.size();s++)
 	    {
 	      if(g_vec_mapBoth.at(s).size()>0)
 		{
@@ -727,7 +751,12 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
 		  string t_fileName=_mapBoth_fname;
 		  if(g_by_isotype_flag)
-		    t_fileName=_mapBoth_fname+g_vec_primer_isotype.at(s).GetName();
+		    {
+		      if(s<g_vec_mapBoth.size())
+			t_fileName=_mapBoth_fname+g_vec_primer_isotype.at(s).GetName();
+		      else
+			t_fileName=_mapBoth_fname+"nonIsotype";
+		    }
 		  WriteFasta(t_fileName, g_vec_mapBoth.at(s),100, ofstream::app);
 		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
 		  g_vec_mapBoth.at(s).clear();
@@ -742,12 +771,19 @@ cout<<"length of pattern:"<<_vecSeq.at(i).GetLength()<<";alignment ends:"<<tempA
 		}
 	    }
 	  cout<<"done map both"<<endl;
+
 	  for(unsigned int s=0;s<g_vec_mapForward.size();s++)
 	    {
 	      if(g_vec_mapForward.at(s).size()>0)
 		{
 		  string t_fileName=_mapForward_fname;
 		  if(g_by_isotype_flag)
+		    {
+		      if(s<g_vec_mapBoth.size())
+			t_fileName=_mapForward_fname+g_vec_primer_isotype.at(s).GetName();
+		      else
+			t_fileName=_mapForward_fname+"nonIsotype";
+		    }
 		    t_fileName=_mapForward_fname+g_vec_primer_isotype.at(s).GetName();
 		  WriteFasta( t_fileName, g_vec_mapForward.at(s),100, ofstream::app);
 		  //#fileCounter_mpForward<-fileCounter_mpForward+1;
@@ -1168,12 +1204,28 @@ void MappingPrimerDimers(vector<SequenceString>& _vecForward, vector<SequenceStr
 		      p_vec_map=&g_vec_mapBoth.at(found);  //g_vec_mapBoth is initilized in the processingAdaptor function above
 		      
 		    }
+		  else //not fould the isotype 
+		    {
+		      p_vec_map=&g_vec_mapBoth.at(g_vec_primer_isotype.size());
+		    }
+		}
+	      else  //not by isotype
+		{
+		  p_vec_map=&g_vec_mapBoth.at(0); 
+		      
 		}
 	      
 	     
 	    }
-	  
+	  else  //not found reverse
+	    {
+	      continue;  //skip rest
+	    }
 	}
+	else  //not found forward
+	  {
+	    continue; //skip rest
+	  }
 	
 	//now we need to store the data into the correct vectors/files
 	p_vec_map->push_back(tempLstSeq); 
@@ -1195,7 +1247,13 @@ void MappingPrimerDimers(vector<SequenceString>& _vecForward, vector<SequenceStr
 		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
 		  string t_fileName=_mapBoth_fname;
 		  if(g_by_isotype_flag)
-		    t_fileName=_mapBoth_fname+g_vec_primer_isotype.at(s).GetName();
+		    {
+		      if(s<g_vec_primer_isotype.size())
+			t_fileName=_mapBoth_fname+g_vec_primer_isotype.at(s).GetName();
+		      else
+			t_fileName=_mapBoth_fname+"_notFoundIsotye";
+		     
+		    }
 		  WriteFasta(t_fileName, g_vec_mapBoth.at(s),100, ofstream::app);
 		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
 		  g_vec_mapBoth.at(s).clear();
@@ -1238,7 +1296,15 @@ void MappingPrimerDimers(vector<SequenceString>& _vecForward, vector<SequenceStr
 	  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
 	  string t_fileName=_mapBoth_fname;
 	  if(g_by_isotype_flag)
-	    t_fileName=_mapBoth_fname+g_vec_primer_isotype.at(s).GetName();
+	    {
+	      if(s<g_vec_primer_isotype.size())
+		t_fileName=_mapBoth_fname+g_vec_primer_isotype.at(s).GetName();
+	      else
+		t_fileName=_mapBoth_fname+"_notFoundIsotye";
+	      
+	    }
+
+	  //t_fileName=_mapBoth_fname+g_vec_primer_isotype.at(s).GetName();
 	  WriteFasta(t_fileName, g_vec_mapBoth.at(s),100, ofstream::app);
 	  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
 	  //g_vec_mapBoth.at(s).clear();

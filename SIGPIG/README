@@ -6,3 +6,7 @@ Organization of files
 --main.cpp, is for the general purpose testing.
 --do_VDJ_alignments.cpp, is for running alignments
 --do_probabilistic_model_fitting.cpp, is for model fitting
+
+
+Arrangement of files
+GenomicSegment.cpp hop defines the abstract class of individual genomic segment

@@ -24,7 +24,7 @@ GenomicJ::GenomicJ(/*const string& _fastaFile, const string& _infoFile*/): Genom
   return true;
   }*/
 
-GenomicV::~GenomicV()
+GenomicJ::~GenomicJ()
 {
   //empty;
 }

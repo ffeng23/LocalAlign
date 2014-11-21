@@ -367,10 +367,14 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	  break;
 	case 'e':
 	  gapextension=atoi(optarg);
+	  if (gapextension>0)
+	    gapextension*=-1;
 	  gapextensionFlag=true;
 	  break;
 	case 'g':
 	  gapopen=atoi(optarg);
+	  if(gapopen>0)
+	    gapopen*=-1;
 	  if(!gapextensionFlag)
 	    gapextension=gapopen;
 	  break;
@@ -427,7 +431,15 @@ static void printUsage(int argc, char* argv[])
       <<"\t\t\t 1 by default. The programe first uses the scale factor coming with matrix\n"
       <<"\t\t\t  to the return score and the the scale set by this option\n\n";
 
-  cout<<"\t\t-g gapopen -- the second sequence fasta filenames\n"
+  cout<<"\t\t-g gapopen -- the cost to open a gap.\n"
+      <<"\t\t\t -8 by default. The gap value has to e negative.\n"
+      <<"\t\t\t if a non-negative value is specified, it will be\n"
+      <<"\t\t\t turned into negative (by being multiplied by -1)\n"
+      <<"\n";
+  cout<<"\t\t-e gapextension -- the cost to open a gap.\n"
+      <<"\t\t\t -8 by default. The gap value has to negative.\n"
+      <<"\t\t\t if a non-negative value is specified, it will be\n"
+      <<"\t\t\t turned into negative (by being multiplied by -1)\n"
       <<"\n";
     
   cout<<"\t\t-h -- help\n";
