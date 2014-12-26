@@ -8,7 +8,7 @@ GCC = gcc
 GXX = g++
 MAKE= make
 
-CFLAG= -Wall -g -Werror -O 
+CFLAG= -Wall -g -Werror -O -lpthread
 LOADFLAG=-s -lm
 AlignmentLibDir=../
 

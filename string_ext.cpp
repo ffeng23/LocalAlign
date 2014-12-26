@@ -374,4 +374,21 @@ bool stringCompare_ext(const string& s1, const string& s2)
       return false;
     }
 }
+string flipStr(const string& _s1)
+{
+  char* temp=new char[_s1.size()+1];
+  unsigned count=0;
+  //char c;
+  //unsigned indexFromEnd=_s1.size();
+  for(unsigned i=_s1.size();i>0;i--)
+    {
+      //count=0;
+      temp[count]=_s1.at(i-1);
+      count++;
+    }
+  temp[count]='\0';
+  string newStr(temp);
+  delete [] temp;
+  return newStr;
+}
 

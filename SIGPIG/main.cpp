@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>
 
 #include "../score.hpp"
 #include "../SequenceString.hpp"
@@ -24,6 +25,7 @@
 #include "GenomicV.hpp"
 #include "genomicSegments.hpp"
 #include "LoadData.hpp"
+#include "AlignmentSettings.hpp"
 
 using namespace std;
 
@@ -45,8 +47,10 @@ string dSegmentFileName("genomicDs.fasta");
 string jSegmentFileName("genomicJs_all_curated.fasta");
 
 string outputFileNameBase;
-unsigned numberOfSeqProcessedEach=200;
+unsigned numberOfSeqProcessedEach;
 
+int numberOfThread=2;//the number of working thread, doesn't included 
+pthread_mutex_t progressMutex;
 
 static void printUsage(int argc, char* argv[]);
 static void parseArguments(int argc, char **argv, const char *opts);
@@ -55,12 +59,21 @@ int main(int argc, char* argv[])
 {
   //for parsing commandline arguement
 
-  const char *opts = "hiv:d:j:c:s:o:n:";
+  const char *opts = "hiv:d:j:c:s:o:n:t:";
   //f: the input file name containing the fasta format gene sequence
   //c: flag to indicate to count each gene length.
   //o: output file name
 
+  numberOfSeqProcessedEach=AlignmentSettings::N_per_file;
+
   parseArguments(argc, argv, opts);
+  if(numberOfThread<1)
+    {
+      cout<<"The number of working threads requested is not valid.......\n";
+      cout<<"type \""<<argv[0]<<"\" -h\" for usage help\n";
+      exit(-1);
+      
+    }
   
   if(seqFileName.size()==0)
     {
@@ -82,6 +95,8 @@ int main(int argc, char* argv[])
   cout<<"\tJ gene segment file:\""<<jSegmentFileName<<"\"\n";
   cout<<"\tThe error cost: "<<errorCost<<"\n";
   cout<<"\tThe number of sequences processed for each file: "<<numberOfSeqProcessedEach<<"\n";
+  
+  AlignmentSettings::N_per_file=numberOfSeqProcessedEach;
 
   //testing the alignment string
   ScoreMatrix* sm= ScoreMatrixArr[0];
@@ -186,7 +201,7 @@ int main(int argc, char* argv[])
   cout<<totalNumV<<" V genomic segments are read in."<<endl; 
 
 
-  //now testing load data
+  //now testing load sequence data
   vector<SequenceString> data_vec;
   vector<string> header_vec;
   vector<unsigned> count_vec;
@@ -216,10 +231,67 @@ int main(int argc, char* argv[])
   unsigned N_read=data_vec.size();
   vector<SequenceString>all_Sequences=data_vec;
   unsigned Read_Length=ParseField(header_vec, "Read_Length");
-  cout<<"\tread length:"<<Read_Length<<endl;
+  if((signed)Read_Length!=-1)
+    {
+      cout<<"\tread length:"<<Read_Length<<endl;
+    }
+  else
+    {
+      cout<<"\tread length:"<<-1<<endl;
+    }
   cout<<"\tnumber of read:"<<N_read<<endl;
 
-  //clean up
+  //determine the output file names.
+  vector<string> outFileNames;
+  outFileNames=DetermineOutputFileNames(outputFileNameBase, AlignmentSettings::N_per_file, N_read);
+
+  //now we are ready to do the alignment??
+  //first need to figure out number of output files
+  unsigned numOfOutFiles=outFileNames.size();
+
+  //declare/initialize the working threads
+  pthread_t* workThreads;
+  int ret;
+  ret = pthread_mutex_init(&progressMutex, NULL);
+      if(ret != 0) {
+	perror("mutex init failed\n");
+	exit(EXIT_FAILURE);
+      }
+
+
+  for(unsigned i=0;i<numOfOutFiles;i++) //outer for loops for the alignment
+    {
+      //determine the number of sequences
+      unsigned numOfThisFile=(N_read-i*AlignmentSettings::N_per_file);
+      
+      //allocate the threads
+      workThreads=new pthread_t[numberOfThread];
+      
+      //prepare the output
+      for(int j=0;j<numberOfThread;j++)
+	{
+	  ret =  pthread_create(workThreads[j], NULL, thread_fnc, NULL);?????
+	  if(ret != 0) {
+	    perror("pthread_create failed\n");
+	    exit(EXIT_FAILURE);
+	  }
+	}
+      
+      
+      if(numOfThisFile>AlignmentSettings::N_per_file)
+	{
+	  numOfThisFile=AlignmentSettings::N_per_file;
+	}
+      //now determine the sequences to be used in this files
+      unsigned startIndexOfSequence=i*AlignmentSettings::N_per_file;
+      startIndexOfSequence=startIndexOfSequence+0;
+      //now here is where we need to figure out the thread thing
+
+      //cleaning up the threads
+      delete[] workThreads;
+    }
+
+  //********clean up
   cout<<"Clean up the memories....."<<endl;
   if(genV!=NULL)
     delete [] genV;
@@ -269,6 +341,10 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	  errorCost=atoi(optarg);
 	  errorCost*=-1;
 	  break;
+	case 't':
+	  numberOfThread=atoi(optarg);
+	  break;
+
 	  /*case 'e':
 	  gapextension=atoi(optarg);
 	  if (gapextension>0)
@@ -328,8 +404,22 @@ static void printUsage(int argc, char* argv[])
       <<"\t\t as well as the number of processed for each file (-n option)\n"
       <<"\n";
   
-  cout<<"\t\t-n number -- the number of sequences processed by each file\n"
+  cout<<"\t\t-n number -- the number of sequences processed by each output file\n"
+      <<"\t\t\t this number is also specified in the aligment setting file.\n"
+      <<"\t\t\t so only if we want to overwrite this number, specify it here\n"
       <<"\n";
+
+  cout<<"\t\t-t number -- the number of working threads for doing the alignment\n"
+      <<"\t\t\t Be careful not to setting a number too big. Not bigger than\n"
+      <<"\t\t\t the actual physical CPUs/processors. Please run script to \n"
+      <<"\t\t\t determine the number of the physical CPUs and logical CPUs\n"
+      <<"\t\t\t (they are not the same when the hyper-threading is enabled\n"
+      <<"\t\t\t Also, you need to specify at least 1, \n"
+      <<"\t\t\t (total number of thread = main+one working thread)\n"
+      <<"\t\t\t main thread is managing, reporting, writing output, etc.\n"
+      <<"\t\t\t only the working thread(s) doing the alignments."
+      <<"\n";
+
   /*
   cout<<"\t\t-a  -- the type of alignment a for protein alignment, aa; \n"
       <<"\t\t\t without this one, it is by default doing nucleotide alignment.\n"
@@ -339,6 +429,7 @@ static void printUsage(int argc, char* argv[])
       <<"\t\t\t 1 by default. The programe first uses the scale factor coming with matrix\n"
       <<"\t\t\t  to the return score and the the scale set by this option\n\n";
   */
+
   cout<<"\t\t-c error cost -- the cost for a miss match. will be turned into negative if not\n"
       <<"\n";
   /*  cout<<"\t\t-e gapextension -- the cost to open a gap.\n"

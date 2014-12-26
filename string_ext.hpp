@@ -47,5 +47,7 @@ int parseNumberString(const string& s, vector<int>& vec, char stopping_char1='-'
 //this because we want to use it in the sort function
 bool stringCompare_ext(const string& s1, const string& s2);
 
+//this is the function to return a string with a reverse order of the char in the string
+string flipStr(const string&);
 
 #endif

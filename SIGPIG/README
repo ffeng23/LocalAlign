@@ -9,4 +9,8 @@ Organization of files
 
 
 Arrangement of files
-GenomicSegment.cpp hop defines the abstract class of individual genomic segment
+GenomicSegment.cpp hpp defines the abstract class of individual genomic
+segment
+	inherited by GenomicV, GenomicJ, GenomicD
+GenomicSegments.hpp cpp defines 3 individual methods to read in the Genomic
+gene segments. In addition, it defines necessary functions.

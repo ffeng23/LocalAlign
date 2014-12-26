@@ -390,3 +390,42 @@ unsigned ReadGenomicD(const string& _fastaFileName, GenomicD** _gseg)
 
   return totalNumber; 
 }
+
+
+void FlipSequenceString(SequenceString& _ss)
+{
+  string temp=_ss.GetSequence();
+  temp=flipStr(temp);
+    _ss.SetSequence(temp);
+}
+
+vector<string> DetermineOutputFileNames(const string& _outFileNameBase, const unsigned& _NPerFile, const unsigned& _totalNSeq)
+{
+  vector<string> vecFileNames;
+
+  unsigned NFiles;
+  if(_totalNSeq/_NPerFile*_NPerFile==_totalNSeq)
+    {
+      NFiles=_totalNSeq/_NPerFile;
+    }
+  else
+    {
+      NFiles=_totalNSeq/_NPerFile+1;
+    }
+  
+  for(unsigned i=0;i<NFiles;i++)
+    {
+      ostringstream convert;
+      convert<<i;
+      string temp(_outFileNameBase);
+      temp.append("_");
+      temp.append(convert.str());
+      temp.append(".align");
+      vecFileNames.push_back(temp);
+    }
+  return vecFileNames;
+}
+
+
+
+

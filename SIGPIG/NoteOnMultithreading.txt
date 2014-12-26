@@ -1,0 +1,30 @@
+Notes:
+1)threading in pthread is supported to run as if they the separated
+processes. So we don't have to worry about running in threads vs in
+processes. We can further to specify the scope, system scope vs. process
+scope. System scope is treating a thread as if it is a process, while process
+scope is the opposite and treat the threads with process scope to be groupped
+as if they are one process. Need to be careful that scope is implementation
+dependent. Under linux, it is always(?) system scope?.
+2)CPU/process vs. thread or logical vs. physical CPUs. This is hard to
+determine by C++. It is implementation dependent. So, we decided to go with
+the easit way. We can first determine the CPUs/processors and then input the
+number of threads as the input to the program.
+
+
+For example, consider if I run the following command on my Linux laptop:
+$ cat /proc/cpuinfo  | grep processor
+
+to find the number of actual CPU sockets being used you can run this command:
+$  cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l
+
+To show the total number of cores, you need to look at both "physical id" and
+"core id".   "core id" is the identifier for each core on a CPU socket.    If
+we run this command:
+ 
+ $ cat /proc/cpuinfo | egrep "core id|physical id" 
+
+ to show the number of cores on a system: 
+ $ cat /proc/cpuinfo | egrep "core id|physical id" | tr -d "\n" | sed
+ s/physical/\\nphysical/g | grep -v ^$ | sort | uniq | wc -l
+

@@ -5,12 +5,15 @@
 //Will be instantiated into 3 different segments V, D, J
 
 #include <string>
+#include <sstream>
 
 #include "../SequenceString.hpp"
 #include "genomicSegment.hpp"
 #include "GenomicJ.hpp"
 #include "GenomicV.hpp"
 #include "GenomicD.hpp"
+
+
 
 using namespace std;
 
@@ -65,5 +68,9 @@ string ParseName(const string& _seqName);
 string ParseGeneName(const string& _seqName);
 
 string ParseSequenceName(const string& _seqName);
+
+void FlipSequenceString(SequenceString& _ss);
+
+vector<string> DetermineOutputFileNames(const string& _outFileNameBase, const unsigned& _NPerFile, const unsigned& _totalNSeq);
 
 #endif

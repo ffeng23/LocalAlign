@@ -1,3 +1,4 @@
+Alignment.o: Alignment.cpp
 Align_with_constraints.o: Align_with_constraints.cpp \
  Align_with_constraints.hpp ../score.hpp ../SequenceString.hpp \
  ../AlignmentString.hpp ../AffineGapModel.hpp ../GapModel.hpp \
@@ -27,4 +28,4 @@ main.o: main.cpp ../string_ext.hpp ../score.hpp ../SequenceString.hpp \
  ../GlobalAlignment.hpp ../OverlapAlignment.hpp ../FastaHandler.hpp \
  ../SequenceHandler.hpp ../SequenceHandlerCommon.hpp \
  ../AlignmentString.hpp GenomicJ.hpp genomicSegment.hpp GenomicD.hpp \
- GenomicV.hpp genomicSegments.hpp LoadData.hpp
+ GenomicV.hpp genomicSegments.hpp LoadData.hpp AlignmentSettings.hpp

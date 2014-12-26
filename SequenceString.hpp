@@ -20,7 +20,7 @@ public:
 
   string toString(bool _fasta=false) const;
 
-bool operator < (const SequenceString& other) const;
+  bool operator < (const SequenceString& other) const;
 
 private:
   string c_name;

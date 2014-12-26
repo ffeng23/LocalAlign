@@ -139,8 +139,8 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	  //cout<<"\tstrSubject:"<<strSubject<<endl;
 
 	  mismatch_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
-	  cout<<"\tcompare:"<<CompareStrings(strPattern, strSubject)<<";length():"<<strPattern.length()<<endl;
-	  cout<<"\tmismatch_rate:"<<mismatch_rate<<endl;
+	  //cout<<"\tcompare:"<<CompareStrings(strPattern, strSubject)<<";length():"<<strPattern.length()<<endl;
+	  //cout<<"\tmismatch_rate:"<<mismatch_rate<<endl;
 		
 	  //check the best score and mismatch rate
 	  if(tempAS_arr[0].GetScore()>bestForwardScore&&mismatch_rate>_mismatchRateThreshold&&strPattern.length()>_minimumOverlapLength)
