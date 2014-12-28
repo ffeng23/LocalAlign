@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
       startIndexOfSequence=startIndexOfSequence+0;
       //now here is where we need to figure out the thread thing
 
-      //cleaning up the threads
+      //*******cleaning up the threads
       delete[] workThreads;
     }
 

@@ -81,6 +81,12 @@ struct Alignmet_Object
 };
 
 //defining the functions doing alignment
-bool match_Vs();
+
+bool match_Vs(vector<SequenceString>& _seq, unsigned _start_index, unsigned _numOfSeqs,
+	      const GenomicV* _genVs, unsigned _numOfVSegs, 
+	      unsigned _V_minimum_alignment_length, unsigned _V_maximum_deletion, 
+	      unsigned _nagative_excess_deletion_max, unsigned _V_allowed_errors, unsigned _error_cost
+ );
+
 
 #endif
