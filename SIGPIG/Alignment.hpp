@@ -3,6 +3,8 @@
 
 #include <vector>
 #include "../SquenceString.hpp"
+#include "../score.hpp"
+
 //for each object here, it contains possibly more then one alignment that passed the filter
 //so, it is variable for each input sequences. that is why we need use vector
 
@@ -82,11 +84,60 @@ struct Alignmet_Object
 
 //defining the functions doing alignment
 
-bool match_Vs(vector<SequenceString>& _seq, unsigned _start_index, unsigned _numOfSeqs,
+//the function to do the V alignments
+//input:
+// _seq, the input seq that is being aligned against. constant reference 
+//_genVs, the V gen segments arrays.
+//_numOfVSegs, the number of v gene segments in the array
+//_V_minimum_alignment_length, length of v mininum alignement
+//_V_maximum_deletion, maximum deletion
+//_negative_excess_deletion_max, maximum excess deletion, usually 3
+//_v_allowed_errors, number maximum allowed errors in the alignment
+//_error_cost, mismatch error cost, -4 or -5 (?)
+//
+//output:
+// _V, the Alignment_obj pointer V holding the alignment details. The caller need to allocate the memory
+//bool, indicating whether the alignment is successful.
+bool match_V(const SequenceString& _seq,
 	      const GenomicV* _genVs, unsigned _numOfVSegs, 
 	      unsigned _V_minimum_alignment_length, unsigned _V_maximum_deletion, 
-	      unsigned _nagative_excess_deletion_max, unsigned _V_allowed_errors, unsigned _error_cost
+	      unsigned _nagative_excess_deletion_max, unsigned _V_allowed_errors, unsigned _error_cost,
+	      Alignment_Obj* _V
  );
+
+
+//see above for the definition (match_Vs)
+bool match_J(const SequenceString& _seq,
+	      const GenomicV* _genJs, unsigned _numOfJSegs, 
+	      unsigned _J_minimum_alignment_length, unsigned _J_maximum_deletion, 
+	      unsigned _nagative_excess_deletion_max, unsigned _J_allowed_errors, unsigned _error_cost,
+	      Alignment_Obj* _J
+ );
+
+//input:
+// _seq, the input seq that is being aligned against. constant reference 
+//_genDs, the V gen segments arrays.
+//_numOfDSegs, the number of D gene segments in the array
+//_V_end, the position where the previous V alignemnt stops
+//_J_start, the position where the previous J alignment starts, 
+//_scoreMatrix, the matrix do the alignment. pointer to the scorematrix
+//_D_maximum_deletion, maximum deletion
+//_negative_excess_deletion_max, maximum excess deletion, usually 3
+//_max_align, the maximum number of alignments for the D align, 200 usually.
+//
+//output:
+// _D, the Alignment_obj pointer V holding the alignment details. The caller need to allocate the memory
+//bool, indicating whether the alignment is successful.
+bool match_D(const SequenceString& _seq,
+	      const GenomicV* _genDs, unsigned _numOfDSegs,
+	      unsigned _V_end, unsigned _J_start,
+	      ScoreMatrix* _ScoreMatrix, unsigned _D_maximum_deletion, 
+	     unsigned _nagative_excess_deletion_max, unsigned _max_align,
+	      Alignment_D*, _D
+ );
+
+
+
 
 
 #endif
