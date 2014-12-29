@@ -391,12 +391,15 @@ unsigned ReadGenomicD(const string& _fastaFileName, GenomicD** _gseg)
   return totalNumber; 
 }
 
-
-void FlipSequenceString(SequenceString& _ss)
+//return a new object and leave the original one unchanged
+SequenceString FlipSequenceString(const SequenceString& _ss)
 {
-  string temp=_ss.GetSequence();
+  SequenceString retSS=_ss;
+  string temp=_retSS.GetSequence();
   temp=flipStr(temp);
-    _ss.SetSequence(temp);
+  _retSS.SetSequence(temp);
+   
+  return retSS;
 }
 
 vector<string> DetermineOutputFileNames(const string& _outFileNameBase, const unsigned& _NPerFile, const unsigned& _totalNSeq)

@@ -99,19 +99,21 @@ struct Alignmet_Object
 // _V, the Alignment_obj pointer V holding the alignment details. The caller need to allocate the memory
 //bool, indicating whether the alignment is successful.
 bool match_V(const SequenceString& _seq,
-	      const GenomicV* _genVs, unsigned _numOfVSegs, 
-	      unsigned _V_minimum_alignment_length, unsigned _V_maximum_deletion, 
-	      unsigned _nagative_excess_deletion_max, unsigned _V_allowed_errors, unsigned _error_cost,
-	      Alignment_Obj* _V
+	      const GenomicV* _genVs, const unsigned& _numOfVSegs, 
+	      const unsigned& _V_minimum_alignment_length, const unsigned& _V_maximum_deletion, 
+	      const unsigned& _nagative_excess_deletion_max, const unsigned& _V_allowed_errors, 
+	     const unsigned& _error_cost,
+	     /*output*/ Alignment_Obj* _V
  );
 
 
 //see above for the definition (match_Vs)
 bool match_J(const SequenceString& _seq,
-	      const GenomicV* _genJs, unsigned _numOfJSegs, 
-	      unsigned _J_minimum_alignment_length, unsigned _J_maximum_deletion, 
-	      unsigned _nagative_excess_deletion_max, unsigned _J_allowed_errors, unsigned _error_cost,
-	      Alignment_Obj* _J
+	      const GenomicV* _genJs, const unsigned& _numOfJSegs, 
+	      const unsigned& _J_minimum_alignment_length, const unsigned& _J_maximum_deletion, 
+	      const unsigned& _nagative_excess_deletion_max, const unsigned& _J_allowed_errors, 
+	     const unsigned& _error_cost,
+	     /*output*/ Alignment_Obj* _J
  );
 
 //input:
@@ -129,15 +131,53 @@ bool match_J(const SequenceString& _seq,
 // _D, the Alignment_obj pointer V holding the alignment details. The caller need to allocate the memory
 //bool, indicating whether the alignment is successful.
 bool match_D(const SequenceString& _seq,
-	      const GenomicV* _genDs, unsigned _numOfDSegs,
-	      unsigned _V_end, unsigned _J_start,
-	      ScoreMatrix* _ScoreMatrix, unsigned _D_maximum_deletion, 
-	     unsigned _nagative_excess_deletion_max, unsigned _max_align,
-	      Alignment_D*, _D
+	      const GenomicV* _genDs, const unsigned& _numOfDSegs,
+	      const unsigned& _V_end, const unsigned& _J_start,
+	      const ScoreMatrix* _ScoreMatrix, const unsigned& _D_maximum_deletion, 
+	     const unsigned& _nagative_excess_deletion_max, const unsigned& _max_align,
+	     /*output*/ Alignment_D* _D
  );
 
+//finds highest scoring alignment of between seq and target 
+//doing the alignment forcing the alignment to begin from the first nucleotide on
+//the left of target, but allowing the alignment to start at any nt of target
+//note: we modified this code to force to start at first nt on target instead of seq!!!!
 
+//input:
+// _seq, the input sequence to align
+// _target, the genomice template to align against.
+// _maximium_errors, the maximum number of errors allow in this alignment
+// _error_cost, the error cost, double
+//
+//output: Note, the caller need to initialize the memory
+// _align_position, the array of size 2 to contain the alignment starting position 
+//         for the best alignment. [0] for _seq, [1] for _target
+// _n_errors, the pointer to the unsigned variable for holding the number of errors in the best alignment
+// _error_positions, the array of size _maximum_errors. but it only have n_errors elements. Again, need to
+//         initialized by the caller. 
 
+//return: 
+//   alignment_length, unsigned
+unsigned align_with_constraints_fast_left(const string& _seq, const string& _target, 
+					 const unsigned& _maximum_errors,  const double& _error_cost, 
+					 /*output*/unsigned _align_position[2], unsigned* n_errors, 
+					 unsigned* _error_positions);
 
+//this is the code to finds highest scoring alignement of seq1 and seq2 that forces their
+//left ends to match.
+//this is the one in the original code named "align_with_constraints_fixed_left_remove_right_errors". 
+//we named it so here in order to make the distinction. no further changes made.
+
+//input:
+// _seq1 and _seq2, the sequence strings to align, with forcing to begin from the left
+// _maximum_errors and error_cost
+//output: Note: caller need to initialize the memory for the output
+// _n_errors, pointer to the variable for the output,
+// _error_positions, array of size maximum_errors, but only the first _n_errors are used.
+//return: the align_length.
+unsigned align_with_constraints_fixed_left_remove_right_errors
+       (const string& _seq1, const string& _seq2, const unsigned& _maximum_errors, 
+	const double& _error_cost,
+	/*output*/ unsigned* _n_errors, unsinged* _error_positions);
 
 #endif

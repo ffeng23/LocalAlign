@@ -69,7 +69,9 @@ string ParseGeneName(const string& _seqName);
 
 string ParseSequenceName(const string& _seqName);
 
-void FlipSequenceString(SequenceString& _ss);
+//only flip the sequence of the object, but do not change the name
+//return a new object and leave the input object no change
+SequenceString FlipSequenceString(const SequenceString& _ss);
 
 vector<string> DetermineOutputFileNames(const string& _outFileNameBase, const unsigned& _NPerFile, const unsigned& _totalNSeq);
 

@@ -9,7 +9,10 @@ SequenceString::SequenceString():c_name(""),c_seq("")
 {
   //empty
 }
-
+SequenceString::~SequenceString()
+{
+  //empty
+}
 SequenceString::SequenceString(const string& _name, const string& _seq) : c_name(_name),c_seq(_seq)
 {
   //empty

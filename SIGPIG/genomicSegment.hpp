@@ -39,7 +39,8 @@ public:
 private: 
   SequenceString c_seq;
   string c_gene;//this is the gene name without allele number
-  unsigned c_gene_index;
+  unsigned c_gene_index;//index of the genes in the gene array, not sure where the array is now (?)
+  //but probably will use this array later.
   unsigned c_n_alleles;  //this is the total number of alleles for this gene segment
   unsigned c_allele; //which allele in terms of number is this current one
   

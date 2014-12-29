@@ -1,12 +1,58 @@
 #include "Alignment.hpp"
 
+
+//this is the code to finds highest scoring alignement of seq1 and seq2 that forces their
+//left ends to match.
+//this is the one in the original code named "align_with_constraints_fixed_left_remove_right_errors". 
+//we named it so here in order to make the distinction. no further changes made.
+
+//input:
+// _seq1 and _seq2, the sequence strings to align, with forcing to begin from the left
+// _maximum_errors and error_cost
+//output: Note: caller need to initialize the memory for the output
+// _n_errors, pointer to the variable for the output,
+// _error_positions, array of size maximum_errors, but only the first _n_errors are used.
+//return: the align_length.
+unsigned align_with_constraints_fixed_left_remove_right_errors
+       (const string& _seq1, const string& _seq2, const unsigned& _maximum_errors, 
+	const double& _error_cost,
+	/*output*/ unsigned* _n_errors, unsinged* _error_positions)
+{
+  unsigned l_seq1=_seq1.size();
+  unsigned l_seq2=_seq2.size();
+  
+  unsigned max_match_length=l_seq1;
+  if(l_seq2<l_seq1)
+    {
+      max_match_length=l_seq2;
+    }
+  //now we need to bitwise matching between two strings.
+  //there are a few things to do for this
+  //1) go through the string to find match and mismatch for each bit
+  //    to make it right, we need to go one beyond the maximum allowed errors
+  //    till we reach the one next error if possible
+  //2) we need to figure out i)whether this is empty array ii)error positions
+  //    iii)align length;iv)num of errors v)best score so far
+  //3) find the best score along the longest match with maximum errors. Just
+  //    go through each errors position and calculate the best score for it and 
+  //    compare to return the best one.
+  byte[]
+
+}
+
+
 //see above for the definition (match_Vs)
 //we should keep in mind that we are doing multithread functions
+//remember Alignment_Obj* J has been declared and initialized, 
+//but the vector memeber of it is not initialized. Do we have to 
+//initialized it first?? or not necessarily? we could do the 
+//initialization when we need to. 
 bool match_J(const SequenceString& _seq,
-	      const GenomicV* _genJs, unsigned _numOfJSegs, 
-	      unsigned _J_minimum_alignment_length, unsigned _J_maximum_deletion, 
-	      unsigned _nagative_excess_deletion_max, unsigned _J_allowed_errors, unsigned _error_cost,
-	      Alignment_Obj* _J
+	      const GenomicV* _genJs, const unsigned& _numOfJSegs, 
+	      const unsigned& _J_minimum_alignment_length, const unsigned& _J_maximum_deletion, 
+	      const unsigned& _nagative_excess_deletion_max, const unsigned& _J_allowed_errors, 
+	     const unsigned& _error_cost,
+	     /*output*/ Alignment_Obj* _J
  )
 {
   //***from Matlab code
@@ -22,30 +68,38 @@ bool match_J(const SequenceString& _seq,
 
   //now we assume the return Aligment_obj has been correctly initialized. so we can use it now
   //set up pointers to the data and use them
-  vector<unsigned>* align_length = (J->align_length); //% contains the length of the alignment
+  //***1) vector<unsigned>* align_length = (J->align_length); //% contains the length of the alignment
 
+  //***2) align_position, 
   //% align_position(1,j) contains the first matched nt in seq (redundant, same as length(seq) - align_length +1 ),
   //% align_position_(2,j) is the first matched nt in genJ.seq{j} - also redundant information because we know where the sequencing primer ends.
-  vector<unsigned[2]> align_position = J->align_position;
-  vector<unsigned> n_errors=J->n_errors;//zeros(length(genJ),1); % number of mismatches in alignment
+  //vector<unsigned[2]> align_position = J->align_position;
 
-  vector<unsigned> >error_positions = zeros(length(genJ),J_allowed_errors); % positions of mismatches
-											      min_deletions = zeros(length(genJ),1); % number of deletions implied by alignment
+  //***3)n_errors,  vector<unsigned> n_errors=J->n_errors;//zeros(length(genJ),1); % number of mismatches in alignment
 
-																	     j_large_deletion_flag=zeros(length(genJ),1); % Flag if deletions is too large
-																										l_seq = length(seq);
+  //***4)vector<vector<unsigned> >error_positions = J->error_positions ;//zeros(length(genJ),J_allowed_errors); % positions of mismatches
+  //***5)vecotr<unsigned>  min_deletions = J->min_deletions; //zeros(length(genJ),1); % number of deletions implied by alignment	
+  bool j_large_deletion_flag=false; //=zeros(length(genJ),1); % Flag if deletions is too large
+ unsigned l_seq = _seq.GetLength(); //length of the input sequence
 
+ //% Loop through template alleles for alignment
+ for(unsigned int i=0;i<_numOfJSegs;i++) //for j=1:length(genJ)
+   {
+     //%j=1
+     //%disp(['loop: ' num2str(j)])
+     //% Get highest scoring alignment for this allele, with acceptable number of errors
+     //% NOTE: I use an alignment function that fixes position on the left (as in match_Vs) but I pass in the
+     //% reversed sequences, because I want to fix the position on the right.
+     unsigned l_target=genJs[i].Get_Seq().GetLength();//length of the genomic template allele for current one
 
-  % Loop through alleles
-      for j=1:length(genJ)
-	      %j=1
-	      %disp(['loop: ' num2str(j)])
-	      % Get highest scoring alignment for this allele, with acceptable number of errors
-							 % NOTE: I use an alignment function that fixes position on the left (as in match_Vs) but I pass in the
-							 % reversed sequences, because I want to fix the position on the right.
-							 l_target=length(genJ(j).seq);
-  %[align_length(j), rev_align_position, n_errors(j), rev_error_positions] = align_with_constraints_fast_left_on_target( seq(end:-1:1) , genJ(j).seq(end:-1:1) , J_allowed_errors, error_cost);
-  [align_length(j), rev_align_position, n_errors(j), rev_error_positions]=align_with_constraints_fast_no_fix(seq(end:-1:1) , genJ(j).seq(end:-1:1) , J_allowed_errors, error_cost);
+     //before doing the alignment, we need to flip/reverse the sequence, since the function do it assume doing
+     //fixed on the left. 
+     SequenceString rev_seq=FlipSequenceString(_seq);
+     SequenceString rev_target=FlipSequenceString(genJs[j]);
+
+     //now calling to do the alignment
+
+     //[align_length(j), rev_align_position, n_errors(j), rev_error_positions]=align_with_constraints_fast_no_fix(seq(end:-1:1) , genJ(j).seq(end:-1:1) , J_allowed_errors, error_cost);
       % Reverse the error positions to be relative to left-right orientation.
 	  %%%j  error positions is relative to the end of J chain
 	  if n_errors(j)>0
@@ -64,7 +118,8 @@ bool match_J(const SequenceString& _seq,
           end
 	    end
 
-	    % Check!
+	    }//end of for loop to go through the J segs alleles for alignment.
+    % Check!
 	    assert(all(min_deletions>=0));
 
 	  % sort the genomic Js in descending order of 'score' and ascending order of min_deletions

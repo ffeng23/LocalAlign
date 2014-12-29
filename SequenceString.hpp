@@ -8,6 +8,10 @@ class SequenceString
 {
 public:
   SequenceString();
+  
+  ~SequenceString();//destructor empty one
+
+  //no copy constructor since it is not necessary. since there is no pointer or dynamically allocated mem
 
   SequenceString(const string& _name, const string& _seq);
 
