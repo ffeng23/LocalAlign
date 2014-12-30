@@ -60,13 +60,15 @@ struct Alignmet_Object
 		private:*/
   unsigned numOfAligned;
   vector<unsigned> align_length;
-  vector<unsigned [2] > align_position;//aligned position is a vector of 2 positions each alignment. 
+  vector<vector<unsigned> > align_position;//aligned position is a vector of 2 positions each alignment. 
                      //first one for the seq, and second one for the genomic sequence 
   vector<unsigned> min_deletions;
   vector<unsigned> n_errors;
   vector< vector<unsigned> > error_positions; //this is a 2D vector, both dimensions are variable size. 1D size is numOfAligned; 
                     //2D size is variable based on the n_errors[i]. in the original Matlab implementation, this is fixed and having 
                     //size of max_allowed_errors
+  //for a J alignment, this error position is relative to the end of J chain. and we assume the alignment is 
+  //forced to fixed on the end of J chain.!!!
 
   vector<vector<unsigned> > p_region_max_length;//This one is storing the length of longest half-palindrome for each value of deletions
   //But not all number of deletions is possible for the specific alignment.
@@ -160,7 +162,7 @@ bool match_D(const SequenceString& _seq,
 //   alignment_length, unsigned
 unsigned align_with_constraints_fast_left(const string& _seq, const string& _target, 
 					 const unsigned& _maximum_errors,  const double& _error_cost, 
-					 /*output*/unsigned _align_position[2], unsigned* n_errors, 
+					 /*output*/unsigned* _align_position, unsigned* n_errors, 
 					 unsigned* _error_positions);
 
 //this is the code to finds highest scoring alignement of seq1 and seq2 that forces their

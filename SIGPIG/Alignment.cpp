@@ -1,5 +1,6 @@
 #include "Alignment.hpp"
 
+enum MatchState{ MATCH, MISMATCH, NOT_ALIGNED};
 
 //this is the code to finds highest scoring alignement of seq1 and seq2 that forces their
 //left ends to match.
@@ -20,7 +21,8 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
 {
   unsigned l_seq1=_seq1.size();
   unsigned l_seq2=_seq2.size();
-  
+  unsigned align_length=0;
+
   unsigned max_match_length=l_seq1;
   if(l_seq2<l_seq1)
     {
@@ -36,9 +38,158 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
   //3) find the best score along the longest match with maximum errors. Just
   //    go through each errors position and calculate the best score for it and 
   //    compare to return the best one.
-  byte[]
+  
+  bool matchFlag;
+  
+  *_n_errors=0;
+  unsigned i;
+  //do the alignment
+  for(i=0;i<max_match_length;i++)
+    {
+      
+      //check for match or mismatch
+      if(_seq1.at(i)==_seq2.at(i))
+	{
+	  matchFlag=true;
+	}
+      else //mismatch, need to update the n_errors and error_position
+	{
+	  matchFlag=false;
+	
+	  *_n_errors=*_n_errors+1;
+	}
 
+      //check to see whether we have 
+      if(&_n_errors>_maximum_errors)
+	{
+	  //we are reaching the maximum errors, now it is _maximum_errors+1, done!
+	  break;
+	}
+      //this one is a mismatch, but not go beyond the maximum allowed ones, we remeber the position
+      if(!matchFlag)
+	{
+	  _error_positions[*n_errors-1]=i;
+	}
+    }
+
+  //now we are done, we need to know the align length
+  //need to know whether it is because we go through the maximum_length or due to too many errors
+  if(i>max_match_length)
+    align_length=i; //because i starts at zero, so it is i-1+1
+  else //due to maximum error
+    align_length=i+1;//because it starts at zero, so it i+1;
+  double best_score=align_length-_error_cost* (*_n_errors);
+  
+  
+  //now we need to figure out best score along the longest match
+  double running_score=best_score;
+  
+  
+  for(unsigned j=0;j< *_n_errors ; j++)
+    {
+      running_score=(_error_positions[j]-1+1)-_error_cost*j;
+      
+      if(running_score>best_score)
+	{
+	  align_length=_error_positions[j]-1+1;
+	  best_score=running_score;
+	  *_n_errors=j;
+	}
+    }
+  //prepare the error_position array based on the 
+  //this is not necessary, we just need to according to the _n_errors to 
+  //check the error_positions array elements
+  for(unsigned j=*_n_errors;j<_maximum_errors;j++)
+    {
+      _error_positions[j]=-1;
+    }
+
+  //clean up
+  //delete [] c;
+  
+  return align_length;
 }
+
+//input:
+// _seq, the input sequence to align
+// _target, the genomice template to align against.
+// _maximium_errors, the maximum number of errors allow in this alignment
+// _error_cost, the error cost, double
+//
+//output: Note, the caller need to initialize the memory
+// _align_position, the array of size 2 to contain the alignment starting position 
+//         for the best alignment. [0] for _seq, [1] for _target
+// _n_errors, the pointer to the unsigned variable for holding the number of errors in the best alignment
+// _error_positions, the array of size _maximum_errors. but it only have n_errors elements. Again, need to
+//         initialized by the caller. 
+
+//return: 
+//   alignment_length, unsigned
+unsigned align_with_constraints_fast_left(const string& _seq, const string& _target, 
+					 const unsigned& _maximum_errors,  const double& _error_cost, 
+					 /*output*/unsigned* _align_position, unsigned* _n_errors, 
+					 unsigned* _error_positions)
+{
+  unsigned align_length=0;
+  
+  unsigned l_seq=_seq.size();
+  unsigned l_target=_target.size();
+  unsigned best_match_index=0;
+  double score=-1E200;
+
+  unsigned current_align_length, current_n_errors;
+  unsigned* current_error_positions=new unsigned [_max_errors];
+  double current_score;
+  unsigned max_length;
+  //looping through the positions of sequence to force the left side of target to align with
+  //subsequence of seq starting at the current index of _seq
+  for(unsigned i=0;i<l_seq;i++)
+    {
+      max_length=l_seq-i;
+      if(l_target<max_length)
+	{
+	  max_length=l_target;
+	}
+      //can not be better
+      if(max_length<score)
+	{
+	  break;
+	}
+      string current_seq=_seq.substr(i, max_length);
+      string current_target=_target.substr(0,max_length);
+      //call to do alignment forcing fixed left ends
+      current_align_length=
+	align_with_constraints_fixed_left_remove_right_errors(current_seq, current_target,
+							      _maximum_errors,_error_cost,
+							      &current_n_errors, current_error_positions);
+      
+      current_score=current=current_align_length-_error_cost*current_n_errors;
+      
+      if(current_score>score||
+	 ((current_score-score<1E-6||current_score-score>-1E-6)&&(current_align_length>align_length))
+	 )
+	{
+	  align_length=current_align_length;
+	  *_n_errors=current_n_errors;
+	  //copy over the corrent error positions
+	  for(unsigned j=0;j<current_n_errors;j++)
+	    {
+	      _error_positions[j]=current_error_positions[j];
+	    }
+	  score=current_score;
+	  best_match_index=i;
+	}//if loop
+      
+    }//end of looping over the seq positions
+  
+  align_positions[0]=best_match_index;
+  align_positions[1]=0;
+  
+  //clean up
+  delete [] current_error_positions;
+  return align_length;
+}
+
 
 
 //see above for the definition (match_Vs)
@@ -79,9 +230,14 @@ bool match_J(const SequenceString& _seq,
 
   //***4)vector<vector<unsigned> >error_positions = J->error_positions ;//zeros(length(genJ),J_allowed_errors); % positions of mismatches
   //***5)vecotr<unsigned>  min_deletions = J->min_deletions; //zeros(length(genJ),1); % number of deletions implied by alignment	
-  bool j_large_deletion_flag=false; //=zeros(length(genJ),1); % Flag if deletions is too large
+  bool j_large_deletion_flag[numOfJSegs]; //=zeros(length(genJ),1); % Flag if deletions is too large
  unsigned l_seq = _seq.GetLength(); //length of the input sequence
 
+ 
+ unsigned temp_align_position[2];
+ unsigned temp_n_errors;
+ unsigned temp_error_positions=new unsigned[_J_allowed_errors];
+ //unsigned temp_
  //% Loop through template alleles for alignment
  for(unsigned int i=0;i<_numOfJSegs;i++) //for j=1:length(genJ)
    {
@@ -90,37 +246,62 @@ bool match_J(const SequenceString& _seq,
      //% Get highest scoring alignment for this allele, with acceptable number of errors
      //% NOTE: I use an alignment function that fixes position on the left (as in match_Vs) but I pass in the
      //% reversed sequences, because I want to fix the position on the right.
-     unsigned l_target=genJs[i].Get_Seq().GetLength();//length of the genomic template allele for current one
+     unsigned l_target=_genJs[i].Get_Seq().GetLength();//length of the genomic template allele for current one
 
      //before doing the alignment, we need to flip/reverse the sequence, since the function do it assume doing
      //fixed on the left. 
      SequenceString rev_seq=FlipSequenceString(_seq);
-     SequenceString rev_target=FlipSequenceString(genJs[j]);
+     SequenceString rev_target=FlipSequenceString(_genJs[j]);
 
      //now calling to do the alignment
+     temp_align_length=
+       aligned_with_constraints_fast_left(rev_seq.GetSeq(), rev.target.GetSeq(), _J_allowed_errors, _error_cost,
+					  temp_align_position, &temp_n_errors, temp_error_positions);
+					  
 
+     _J->align_length.push_back(temp_align_length);
+     
      //[align_length(j), rev_align_position, n_errors(j), rev_error_positions]=align_with_constraints_fast_no_fix(seq(end:-1:1) , genJ(j).seq(end:-1:1) , J_allowed_errors, error_cost);
-      % Reverse the error positions to be relative to left-right orientation.
-	  %%%j  error positions is relative to the end of J chain
-	  if n_errors(j)>0
-		       error_positions(j,1:n_errors(j)) = (rev_error_positions(n_errors(j):-1:1)) ;
-      end
+     
+     _J->n_errors.push_back(temp_n_errors);
+     // % Reverse the error positions to be relative to left-right orientation.
+     //  %%%j  error positions is relative to the end of J chain
+     vector<unsigned> temp_error_position_vec;
+     if( temp_n_errors>0)
+       {
+	 //unsigned rev_j=temp_n_errors-1;
+	 for(unsigned j=0;j<temp_n_errors;j++)
+	   {
+	     //unsigned tempValue=temp_error_positions[j]
+	     temp_error_position_vec.push_back( temp_error_positions[temp_n_errors-j-1]) ;
+	     //temp_error_positions[rev_j]=tempValue;
+	     //rev_j--;
+	   }
+       }//end
+     _J->error_positions.push_back(temp_error_position_vec);
 
-	% Calculate (redundant) align_position values. These are used in model scripts.
-	align_position(:,j) = [ (l_seq-(rev_align_position(1)+align_length(j)-1)+1) , l_target-(rev_align_position(2)+align_length(j)-1)+1 ];
+     vector<unsigned> temp_align_position_vec;
+	//% Calculate (redundant) align_position values. These are used in model scripts.
+     temp_align_position_vec.push_back(
+				  /*temp_align_position[0]*/ = (l_seq-(temp_align_position[0]+temp_align_length-1)-1 ) ); //for _seq first position
+     temp_align_position_vec.push_back(
+				       /*temp_align_position[1]*/= l_target-(temp_align_position[1]+temp_align_length-1)-1 );//for target second position
+     _J->align_position.push_back(temp_align_position_vec);
 
-          % Calculate deletions implied by alignment
-	      min_deletions(j) = align_position(2,j) - 1;
-          % Flag if number of deletions is too many
-			     if( min_deletions(j) > J_maximum_deletion)
-			       j_large_deletion_flag(j) = 1;
-      %continue;
-          end
-	    end
+      // % Calculate deletions implied by alignment
+     _J->min_deletions.push_back( l_target-(temp_align_position[1]+temp_align_length-1) - 1);
+      //    % Flag if number of deletions is too many
+     j_large_deletion_flag[j]=false;
+     if( _J->min_deletions.at(j) > _J_maximum_deletion)
+	{
+	  j_large_deletion_flag[j] = true;
+	  //%continue;
+        }//  end
+      //    end
 
-	    }//end of for loop to go through the J segs alleles for alignment.
-    % Check!
-	    assert(all(min_deletions>=0));
+   }//end of for loop to go through the J segs alleles for alignment.
+    //% Check!
+ //	    assert(all(min_deletions>=0));
 
 	  % sort the genomic Js in descending order of 'score' and ascending order of min_deletions
 	      scores  = align_length - error_cost*n_errors;
@@ -224,6 +405,8 @@ end
 end
   
 
+//clean up
+delete [] temp_error_positions;
 
   return true;
 }
