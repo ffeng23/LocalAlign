@@ -306,7 +306,9 @@ bool match_J(const SequenceString& _seq,
  //	  % sort the genomic Js in descending order of 'score' and ascending order of min_deletions
 
  //calculate the score first
- double* scores=new score[numOfJSegs];
+ double* scores=new double[numOfJSegs];
+ unsigned* sorted_index=new unsigned[numOfJSegs];
+ sort_mf(scores, numOfJSegs, sorted, sorted_index);
 	      scores  = align_length - error_cost*n_errors;
 	  S = [-scores, min_deletions];
 	  [~,order]=sortrows(S);
