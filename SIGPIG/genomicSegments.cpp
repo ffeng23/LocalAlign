@@ -395,9 +395,9 @@ unsigned ReadGenomicD(const string& _fastaFileName, GenomicD** _gseg)
 SequenceString FlipSequenceString(const SequenceString& _ss)
 {
   SequenceString retSS=_ss;
-  string temp=_retSS.GetSequence();
+  string temp=retSS.GetSequence();
   temp=flipStr(temp);
-  _retSS.SetSequence(temp);
+  retSS.SetSequence(temp);
    
   return retSS;
 }

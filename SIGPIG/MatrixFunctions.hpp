@@ -4,18 +4,20 @@
 #include <vector>
 #include <iostream>
 #include <string>
+
 //this is the module to define some basic and necessary functions for matrix/array manipulations
+using namespace std;
 
-double max(vector<double> _m);
-double max(const double*  _m, const unsigned& _len);
-unsigned max(vector<unsigned> _m);
-unsigned max(const unsigned* _m, const unsigned& _len);
+double max_mf(const vector<double>& _m);
+double max_mf(const double*  _m, const unsigned& _len);
+unsigned max_mf(const vector<unsigned>& _m);
+unsigned max_mf(const unsigned* _m, const unsigned& _len);
 
 
-double min(vector<double> _m);
-double min(const double*  _m, const unsigned& _len);
-unsigned min(vector<unsigned> _m);
-unsigned min(const unsigned* _m, const unsigned& _len);
+double min_mf(const vector<double>& _m);
+double min_mf(const double*  _m, const unsigned& _len);
+unsigned min_mf(const vector<unsigned>& _m);
+unsigned min_mf(const unsigned* _m, const unsigned& _len);
 
 
 

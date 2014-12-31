@@ -2,7 +2,7 @@
 #define ALIGNMENT_HPP
 
 #include <vector>
-#include "../SquenceString.hpp"
+#include "../SequenceString.hpp"
 #include "../score.hpp"
 
 //for each object here, it contains possibly more then one alignment that passed the filter

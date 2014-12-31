@@ -1,6 +1,9 @@
 #include "MatrixFunctions.hpp"
-using std;
-double max(vector<double> _m)
+#include <iostream>
+
+using namespace std;
+
+double max_mf(const vector<double>& _m)
 {
   unsigned size=_m.size();
   double temp=0;
@@ -21,7 +24,7 @@ double max(vector<double> _m)
     }
   return temp;
 }
-double max(const double*  _m, const unsigned& _len)
+double max_mf(const double*  _m, const unsigned& _len)
 {
   
   double temp=0;
@@ -43,7 +46,7 @@ double max(const double*  _m, const unsigned& _len)
   return temp;
 }
 
-unsigned max(vector<unsigned> _m)
+unsigned max_mf(const vector<unsigned>& _m)
 {
   unsigned size=_m.size();
   unsigned temp=0;
@@ -64,7 +67,7 @@ unsigned max(vector<unsigned> _m)
     }
   return temp;
 }
-unsigned max(const unsigned* _m, const unsigned& _len)
+unsigned max_mf(const unsigned* _m, const unsigned& _len)
 
 {
   
@@ -74,9 +77,9 @@ unsigned max(const unsigned* _m, const unsigned& _len)
       temp=_m[0];
       for(unsigned int i=1;i<_len;i++)
 	{
-	  if(_m.at(i)>temp)
+	  if(_m[i]>temp)
 	    {
-	      temp=_m.at(i);
+	      temp=_m[i];
 	    }
 	}
     }
@@ -90,7 +93,7 @@ unsigned max(const unsigned* _m, const unsigned& _len)
 
 
 
-double min(vector<double> _m)
+double min_mf(const vector<double>& _m)
 {
   unsigned size=_m.size();
   double temp=0;
@@ -111,7 +114,7 @@ double min(vector<double> _m)
     }
   return temp;
 }
-double min(const double*  _m, const unsigned& _len)
+double min_mf(const double*  _m, const unsigned& _len)
 {
   
   double temp=0;
@@ -132,7 +135,7 @@ double min(const double*  _m, const unsigned& _len)
     }
   return temp;
 }
-unsigned min(vector<unsigned> _m)
+unsigned min_mf(const vector<unsigned>& _m)
 {
   unsigned size=_m.size();
   unsigned temp=0;
@@ -153,7 +156,7 @@ unsigned min(vector<unsigned> _m)
     }
   return temp;
 }
-unsigned min(const unsigned* _m, const unsigned& _len)
+unsigned min_mf(const unsigned* _m, const unsigned& _len)
 {
   
   unsigned temp=0;

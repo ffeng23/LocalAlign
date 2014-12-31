@@ -245,6 +245,7 @@ int main(int argc, char* argv[])
   vector<string> outFileNames;
   outFileNames=DetermineOutputFileNames(outputFileNameBase, AlignmentSettings::N_per_file, N_read);
 
+  /*
   //now we are ready to do the alignment??
   //first need to figure out number of output files
   unsigned numOfOutFiles=outFileNames.size();
@@ -270,7 +271,7 @@ int main(int argc, char* argv[])
       //prepare the output
       for(int j=0;j<numberOfThread;j++)
 	{
-	  ret =  pthread_create(workThreads[j], NULL, thread_fnc, NULL);?????
+	  ret =  pthread_create(workThreads[j], NULL, thread_func, NULL);
 	  if(ret != 0) {
 	    perror("pthread_create failed\n");
 	    exit(EXIT_FAILURE);
@@ -287,10 +288,10 @@ int main(int argc, char* argv[])
       startIndexOfSequence=startIndexOfSequence+0;
       //now here is where we need to figure out the thread thing
 
-      //*******cleaning up the threads
+      // *******cleaning up the threads
       delete[] workThreads;
     }
-
+  */
   //********clean up
   cout<<"Clean up the memories....."<<endl;
   if(genV!=NULL)

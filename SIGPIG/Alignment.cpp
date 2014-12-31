@@ -303,7 +303,7 @@ bool match_J(const SequenceString& _seq,
     //% Check!
  //	    assert(all(min_deletions>=0));
 
-	  % sort the genomic Js in descending order of 'score' and ascending order of min_deletions
+ //	  % sort the genomic Js in descending order of 'score' and ascending order of min_deletions
 	      scores  = align_length - error_cost*n_errors;
 	  S = [-scores, min_deletions];
 	  [~,order]=sortrows(S);
