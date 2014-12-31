@@ -300,10 +300,12 @@ bool match_J(const SequenceString& _seq,
       //    end
 
    }//end of for loop to go through the J segs alleles for alignment.
-    //% Check!
+    //% Check!  No need to check in c++ code.
  //	    assert(all(min_deletions>=0));
 
-	  % sort the genomic Js in descending order of 'score' and ascending order of min_deletions
+ //	  % sort the genomic Js in descending order of 'score' and ascending order of min_deletions
+ //calculate the score first
+ double* scores=new score[numOfJSegs];
 	      scores  = align_length - error_cost*n_errors;
 	  S = [-scores, min_deletions];
 	  [~,order]=sortrows(S);
@@ -316,7 +318,7 @@ bool match_J(const SequenceString& _seq,
 	      j_list = find( scores(order) >= min_score & align_length(order) >= J_minimum_alignment_length & j_large_deletion_flag(order)==0);
 
 	  if isempty(j_list)
-		      %disp(['No reasonable J match for sequence' ])
+		      //		      %disp(['No reasonable J match for sequence' ])
 		      ok_order = [];
 	  seq_j_ok = false; % Sequence not ok!
 
@@ -347,13 +349,13 @@ bool match_J(const SequenceString& _seq,
 	      end
 
 		    % Get list of distinct genes from acceptable alleles.
-		[~,Jg] = unique(genJ_ok_gene_inds,'first' ); % Pick the first allele listed for each gene.
+		[~,Jg] = unique(genJ_ok_gene_inds,"first" ); % Pick the first allele listed for each gene.
 												       Jg = sort(Jg); % sort it because unique returns in ascending order of ok_order. This puts it back in order of best match.
 															  % Only one (best) allele from each gene
-															  J.alleles_from_distinct_genes = ok_order(Jg');
+															  J.alleles_from_distinct_genes = ok_order(Jg'); '
 
-    %Now go through and find palindromic nucleotides for various number of deletions,
-    %as well as error positions for 'negative' deletions.
+//    %Now go through and find palindromic nucleotides for various number of deletions,
+//    %as well as error positions for 'negative' deletions.
     for j=1:numel(ok_order)
         % Loop over number of deletions (nd is actual number of genomic deletions).
         % Lower bound is maximum of 0 and min_deletions - negative_excess_deletions_max (usually 3).
@@ -376,11 +378,10 @@ bool match_J(const SequenceString& _seq,
             % deletions.
             J.p_region_max_length(j, 1+nd) = p;
         end
-
-        % Now for the 'negative' deletions, store where the mismatches are.
+   //        % Now for the 'negative' deletions, store where the mismatches are.
         % This is so we can count number of errors for these possibilities.
 
-        % Number of 'negative' deletions to consider:
+  //        % Number of 'negative' deletions to consider:
         n_excess = min([negative_excess_deletions_max, J.min_deletions(j), J.align_position(1,j)-1 ]);
 
         % Find mismatches between sequence and genomic J at those positions.
