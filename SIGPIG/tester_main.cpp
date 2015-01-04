@@ -40,11 +40,39 @@ int main()
 
   cout<<"***********testing get median index***********"<<endl;
   cout<<"\tmedian:first:"<<0<<";last:"<<7<<";middle:"<<3<<";median:"<<GetMedianIndex(array_double2,0,7,3)<<endl;
+  cout<<"\t\tpivot value:"<<array_double2[GetMedianIndex(array_double2,0,7,3)]<<endl;
 
   cout<<"*******Testing quick sort*******"<<endl;
+  unsigned index[]={0,1,2,3,4,5,6,7};
   Print(array_double2, 8);
-  QuickSort(array_double2, 0,7);
+  QuickSort(array_double2, 0,7, index);
   Print(array_double2, 8);
 
+  Print(index, 8);
+
+  cout<<"****New array********************>>>>>>>>>>>>>"<<endl;
+  double array_double3[]={ 1.0, 23.0, 1.0,-1.5, -2990, 39.0, 1.0, 0.0, 34.5, 14, 1.0 };
+  unsigned array_int2[]={11,1,2,3,4,5,6,7,8,9,1};
+  Print(array_double3, 11);
+  unsigned index2[]={0,1,2,3,4,5,6,7,8,9,10};
+  QuickSort(array_double3, 0,10, index2, array_int2);
+  cout<<"***sorted array"<<endl;
+  Print(array_double3,11);
+  cout<<"***sorted index"<<endl;
+  Print(index2,11);
+  cout<<"****sorted secondary array"<<endl;
+  Print(array_int2, 11);
+
+  
+  Reverse(array_int, 4);
+  Print(array_int, 4);
+  Reverse(array_double, 4);
+  Print(array_double, 4);
+
+  Reverse(vec_int);
+  //Print(vec_int);
+  Reverse(vec_double);
+  //Print(vec_double, 4);
+  
   return 0;
 }

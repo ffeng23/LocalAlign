@@ -307,11 +307,20 @@ bool match_J(const SequenceString& _seq,
 
  //calculate the score first
  double* scores=new double[numOfJSegs];
+ //prepare the sorted index of the array.
  unsigned* sorted_index=new unsigned[numOfJSegs];
- sort_mf(scores, numOfJSegs, sorted, sorted_index);
-	      scores  = align_length - error_cost*n_errors;
-	  S = [-scores, min_deletions];
-	  [~,order]=sortrows(S);
+ for(unsigned k=0;k<numOfSegs;k++)
+   {
+     sorted_index[k]=k;
+     scores[k]=_J->align_length[k]-error_cost*_J->n_errors[k];
+   }
+ 
+ QuickSort(scores, 0, numOfJSegs-1, sorted_index);
+ //	      scores  = align_length - error_cost*n_errors;
+ //S = [-scores, min_deletions];
+ //	  [~,order]=sortrows(S);
+ //now we need to reverse the order, since the QuickSort is ascending, but for our purpose we need to descending.
+ 
 
 	  % Set a score threshold for alleles.
 	      min_score = max(scores) - 3*J_minimum_alignment_length;

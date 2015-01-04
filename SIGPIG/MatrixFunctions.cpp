@@ -1,6 +1,6 @@
 #include "MatrixFunctions.hpp"
 #include <iostream>
-
+#include <limits>
 using namespace std;
 
 double max_mf(const vector<double>& _m)
@@ -183,16 +183,28 @@ unsigned min_mf(const unsigned* _m, const unsigned& _len)
  * @param a - The array to be sorted.
  * @param first - The start of the sequence to be sorted.
  * @param last - The end of the sequence to be sorted.
+ * 
+ * _index is the index of element of the _a array, this is required only when
+ * the user want to return a sorted index of the _a array. it has to be initialized 
+ * and prefilled with 1 through N in order.!!!!
+ *
  */
-void QuickSort(double* _a, const unsigned& _first, const unsigned int& _last, unsigned* _index ) 
+void QuickSort(double* _a, const unsigned& _first, const unsigned int& _last, unsigned* _index, unsigned* _b ) 
 {
-  int pivotElement;
+  //cout<<"&&&&&&&&&&call QuickSort"<<endl;
+  unsigned int pivotElement;
  
   if(_first < _last)
     {
-      pivotElement = Pivot(_a, _first, _last, _index);
-      QuickSort(_a, _first, pivotElement-1, _index);
-      QuickSort(_a, pivotElement+1, _last, _index);
+      pivotElement = Pivot(_a, _first, _last, _index, _b);
+      if(pivotElement>0)
+	QuickSort(_a, _first, pivotElement-1, _index, _b);
+      if(pivotElement< numeric_limits<unsigned int>::max())
+	QuickSort(_a, pivotElement+1, _last, _index, _b);
+      /*else
+	{
+	  cout<<"*************WARNING: OVERFLOW for the 
+	  }*/
     }
 }
  
@@ -204,49 +216,92 @@ void QuickSort(double* _a, const unsigned& _first, const unsigned int& _last, un
  * @return - the pivot element
  */
 //here we use a new way to choose pivot. a median between [first], [middle] and [last]
-unsigned Pivot(double* _a, const unsigned int& _first, const unsigned int& _last, unsigned* _index) 
+unsigned Pivot(double* _a, const unsigned int& _first, const unsigned int& _last, unsigned* _index, unsigned* _b) 
 {
+  //cout<<"%%%%%%%%%%%%call pivot:[_last, _first]:["<<_first<<","<<_last<<"];"<<endl;
   
   unsigned  p = _first;
   unsigned middle=(_first+_last)/2;
   double pivotElement;
   unsigned pivotIndex=_first;
   
-  if(middle==_first||middle==_last)
+  if(middle!=_first&&middle!=_last)
     {
+      //cout<<"\t\t\t[first, last, middle]:["<<_first<<","<<_last<<","<<middle<<"]."<<endl;
       pivotIndex = GetMedianIndex(_a, _first, _last, middle) ;
+      //cout<<"\t\t\t>>pivotIndex:"<<pivotIndex<<endl;
       //swap the index
       if(pivotIndex!=_first)
 	{
 	  swap(_a[_first], _a[pivotIndex]);
+	  if(_index!=NULL)
+	    {
+	      swap(_index[_first], _index[pivotIndex]);
+	    }
+	  if(_b!=NULL)
+	    {
+	      swap(_b[_first], _b[pivotIndex]);
+	      
+	    }
+	  pivotIndex=_first;
 	}
     }
-  //now we have put the pivot element in the [_first]
+  //we should have already put the pivot element in the [_first] no matter whether we get the median
+  //just use the first one as pivot anyway
   pivotElement=_a[_first];
-  cout<<"8888888888888>>pivote value:"<<_a[_first]<<endl;
-  //if(_index!=NULL)
-  //  _index[_first]=pivotIndex;
-  Print(_a, _last-_first+1);
+  pivotIndex=_first;
+  //cout<<"8888888888888>>pivote value:"<<_a[_first]<<endl;
+  /*if(_index!=NULL)
+    {
+      _index[_first]=pivotIndex;
+      }*/
+  //Print(_a, _last-_first+1);
   for(unsigned int i = _first+1 ; i <= _last ; i++)
     {
-      cout<<"\tround i:"<<i<<"--";
+      //cout<<"\tround i:"<<i<<"--";
       
       /* If you want to sort the list in the other order, change "<=" to ">" */
-      if(_a[i] <= pivotElement)
+      if( _a[i] < pivotElement ||
+	  (_a[i]==pivotElement&&(_b!=NULL&&_b[i]<_b[pivotIndex]))
+	 )
         {
+	  
 	  p++;
-	  cout<<"p:"<<p<<";i:"<<i<<endl;
-	  swap(_a[i], _a[p]);
-	  cout<<"********************SWAP*************!!!"<<endl;
+	  //	  cout<<"p:"<<p<<";i:"<<i<<endl;
+	  if(p!=i)
+	    {
+	      swap(_a[i], _a[p]);
+	      //cout<<"********************SWAP*************!!!"<<endl;
+	      if(_index!=NULL)
+		{
+		  swap(_index[p], _index[i]);
+		}
+	      if(_b!=NULL)
+		{
+		  swap(_b[p], _b[i]);
+		}
+	    }
+	  else
+	    {
+	      //cout<<"******swap step but no swap actions, since p==i"<<endl;
+	    }
         }
-Print(_a, _last-_first+1);
+      //Print(_a, _last-_first+1);
     }
-  cout<<"\t>>before pivot"<<endl;
-  Print(_a, _last-_first+1);
+  //cout<<"\t>>before pivot"<<endl;
+  //Print(_a, _last-_first+1);
   swap(_a[p], _a[_first]);
-  cout<<"\t>>after"<<endl;
-  Print(_a,_last-_first+1);
-  
+  if(_index!=NULL)
+    {
+      swap(_index[p],_index[_first]);
+    }
+  if(_b!=NULL)
+    {
+      swap(_b[p],_b[_first]);
+    }
+  //cout<<"\t>>after"<<endl;
+  //Print(_a,_last-_first+1);
+  //cout<<"********end of pivot, p :"<<p<<endl;
   return p;
 }
  
@@ -308,4 +363,75 @@ void Print(const double* a, const int& N)
 {
   for(int i = 0 ; i < N ; i++)
     cout << "array[" << i << "] = " << a[i] << endl;
+}
+
+ 
+/**
+ * Print an array.
+ * @param a - The array.
+ * @param N - The size of the array.
+ */
+void Print(const unsigned* a, const int& N)
+{
+  for(int i = 0 ; i < N ; i++)
+    cout << "array[" << i << "] = " << a[i] << endl;
 } 
+ 
+
+void Reverse( unsigned* _array, const unsigned& _N)
+{
+  unsigned start=0,end=_N-1;
+  unsigned temp;
+  for(;start<end;)
+    {
+      temp=_array[end];
+      _array[end]=_array[start];
+      _array[start]=temp;
+      start++;
+      end--;
+    }
+
+}
+void Reverse(double* _array, const unsigned& _N)
+{
+  unsigned start=0,end=_N-1;
+  double temp;
+  for(;start<end;)
+    {
+      temp=_array[end];
+      _array[end]=_array[start];
+      _array[start]=temp;
+      start++;
+      end--;
+    }
+
+}
+void Reverse(vector<unsigned> _v)
+{
+  unsigned start=0,end=_v.size()-1;
+  unsigned temp;
+  for(;start<end;)
+    {
+      temp=_v.at(end);
+      _v[end]=_v[start];
+      _v[start]=temp;
+      start++;
+      end--;
+    }
+}
+void Reverse(vector<double> _v)
+{
+  //unsigned size=_v.size();
+  unsigned start=0,end=_v.size()-1;
+  double temp;
+  for(;start<end;)
+    {
+      temp=_v.at(end);
+      _v[end]=_v[start];
+      _v[start]=temp;
+      start++;
+      end--;
+    }
+
+}
+
