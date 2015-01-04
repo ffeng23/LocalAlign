@@ -315,7 +315,7 @@ bool match_J(const SequenceString& _seq,
      scores[k]=_J->align_length[k]-error_cost*_J->n_errors[k];
    }
  
- QuickSort(scores, 0, numOfJSegs-1, sorted_index);
+ QuickSort(scores, 0, numOfJSegs-1, sorted_index, _J->min_deletions);
  //	      scores  = align_length - error_cost*n_errors;
  //S = [-scores, min_deletions];
  //	  [~,order]=sortrows(S);

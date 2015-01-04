@@ -42,14 +42,18 @@ struct Alignment_D
 //the reason that we want to have a class instead of struct because we want to more control also more abstraction
 //defining more accessor method so we can easily change the implementation detail later without changing the
 //interface
+//each object is initialized to be of fixed elements, numOfAligned is determined by the type of 
+//alignment, J or V. In the end, it is not containing all the entry. it is smaller, but the size is still longer
+//we use numOfAligned to indicate how many are useful.
+//we also need to delete in the constructor
 //***************
-struct Alignmet_Object
+class Alignmet_Object
 {
   /*public:
   Alignment_Object();
 
   ~Alignment_Object();
-
+  
   //for initializing
   bool Initialize();
 
@@ -59,11 +63,11 @@ struct Alignmet_Object
 
 		private:*/
   unsigned numOfAligned;
-  vector<unsigned> align_length;
-  vector<vector<unsigned> > align_position;//aligned position is a vector of 2 positions each alignment. 
+  vector<unsigned> align_length;//length of numOfAligned
+  vector<vector<unsigned> > align_position;//2D array(numOfAligend x 2), aligned position is a vector of 2 positions each alignment. 
                      //first one for the seq, and second one for the genomic sequence 
-  vector<unsigned> min_deletions;
-  vector<unsigned> n_errors;
+  vector<unsigned> min_deletions; //len of numOfAligned
+  vector<unsigned> n_errors;//len of numOfAligned
   vector< vector<unsigned> > error_positions; //this is a 2D vector, both dimensions are variable size. 1D size is numOfAligned; 
                     //2D size is variable based on the n_errors[i]. in the original Matlab implementation, this is fixed and having 
                     //size of max_allowed_errors
