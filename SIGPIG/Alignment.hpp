@@ -42,18 +42,19 @@ struct Alignment_D
 //the reason that we want to have a class instead of struct because we want to more control also more abstraction
 //defining more accessor method so we can easily change the implementation detail later without changing the
 //interface
-//each object is initialized to be of fixed elements, numOfAligned is determined by the type of 
+//each object is initialized to be of Fixed elements, numOfAligned is determined by the type of 
 //alignment, J or V. In the end, it is not containing all the entry. it is smaller, but the size is still longer
 //we use numOfAligned to indicate how many are useful.
 //we also need to delete in the constructor
 //***************
 class Alignmet_Object
 {
-  /*public:
-  Alignment_Object();
+  public:
+  Alignment_Object(const unsigned& numOfGenTempleates);
 
   ~Alignment_Object();
   
+  /*
   //for initializing
   bool Initialize();
 
@@ -63,28 +64,28 @@ class Alignmet_Object
 
 		private:*/
   unsigned numOfAligned;
-  vector<unsigned> align_length;//length of numOfAligned
-  vector<vector<unsigned> > align_position;//2D array(numOfAligend x 2), aligned position is a vector of 2 positions each alignment. 
+  unsigned* align_length;//length of numOfAligned
+  unsigned** align_position;//2D array(numOfAligend x 2), aligned position is a vector of 2 positions each alignment. 
                      //first one for the seq, and second one for the genomic sequence 
-  vector<unsigned> min_deletions; //len of numOfAligned
-  vector<unsigned> n_errors;//len of numOfAligned
-  vector< vector<unsigned> > error_positions; //this is a 2D vector, both dimensions are variable size. 1D size is numOfAligned; 
+  unsigned* min_deletions; //len of numOfAligned
+  unsigned* n_errors;//len of numOfAligned
+  unsigned** error_positions; //this is a 2D array. 1D size is numOfAligned; 
                     //2D size is variable based on the n_errors[i]. in the original Matlab implementation, this is fixed and having 
                     //size of max_allowed_errors
   //for a J alignment, this error position is relative to the end of J chain. and we assume the alignment is 
   //forced to fixed on the end of J chain.!!!
 
-  vector<vector<unsigned> > p_region_max_length;//This one is storing the length of longest half-palindrome for each value of deletions
+  unsigned** p_region_max_length;//This one is storing the length of longest half-palindrome for each value of deletions
   //But not all number of deletions is possible for the specific alignment.
   //this is a 2 D vector, both dimensions are variable size. 1D size is numOfAligned;
   //2D size is fixed, having a size of max_deletion+1, 1 plus because it is also possible having zero deletion.  
   
-  vector<vector <unsigned> > excess_error_positions;//2D vectors, holding the negative_excess_error positions. it bases on the alignment
+  unsigned** excess_error_positions;//2D vectors, holding the negative_excess_error positions. it bases on the alignment
   //and counting one round of errors. Again, in this negative excess error, we assume the current deletion (min_deletion) is not the real 
   //deletion. it is because of sequence errors, so we want to figure out the error positions in this case.
 
-  vector<unsigned> alleles_all;//size of numOfAligned. contains the index to the position of genomic template
-  vector<unsigned> alleles_from_distinct_genes;//unique version Cof the above alleles_all
+  unsigned* alleles_all;//size of numOfAligned. contains the index to the position of genomic template
+  unsigned* alleles_from_distinct_genes;//unique version Cof the above alleles_all
   
 };
 

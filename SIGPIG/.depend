@@ -28,4 +28,6 @@ main.o: main.cpp ../string_ext.hpp ../score.hpp ../SequenceString.hpp \
  ../AlignmentString.hpp GenomicJ.hpp genomicSegment.hpp GenomicD.hpp \
  GenomicV.hpp genomicSegments.hpp LoadData.hpp AlignmentSettings.hpp
 MatrixFunctions.o: MatrixFunctions.cpp MatrixFunctions.hpp
+tester_boost.o: tester_boost.cpp
 tester_main.o: tester_main.cpp MatrixFunctions.hpp
+tester_serialization.o: tester_serialization.cpp
