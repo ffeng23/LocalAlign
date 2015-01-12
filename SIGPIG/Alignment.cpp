@@ -1,7 +1,90 @@
 #include "Alignment.hpp"
 
-enum MatchState{ MATCH, MISMATCH, NOT_ALIGNED};
+//enum MatchState{ MATCH, MISMATCH, NOT_ALIGNED};
+Alignment_Object::Alignment_Object(): numberOfAligned(0), align_length(NULL),
+  align_position(NULL), min_deletions(NULL), n_errors(NULL), error_positions(NULL),
+  p_region_max_length(NULL), excess_error_positions(NULL), alleles_all(NULL),
+  alleles_from_distinct_genes(NULL)
+{
+  //empty constructor
+}
 
+Alignment_Object::~Alignment_Object()
+{
+  //now we need to delete the data if there are 
+  //we better do this in a reverse order than it is constructed
+  
+  //
+  if(alleles_from_distinct_genes!=NULL)
+    {
+      delete[] alleles_from_distinct_genes;
+    }
+  //
+  if(alleles_all!=NULL)
+    {
+      delete[] alleles_all;
+    }
+  //
+  if(excess_error_positions!=NULL)
+    {
+      for(unsigned i=0;i<numberOfAligned;i++)
+	{
+	  if( excess_error_positions[i]!=NULL)
+	    {
+	      delete [] excess_error_positions[i];
+	    }
+	}
+      delete [] excess_error_positions;
+    }
+  //
+  if(p_region_max_length!=NULL)
+    {
+      for(unsigned i=0;i<numberOfAligned;i++)
+	{
+	  if(p_region_max_length[i]!=NULL)
+	    {
+	      delete [] p_region_max_length[i];
+	    }
+	}
+      delete [] p_region_max_length;
+    }
+  //
+  if(error_positions!=NULL)
+    {
+      for(unsigned i=0;i<numberOfAligned;i++)
+	{
+	  if(error_positions[i]!=NULL)
+	    {
+	      delete [] error_positions[i];
+	    }
+	}
+      delete [] error_positions;
+    }
+  //
+  if(n_errors!=NULL)
+    delete[] n_errors;
+  //
+  if(min_deletions)
+    delete [] min_deletions;
+  //
+  if(align_position!=NULL)
+    {
+      for(unsigned i=0;i<numberOfAligned;i++)
+	{
+	  if(align_positions[i]!=NULL)
+	    {
+	      delete [] align_positions[i];
+	    }
+	}
+      delete [] align_positions;
+    }
+  // 
+  if(align_length!=NULL)
+    {
+      delete[] align_length;
+    }
+  
+}
 //this is the code to finds highest scoring alignement of seq1 and seq2 that forces their
 //left ends to match.
 //this is the one in the original code named "align_with_constraints_fixed_left_remove_right_errors". 

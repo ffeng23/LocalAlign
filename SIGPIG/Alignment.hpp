@@ -46,13 +46,16 @@ struct Alignment_D
 //alignment, J or V. In the end, it is not containing all the entry. it is smaller, but the size is still longer
 //we use numOfAligned to indicate how many are useful.
 //we also need to delete in the constructor
+//----
+//finally decide to use (array)pointer to hold the data in the alignment object
+//need to deconstruct DESTRUCTOR
 //***************
 class Alignmet_Object
 {
   public:
   Alignment_Object(const unsigned& numOfGenTempleates);
 
-  ~Alignment_Object();
+  virtual ~Alignment_Object();
   
   /*
   //for initializing
@@ -79,10 +82,13 @@ class Alignmet_Object
   //But not all number of deletions is possible for the specific alignment.
   //this is a 2 D vector, both dimensions are variable size. 1D size is numOfAligned;
   //2D size is fixed, having a size of max_deletion+1, 1 plus because it is also possible having zero deletion.  
+  //again, 2nd Dimension might not be this long since if we don't have that long sequence to be deleted (unlikely), but keep the array the fixed size at this dimension always fixed -- as the maximum_numberOfdeletion allowed
   
   unsigned** excess_error_positions;//2D vectors, holding the negative_excess_error positions. it bases on the alignment
   //and counting one round of errors. Again, in this negative excess error, we assume the current deletion (min_deletion) is not the real 
   //deletion. it is because of sequence errors, so we want to figure out the error positions in this case.
+  //2D array, 1D is of numberOfAligned long; 2D is max_nagative_excess_deletions long. it could be smaller (?), example because we don't have that many position, like we only have zero or 1 or 2 deletions. we will not have that many excess error. but in this case we allocate max_negative_error positions, just holding not that many errors.2D is fixed anyway.
+
 
   unsigned* alleles_all;//size of numOfAligned. contains the index to the position of genomic template
   unsigned* alleles_from_distinct_genes;//unique version Cof the above alleles_all
