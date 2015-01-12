@@ -49,6 +49,8 @@ struct Alignment_D
 //----
 //finally decide to use (array)pointer to hold the data in the alignment object
 //need to deconstruct DESTRUCTOR
+//-----
+//the outer caller will need to initialize and fill the data
 //***************
 class Alignmet_Object
 {
