@@ -318,9 +318,9 @@ bool match_J(const SequenceString& _seq,
 
  
  unsigned temp_align_position[2];
- unsigned temp_n_errors;
- unsigned temp_error_positions=new unsigned[_J_allowed_errors];
- //unsigned temp_
+ unsigned* temp_n_errors=new unsigned[_numOfJSegs];
+ unsigned* temp_error_positions=new unsigned[_J_allowed_errors];
+ unsigned temp_align_length
  //% Loop through template alleles for alignment
  for(unsigned int i=0;i<_numOfJSegs;i++) //for j=1:length(genJ)
    {

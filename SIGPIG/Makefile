@@ -10,7 +10,8 @@ GXX = g++
 MAKE= make
 
 CFLAG=-g -Werror -O -I ../Lib/include
-LOADFLAG=-s -lm -L../Lib/lib/ -lboost_serialization -lpthread
+LOADFLAG=-s -lm -L../Lib/lib/ -lpthread
+#LOADFLAG=-s -lm -L../Lib/lib/ -lpthread -lboost_serialization
 AlignmentLibDir=../
 
 CXXFLAG=${CFLAG}
