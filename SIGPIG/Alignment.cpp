@@ -1,4 +1,5 @@
 #include "Alignment.hpp"
+#include "MatrixManipulation.hpp"
 
 //enum MatchState{ MATCH, MISMATCH, NOT_ALIGNED};
 Alignment_Object::Alignment_Object(): numberOfAligned(0), align_length(NULL),
@@ -284,9 +285,9 @@ unsigned align_with_constraints_fast_left(const string& _seq, const string& _tar
 bool match_J(const SequenceString& _seq,
 	      const GenomicV* _genJs, const unsigned& _numOfJSegs, 
 	      const unsigned& _J_minimum_alignment_length, const unsigned& _J_maximum_deletion, 
-	      const unsigned& _nagative_excess_deletion_max, const unsigned& _J_allowed_errors, 
+	      const unsigned& _negative_excess_deletion_max, const unsigned& _J_allowed_errors, 
 	     const unsigned& _error_cost,
-	     /*output*/ Alignment_Obj* _J
+	     /*output*/ Alignment_Obj& _J
  )
 {
   //***from Matlab code
@@ -300,36 +301,69 @@ bool match_J(const SequenceString& _seq,
   //but the input sequence start at variable position since it contain some portion of IgG/M
   //constant regions
 
-  //now we assume the return Aligment_obj has been correctly initialized. so we can use it now
-  //set up pointers to the data and use them
-  //***1) vector<unsigned>* align_length = (J->align_length); //% contains the length of the alignment
+  //now we assume the return Aligment_obj is initialized, but the data they point to are filled and initialized here in this function. so we can use
+  //the pointers to point the data and use them
+  //***1) unsigned* align_length, size numOfJSegs maximumly ; ---temp_align_length//% contains the length of the alignment
 
-  //***2) align_position, 
+  //***2) align_position, 2D, numOfJSegs by 2
   //% align_position(1,j) contains the first matched nt in seq (redundant, same as length(seq) - align_length +1 ),
   //% align_position_(2,j) is the first matched nt in genJ.seq{j} - also redundant information because we know where the sequencing primer ends.
-  //vector<unsigned[2]> align_position = J->align_position;
+  // temp_align_position = J->align_position;
 
-  //***3)n_errors,  vector<unsigned> n_errors=J->n_errors;//zeros(length(genJ),1); % number of mismatches in alignment
+  //***3) min_deletions, 1D, maximumly numOfJSegs long, temp_min_deletions;
 
-  //***4)vector<vector<unsigned> >error_positions = J->error_positions ;//zeros(length(genJ),J_allowed_errors); % positions of mismatches
-  //***5)vecotr<unsigned>  min_deletions = J->min_deletions; //zeros(length(genJ),1); % number of deletions implied by alignment	
+  //***4)n_errors,  temp_n_errors=J->n_errors;//zeros(length(genJ),1); % number of mismatches in alignment
+
+  //***5)error_positions = J->error_positions ;//zeros(length(genJ),J_allowed_errors); % positions of mismatches
+  //     2D, maximumly numOfJSegs by J_allowed_errors; (numOfAligned x n_errors[i])
+
+  //from here, all the array are of size numOfAligned, and declared/initialized after the alignment all done.
+  //***6)p_region_max_length, temp_p_region_max_length 2D, numOfAligned by (max_deletion+1). 
+  //    2ndDimension is fixed to be max_deletion+1. 1st dimension could be shorter	
+  
+  //***7)excess_error_positions, 2D, maximumly numOfJSegs by negative_deletion_max (3), usually, could be shorter, but keep it fixed
+
+  //***8)alleles_all, 1D numOfAligned
+  //***9)alleles_from_distinct_gene, 1D numOfAligned
+
   bool j_large_deletion_flag[numOfJSegs]; //=zeros(length(genJ),1); % Flag if deletions is too large
- unsigned l_seq = _seq.GetLength(); //length of the input sequence
+  unsigned l_seq = _seq.GetLength(); //length of the input sequence
 
- 
- unsigned temp_align_position[2];
- unsigned* temp_n_errors=new unsigned[_numOfJSegs];
- unsigned* temp_error_positions=new unsigned[_J_allowed_errors];
- unsigned temp_align_length
- //% Loop through template alleles for alignment
- for(unsigned int i=0;i<_numOfJSegs;i++) //for j=1:length(genJ)
-   {
+  unsigned* temp_aligned_length=new unsigned[_numOfJSegs];
+  unsigned** temp_align_position=new (unsigned*)[_numOfJSegs];
+  for(unsigned i=0;i<_numOfJSegs;i++)
+    {
+      temp_align_position[i]=new unsigned[2];
+    }
+  unsigned* temp_min_deletions=new unsigned[_numOfJSegs];
+
+  unsigned* temp_n_errors=new unsigned[_numOfJSegs];
+  std::memset(temp_n_errors, -1, _numOfJSegs);//fill the default value with -1
+  unsigned** temp_error_positions=new (unsigned*)[_numOfJSegs];
+  for(unsigned i=0;i<_numOfJSegs;i++)
+    {
+      temp_error_positions[i]=new unsigned[_J_allowed_errors];
+    }
+  unsigned** temp_p_region_max_length=NULL;
+  unsigned** temp_excess_error_positions=NULL;
+  unsigned* temp_alleles_all=NULL, alleles_from_distinct_gene=NULL;
+
+  
+  //the following are only for setting up the output for the 
+  //unsigned align_length_func;
+  unsigned align_position_func[2];
+  unsigned* error_position_func=new unsigned[_J_allowed_errors];
+  //unsigned n_errors_func;
+  //% Loop through template alleles for alignment
+  for(unsigned int i=0;i<_numOfJSegs;i++) //for j=1:length(genJ)
+    {
      //%j=1
      //%disp(['loop: ' num2str(j)])
      //% Get highest scoring alignment for this allele, with acceptable number of errors
      //% NOTE: I use an alignment function that fixes position on the left (as in match_Vs) but I pass in the
      //% reversed sequences, because I want to fix the position on the right.
-     unsigned l_target=_genJs[i].Get_Seq().GetLength();//length of the genomic template allele for current one
+
+     //unsigned l_target=_genJs[i].Get_Seq().GetLength();//length of the genomic template allele for current one
 
      //before doing the alignment, we need to flip/reverse the sequence, since the function do it assume doing
      //fixed on the left. 
@@ -337,45 +371,47 @@ bool match_J(const SequenceString& _seq,
      SequenceString rev_target=FlipSequenceString(_genJs[j]);
 
      //now calling to do the alignment
-     temp_align_length=
+     temp_align_length[i]=
        aligned_with_constraints_fast_left(rev_seq.GetSeq(), rev.target.GetSeq(), _J_allowed_errors, _error_cost,
-					  temp_align_position, &temp_n_errors, temp_error_positions);
+					  align_position_func, temp_n_errors+i, error_positions_func);
 					  
 
-     _J->align_length.push_back(temp_align_length);
+     //_J->align_length.push_back(temp_align_length);
      
      //[align_length(j), rev_align_position, n_errors(j), rev_error_positions]=align_with_constraints_fast_no_fix(seq(end:-1:1) , genJ(j).seq(end:-1:1) , J_allowed_errors, error_cost);
      
-     _J->n_errors.push_back(temp_n_errors);
+     //_J->n_errors.push_back(temp_n_errors);
+
      // % Reverse the error positions to be relative to left-right orientation.
+     //********be careful here, we decide to keep the j error position relative to the END OF J CHAIN
      //  %%%j  error positions is relative to the end of J chain
-     vector<unsigned> temp_error_position_vec;
-     if( temp_n_errors>0)
+     //vector<unsigned> temp_error_position_vec;
+     if( temp_n_errors[i]>0&&temp_n_errors[i]!=((unsigned)-1))  //the second case will not possible??
        {
 	 //unsigned rev_j=temp_n_errors-1;
 	 for(unsigned j=0;j<temp_n_errors;j++)
 	   {
 	     //unsigned tempValue=temp_error_positions[j]
-	     temp_error_position_vec.push_back( temp_error_positions[temp_n_errors-j-1]) ;
+	     temp_error_position[i][j]= error_positions_func[temp_n_errors[i]-j-1] ;
 	     //temp_error_positions[rev_j]=tempValue;
 	     //rev_j--;
 	   }
        }//end
-     _J->error_positions.push_back(temp_error_position_vec);
+     //_J->error_positions.push_back(temp_error_position_vec);
 
-     vector<unsigned> temp_align_position_vec;
+     //vector<unsigned> temp_align_position_vec;
 	//% Calculate (redundant) align_position values. These are used in model scripts.
-     temp_align_position_vec.push_back(
-				  /*temp_align_position[0]*/ = (l_seq-(temp_align_position[0]+temp_align_length-1)-1 ) ); //for _seq first position
-     temp_align_position_vec.push_back(
-				       /*temp_align_position[1]*/= l_target-(temp_align_position[1]+temp_align_length-1)-1 );//for target second position
-     _J->align_position.push_back(temp_align_position_vec);
+     temp_align_position[i][0]
+       /*temp_align_position[0]*/ = (l_seq-(align_position_func[0]+temp_align_length[i]-1)-1 ) ; //for _seq first position
+     temp_align_position[i][1]
+       /*temp_align_position[1]*/= l_target-(align_position_func[1]+temp_align_length[i]-1)-1 ;//for target second position
+     //_J->align_position.push_back(temp_align_position_vec);
 
-      // % Calculate deletions implied by alignment
-     _J->min_deletions.push_back( l_target-(temp_align_position[1]+temp_align_length-1) - 1);
-      //    % Flag if number of deletions is too many
+     // % Calculate deletions implied by alignment
+     temp_min_deletions[i]=l_target-(align_position_func[1]+temp_align_length[i]-1) - 1;
+     //    % Flag if number of deletions is too many
      j_large_deletion_flag[j]=false;
-     if( _J->min_deletions.at(j) > _J_maximum_deletion)
+     if( temp_min_deletions[i] > _J_maximum_deletion)
 	{
 	  j_large_deletion_flag[j] = true;
 	  //%continue;
@@ -397,94 +433,123 @@ bool match_J(const SequenceString& _seq,
      sorted_index[k]=k;
      scores[k]=_J->align_length[k]-error_cost*_J->n_errors[k];
    }
- 
- QuickSort(scores, 0, numOfJSegs-1, sorted_index, _J->min_deletions);
+ //sorted index also holding the gene allele index
+ QuickSort(scores, 0, numOfJSegs-1, sorted_index, temp_min_deletions);
  //	      scores  = align_length - error_cost*n_errors;
  //S = [-scores, min_deletions];
  //	  [~,order]=sortrows(S);
+
  //now we need to reverse the order, since the QuickSort is ascending, but for our purpose we need to descending.
+ Reverse(sorted_index, _numOfJSegs);
+ Reverse(scores, _numOfJSegs);
+ //  % Set a score threshold for alleles.
+ double min_score=max_mf(scores,_numOfJSegs)-3*_J_minimum_alignment_length;
+ //	      min_score = max(scores) - 3*J_minimum_alignment_length;
+
+ //% Subset of alleles that have high enough score, long enough alignment, and
+ //	      % not too many deletions.
+ unsigned* ok_order = new unsigned[_numOfJSegs];
+ unsigned ok_count=0;
+ for(unsigned i=0;i<_numOfJSegs;i++)
+   { 
+     
+     //find( scores(order) >= min_score & align_length(order) >= J_minimum_alignment_length & j_large_deletion_flag(order)==0);
+     if(scores[i]>=min_score&&temp_align_length[sorted_index[i]]>=_J_minimum_alignment_length&&!j_large_deletion_flag[sorted_index[i]])
+       {
+	 ok_order[i]=sorted_index[i];
+	 ok_count++;
+       }
+   }
+ //bool seq_j_ok=true;
+ if(ok_count<=0)//empty
+   {
+   
+     _J.numOfAligned=0;
+     //do we want to clean up the memory, not necessary???
+     return false;
+   }
+
+ //if we are here we are good, we still need to do more next
+ //   % Store all the alignment information in J for acceptable alleles
+ _J.numOfAligned=ok_count;
+
+ _J.align_length = new unsigned [ok_count];
+ if(!CopyElements(temp_align_length,numOfJSegs,  _J.align_length,ok_count, ok_order, ok_count))
+   return false;
  
+ _J.align_position =new unsigned [ok_count];
+ if(!CopyElements(temp_align_position, numOfJSegs,_J.align_position, ok_count, ok_order, ok_count))//(:,ok_order);
+   {
+     return false;
+   }
+ 
+ _J.min_deletions =new unsigned [ok_count];
+ if(!CopyElements(temp_min_deletions, numOfJSegs, _J.min_deletions, ok_count, ok_order, ok_count))
+   return false;
+ 
+ _J.n_errors = new unsigned [ok_count];
+ if(!CopyElements(temp_min_deletions, numOfJSegs, _J.n_errors, ok_count, ok_order, ok_count))
+   return false;
+ 
+ _J.error_positions = new unsigned[ok_count];
+ if(!CopyElements(temp_error_positions, numOfJSegs, _J.error_positions, ok_count, ok_order, ok_count))
+   return false;//error_positions(ok_order,:);
 
-	  % Set a score threshold for alleles.
-	      min_score = max(scores) - 3*J_minimum_alignment_length;
+ //now we are done so, and need to run initialization for the later assignments
+ _J.p_region_max_length = new (unsigned*)[ok_count];
+ for(unsigned i=0;i<ok_count;i++)
+   {
+     _J.p_region_max_length[i]=new unsigned[_J_maximum_deletion+1];
+   }
+ //zeros(numel(ok_order),J_maximum_deletion+1);
+ _J.excess_error_positions =new (unsigned*)[ok_count];
+ //zeros(numel(ok_order),negative_excess_deletions_max);
+ for(unsigned i=0;i<ok_count;i++)
+   {
+     _J.excess_error_positions[i]=new unsigned[_J_negative_excess_deletion_max];
+   }
+ _J.alleles_all = ok_order;
+ 
+ // % Find gene indices of the acceptable alleles.
+ //		      %%%codegen compatible version of
+ //		  %%%genJ_ok_gene_inds = [genJ(ok_order).gene_index];
+ unsigned* genJ_ok_index = new unsigned[ok_count];
+ //go through the genJ to figure out the distinct genes for the each allele, and then reture a array of indices to the  
+ for(unsigned i=0;i<ok_count;i++)
+   {
+     genJ_ok_index=_genJs[alleles_all[i]].Get_GeneIndex;
+   }
+ //genJ_ok_gene_inds = zeros(1,numel(ok_order));
 
-	  % Subset of alleles that have high enough score, long enough alignment, and
-	      % not too many deletions.
-	      j_list = find( scores(order) >= min_score & align_length(order) >= J_minimum_alignment_length & j_large_deletion_flag(order)==0);
+ //compare and then get it copied to the alignment object
+ _J.alleles_from_distinct_genes=new unsigned[ok_count];
 
-	  if isempty(j_list)
-		      //		      %disp(['No reasonable J match for sequence' ])
-		      ok_order = [];
-	  seq_j_ok = false; % Sequence not ok!
+ unsigned runningValue=genJ_ok_index[0];
+ unsigned runningIndexOfAlleleArray=1;
+ _J.alleles_from_distinct_genes[0]=runningGeneIndex;
+ for(unsigned i=1;i<ok_count;i++)
+   {
+     if(runningValue!=genJ_ok_index[i])
+       {
+	 _J.alleles_from_distinct_genes[runningIndexOfAlleleArray] = ok_order[i];
+	 runningValue=genJ_ok_index[i];
+	 runningIndexOfAlleleArray++;
+       }
+   }
+ //need to fill the rest of the distinc gene array with -1 as an indicator
+ for(unsigned i=runningIndexOfAlleleArray;i<ok_count;i++)
+   {
+     _J.alleles_from_distinct_genes[i]=-1;
+   }
+ //
+ //		    % Get list of distinct genes from acceptable alleles.
+ //		[~,Jg] = unique(genJ_ok_gene_inds,"first" ); % Pick the first allele listed for each gene.
+ //												       Jg = sort(Jg); % sort it because unique returns in ascending order of ok_order. This puts it back in order of best match.
+ //															  % Only one (best) allele from each gene
+ //															  J.alleles_from_distinct_genes = ok_order(Jg'); '
+ //done so far
 
-	  else
-				ok_order = order(j_list);
-	  seq_j_ok = true; % Sequence ok!
-			       end
-
-			       if seq_j_ok
-
-				     % Store all the alignment information in J for acceptable alleles
-												 J.align_length = align_length(ok_order);
-	  J.align_position =  align_position(:,ok_order);
-	  J.min_deletions = min_deletions(ok_order);
-	  J.n_errors = n_errors(ok_order);
-	  J.error_positions = error_positions(ok_order,:);
-	  J.p_region_max_length = zeros(numel(ok_order),J_maximum_deletion+1);
-	  J.excess_error_positions = zeros(numel(ok_order),negative_excess_deletions_max);
-	  J.alleles_all = ok_order;
-
-	      % Find gene indices of the acceptable alleles.
-		      %%%codegen compatible version of
-		  %%%genJ_ok_gene_inds = [genJ(ok_order).gene_index];
-	  genJ_ok = genJ(ok_order);
-	  genJ_ok_gene_inds = zeros(1,numel(ok_order));
-	  for g=1:numel(ok_order)
-		  genJ_ok_gene_inds(g) = genJ_ok(g).gene_index;
-	      end
-
-		    % Get list of distinct genes from acceptable alleles.
-		[~,Jg] = unique(genJ_ok_gene_inds,"first" ); % Pick the first allele listed for each gene.
-												       Jg = sort(Jg); % sort it because unique returns in ascending order of ok_order. This puts it back in order of best match.
-															  % Only one (best) allele from each gene
-															  J.alleles_from_distinct_genes = ok_order(Jg'); '
-
-//    %Now go through and find palindromic nucleotides for various number of deletions,
-//    %as well as error positions for 'negative' deletions.
-    for j=1:numel(ok_order)
-        % Loop over number of deletions (nd is actual number of genomic deletions).
-        % Lower bound is maximum of 0 and min_deletions - negative_excess_deletions_max (usually 3).
-        % Upper bound is minimum of J_maximum_deletion (usually 12) and the whole alignment being random insertions
-        for nd=(max(0,J.min_deletions(j) - negative_excess_deletions_max)):min(J_maximum_deletion, J.align_length(j) + J.min_deletions(j))
-
-            % For each value of deletions, find longest half-palindrome
-            % from the implied end of the gene sequence
-            p=0;
-            still_palindrome=true;
-            % Upper bound on p is the length of the J match (accounting for deletions) OR the never actually possible case of sequence length to the left of J match (accounting for deletions)
-            while still_palindrome && p < min( J.align_length(j) - (nd-J.min_deletions(j)), J.align_position(1,j)-1 + nd - J.min_deletions(j))
-                still_palindrome = genJ(ok_order(j)).seq(J.align_position(2,j) + p + (nd - J.min_deletions(j) )) == dnacomplement(seq(J.align_position(1,j) - p + nd - J.min_deletions(j) - 1) );
-                if still_palindrome
-                    p = p + 1;
-                end
-            end
-
-            % Store length of longest half-palindrome for each value of
-            % deletions.
-            J.p_region_max_length(j, 1+nd) = p;
-        end
-   //        % Now for the 'negative' deletions, store where the mismatches are.
-        % This is so we can count number of errors for these possibilities.
-
-  //        % Number of 'negative' deletions to consider:
-        n_excess = min([negative_excess_deletions_max, J.min_deletions(j), J.align_position(1,j)-1 ]);
-
-        % Find mismatches between sequence and genomic J at those positions.
-        excess_err_pos = J.align_position(1,j) - ( n_excess + 1 - find((genJ(ok_order(j)).seq((J.align_position(2,j)-n_excess): (J.align_position(2,j)-1) )~=seq((J.align_position(1,j) -n_excess): (J.align_position(1,j)-1) ))) );
-        J.excess_error_positions(j, 1:length(excess_err_pos)) = excess_err_pos;
-    end
-
-else
+/*else
 
     % Since sequence is not ok, return empty values.
     J.align_length = [];
@@ -499,14 +564,88 @@ else
 end
 
 end
-  
+*/  
 
-//clean up
-delete [] temp_error_positions;
-
-  return true;
+ //clean up
+ delete [] error_positions_func;
+ delete [] genJ_ok_index;
+ return true;
 }
 
-
-
-
+bool DeterminePalindromAndExcessError
+( const Sequencestring& _seq, const GenomicJ* _genJs, const unsigned* _ok_order,
+  const unsigned* _min_deletions, 
+  const unsigned& _negative_excess_deletions_max, const unsigned& _J_maximum_deletion,
+  const unsigned* _align_length, const unsigned& _numOfAligned, const unsigned** _align_positions,
+  /*output*/ unsigned** _p_region_max_length, unsigned** _excess_error_position  
+  )
+{
+  unsigned p=0;
+  bool still_palindrome=true;
+  //go through and find palindromic nucleotides for various number of deletions,
+  //    %as well as error positions for 'negative' deletions.
+  for(unsigned  j=0;j<_ok_count;j++)
+    {
+      string target=_genJs[_ok_order[j]].Get_Sequence();
+      //% Loop over number of deletions (nd is actual number of genomic deletions).
+      //  % Lower bound is maximum of 0 and min_deletions - negative_excess_deletions_max (usually 3).
+      //  % Upper bound is minimum of J_maximum_deletion (usually 12) and the whole alignment being random insertions
+      int nd=_min_deletions[j]-_negative_excess_deletions_max;
+      if(nd<0)
+	nd=0;
+      int max_nd=_J_max_deletions;
+      if(max_nd>_align_length[j]+_min_deletions[j])
+	max_nd=_align_length+_min_deletions[j];
+      
+      for(;nd<=max_nd;nd++)
+	{
+	  //% For each value of deletions, find longest half-palindrome
+          //  % from the implied end of the gene sequence
+	  p=0;
+	  still_palindrome=true;
+	  //% Upper bound on p is the length of the J match (accounting for deletions) OR the never actually possible case of sequence length to the left of J match (accounting for deletions)
+	  unsigned max_p_length=_align_length[j]-(nd-_min_deletions[j]);
+	  if(max_p_length>_align_position[j][0]-1+nd-_min_deletions[j])
+	    max_p_length=_align_position[j][0]-1+nd-_min_deletions[j];
+	  while( still_palindrome && p < max_p_length)
+	    {
+	      
+	      still_palindrome = target.at(_align_position[j][1] + p + (nd - _min_deletions[j] )) == dnacomplement(_seq(_align_position[j][0] - p + nd - _min_deletions[j] - 1) );
+	      if (still_palindrome)
+		{
+		  p ++;
+		}
+	    }
+	  
+	  //% Store length of longest half-palindrome for each value of
+	  //% deletions.
+	  _p_region_max_length[j][ nd] = p;
+	}
+      //        % Now for the 'negative' deletions, store where the mismatches are.
+      // % This is so we can count number of errors for these possibilities.
+      
+      //        % Number of 'negative' deletions to consider:
+      unsigned tempArry[]={negative_excess_deletions_max, _min_deletions[j], _align_position[j][0]-1 };
+      unsigned n_excess = min_mf(tempArry,3);
+      unsigned k;    
+      unsigned runningIndex_excessError=0;
+      // % Find mismatches between sequence and genomic J at those positions.
+      for( k=0;k<n_excess;k++)
+	{
+	  if(target.at(_align_position[j][1]-n_excess+k)==_seq.at(_align_position[j][0]-n_excess+k))
+	    {
+	      _excess_error_positions[runningIndex_excessError]=_align_position[j][0]-n_excess+k;
+	      runningIndex_excessError++;
+	    }
+	}
+      for(;runningIndex_excessError<_negative_excess_error_max;runningIndex_excessError++)
+	{
+	  _excess_error_positions[runningIndex_excessError]=0;
+	}
+      
+      //excess_err_pos = J.align_position(1,j) - ( n_excess + 1 - find((genJ(ok_order(j)).seq((J.align_position(2,j)-n_excess): (J.align_position(2,j)-1) )~=seq((J.align_position(1,j) -n_excess): (J.align_position(1,j)-1) ))) );
+      //  J.excess_error_positions(j, 1:length(excess_err_pos)) = excess_err_pos;
+    }
+  
+  return true;
+}

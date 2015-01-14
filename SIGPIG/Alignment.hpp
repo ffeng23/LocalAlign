@@ -116,7 +116,7 @@ class Alignmet_Object
 bool match_V(const SequenceString& _seq,
 	      const GenomicV* _genVs, const unsigned& _numOfVSegs, 
 	      const unsigned& _V_minimum_alignment_length, const unsigned& _V_maximum_deletion, 
-	      const unsigned& _nagative_excess_deletion_max, const unsigned& _V_allowed_errors, 
+	      const unsigned& _negative_excess_deletion_max, const unsigned& _V_allowed_errors, 
 	     const unsigned& _error_cost,
 	     /*output*/ Alignment_Obj* _V
  );
@@ -126,7 +126,7 @@ bool match_V(const SequenceString& _seq,
 bool match_J(const SequenceString& _seq,
 	      const GenomicV* _genJs, const unsigned& _numOfJSegs, 
 	      const unsigned& _J_minimum_alignment_length, const unsigned& _J_maximum_deletion, 
-	      const unsigned& _nagative_excess_deletion_max, const unsigned& _J_allowed_errors, 
+	      const unsigned& _negative_excess_deletion_max, const unsigned& _J_allowed_errors, 
 	     const unsigned& _error_cost,
 	     /*output*/ Alignment_Obj* _J
  );
@@ -149,7 +149,7 @@ bool match_D(const SequenceString& _seq,
 	      const GenomicV* _genDs, const unsigned& _numOfDSegs,
 	      const unsigned& _V_end, const unsigned& _J_start,
 	      const ScoreMatrix* _ScoreMatrix, const unsigned& _D_maximum_deletion, 
-	     const unsigned& _nagative_excess_deletion_max, const unsigned& _max_align,
+	     const unsigned& _negative_excess_deletion_max, const unsigned& _max_align,
 	     /*output*/ Alignment_D* _D
  );
 
@@ -195,4 +195,10 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
 	const double& _error_cost,
 	/*output*/ unsigned* _n_errors, unsinged* _error_positions);
 
+/*input:
+ *
+ */
+bool DeterminePalindrom();
+
 #endif
+

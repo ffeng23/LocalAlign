@@ -435,3 +435,54 @@ void Reverse(vector<double> _v)
 
 }
 
+void Reverse(unsigned* _V, unsigned _size)
+{
+  //unsigned size=_v.size();
+  unsigned start=0,end=_size()-1;
+  double temp;
+  for(;start<end;)
+    {
+      temp=_v[end];
+      _v[end]=_v[start];
+      _v[start]=temp;
+      start++;
+      end--;
+    }  
+
+}
+
+/*we want to copy elements from _source to _target based on the indice in the _indexOfElementToCopy
+ *target has to be initialized by the caller. The size of target has to be at least the size of the index array
+ *
+ *
+ */
+bool CopyElements(unsigned* _source, unsigned _s_size, unsigned* _target, unsigned _t_size,
+		  unsigned* _indexOfElementToCopy, unsigned _i_size)
+{
+  //first, need to check to make sure the target size has to be larger or equal to index array
+  if (_t_size<_i_size||_s_size<_i_size)
+    return false;
+  
+  for(unsigned i=0;i<_i_size;i++)
+    {
+      _target[i]=_source[_indexOfElementToCopy[i]];
+    }
+  return true;
+}
+
+bool CopyElements(unsigned** _source, unsigned _s_size, unsigned** _target, unsigned _t_size,
+		  unsigned* _indexOfElementToCopy, unsigned _i_size)
+{
+  //first, need to check to make sure the target size has to be larger or equal to index array
+  if (_t_size<_i_size||_s_size<_i_size)
+    return false;
+  
+  for(unsigned i=0;i<_i_size;i++)
+    {
+      _target[i]=_source[_indexOfElementToCopy[i]];
+    }
+  return true;
+}
+
+
+

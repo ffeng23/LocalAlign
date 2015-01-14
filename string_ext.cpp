@@ -392,3 +392,85 @@ string flipStr(const string& _s1)
   return newStr;
 }
 
+char DnaComplement(const char& c)
+{
+ 
+  char temp;
+  //SequenceString temp(seq.GetName(), "");
+  //string tempStrReturn("");
+  //cout<<"temStr (seq get sequence):"<<tempStr<<endl;
+  //cout<<"length:"<<tempStr.length()<<endl;
+  
+      switch(c)
+	{
+	case 'A':
+	case 'a':
+	  temp='T';
+	  break;
+	case 'T':
+	case 't':
+	  temp='A';
+	  break;
+	case 'U':
+	case 'u':
+	  temp='A';
+	  break;
+	case 'G':
+	case 'g':
+	  temp='C';
+	  break;
+	case 'C':
+	case 'c':
+	  temp='G';
+	  break;
+	case 'Y':
+	case 'y':
+	  temp='R';
+	  break;
+	case 'R':
+	case 'r':
+	  temp='Y';
+	  break;
+	case 'S':
+	case 's':
+	  temp='S';
+	  break;
+	case 'W':
+	case 'w':
+	  temp='W';
+	  break;
+	case 'K':
+	case 'k':
+	  temp='M';
+	  break;
+	case 'M':
+	case 'm':
+	  temp='K';
+	  break;
+	case 'B':
+	case 'b':
+	  temp='V';
+	  break;
+	case 'D':
+	case 'd':
+	  temp='H';
+	  break;
+	case 'H':
+	case 'h':
+	  temp='D';
+	  break;
+	case 'V':
+	case 'v':
+	  temp='B';
+	  break;
+	case 'N':
+	case 'n':
+	default:
+	  temp='N';
+	  break;
+	}
+      
+
+      return temp;
+
+}
