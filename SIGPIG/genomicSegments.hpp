@@ -6,6 +6,7 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
 
 #include "../SequenceString.hpp"
 #include "genomicSegment.hpp"

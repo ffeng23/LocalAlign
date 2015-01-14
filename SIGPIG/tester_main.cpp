@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <cstring>
 
 #include "MatrixFunctions.hpp"
 //this is a testing module for testing various functions

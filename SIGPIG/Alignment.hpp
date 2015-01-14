@@ -4,11 +4,14 @@
 #include <vector>
 #include "../SequenceString.hpp"
 #include "../score.hpp"
+#include "GenomicV.hpp"
+#include "GenomicD.hpp"
+#include "GenomicJ.hpp"
 
 //for each object here, it contains possibly more then one alignment that passed the filter
 //so, it is variable for each input sequences. that is why we need use vector
 
-struct Alignment_D
+class Alignment_D
 {
   vector<unsigned> numOfAligned;
   vector<vector<unsigned> > align_length; //2D vector, 
@@ -30,11 +33,11 @@ struct Alignment_D
   vector<vector<vector<unsigned> > >p_region_max_length_left;//allele by numOfAligned by  max_number of deletions
   vector<vector<vector<unsigned> > > p_region_max_length_right; //above
 
-  unsigned[] allele_order={ 0,
-                            1, 2, 3, 4, 5, 6, 7, 8, 9,10,
-			   11,12,13,14,15,16,17,18,19,20,
-			    21,22,23,24,25,26,27,28,29,30,
-			    31,32,33};
+  static unsigned allele_order [];//={ 0,
+  //1, 2, 3, 4, 5, 6, 7, 8, 9,10,
+  //			   11,12,13,14,15,16,17,18,19,20,
+  //			    21,22,23,24,25,26,27,28,29,30,
+  //			    31,32,33};
   
 };
 
@@ -52,11 +55,20 @@ struct Alignment_D
 //-----
 //the outer caller will need to initialize and fill the data
 //***************
-class Alignmet_Object
+class Alignment_Object
 {
   public:
-  Alignment_Object(const unsigned& numOfGenTempleates);
+  //default constructor
+  //Alignment_Object();
+  Alignment_Object(const unsigned& numOfGenTemplates=0);
 
+  //copy constructor
+  Alignment_Object(const Alignment_Object& _ao);
+
+  //assignment operator
+  Alignment_Object& operator = (const Alignment_Object& _ao);
+  
+  //virtual destructor, not necessary 
   virtual ~Alignment_Object();
   
   /*
@@ -118,7 +130,7 @@ bool match_V(const SequenceString& _seq,
 	      const unsigned& _V_minimum_alignment_length, const unsigned& _V_maximum_deletion, 
 	      const unsigned& _negative_excess_deletion_max, const unsigned& _V_allowed_errors, 
 	     const unsigned& _error_cost,
-	     /*output*/ Alignment_Obj* _V
+	     /*output*/ Alignment_Object* _V
  );
 
 
@@ -128,7 +140,7 @@ bool match_J(const SequenceString& _seq,
 	      const unsigned& _J_minimum_alignment_length, const unsigned& _J_maximum_deletion, 
 	      const unsigned& _negative_excess_deletion_max, const unsigned& _J_allowed_errors, 
 	     const unsigned& _error_cost,
-	     /*output*/ Alignment_Obj* _J
+	     /*output*/ Alignment_Object* _J
  );
 
 //input:
@@ -193,7 +205,7 @@ unsigned align_with_constraints_fast_left(const string& _seq, const string& _tar
 unsigned align_with_constraints_fixed_left_remove_right_errors
        (const string& _seq1, const string& _seq2, const unsigned& _maximum_errors, 
 	const double& _error_cost,
-	/*output*/ unsigned* _n_errors, unsinged* _error_positions);
+	/*output*/ unsigned* _n_errors, unsigned* _error_positions);
 
 /*input:
  *

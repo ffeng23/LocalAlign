@@ -435,10 +435,10 @@ void Reverse(vector<double> _v)
 
 }
 
-void Reverse(unsigned* _V, unsigned _size)
+void Reverse(unsigned* _v, unsigned _size)
 {
   //unsigned size=_v.size();
-  unsigned start=0,end=_size()-1;
+  unsigned start=0,end=_size-1;
   double temp;
   for(;start<end;)
     {
@@ -456,7 +456,7 @@ void Reverse(unsigned* _V, unsigned _size)
  *
  *
  */
-bool CopyElements(unsigned* _source, unsigned _s_size, unsigned* _target, unsigned _t_size,
+bool CopyElements(const unsigned* _source, unsigned _s_size, unsigned* _target, unsigned _t_size,
 		  unsigned* _indexOfElementToCopy, unsigned _i_size)
 {
   //first, need to check to make sure the target size has to be larger or equal to index array
@@ -470,8 +470,8 @@ bool CopyElements(unsigned* _source, unsigned _s_size, unsigned* _target, unsign
   return true;
 }
 
-bool CopyElements(unsigned** _source, unsigned _s_size, unsigned** _target, unsigned _t_size,
-		  unsigned* _indexOfElementToCopy, unsigned _i_size)
+bool CopyElements(const unsigned** _source, const unsigned& _s_size, unsigned** _target, const unsigned& _t_size,
+		  const unsigned* _indexOfElementToCopy, const unsigned& _i_size)
 {
   //first, need to check to make sure the target size has to be larger or equal to index array
   if (_t_size<_i_size||_s_size<_i_size)

@@ -10,14 +10,15 @@ GXX = g++
 MAKE= make
 
 CFLAG=-g -Werror -O -I ../Lib/include
-LOADFLAG=-s -lm -L../Lib/lib/ -lpthread
+LOADFLAG=-s -lm  -lpthread
 #LOADFLAG=-s -lm -L../Lib/lib/ -lpthread -lboost_serialization
+#  the -L ../Lib/lib is the searching dir for shared libraries. -lboost_serialization is the boost serilization library, but this is not what we do now. so remove it for now.
 AlignmentLibDir=../
 
 CXXFLAG=${CFLAG}
 
 
-SRCS_1=tester_main.cpp MatrixFunctions.cpp
+SRCS_1=tester_main.cpp MatrixFunctions.cpp Alignment.cpp
 
 SRCS_0=main.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}score.cpp ${AlignmentLibDir}SequenceString.cpp ${AlignmentLibDir}AlignmentString.cpp ${AlignmentLibDir}AffineGapModel.cpp ${AlignmentLibDir}MarkovChainGapModel_454.cpp ${AlignmentLibDir}TracebackTable.cpp ${AlignmentLibDir}pairwiseAlignment.cpp ${AlignmentLibDir}OverlapAlignment.cpp ${AlignmentLibDir}GapModel.cpp ${AlignmentLibDir}FastaHandler.cpp ${AlignmentLibDir}LocalAlignment.cpp ${AlignmentLibDir}SequenceHandlerCommon.cpp ${AlignmentLibDir}GlobalAlignment.cpp GenomicV.cpp genomicSegments.cpp genomicSegment.cpp GenomicJ.cpp GenomicD.cpp LoadData.cpp
 
