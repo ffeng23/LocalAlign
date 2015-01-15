@@ -456,8 +456,8 @@ void Reverse(unsigned* _v, unsigned _size)
  *
  *
  */
-bool CopyElements(const unsigned* _source, unsigned _s_size, unsigned* _target, unsigned _t_size,
-		  unsigned* _indexOfElementToCopy, unsigned _i_size)
+bool CopyElements(const unsigned* _source, const unsigned& _s_size, unsigned* _target, const unsigned& _t_size,
+		  const unsigned* _indexOfElementToCopy, const unsigned& _i_size)
 {
   //first, need to check to make sure the target size has to be larger or equal to index array
   if (_t_size<_i_size||_s_size<_i_size)
@@ -470,16 +470,23 @@ bool CopyElements(const unsigned* _source, unsigned _s_size, unsigned* _target, 
   return true;
 }
 
-bool CopyElements(const unsigned** _source, const unsigned& _s_size, unsigned** _target, const unsigned& _t_size,
-		  const unsigned* _indexOfElementToCopy, const unsigned& _i_size)
+bool CopyElements
+  (const unsigned** _source, const unsigned& _s_size1, const unsigned& _s_size2, 
+   unsigned** _target, const unsigned& _t_size1, const unsigned& _t_size2,
+   const unsigned* _indexOfElementToCopy, const unsigned& _i_size)
 {
   //first, need to check to make sure the target size has to be larger or equal to index array
-  if (_t_size<_i_size||_s_size<_i_size)
+  if (_t_size1<_i_size||_s_size1<_i_size)
+    return false;
+  if(_t_size2<_s_size2)
     return false;
   
   for(unsigned i=0;i<_i_size;i++)
     {
-      _target[i]=_source[_indexOfElementToCopy[i]];
+      for(unsigned j=0;j<_s_size2;j++)
+	{
+	  _target[i][j]=_source[_indexOfElementToCopy[i]][j];
+	}
     }
   return true;
 }

@@ -372,7 +372,8 @@ bool match_J(const SequenceString& _seq,
     }
   unsigned** temp_p_region_max_length=NULL;
   unsigned** temp_excess_error_positions=NULL;
-  unsigned* temp_alleles_all=NULL, alleles_from_distinct_gene=NULL;
+  unsigned* temp_alleles_all, alleles_from_distinct_gene;
+  temp_alleles_all=NULL; alleles_from_distinct_gene=NULL;
 
   
   //the following are only for setting up the output for the 
@@ -501,25 +502,33 @@ bool match_J(const SequenceString& _seq,
  _J.numOfAligned=ok_count;
 
  _J.align_length = new unsigned [ok_count];
- if(!CopyElements(temp_align_length,numOfJSegs,  _J.align_length,ok_count, ok_order, ok_count))
+ if(!CopyElements(temp_align_length, _numOfJSegs,  _J.align_length,ok_count, ok_order, ok_count))
    return false;
  
- _J.align_position =new unsigned [ok_count];
- if(!CopyElements(temp_align_position, numOfJSegs,_J.align_position, ok_count, ok_order, ok_count))//(:,ok_order);
+ _J.align_position =new unsigned* [ok_count];
+ for(unsigned m=0;m<ok_count;m++)
+   {
+     _J.align_position=new unsigned [2];
+   }
+ if(!CopyElements(temp_align_position, _numOfJSegs, 2, _J.align_position, ok_count, 2, ok_order, ok_count))//(:,ok_order);
    {
      return false;
    }
  
  _J.min_deletions =new unsigned [ok_count];
- if(!CopyElements(temp_min_deletions, numOfJSegs, _J.min_deletions, ok_count, ok_order, ok_count))
+ if(!CopyElements(temp_min_deletions, _numOfJSegs, _J.min_deletions, ok_count, ok_order, ok_count))
    return false;
  
  _J.n_errors = new unsigned [ok_count];
- if(!CopyElements(temp_min_deletions, numOfJSegs, _J.n_errors, ok_count, ok_order, ok_count))
+ if(!CopyElements(temp_min_deletions, _numOfJSegs, _J.n_errors, ok_count, ok_order, ok_count))
    return false;
  
  _J.error_positions = new unsigned[ok_count];
- if(!CopyElements(temp_error_positions, numOfJSegs, _J.error_positions, ok_count, ok_order, ok_count))
+ for(unsigned m=0;m<ok_count;m++)
+   {
+     _J.error_posiitons[m]=new unsigned [_J_allowed_errors]
+   }
+ if(!CopyElements(temp_error_positions, numOfJSegs, _J_allowed_errors, _J.error_positions, ok_count, _J_allowed_errors, ok_order, ok_count))
    return false;//error_positions(ok_order,:);
 
  //now we are done so, and need to run initialization for the later assignments
