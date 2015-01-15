@@ -46,7 +46,9 @@ bool CopyElements
    unsigned** _target, const unsigned& _t_size1, const unsigned& _t_size2,
    const unsigned* _indexOfElementToCopy, const unsigned& _i_size);
 
-bool CopyElements(const unsigned* _source, const unsigned& _s_size, unsigned* _target, const unsigned& _t_size,
-		  const unsigned* _indexOfElementToCopy, const unsigned& _i_size);
+bool CopyElements
+  (const unsigned* _source, const unsigned& _s_size, 
+   unsigned* _target, const unsigned& _t_size,
+   const unsigned* _indexOfElementToCopy, const unsigned& _i_size);
 
 #endif

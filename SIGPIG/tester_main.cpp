@@ -64,9 +64,15 @@ int main()
   cout<<"****sorted secondary array"<<endl;
   Print(array_int2, 11);
 
-  
+  cout<<"####now testing reverse array......"<<endl;
+  cout<<"\t before.."<<endl;
+  Print(array_int,4);
   Reverse(array_int, 4);
+  cout<<"\t after...."<<endl;
   Print(array_int, 4);
+
+  //cout<<"#####new test of reverse:"<<endl;
+  Print(array_double, 4);
   Reverse(array_double, 4);
   Print(array_double, 4);
 
@@ -74,6 +80,35 @@ int main()
   //Print(vec_int);
   Reverse(vec_double);
   //Print(vec_double, 4);
+
+
+  //testing
+  cout<<"%%%%%%testing copy element function"<<endl;
+  unsigned* dest=new unsigned[4];
+  unsigned index_array[]={2,1,2};
+  cout<<"--source:"<<endl;
+  Print(array_int,4);
+  if(CopyElements(array_int, 4, dest, 4, index_array,3))
+    {
+      cout<<"--Done"<<endl;
+      Print(dest, 4);
+    }
+  else
+    {
+      cout<<"ERROR, can not copy"<<endl;
+    }
+
+  //testing align with constraints fixed left remove right errors
+%error_cost=-5;
+%seq1='GAGAGCCGAGGACACGGCCGTGTATTACTGTGCGAGAGATCTCTC';
+%seq2='aGCGAGCCGAGGACACGGCAGTGTATTACTGTGCGAGAGACCACT'
+%maximum_errors=10
+
+  
+  //testing align with constraints fast left
+
+
+
   
   return 0;
 }

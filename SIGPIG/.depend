@@ -6,7 +6,8 @@ Align_with_constraints.o: Align_with_constraints.cpp \
   ../TracebackTable.hpp
 Alignment.o: Alignment.cpp ../SequenceString.hpp genomicSegments.hpp \
   genomicSegment.hpp GenomicJ.hpp GenomicV.hpp GenomicD.hpp Alignment.hpp \
-  ../score.hpp MatrixFunctions.hpp ../string_ext.hpp
+  ../score.hpp MatrixFunctions.hpp ../string_ext.hpp \
+  AlignmentSettings.hpp
 GenomicD.o: GenomicD.cpp GenomicD.hpp genomicSegment.hpp \
   ../SequenceString.hpp
 GenomicJ.o: GenomicJ.cpp GenomicJ.hpp genomicSegment.hpp \

@@ -4,6 +4,8 @@
 #include "Alignment.hpp"
 #include "MatrixFunctions.hpp"
 #include "../string_ext.hpp"
+#include "AlignmentSettings.hpp"
+
 using namespace std;
 
 unsigned Alignment_D::allele_order []={ 0,
@@ -13,28 +15,105 @@ unsigned Alignment_D::allele_order []={ 0,
 					  31,32,33
 					  };
 
-
-
-Alignment_Object::Alignment_Object(const Alignment_Object& _ao) :
-  numOfAligned(_ao.numOfAligned)
-{
-align_length=new unsigned [numOfAligned];
-memcpy(align_length, _ao.align_length, numOfAligned);
-}
-//enum MatchState{ MATCH, MISMATCH, NOT_ALIGNED};
 Alignment_Object::Alignment_Object(const unsigned& numOfGenTemplates):
   numOfAligned(numOfGenTemplates), align_length(NULL),
   align_position(NULL), min_deletions(NULL), n_errors(NULL), error_positions(NULL),
   p_region_max_length(NULL), excess_error_positions(NULL), alleles_all(NULL),
   alleles_from_distinct_genes(NULL)
 {
-//empty constructor
+  //empty constructor
+}
 
+//copy constructor, we need a deep copy
+Alignment_Object::Alignment_Object(const Alignment_Object& _ao) :
+  numOfAligned(_ao.numOfAligned)
+{
+  align_length=new unsigned [numOfAligned];
+  memcpy(align_length, _ao.align_length, numOfAligned);
+
+  align_position=new unsigned* [numOfAligned];
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      align_position[i]=new unsigned [2];
+      memcpy(align_position[i], _ao.align_position[i], 2);
+    }
+
+  min_deletions=new unsigned [numOfAligned];
+  memcpy(min_deletions, _ao.min_deletions, numOfAligned);
+
+  n_errors=new unsigned [numOfAligned];
+  memcpy(n_errors, _ao.n_errors, numOfAligned);
+
+  p_region_max_length=new unsigned*[numOfAligned];
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      p_region_max_length[i]=new unsigned[AlignmentSettings::J_allowed_errors+1];
+      memcpy(p_region_max_length[i], _ao.p_region_max_length[i], AlignmentSettings::J_allowed_errors+1);
+    }
+
+  excess_error_positions=new unsigned*[numOfAligned];
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      excess_error_positions[i]=new unsigned[AlignmentSettings::negative_excess_deletions_max];
+      memcpy(excess_error_positions[i], _ao.excess_error_positions[i],AlignmentSettings::negative_excess_deletions_max);
+    }
+
+  alleles_all=new unsigned[numOfAligned];
+  memcpy(alleles_all, _ao.alleles_all, numOfAligned);
+
+  alleles_from_distinct_genes=new unsigned[numOfAligned];
+  memcpy(alleles_from_distinct_genes, _ao.alleles_from_distinct_genes, numOfAligned);
+  //done!!!
+}
+
+//assignment operator
+Alignment_Object& Alignment_Object::operator = (const Alignment_Object& _ao)
+{
+  if(this==&_ao)
+    return *this;
+
+  numOfAligned=_ao.numOfAligned;
+  
+  align_length=new unsigned [numOfAligned];
+  memcpy(align_length, _ao.align_length, numOfAligned);
+
+  align_position=new unsigned* [numOfAligned];
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      align_position[i]=new unsigned [2];
+      memcpy(align_position[i], _ao.align_position[i], 2);
+    }
+
+  min_deletions=new unsigned [numOfAligned];
+  memcpy(min_deletions, _ao.min_deletions, numOfAligned);
+
+  n_errors=new unsigned [numOfAligned];
+  memcpy(n_errors, _ao.n_errors, numOfAligned);
+
+  p_region_max_length=new unsigned*[numOfAligned];
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      p_region_max_length[i]=new unsigned[AlignmentSettings::J_allowed_errors+1];
+      memcpy(p_region_max_length[i], _ao.p_region_max_length[i], AlignmentSettings::J_allowed_errors+1);
+    }
+
+  excess_error_positions=new unsigned*[numOfAligned];
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      excess_error_positions[i]=new unsigned[AlignmentSettings::negative_excess_deletions_max];
+      memcpy(excess_error_positions[i], _ao.excess_error_positions[i],AlignmentSettings::negative_excess_deletions_max);
+    }
+
+  alleles_all=new unsigned[numOfAligned];
+  memcpy(alleles_all, _ao.alleles_all, numOfAligned);
+
+  alleles_from_distinct_genes=new unsigned[numOfAligned];
+  memcpy(alleles_from_distinct_genes, _ao.alleles_from_distinct_genes, numOfAligned);
+  //done!!!
+  
+  return *this;
 }
   
-  
-
-
   
 Alignment_Object::~Alignment_Object()
 {
