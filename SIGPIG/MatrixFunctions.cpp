@@ -471,7 +471,7 @@ bool CopyElements(const unsigned* _source, const unsigned& _s_size, unsigned* _t
 }
 
 bool CopyElements
-  (const unsigned** _source, const unsigned& _s_size1, const unsigned& _s_size2, 
+  (unsigned** _source, const unsigned& _s_size1, const unsigned& _s_size2, 
    unsigned** _target, const unsigned& _t_size1, const unsigned& _t_size2,
    const unsigned* _indexOfElementToCopy, const unsigned& _i_size)
 {

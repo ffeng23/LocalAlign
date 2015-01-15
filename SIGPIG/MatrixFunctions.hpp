@@ -40,8 +40,13 @@ void Reverse(double* _array, const unsigned& _N);
 void Reverse(vector<unsigned> _v);
 void Reverse(vector<double> _v);
 
-bool CopyElements(const unsigned** _source, const unsigned& _s_size,
-		  unsigned** _target,const unsigned& _t_size,
+
+bool CopyElements
+  ( unsigned** _source, const unsigned& _s_size1, const unsigned& _s_size2, 
+   unsigned** _target, const unsigned& _t_size1, const unsigned& _t_size2,
+   const unsigned* _indexOfElementToCopy, const unsigned& _i_size);
+
+bool CopyElements(const unsigned* _source, const unsigned& _s_size, unsigned* _target, const unsigned& _t_size,
 		  const unsigned* _indexOfElementToCopy, const unsigned& _i_size);
 
 #endif

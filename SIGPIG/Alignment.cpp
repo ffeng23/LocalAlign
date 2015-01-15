@@ -3,7 +3,7 @@
 #include "genomicSegments.hpp"
 #include "Alignment.hpp"
 #include "MatrixFunctions.hpp"
-
+#include "../string_ext.hpp"
 using namespace std;
 
 unsigned Alignment_D::allele_order []={ 0,
@@ -502,13 +502,13 @@ bool match_J(const SequenceString& _seq,
  _J.numOfAligned=ok_count;
 
  _J.align_length = new unsigned [ok_count];
- if(!CopyElements(temp_align_length, _numOfJSegs,  _J.align_length,ok_count, ok_order, ok_count))
+ if(!CopyElements(temp_align_length, _numOfJSegs,  _J.align_length, ok_count, ok_order, ok_count))
    return false;
  
  _J.align_position =new unsigned* [ok_count];
  for(unsigned m=0;m<ok_count;m++)
    {
-     _J.align_position=new unsigned [2];
+     _J.align_position=new unsigned* [2];
    }
  if(!CopyElements(temp_align_position, _numOfJSegs, 2, _J.align_position, ok_count, 2, ok_order, ok_count))//(:,ok_order);
    {
@@ -523,26 +523,26 @@ bool match_J(const SequenceString& _seq,
  if(!CopyElements(temp_min_deletions, _numOfJSegs, _J.n_errors, ok_count, ok_order, ok_count))
    return false;
  
- _J.error_positions = new unsigned[ok_count];
+ _J.error_positions = new unsigned* [ok_count];
  for(unsigned m=0;m<ok_count;m++)
    {
-     _J.error_posiitons[m]=new unsigned [_J_allowed_errors]
+     _J.error_positions[m]=new unsigned [_J_allowed_errors];
    }
- if(!CopyElements(temp_error_positions, numOfJSegs, _J_allowed_errors, _J.error_positions, ok_count, _J_allowed_errors, ok_order, ok_count))
+ if(!CopyElements(temp_error_positions, _numOfJSegs, _J_allowed_errors, _J.error_positions, ok_count, _J_allowed_errors, ok_order, ok_count))
    return false;//error_positions(ok_order,:);
 
  //now we are done so, and need to run initialization for the later assignments
- _J.p_region_max_length = new (unsigned*)[ok_count];
+ _J.p_region_max_length = new unsigned* [ok_count];
  for(unsigned i=0;i<ok_count;i++)
    {
      _J.p_region_max_length[i]=new unsigned[_J_maximum_deletion+1];
    }
  //zeros(numel(ok_order),J_maximum_deletion+1);
- _J.excess_error_positions =new (unsigned*)[ok_count];
+ _J.excess_error_positions =new unsigned* [ok_count];
  //zeros(numel(ok_order),negative_excess_deletions_max);
  for(unsigned i=0;i<ok_count;i++)
    {
-     _J.excess_error_positions[i]=new unsigned[_J_negative_excess_deletion_max];
+     _J.excess_error_positions[i]=new unsigned [_negative_excess_deletion_max];
    }
  _J.alleles_all = ok_order;
  
@@ -553,7 +553,7 @@ bool match_J(const SequenceString& _seq,
  //go through the genJ to figure out the distinct genes for the each allele, and then reture a array of indices to the  
  for(unsigned i=0;i<ok_count;i++)
    {
-     genJ_ok_index=_genJs[alleles_all[i]].Get_GeneIndex;
+     genJ_ok_index[i]=_genJs[_J.alleles_all[i]].Get_GeneIndex();
    }
  //genJ_ok_gene_inds = zeros(1,numel(ok_order));
 
@@ -562,7 +562,7 @@ bool match_J(const SequenceString& _seq,
 
  unsigned runningValue=genJ_ok_index[0];
  unsigned runningIndexOfAlleleArray=1;
- _J.alleles_from_distinct_genes[0]=runningGeneIndex;
+ _J.alleles_from_distinct_genes[0]=runningValue;
  for(unsigned i=1;i<ok_count;i++)
    {
      if(runningValue!=genJ_ok_index[i])
@@ -603,13 +603,13 @@ end
 */  
 
  //clean up
- delete [] error_positions_func;
+ delete [] error_position_func;
  delete [] genJ_ok_index;
  return true;
 }
 
 bool DeterminePalindromAndExcessError
-( const Sequencestring& _seq, const GenomicJ* _genJs, const unsigned* _ok_order,
+( const SequenceString& _seq, const GenomicJ* _genJs, const unsigned* _ok_order,
   const unsigned* _min_deletions, 
   const unsigned& _negative_excess_deletions_max, const unsigned& _J_maximum_deletion,
   const unsigned* _align_length, const unsigned& _numOfAligned, const unsigned** _align_positions,
@@ -620,7 +620,7 @@ bool DeterminePalindromAndExcessError
   bool still_palindrome=true;
   //go through and find palindromic nucleotides for various number of deletions,
   //    %as well as error positions for 'negative' deletions.
-  for(unsigned  j=0;j<_ok_count;j++)
+  for(unsigned  j=0;j<_numOfAligned;j++)
     {
       string target=_genJs[_ok_order[j]].Get_Sequence();
       //% Loop over number of deletions (nd is actual number of genomic deletions).
@@ -629,9 +629,9 @@ bool DeterminePalindromAndExcessError
       int nd=_min_deletions[j]-_negative_excess_deletions_max;
       if(nd<0)
 	nd=0;
-      int max_nd=_J_max_deletions;
+      int max_nd=_J_maximum_deletion;
       if(max_nd>_align_length[j]+_min_deletions[j])
-	max_nd=_align_length+_min_deletions[j];
+	max_nd=_align_length[j]+_min_deletions[j];
       
       for(;nd<=max_nd;nd++)
 	{
@@ -641,12 +641,12 @@ bool DeterminePalindromAndExcessError
 	  still_palindrome=true;
 	  //% Upper bound on p is the length of the J match (accounting for deletions) OR the never actually possible case of sequence length to the left of J match (accounting for deletions)
 	  unsigned max_p_length=_align_length[j]-(nd-_min_deletions[j]);
-	  if(max_p_length>_align_position[j][0]-1+nd-_min_deletions[j])
-	    max_p_length=_align_position[j][0]-1+nd-_min_deletions[j];
+	  if(max_p_length>_align_positions[j][0]-1+nd-_min_deletions[j])
+	    max_p_length=_align_positions[j][0]-1+nd-_min_deletions[j];
 	  while( still_palindrome && p < max_p_length)
 	    {
 	      
-	      still_palindrome = target.at(_align_position[j][1] + p + (nd - _min_deletions[j] )) == dnacomplement(_seq(_align_position[j][0] - p + nd - _min_deletions[j] - 1) );
+	      still_palindrome = target.at(_align_positions[j][1] + p + (nd - _min_deletions[j] )) == DnaComplement(_seq.GetSequence().at(_align_positions[j][0] - p + nd - _min_deletions[j] - 1) );
 	      if (still_palindrome)
 		{
 		  p ++;
@@ -661,22 +661,22 @@ bool DeterminePalindromAndExcessError
       // % This is so we can count number of errors for these possibilities.
       
       //        % Number of 'negative' deletions to consider:
-      unsigned tempArry[]={negative_excess_deletions_max, _min_deletions[j], _align_position[j][0]-1 };
+      unsigned tempArry[]={_negative_excess_deletions_max, _min_deletions[j], _align_positions[j][0]-1 };
       unsigned n_excess = min_mf(tempArry,3);
       unsigned k;    
       unsigned runningIndex_excessError=0;
       // % Find mismatches between sequence and genomic J at those positions.
       for( k=0;k<n_excess;k++)
 	{
-	  if(target.at(_align_position[j][1]-n_excess+k)==_seq.at(_align_position[j][0]-n_excess+k))
+	  if(target.at(_align_positions[j][1]-n_excess+k)==_seq.GetSequence().at(_align_positions[j][0]-n_excess+k))
 	    {
-	      _excess_error_positions[runningIndex_excessError]=_align_position[j][0]-n_excess+k;
+	      _excess_error_position[nd][runningIndex_excessError]=_align_positions[j][0]-n_excess+k;
 	      runningIndex_excessError++;
 	    }
 	}
-      for(;runningIndex_excessError<_negative_excess_error_max;runningIndex_excessError++)
+      for(;runningIndex_excessError<_negative_excess_deletions_max;runningIndex_excessError++)
 	{
-	  _excess_error_positions[runningIndex_excessError]=0;
+	  _excess_error_position[nd][runningIndex_excessError]=0;
 	}
       
       //excess_err_pos = J.align_position(1,j) - ( n_excess + 1 - find((genJ(ok_order(j)).seq((J.align_position(2,j)-n_excess): (J.align_position(2,j)-1) )~=seq((J.align_position(1,j) -n_excess): (J.align_position(1,j)-1) ))) );

@@ -31,6 +31,10 @@ unsigned Genomic_Segment::Get_Allele() const
 {
   return c_allele;
 }
+unsigned Genomic_Segment::Get_GeneIndex() const
+{
+  return c_gene_index;
+}
 
 //bool Genomic_Segments::ReadGenomicSegments(const string& _fileName)
 
