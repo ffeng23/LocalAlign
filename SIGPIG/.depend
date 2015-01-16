@@ -30,5 +30,8 @@ main.o: main.cpp ../string_ext.hpp ../score.hpp ../SequenceString.hpp \
   ../GlobalAlignment.hpp ../OverlapAlignment.hpp ../FastaHandler.hpp \
   ../SequenceHandler.hpp ../SequenceHandlerCommon.hpp \
   ../AlignmentString.hpp GenomicJ.hpp genomicSegment.hpp GenomicD.hpp \
-  GenomicV.hpp genomicSegments.hpp LoadData.hpp AlignmentSettings.hpp
-tester_main.o: tester_main.cpp MatrixFunctions.hpp
+  GenomicV.hpp genomicSegments.hpp LoadData.hpp AlignmentSettings.hpp \
+  Alignment.hpp
+tester_main.o: tester_main.cpp MatrixFunctions.hpp Alignment.hpp \
+  ../SequenceString.hpp ../score.hpp GenomicV.hpp genomicSegment.hpp \
+  GenomicD.hpp GenomicJ.hpp

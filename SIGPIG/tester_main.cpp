@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "MatrixFunctions.hpp"
+#include "Alignment.hpp"
 //this is a testing module for testing various functions
 
 using namespace std;
@@ -99,16 +100,45 @@ int main()
     }
 
   //testing align with constraints fixed left remove right errors
-%error_cost=-5;
-%seq1='GAGAGCCGAGGACACGGCCGTGTATTACTGTGCGAGAGATCTCTC';
-%seq2='aGCGAGCCGAGGACACGGCAGTGTATTACTGTGCGAGAGACCACT'
-%maximum_errors=10
+  cout<<"%%%%%%%%testing alignment function 1 fixed left remove"<<endl;
+  double error_cost=5;
+  string seq1="AGGGGGGGGAGAGCCGAGGACACGGCCGTGTATTACTGTGCGAGAGATCTCTC";
+  string seq2=    "GGGGCGAGCCGAGGACACGGCAGTGTATTACTGTGCGAGAGACCACT";
+  unsigned maximum_errors=10;
+  unsigned n_errors=0;
+  unsigned* error_positions=new unsigned [maximum_errors];
+  unsigned alength=align_with_constraints_fixed_left_remove_right_errors(seq1,seq2, maximum_errors, error_cost, &n_errors, error_positions);
 
-  
+  cout<<"\t aligned length: "<<alength<<";n_error:"<<n_errors<<endl;
+  cout<<"\t error positions:";
+  for(unsigned i =0;i<maximum_errors;i++)
+    {
+      cout<<error_positions[i]<<",";
+    }
+  cout<<endl;
+  cout<<"Done"<<endl;
+									
   //testing align with constraints fast left
+  cout<<"#####################start doing the second testing of alignment functions"<<endl;
+  unsigned* align_positions=new unsigned[2];
+  alength=align_with_constraints_fast_left(seq1, seq2, maximum_errors, error_cost, align_positions, &n_errors, error_positions);
 
+  cout<<"\t aligned length: "<<alength<<";n_error:"<<n_errors<<endl;
+  cout<<"\t error positions:";
+  for(unsigned i =0;i<maximum_errors;i++)
+    {
+      cout<<error_positions[i]<<",";
+    }
+  
+  cout<<endl;
 
-
+  cout<<"\talign positions:"<<align_positions[0]<<","<<align_positions[1]<<endl;
+  cout<<"Done"<<endl;
+  
+  //clear the memory
+  delete[] error_positions;
+									 
+  cout<<"!!!!!DONE!!!!!!"<<endl;
   
   return 0;
 }

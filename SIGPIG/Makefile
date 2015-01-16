@@ -18,9 +18,9 @@ AlignmentLibDir=../
 CXXFLAG=${CFLAG}
 
 
-SRCS_1=tester_main.cpp MatrixFunctions.cpp Alignment.cpp genomicSegments.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}SequenceString.cpp genomicSegment.cpp GenomicV.cpp GenomicD.cpp GenomicJ.cpp ${AlignmentLibDir}FastaHandler.cpp
+SRCS_1=tester_main.cpp MatrixFunctions.cpp Alignment.cpp genomicSegments.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}SequenceString.cpp genomicSegment.cpp GenomicV.cpp GenomicD.cpp GenomicJ.cpp ${AlignmentLibDir}FastaHandler.cpp AlignmentSettings
 
-SRCS_0=main.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}score.cpp ${AlignmentLibDir}SequenceString.cpp ${AlignmentLibDir}AlignmentString.cpp ${AlignmentLibDir}AffineGapModel.cpp ${AlignmentLibDir}MarkovChainGapModel_454.cpp ${AlignmentLibDir}TracebackTable.cpp ${AlignmentLibDir}pairwiseAlignment.cpp ${AlignmentLibDir}OverlapAlignment.cpp ${AlignmentLibDir}GapModel.cpp ${AlignmentLibDir}FastaHandler.cpp ${AlignmentLibDir}LocalAlignment.cpp ${AlignmentLibDir}SequenceHandlerCommon.cpp ${AlignmentLibDir}GlobalAlignment.cpp GenomicV.cpp genomicSegments.cpp genomicSegment.cpp GenomicJ.cpp GenomicD.cpp LoadData.cpp
+SRCS_0=main.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}score.cpp ${AlignmentLibDir}SequenceString.cpp ${AlignmentLibDir}AlignmentString.cpp ${AlignmentLibDir}AffineGapModel.cpp ${AlignmentLibDir}MarkovChainGapModel_454.cpp ${AlignmentLibDir}TracebackTable.cpp ${AlignmentLibDir}pairwiseAlignment.cpp ${AlignmentLibDir}OverlapAlignment.cpp ${AlignmentLibDir}GapModel.cpp ${AlignmentLibDir}FastaHandler.cpp ${AlignmentLibDir}LocalAlignment.cpp ${AlignmentLibDir}SequenceHandlerCommon.cpp ${AlignmentLibDir}GlobalAlignment.cpp GenomicV.cpp genomicSegments.cpp genomicSegment.cpp GenomicJ.cpp GenomicD.cpp LoadData.cpp MatrixFunctions.cpp Alignment.cpp AlignmentSettings.cpp
 
 #SRCS_2=tester_boost.cpp
 

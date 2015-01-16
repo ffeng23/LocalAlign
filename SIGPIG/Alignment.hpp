@@ -137,11 +137,11 @@ bool match_V(const SequenceString& _seq,
 
 //see above for the definition (match_Vs)
 bool match_J(const SequenceString& _seq,
-	      const GenomicV* _genJs, const unsigned& _numOfJSegs, 
+	      const GenomicJ* _genJs, const unsigned& _numOfJSegs, 
 	      const unsigned& _J_minimum_alignment_length, const unsigned& _J_maximum_deletion, 
 	      const unsigned& _negative_excess_deletion_max, const unsigned& _J_allowed_errors, 
 	     const unsigned& _error_cost,
-	     /*output*/ Alignment_Object* _J
+	     /*output*/ Alignment_Object& _J
  );
 
 //input:

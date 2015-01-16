@@ -232,6 +232,8 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
   
   *_n_errors=0;
   unsigned i;
+ 
+  //cout<<"calling ..."<<endl;
   //do the alignment
   for(i=0;i<max_match_length;i++)
     {
@@ -252,6 +254,7 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
       if(*_n_errors>_maximum_errors)
 	{
 	  //we are reaching the maximum errors, now it is _maximum_errors+1, done!
+	  *_n_errors=*_n_errors-1;//here don't count the last one
 	  break;
 	}
       //this one is a mismatch, but not go beyond the maximum allowed ones, we remeber the position
@@ -259,20 +262,36 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
 	{
 	  _error_positions[*_n_errors-1]=i;
 	}
+      else
+	{
+	  align_length=i+1;
+	}
     }
-
-  //now we are done, we need to know the align length
-  //need to know whether it is because we go through the maximum_length or due to too many errors
+  //cout<<"after the first round, alength:"<<align_length<<";n_error:"<<*_n_errors<<endl;
+  //so far we know the longest alignment based on either it is not long <maximum_length
+  //or because we have too many errors
+  //now we need to recalculate the n_errors, then we are doing
+  /*
   if(i>max_match_length)
     align_length=i; //because i starts at zero, so it is i-1+1
   else //due to maximum error
     align_length=i+1;//because it starts at zero, so it i+1;
-  double best_score=align_length-_error_cost* (*_n_errors);
   
-  
+  */
+  for(unsigned j=*_n_errors-1;j>0;j--)
+    {
+      //from back to front
+      if(_error_positions[j]<align_length)
+	{
+	  *_n_errors=j+1;
+	  break;//we are done. the one error right before the last aligned one was found
+	}
+    }
+  //cout<<"second round"<<endl;
+  //so far the align_length and n_error were correct.
   //now we need to figure out best score along the longest match
+  double best_score=align_length-_error_cost* (*_n_errors);
   double running_score=best_score;
-  
   
   for(unsigned j=0;j< *_n_errors ; j++)
     {
@@ -290,12 +309,12 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
   //check the error_positions array elements
   for(unsigned j=*_n_errors;j<_maximum_errors;j++)
     {
-      _error_positions[j]=-1;
+      _error_positions[j]=0;
     }
 
   //clean up
   //delete [] c;
-  
+  //cout<<"done"<<endl;
   return align_length;
 }
 
@@ -314,9 +333,10 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
 
 //return: 
 //   alignment_length, unsigned
-unsigned align_with_constraints_fast_left(const string& _seq, const string& _target, 
-					 const unsigned& _maximum_errors,  const double& _error_cost, 
-					 /*output*/unsigned* _align_position, unsigned* _n_errors, 
+unsigned align_with_constraints_fast_left
+   (const string& _seq, const string& _target, 
+    const unsigned& _maximum_errors,  const double& _error_cost, 
+    /*output*/unsigned* _align_position, unsigned* _n_errors, 
 					 unsigned* _error_positions)
 {
   unsigned align_length=0;
@@ -348,12 +368,13 @@ unsigned align_with_constraints_fast_left(const string& _seq, const string& _tar
       string current_target=_target.substr(0,max_length);
       //call to do alignment forcing fixed left ends
       current_align_length=
-	align_with_constraints_fixed_left_remove_right_errors(current_seq, current_target,
-							      _maximum_errors,_error_cost,
-							      &current_n_errors, current_error_positions);
+	align_with_constraints_fixed_left_remove_right_errors
+	(current_seq, current_target, _maximum_errors,_error_cost,
+	 &current_n_errors, current_error_positions);
       
       current_score=current_align_length-_error_cost*current_n_errors;
-      
+
+      //we got a better one or got an identical score, but long, we are good
       if(current_score>score||
 	 ((current_score-score<1E-6||current_score-score>-1E-6)&&(current_align_length>align_length))
 	 )
@@ -388,7 +409,7 @@ unsigned align_with_constraints_fast_left(const string& _seq, const string& _tar
 //initialized it first?? or not necessarily? we could do the 
 //initialization when we need to. 
 bool match_J(const SequenceString& _seq,
-	      const GenomicV* _genJs, const unsigned& _numOfJSegs, 
+	      const GenomicJ* _genJs, const unsigned& _numOfJSegs, 
 	      const unsigned& _J_minimum_alignment_length, const unsigned& _J_maximum_deletion, 
 	      const unsigned& _negative_excess_deletion_max, const unsigned& _J_allowed_errors, 
 	     const unsigned& _error_cost,

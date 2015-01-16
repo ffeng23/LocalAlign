@@ -26,6 +26,8 @@
 #include "genomicSegments.hpp"
 #include "LoadData.hpp"
 #include "AlignmentSettings.hpp"
+#include "Alignment.hpp"
+//#include 
 
 using namespace std;
 
@@ -245,6 +247,17 @@ int main(int argc, char* argv[])
   vector<string> outFileNames;
   outFileNames=DetermineOutputFileNames(outputFileNameBase, AlignmentSettings::N_per_file, N_read);
 
+  //start testing the alignment, first mathJ
+  cout<<"%%%%%%%%%%%testing matchJ()>>>>>>"<<endl;
+  SequenceString test_seq=all_Sequences.at(0);
+  cout<<"\ttesting sequence 0:"<<endl;
+  cout<<test_seq.toString()<<endl;
+  
+  double error_cost=4;
+  Alignment_Object J_obj(totalNumJ);
+  //now calling it
+  bool seq_j_ok=match_J(test_seq, genJ, totalNumJ, AlignmentSettings::J_minimum_alignment_length, AlignmentSettings::J_maximum_deletion, AlignmentSettings::negative_excess_deletions_max, AlignmentSettings::J_allowed_errors, error_cost, J_obj);
+  
   /*
   //now we are ready to do the alignment??
   //first need to figure out number of output files
