@@ -1,37 +1,36 @@
-Align_with_constraints.o: Align_with_constraints.cpp \
-  Align_with_constraints.hpp ../score.hpp ../SequenceString.hpp \
-  ../AlignmentString.hpp ../AffineGapModel.hpp ../GapModel.hpp \
-  ../TracebackTable.hpp ../SequenceString.hpp \
-  ../MarkovChainGapModel_454.hpp ../AffineGapModel.hpp \
-  ../TracebackTable.hpp
 Alignment.o: Alignment.cpp ../SequenceString.hpp genomicSegments.hpp \
-  genomicSegment.hpp GenomicJ.hpp GenomicV.hpp GenomicD.hpp Alignment.hpp \
-  ../score.hpp MatrixFunctions.hpp ../string_ext.hpp \
-  AlignmentSettings.hpp
+ genomicSegment.hpp GenomicJ.hpp GenomicV.hpp GenomicD.hpp Alignment.hpp \
+ ../score.hpp MatrixFunctions.hpp ../string_ext.hpp AlignmentSettings.hpp
+AlignmentSettings.o: AlignmentSettings.cpp AlignmentSettings.hpp
+Align_with_constraints.o: Align_with_constraints.cpp \
+ Align_with_constraints.hpp ../score.hpp ../SequenceString.hpp \
+ ../AlignmentString.hpp ../AffineGapModel.hpp ../GapModel.hpp \
+ ../TracebackTable.hpp ../SequenceString.hpp \
+ ../MarkovChainGapModel_454.hpp ../AffineGapModel.hpp \
+ ../TracebackTable.hpp
 GenomicD.o: GenomicD.cpp GenomicD.hpp genomicSegment.hpp \
-  ../SequenceString.hpp
+ ../SequenceString.hpp
 GenomicJ.o: GenomicJ.cpp GenomicJ.hpp genomicSegment.hpp \
-  ../SequenceString.hpp
-GenomicV.o: GenomicV.cpp GenomicV.hpp genomicSegment.hpp \
-  ../SequenceString.hpp
-LoadData.o: LoadData.cpp LoadData.hpp ../string_ext.hpp \
-  ../SequenceString.hpp
-MatrixFunctions.o: MatrixFunctions.cpp MatrixFunctions.hpp
+ ../SequenceString.hpp
 genomicSegment.o: genomicSegment.cpp genomicSegment.hpp \
-  ../SequenceString.hpp
+ ../SequenceString.hpp
 genomicSegments.o: genomicSegments.cpp genomicSegments.hpp \
-  ../SequenceString.hpp genomicSegment.hpp GenomicJ.hpp GenomicV.hpp \
-  GenomicD.hpp ../FastaHandler.hpp ../SequenceString.hpp \
-  ../string_ext.hpp
+ ../SequenceString.hpp genomicSegment.hpp GenomicJ.hpp GenomicV.hpp \
+ GenomicD.hpp ../FastaHandler.hpp ../SequenceString.hpp ../string_ext.hpp
+GenomicV.o: GenomicV.cpp GenomicV.hpp genomicSegment.hpp \
+ ../SequenceString.hpp
+LoadData.o: LoadData.cpp LoadData.hpp ../string_ext.hpp \
+ ../SequenceString.hpp
 main.o: main.cpp ../string_ext.hpp ../score.hpp ../SequenceString.hpp \
-  ../LocalAlignment.hpp ../pairwiseAlignment.hpp ../score.hpp \
-  ../SequenceString.hpp ../AlignmentString.hpp ../AffineGapModel.hpp \
-  ../GapModel.hpp ../TracebackTable.hpp ../MarkovChainGapModel_454.hpp \
-  ../GlobalAlignment.hpp ../OverlapAlignment.hpp ../FastaHandler.hpp \
-  ../SequenceHandler.hpp ../SequenceHandlerCommon.hpp \
-  ../AlignmentString.hpp GenomicJ.hpp genomicSegment.hpp GenomicD.hpp \
-  GenomicV.hpp genomicSegments.hpp LoadData.hpp AlignmentSettings.hpp \
-  Alignment.hpp
+ ../LocalAlignment.hpp ../pairwiseAlignment.hpp ../score.hpp \
+ ../SequenceString.hpp ../AlignmentString.hpp ../AffineGapModel.hpp \
+ ../GapModel.hpp ../TracebackTable.hpp ../MarkovChainGapModel_454.hpp \
+ ../GlobalAlignment.hpp ../OverlapAlignment.hpp ../FastaHandler.hpp \
+ ../SequenceHandler.hpp ../SequenceHandlerCommon.hpp \
+ ../AlignmentString.hpp GenomicJ.hpp genomicSegment.hpp GenomicD.hpp \
+ GenomicV.hpp genomicSegments.hpp LoadData.hpp AlignmentSettings.hpp \
+ Alignment.hpp
+MatrixFunctions.o: MatrixFunctions.cpp MatrixFunctions.hpp
 tester_main.o: tester_main.cpp MatrixFunctions.hpp Alignment.hpp \
-  ../SequenceString.hpp ../score.hpp GenomicV.hpp genomicSegment.hpp \
-  GenomicD.hpp GenomicJ.hpp
+ ../SequenceString.hpp ../score.hpp GenomicV.hpp genomicSegment.hpp \
+ GenomicD.hpp GenomicJ.hpp

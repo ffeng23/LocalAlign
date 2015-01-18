@@ -1,3 +1,4 @@
+
 #include <cstring>
 #include "../SequenceString.hpp"
 #include "genomicSegments.hpp"
@@ -452,7 +453,8 @@ bool match_J(const SequenceString& _seq,
   //***8)alleles_all, 1D numOfAligned
   //***9)alleles_from_distinct_gene, 1D numOfAligned
 
-  bool j_large_deletion_flag[_numOfJSegs]; //=zeros(length(genJ),1); % Flag if deletions is too large
+  cout<<"***first****"<<endl;
+  bool* j_large_deletion_flag=new bool [_numOfJSegs]; //=zeros(length(genJ),1); % Flag if deletions is too large
   unsigned l_seq = _seq.GetLength(); //length of the input sequence
 
   unsigned* temp_align_length=new unsigned[_numOfJSegs];
@@ -472,9 +474,10 @@ bool match_J(const SequenceString& _seq,
     }
   unsigned** temp_p_region_max_length=NULL;
   unsigned** temp_excess_error_positions=NULL;
-  unsigned* temp_alleles_all, alleles_from_distinct_gene;
+  unsigned* temp_alleles_all; unsigned* alleles_from_distinct_gene;
   temp_alleles_all=NULL; alleles_from_distinct_gene=NULL;
 
+  cout<<"***f2irst****"<<endl;
   
   //the following are only for setting up the output for the 
   //unsigned align_length_func;
@@ -483,8 +486,10 @@ bool match_J(const SequenceString& _seq,
   SequenceString rev_seq=FlipSequenceString(_seq);
   //unsigned n_errors_func;
   //% Loop through template alleles for alignment
+cout<<"***first****3"<<endl;
   for(unsigned int i=0;i<_numOfJSegs;i++) //for j=1:length(genJ)
     {
+      cout<<"***loop****"<<i<<endl;
      //%j=1
      //%disp(['loop: ' num2str(j)])
      //% Get highest scoring alignment for this allele, with acceptable number of errors
@@ -553,23 +558,26 @@ bool match_J(const SequenceString& _seq,
  //	  % sort the genomic Js in descending order of 'score' and ascending order of min_deletions
 
  //calculate the score first
+cout<<"***first****3"<<endl;
  double* scores=new double[_numOfJSegs];
  //prepare the sorted index of the array.
  unsigned* sorted_index=new unsigned[_numOfJSegs];
  for(unsigned k=0;k<_numOfJSegs;k++)
    {
      sorted_index[k]=k;
-     scores[k]=_J.align_length[k]-_error_cost*_J.n_errors[k];
+     scores[k]=temp_align_length[k]-_error_cost*temp_n_errors[k];
    }
+cout<<"***first****3aa"<<endl;
  //sorted index also holding the gene allele index
  QuickSort(scores, 0, _numOfJSegs-1, sorted_index, temp_min_deletions);
  //	      scores  = align_length - error_cost*n_errors;
  //S = [-scores, min_deletions];
  //	  [~,order]=sortrows(S);
-
+cout<<"***first****3bb"<<endl;
  //now we need to reverse the order, since the QuickSort is ascending, but for our purpose we need to descending.
  Reverse(sorted_index, _numOfJSegs);
  Reverse(scores, _numOfJSegs);
+cout<<"***first****3ccc"<<endl;
  //  % Set a score threshold for alleles.
  double min_score=max_mf(scores,_numOfJSegs)-3*_J_minimum_alignment_length;
  //	      min_score = max(scores) - 3*J_minimum_alignment_length;
@@ -578,6 +586,7 @@ bool match_J(const SequenceString& _seq,
  //	      % not too many deletions.
  unsigned* ok_order = new unsigned[_numOfJSegs];
  unsigned ok_count=0;
+cout<<"***first****4"<<endl;
  for(unsigned i=0;i<_numOfJSegs;i++)
    { 
      
@@ -600,39 +609,43 @@ bool match_J(const SequenceString& _seq,
  //if we are here we are good, we still need to do more next
  //   % Store all the alignment information in J for acceptable alleles
  _J.numOfAligned=ok_count;
-
+cout<<"***first****4aaa"<<endl;
  _J.align_length = new unsigned [ok_count];
  if(!CopyElements(temp_align_length, _numOfJSegs,  _J.align_length, ok_count, ok_order, ok_count))
    return false;
- 
+ cout<<"***first****4bbbb"<<endl;
  _J.align_position =new unsigned* [ok_count];
  for(unsigned m=0;m<ok_count;m++)
    {
-     _J.align_position=new unsigned* [2];
+     _J.align_position[m]=new unsigned [2];
    }
  if(!CopyElements(temp_align_position, _numOfJSegs, 2, _J.align_position, ok_count, 2, ok_order, ok_count))//(:,ok_order);
    {
      return false;
    }
- 
+ cout<<"***first****4cccc"<<endl;
  _J.min_deletions =new unsigned [ok_count];
  if(!CopyElements(temp_min_deletions, _numOfJSegs, _J.min_deletions, ok_count, ok_order, ok_count))
    return false;
  
+cout<<"***first****4dddd"<<endl;
  _J.n_errors = new unsigned [ok_count];
  if(!CopyElements(temp_min_deletions, _numOfJSegs, _J.n_errors, ok_count, ok_order, ok_count))
    return false;
- 
+ cout<<"***first****4eee"<<endl;
  _J.error_positions = new unsigned* [ok_count];
  for(unsigned m=0;m<ok_count;m++)
    {
      _J.error_positions[m]=new unsigned [_J_allowed_errors];
    }
+cout<<"***first****4fff"<<endl;
  if(!CopyElements(temp_error_positions, _numOfJSegs, _J_allowed_errors, _J.error_positions, ok_count, _J_allowed_errors, ok_order, ok_count))
    return false;//error_positions(ok_order,:);
 
  //now we are done so, and need to run initialization for the later assignments
  _J.p_region_max_length = new unsigned* [ok_count];
+
+cout<<"***first5****"<<endl;
  for(unsigned i=0;i<ok_count;i++)
    {
      _J.p_region_max_length[i]=new unsigned[_J_maximum_deletion+1];
@@ -657,6 +670,7 @@ bool match_J(const SequenceString& _seq,
    }
  //genJ_ok_gene_inds = zeros(1,numel(ok_order));
 
+cout<<"***first****6"<<endl;
  //compare and then get it copied to the alignment object
  _J.alleles_from_distinct_genes=new unsigned[ok_count];
 
@@ -701,10 +715,11 @@ end
 
 end
 */  
-
+cout<<"***first****7"<<endl;
  //clean up
  delete [] error_position_func;
  delete [] genJ_ok_index;
+ delete [] j_large_deletion_flag;
  return true;
 }
 
