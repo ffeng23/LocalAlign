@@ -102,16 +102,17 @@ int main()
   //testing align with constraints fixed left remove right errors
   cout<<"%%%%%%%%testing alignment function 1 fixed left remove"<<endl;
   double error_cost=5;
-  /*string seq1="CAAGCCCCTTCATCAGGAACTGGTCCGTCGGGTCCCGGCGACACGGGGGTCTCCACGAGAACCTCCTCCCACGATCCCCCTTCTGGCTACCCGGGAACCACCTCCGACTCCTCTGCCACTGGCGCCAGGGAACCGGGGTCTGCAGGTATCGCATCATCGGTTTGGGACCCCATTGGGGAGGTTTTTAGCACTAGGGCCGACTCACCAGAGAGCGTGTCATTATGTGACGGCACAGGAGCCGAGCGGGGTACATGAGACGCAACTATGGTGACTAACGGGATATCAATGAGCAGACAGAGA";
-    string seq2=    "GACTCCTCTGTCACTGGTCCCACGGTGCCGGGGTCTCTAGCTTCATGGTCATC";*/
-
-  string seq1="GACTCCTCTGCCACTGGCGCCAGGGAACCGGGGTCTGCAGGTATCGCATCATC";
+  string seq1="CAAGCCCCTTCATCAGGAACTGGTCCGTCGGGTCCCGGCGACACGGGGGTCTCCACGAGAACCTCCTCCCACGATCCCCCTTCTGGCTACCCGGGAACCACCTCCGACTCCTCTGCCACTGGCGCCAGGGAACCGGGGTCTGCAGGTATCGCATCATCGGTTTGGGACCCCATTGGGGAGGTTTTTAGCACTAGGGCCGACTCACCAGAGAGCGTGTCATTATGTGACGGCACAGGAGCCGAGCGGGGTACATGAGACGCAACTATGGTGACTAACGGGATATCAATGAGCAGACAGAGA";
+  string seq2=    "GACTTCTCTGCCACTGGTAACAGGGAACCGGGGTCTGTAGTTTTCGTAGT";
+  
+  /*string seq1="GACTCCTCTGCCACTGGCGCCAGGGAACCGGGGTCTGCAGGTATCGCATCATC";
   string seq2="GACTCCTCTGTCACTGGTCCCACGGTGCCGGGGTCTCTAGCTTCATGGTCATC";
-
+  */
   unsigned maximum_errors=10;
   unsigned n_errors=0;
   unsigned* error_positions=new unsigned [maximum_errors];
-  unsigned alength=align_with_constraints_fixed_left_remove_right_errors(seq1,seq2, maximum_errors, error_cost, &n_errors, error_positions);
+  unsigned alength;
+  /*  alength=align_with_constraints_fixed_left_remove_right_errors(seq1,seq2, maximum_errors, error_cost, &n_errors, error_positions);
 
   cout<<"\t aligned length: "<<alength<<";n_error:"<<n_errors<<endl;
   cout<<"\t error positions:";
@@ -120,8 +121,8 @@ int main()
       cout<<error_positions[i]<<",";
     }
   cout<<endl;
-  cout<<"Done"<<endl;
-									
+  cout<<"Done"<<endl;*/
+  							
   //testing align with constraints fast left
   cout<<"#####################start doing the second testing of alignment functions"<<endl;
   unsigned* align_positions=new unsigned[2];
@@ -141,7 +142,7 @@ int main()
   
   //clear the memory
   delete[] error_positions;
-									 
+  									 
   cout<<"!!!!!DONE!!!!!!"<<endl;
   
   return 0;

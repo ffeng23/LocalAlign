@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
 
   //start testing the alignment, first mathJ
   cout<<"%%%%%%%%%%%testing matchJ()>>>>>>"<<endl;
-  SequenceString test_seq=all_Sequences.at(0);
+  SequenceString test_seq=all_Sequences.at(1);
   cout<<"\ttesting sequence 0:"<<endl;
   cout<<test_seq.toString()<<endl;
   
@@ -267,11 +267,14 @@ int main(int argc, char* argv[])
 	  <<J_obj.min_deletions[1]<<","<<J_obj.min_deletions[2]<<"."<<endl;
       cout<<"\tthe n_errors:"<<J_obj.n_errors[0]<<","
 	  <<J_obj.n_errors[1]<<","<<J_obj.n_errors[2]<<","<<endl;
+      cout<<"\talleles_all:"<<J_obj.alleles_all[0]<<","
+	  <<J_obj.alleles_all[1]<<","<<J_obj.alleles_all[2]<<","<<endl;
     }
   else
     {
       cout<<"failed alignment"<<endl;
     }
+  
   /*
   //now we are ready to do the alignment??
   //first need to figure out number of output files

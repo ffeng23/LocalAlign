@@ -234,7 +234,7 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
   *_n_errors=0;
   unsigned i;
  
-  //cout<<"calling ..."<<endl;
+  //cout<<"*****calling ...cost:"<<_error_cost<<endl;
   //do the alignment
   for(i=0;i<max_match_length;i++)
     {
@@ -268,7 +268,11 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
 	  align_length=i+1;
 	}
     }
-  //cout<<"after the first round, alength:"<<align_length<<";n_error:"<<*_n_errors<<endl;
+  /*cout<<_seq1<<endl;
+  cout<<_seq2<<endl;
+  cout<<"\tafter match the align_length:"<<align_length<<endl;
+  cout<<"after the first round, alength:"<<align_length<<";n_error:"<<*_n_errors<<endl;
+  */
   //so far we know the longest alignment based on either it is not long <maximum_length
   //or because we have too many errors
   //now we need to recalculate the n_errors, then we are doing
@@ -279,6 +283,8 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
     align_length=i+1;//because it starts at zero, so it i+1;
   
   */
+  //check to make sure the n_errors is not larger than maximum_errors
+  //and we did not end at errors
   for(unsigned j=*_n_errors-1;j>0;j--)
     {
       //from back to front
@@ -289,22 +295,30 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
 	}
     }
   //cout<<"second round"<<endl;
+  //cout<<"after the second round, alength:"<<align_length<<";n_error:"<<*_n_errors<<endl;
   //so far the align_length and n_error were correct.
   //now we need to figure out best score along the longest match
   double best_score=align_length-_error_cost* (*_n_errors);
   double running_score=best_score;
-  
+  unsigned best_n_errors=*_n_errors;
+
+  //cout<<"after the 3 round, best_score:"<<best_score<<endl;//<<";n_error:"<<*_n_errors<<endl;
   for(unsigned j=0;j< *_n_errors ; j++)
     {
+      //cout<<"\t@@@sub loop(#errors):"<<j<<endl;
       running_score=(_error_positions[j]-1+1)-_error_cost*j;
-      
+      //cout<<"\t@@@running score:"<<running_score<<endl;
       if(running_score>best_score)
 	{
 	  align_length=_error_positions[j]-1+1;
 	  best_score=running_score;
-	  *_n_errors=j;
+	  best_n_errors=j;
+	  //cout<<"\t\t@@@@got one"<<endl;
 	}
+      //cout<<"why??j:"<<j<<endl;
     }
+  *_n_errors=best_n_errors;
+  //cout<<"after the 3 round, best_score:"<<best_score<<";align_length:"<<align_length<<";n_error:"<<*_n_errors<<endl;
   //prepare the error_position array based on the 
   //this is not necessary, we just need to according to the _n_errors to 
   //check the error_positions array elements
@@ -352,12 +366,12 @@ unsigned align_with_constraints_fast_left
   double current_score;
   unsigned max_length;
 
-  cout<<"param:maximum_errors:"<<_maximum_errors<<";cost:"<<_error_cost<<endl;
+  //cout<<"param:maximum_errors:"<<_maximum_errors<<";cost:"<<_error_cost<<endl;
   //looping through the positions of sequence to force the left side of target to align with
   //subsequence of seq starting at the current index of _seq
   for(unsigned i=0;i<l_seq;i++)
     {
-      cout<<"*************doing loop "<<i<<endl;
+      //cout<<"*************doing loop "<<i<<endl;
       max_length=l_seq-i;
       if(l_target<max_length)
 	{
@@ -372,8 +386,8 @@ unsigned align_with_constraints_fast_left
 
       //string current_target=_target.substr(0,max_length);
       string current_target=_target;
-      cout<<"\tseq:"<<current_seq<<endl;
-      cout<<"\ttarget:"<<current_target<<endl;
+      //cout<<"\tseq:"<<current_seq<<endl;
+      //cout<<"\ttarget:"<<current_target<<endl;
       //call to do alignment forcing fixed left ends
       current_align_length=
 	align_with_constraints_fixed_left_remove_right_errors
@@ -381,7 +395,7 @@ unsigned align_with_constraints_fast_left
 	 &current_n_errors, current_error_positions);
       
       current_score=current_align_length-_error_cost*current_n_errors;
-      cout<<"\tcurrent_score:"<<current_score<<";current_align_length:"<<current_align_length<<endl;
+      //cout<<"\tcurrent_score:"<<current_score<<";current_align_length:"<<current_align_length<<endl;
 
       //we got a better one or got an identical score, but long, we are good
       if(current_score>score||
@@ -528,6 +542,7 @@ cout<<"***first****3"<<endl;
      cout<<"\ttemp_align_length["<<i<<"]:"<<temp_align_length[i]<<endl;
      cout<<"\ttemp_n_errors[i]"<<i<<"]:"<<temp_n_errors[i]<<endl;
      cout<<"\talign_position_func"<<align_position_func[0]<<","<<align_position_func[1]<<endl;
+     
      //_J->align_length.push_back(temp_align_length);
      
      //[align_length(j), rev_align_position, n_errors(j), rev_error_positions]=align_with_constraints_fast_no_fix(seq(end:-1:1) , genJ(j).seq(end:-1:1) , J_allowed_errors, error_cost);
@@ -561,6 +576,7 @@ cout<<"***first****3"<<endl;
 
      // % Calculate deletions implied by alignment
      temp_min_deletions[i]=l_target-(align_position_func[1]+temp_align_length[i]-1) - 1;
+     cout<<"\tmin_deletion:"<<temp_min_deletions[i]<<endl;
      //    % Flag if number of deletions is too many
      j_large_deletion_flag[i]=false;
      if( temp_min_deletions[i] > _J_maximum_deletion)
@@ -596,6 +612,8 @@ cout<<"***first****3aa"<<endl;
  //now we need to reverse the order, since the QuickSort is ascending, but for our purpose we need to descending.
  Reverse(sorted_index, _numOfJSegs);
  Reverse(scores, _numOfJSegs);
+ Reverse(temp_min_deletions, _numOfJSegs);
+ 
  cout<<"***first****3ccc"<<endl;
  //  % Set a score threshold for alleles. well, this is kind of arbitrary
  //we want to get the best ones, but limited numbers 
@@ -681,12 +699,25 @@ cout<<"***first****4aaa"<<endl;
    }
  cout<<"***first****4cccc"<<endl;
  _J.min_deletions =new unsigned [ok_count];
- if(!CopyElements(temp_min_deletions, _numOfJSegs, _J.min_deletions, ok_count, ok_order, ok_count))
+ cout<<"\t***&&&&&&showing min deletions"<<endl;
+ cout<<"\t\t";
+ for(unsigned _m=0;_m<_numOfJSegs;_m++)
+   {
+     cout<<temp_min_deletions[_m]<<","<<endl;
+   }
+ cout<<endl;
+ /*if(!CopyElements(temp_min_deletions, _numOfJSegs, _J.min_deletions, ok_count, ok_order, ok_count))
    return false;
- 
+ */
+ //****NOTE:important, temp_min_deletions, is different than others, it is sorted together with socres, so we only need to copy over
+ //what is in the front (best values) according to ok_count
+ for(unsigned _m=0;_m<ok_count;_m++)
+   {
+     _J.min_deletions[_m]=temp_min_deletions[_m];//<<","<<endl;
+   }
 cout<<"***first****4dddd"<<endl;
  _J.n_errors = new unsigned [ok_count];
- if(!CopyElements(temp_min_deletions, _numOfJSegs, _J.n_errors, ok_count, ok_order, ok_count))
+ if(!CopyElements(temp_n_errors, _numOfJSegs, _J.n_errors, ok_count, ok_order, ok_count))
    return false;
  cout<<"***first****4eee"<<endl;
  _J.error_positions = new unsigned* [ok_count];
