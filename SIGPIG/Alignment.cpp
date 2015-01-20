@@ -472,10 +472,10 @@ bool match_J(const SequenceString& _seq,
     {
       temp_error_positions[i]=new unsigned[_J_allowed_errors];
     }
-  unsigned** temp_p_region_max_length=NULL;
-  unsigned** temp_excess_error_positions=NULL;
-  unsigned* temp_alleles_all; unsigned* alleles_from_distinct_gene;
-  temp_alleles_all=NULL; alleles_from_distinct_gene=NULL;
+  //unsigned** temp_p_region_max_length=NULL;
+  //unsigned** temp_excess_error_positions=NULL;
+  //unsigned* temp_alleles_all; unsigned* alleles_from_distinct_gene;
+  //temp_alleles_all=NULL; alleles_from_distinct_gene=NULL;
 
   cout<<"***f2irst****"<<endl;
   
@@ -585,7 +585,7 @@ cout<<"***first****3aa"<<endl;
 
  //% Subset of alleles that have high enough score, long enough alignment, and
  //	      % not too many deletions.
- unsigned* ok_order = new unsigned[_numOfJSegs];
+ unsigned* ok_order = new unsigned[_numOfJSegs]; //this will directly used by J.alleles_all, so do NOT delete/clean later
  unsigned ok_count=0;
 cout<<"***first****4"<<endl;
  for(unsigned i=0;i<_numOfJSegs;i++)
@@ -604,8 +604,30 @@ cout<<"***first****4"<<endl;
    
      _J.numOfAligned=0;
      //do we want to clean up the memory, not necessary???
-     //we have to clean up the memory
+     //we have to clean up the memory, by now some of the arrays have been allocated
      //<--------
+     //clean up
+     delete [] j_large_deletion_flag;
+ 
+     delete [] temp_align_length;
+     CleanUpMemory(temp_align_position, _numOfJSegs);
+     delete [] temp_min_deletions;
+     delete [] temp_n_errors;
+     CleanUpMemory(temp_error_positions, _numOfJSegs);
+ //CleanUpMemory(temp_p_region_max_length, _numOfJSegs);
+ //CleanUpMemory(temp_excess_error_positions, _numOfJsegs);
+ //delete [] temp_alleles_all;
+ //delete [] alleles_from_distinc_gene;
+ 
+     delete [] error_position_func;
+
+     delete [] scores;
+     delete [] sorted_index;
+     delete [] ok_order; //ok order has not been referenced directly by J.alleles_all
+     //and in this case, it will not. so we delete it.
+ 
+     //delete [] genJ_ok_index;
+ 
      return false;
    }
 
@@ -710,11 +732,11 @@ cout<<"***first****6"<<endl;
  cout<<"******second ****6aaaa"<<endl; 
  //now call to generate panlindrol and negative access errors
  DeterminePalindromAndExcessError
-( _seq, _genJs, ok_order,_J.min_deletions, 
-  _negative_excess_deletion_max, _J_maximum_deletion,
-  _J.align_length, _J.numOfAligned, _J.align_position,
-  _J.p_region_max_length, _J.excess_error_positions  
-  );
+   ( _seq, _genJs, ok_order,_J.min_deletions, 
+     _negative_excess_deletion_max, _J_maximum_deletion,
+     _J.align_length, _J.numOfAligned, _J.align_position,
+     _J.p_region_max_length, _J.excess_error_positions  
+     );
 
 /*else
 
@@ -734,11 +756,36 @@ end
 */  
 cout<<"***first****7"<<endl;
  //clean up
- delete [] error_position_func;
- delete [] genJ_ok_index;
  delete [] j_large_deletion_flag;
  
+ delete [] temp_align_length;
+ CleanUpMemory(temp_align_position, _numOfJSegs);
+ delete [] temp_min_deletions;
+ delete [] temp_n_errors;
+ CleanUpMemory(temp_error_positions, _numOfJSegs);
+ //CleanUpMemory(temp_p_region_max_length, _numOfJSegs);
+ //CleanUpMemory(temp_excess_error_positions, _numOfJsegs);
+ //delete [] temp_alleles_all;
+ //delete [] alleles_from_distinc_gene;
+ 
+ delete [] error_position_func;
+
+ delete [] scores;
+ delete [] sorted_index;
+ //delete [] ok_order; ok order is referenced directly by J.alleles_all
+ 
+ delete [] genJ_ok_index;
+ 
  return true;
+}
+
+void CleanUpMemory(unsigned** p_mem, unsigned size_first_dim)
+{
+  for(unsigned i=0;i<size_first_dim;i++)
+    {
+      delete [] p_mem[i];
+    }
+  delete [] p_mem;
 }
 
 void DeterminePalindromAndExcessError

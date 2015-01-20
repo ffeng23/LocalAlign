@@ -219,5 +219,7 @@ void DeterminePalindromAndExcessError
   const unsigned* _align_length, const unsigned& _numOfAligned, unsigned** _align_positions,
   /*output*/ unsigned** _p_region_max_length, unsigned** _excess_error_position  
   );
+
+void CleanUpMemory(unsigned** p_mem, unsigned size_first_dim);
 #endif
 
