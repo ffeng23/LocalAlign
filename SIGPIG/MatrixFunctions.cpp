@@ -451,6 +451,10 @@ void Reverse(unsigned* _v, unsigned _size)
 
 }
 
+/*CopyElements only return false when the caller
+ *messes up the sizes of the input arrays. 
+ *so if we are calling it right, there will not be errors
+ */
 /*we want to copy elements from _source to _target based on the indice in the _indexOfElementToCopy
  *target has to be initialized by the caller. The size of target has to be at least the size of the index array
  *

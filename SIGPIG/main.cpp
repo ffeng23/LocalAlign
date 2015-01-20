@@ -257,7 +257,12 @@ int main(int argc, char* argv[])
   Alignment_Object J_obj(totalNumJ);
   //now calling it
   bool seq_j_ok=match_J(test_seq, genJ, totalNumJ, AlignmentSettings::J_minimum_alignment_length, AlignmentSettings::J_maximum_deletion, AlignmentSettings::negative_excess_deletions_max, AlignmentSettings::J_allowed_errors, error_cost, J_obj);
+  //now we check the output
+  cout<<"\tthe number of aligned:"<<J_obj.numOfAligned<<endl;
+  cout<<"\tthe aligned length:"<<J_obj.align_length[0]<<","
+      <<J_obj.align_length[1]<<","<<J_obj.align_length[2]<<endl;
   
+
   /*
   //now we are ready to do the alignment??
   //first need to figure out number of output files

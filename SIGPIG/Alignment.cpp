@@ -573,12 +573,13 @@ cout<<"***first****3aa"<<endl;
  //	      scores  = align_length - error_cost*n_errors;
  //S = [-scores, min_deletions];
  //	  [~,order]=sortrows(S);
-cout<<"***first****3bb"<<endl;
+ cout<<"***first****3bb"<<endl;
  //now we need to reverse the order, since the QuickSort is ascending, but for our purpose we need to descending.
  Reverse(sorted_index, _numOfJSegs);
  Reverse(scores, _numOfJSegs);
-cout<<"***first****3ccc"<<endl;
- //  % Set a score threshold for alleles.
+ cout<<"***first****3ccc"<<endl;
+ //  % Set a score threshold for alleles. well, this is kind of arbitrary
+ //we want to get the best ones, but limited numbers 
  double min_score=max_mf(scores,_numOfJSegs)-3*_J_minimum_alignment_length;
  //	      min_score = max(scores) - 3*J_minimum_alignment_length;
 
@@ -603,11 +604,19 @@ cout<<"***first****4"<<endl;
    
      _J.numOfAligned=0;
      //do we want to clean up the memory, not necessary???
+     //we have to clean up the memory
+     //<--------
      return false;
    }
 
  //if we are here we are good, we still need to do more next
  //   % Store all the alignment information in J for acceptable alleles
+ //NOTE: the following code to copy over the elements from one array to another
+ //it returns false only because the array sizes are not set up correctly
+ //if the size are right then we have no trouble. Here we are sure 
+ //that the size are all right. and we will not have errors. so at the 
+ //time of false, we will not clean up memeory, since it will never 
+ //happen
  _J.numOfAligned=ok_count;
 cout<<"***first****4aaa"<<endl;
  _J.align_length = new unsigned [ok_count];
@@ -663,7 +672,7 @@ cout<<"***first5****"<<endl;
  //		      %%%codegen compatible version of
  //		  %%%genJ_ok_gene_inds = [genJ(ok_order).gene_index];
  unsigned* genJ_ok_index = new unsigned[ok_count];
- //go through the genJ to figure out the distinct genes for the each allele, and then reture a array of indices to the  
+ //go through the genJ to figure out the distinct genes for the each allele, and then reture a array of indices to them  
  for(unsigned i=0;i<ok_count;i++)
    {
      genJ_ok_index[i]=_genJs[_J.alleles_all[i]].Get_GeneIndex();
@@ -692,12 +701,20 @@ cout<<"***first****6"<<endl;
      _J.alleles_from_distinct_genes[i]=-1;
    }
  //
- //		    % Get list of distinct genes from acceptable alleles.
- //		[~,Jg] = unique(genJ_ok_gene_inds,"first" ); % Pick the first allele listed for each gene.
- //												       Jg = sort(Jg); % sort it because unique returns in ascending order of ok_order. This puts it back in order of best match.
- //															  % Only one (best) allele from each gene
- //															  J.alleles_from_distinct_genes = ok_order(Jg'); '
+ //% Get list of distinct genes from acceptable alleles.
+ //[~,Jg] = unique(genJ_ok_gene_inds,"first" ); % Pick the first allele listed for each gene.
+ //Jg = sort(Jg); % sort it because unique returns in ascending order of ok_order. This puts it back in order of best match.
+ //% Only one (best) allele from each gene
+ //J.alleles_from_distinct_genes = ok_order(Jg'); '
  //done so far
+ cout<<"******second ****6aaaa"<<endl; 
+ //now call to generate panlindrol and negative access errors
+ DeterminePalindromAndExcessError
+( _seq, _genJs, ok_order,_J.min_deletions, 
+  _negative_excess_deletion_max, _J_maximum_deletion,
+  _J.align_length, _J.numOfAligned, _J.align_position,
+  _J.p_region_max_length, _J.excess_error_positions  
+  );
 
 /*else
 
@@ -720,14 +737,15 @@ cout<<"***first****7"<<endl;
  delete [] error_position_func;
  delete [] genJ_ok_index;
  delete [] j_large_deletion_flag;
+ 
  return true;
 }
 
-bool DeterminePalindromAndExcessError
+void DeterminePalindromAndExcessError
 ( const SequenceString& _seq, const GenomicJ* _genJs, const unsigned* _ok_order,
   const unsigned* _min_deletions, 
   const unsigned& _negative_excess_deletions_max, const unsigned& _J_maximum_deletion,
-  const unsigned* _align_length, const unsigned& _numOfAligned, const unsigned** _align_positions,
+  const unsigned* _align_length, const unsigned& _numOfAligned, unsigned** _align_positions,
   /*output*/ unsigned** _p_region_max_length, unsigned** _excess_error_position  
   )
 {
@@ -735,8 +753,10 @@ bool DeterminePalindromAndExcessError
   bool still_palindrome=true;
   //go through and find palindromic nucleotides for various number of deletions,
   //    %as well as error positions for 'negative' deletions.
+  cout<<"\tinside palindro.....before loop"<<endl;
   for(unsigned  j=0;j<_numOfAligned;j++)
     {
+      cout<<"\t*^^^^^^loop "<<j<<endl;
       string target=_genJs[_ok_order[j]].Get_Sequence();
       //% Loop over number of deletions (nd is actual number of genomic deletions).
       //  % Lower bound is maximum of 0 and min_deletions - negative_excess_deletions_max (usually 3).
@@ -747,7 +767,7 @@ bool DeterminePalindromAndExcessError
       int max_nd=_J_maximum_deletion;
       if(max_nd>_align_length[j]+_min_deletions[j])
 	max_nd=_align_length[j]+_min_deletions[j];
-      
+      cout<<"\t\t^^^^^second loop before"<<endl;
       for(;nd<=max_nd;nd++)
 	{
 	  //% For each value of deletions, find longest half-palindrome
@@ -772,31 +792,38 @@ bool DeterminePalindromAndExcessError
 	  //% deletions.
 	  _p_region_max_length[j][ nd] = p;
 	}
+      cout<<"\t\tend of second loop"<<endl;
       //        % Now for the 'negative' deletions, store where the mismatches are.
       // % This is so we can count number of errors for these possibilities.
       
       //        % Number of 'negative' deletions to consider:
       unsigned tempArry[]={_negative_excess_deletions_max, _min_deletions[j], _align_positions[j][0]-1 };
       unsigned n_excess = min_mf(tempArry,3);
+      cout<<"n_excess :"<<n_excess<<endl;
       unsigned k;    
       unsigned runningIndex_excessError=0;
+      cout<<"\tready to do the excess error"<<endl;
       // % Find mismatches between sequence and genomic J at those positions.
       for( k=0;k<n_excess;k++)
 	{
+	  cout<<"\t\tthird for loop:"<<k<<endl;
 	  if(target.at(_align_positions[j][1]-n_excess+k)==_seq.GetSequence().at(_align_positions[j][0]-n_excess+k))
 	    {
-	      _excess_error_position[nd][runningIndex_excessError]=_align_positions[j][0]-n_excess+k;
+	      _excess_error_position[j][runningIndex_excessError]=_align_positions[j][0]-n_excess+k;
 	      runningIndex_excessError++;
 	    }
+	  cout<<"\t\t$$$$end of third for loop"<<endl;
 	}
+      cout<<"runningIndex_excessError:"<<runningIndex_excessError<<endl;
       for(;runningIndex_excessError<_negative_excess_deletions_max;runningIndex_excessError++)
 	{
-	  _excess_error_position[nd][runningIndex_excessError]=0;
+	  cout<<"\t\tfor loop"<<endl;
+	  _excess_error_position[j][runningIndex_excessError]=0;
 	}
-      
+      cout <<"\t end of first for loop"<<endl;     
       //excess_err_pos = J.align_position(1,j) - ( n_excess + 1 - find((genJ(ok_order(j)).seq((J.align_position(2,j)-n_excess): (J.align_position(2,j)-1) )~=seq((J.align_position(1,j) -n_excess): (J.align_position(1,j)-1) ))) );
       //  J.excess_error_positions(j, 1:length(excess_err_pos)) = excess_err_pos;
-    }
-  
-  return true;
+    }//end of outer for loop for all the aligned strings
+  cout<<"Done for the function"<<endl;
+  //return true;
 }

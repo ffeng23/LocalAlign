@@ -211,7 +211,13 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
 /*input:
  *
  */
-bool DeterminePalindrom();
 
+void DeterminePalindromAndExcessError
+( const SequenceString& _seq, const GenomicJ* _genJs, const unsigned* _ok_order,
+  const unsigned* _min_deletions, 
+  const unsigned& _negative_excess_deletions_max, const unsigned& _J_maximum_deletion,
+  const unsigned* _align_length, const unsigned& _numOfAligned, unsigned** _align_positions,
+  /*output*/ unsigned** _p_region_max_length, unsigned** _excess_error_position  
+  );
 #endif
 
