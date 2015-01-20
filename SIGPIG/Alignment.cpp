@@ -351,10 +351,13 @@ unsigned align_with_constraints_fast_left
   unsigned* current_error_positions=new unsigned [_maximum_errors];
   double current_score;
   unsigned max_length;
+
+  cout<<"param:maximum_errors:"<<_maximum_errors<<";cost:"<<_error_cost<<endl;
   //looping through the positions of sequence to force the left side of target to align with
   //subsequence of seq starting at the current index of _seq
   for(unsigned i=0;i<l_seq;i++)
     {
+      cout<<"*************doing loop "<<i<<endl;
       max_length=l_seq-i;
       if(l_target<max_length)
 	{
@@ -366,7 +369,11 @@ unsigned align_with_constraints_fast_left
 	  break;
 	}
       string current_seq=_seq.substr(i, max_length);
-      string current_target=_target.substr(0,max_length);
+
+      //string current_target=_target.substr(0,max_length);
+      string current_target=_target;
+      cout<<"\tseq:"<<current_seq<<endl;
+      cout<<"\ttarget:"<<current_target<<endl;
       //call to do alignment forcing fixed left ends
       current_align_length=
 	align_with_constraints_fixed_left_remove_right_errors
@@ -374,6 +381,7 @@ unsigned align_with_constraints_fast_left
 	 &current_n_errors, current_error_positions);
       
       current_score=current_align_length-_error_cost*current_n_errors;
+      cout<<"\tcurrent_score:"<<current_score<<";current_align_length:"<<current_align_length<<endl;
 
       //we got a better one or got an identical score, but long, we are good
       if(current_score>score||
