@@ -6,7 +6,7 @@ void chomp_front_ext(string& s)
 {
   for( unsigned int i=0;i<s.length();)
     {
-      if(s[i]==' '||s[i]=='\t'||s[i]=='\n')
+      if(s[i]==' '||s[i]=='\t'||s[i]=='\n'||s[i]=='\r')
 	{
 	  s.erase(i,1);
 	}
@@ -21,7 +21,7 @@ void chomp_end_ext(string& s)
 {
   for(int i=s.length()-1;i>=0;)
     {
-      if(s[i]==' '||s[i]=='\t'||s[i]=='\n')
+      if(s[i]==' '||s[i]=='\t'||s[i]=='\n'||s[i]=='\r')
 	{
 	  s.erase(i,1);
 	  i=s.length()-1;

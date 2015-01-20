@@ -453,10 +453,16 @@ bool match_J(const SequenceString& _seq,
   //***8)alleles_all, 1D numOfAligned
   //***9)alleles_from_distinct_gene, 1D numOfAligned
 
-  cout<<"***first****"<<endl;
+  cout<<"***first****:sequence:"<<_seq.GetSequence()<<endl;
+  cout<<"\t_numOfJSegs:"<<_numOfJSegs
+      <<"\n\t_J_minmum_alignment_length:"<<_J_minimum_alignment_length
+      <<"\n\t_J_maximum_deletion:"<<_J_maximum_deletion
+      <<"\n\t_negative_excess_deletion_max:"<<_negative_excess_deletion_max
+      <<"\n\t_J_allowed_errors"<<_J_allowed_errors
+      <<"\n\t_error_cost"<<_error_cost<<endl;
   bool* j_large_deletion_flag=new bool [_numOfJSegs]; //=zeros(length(genJ),1); % Flag if deletions is too large
   unsigned l_seq = _seq.GetLength(); //length of the input sequence
-
+  cout<<"l_seq:"<<l_seq<<endl;
   unsigned* temp_align_length=new unsigned[_numOfJSegs];
   unsigned** temp_align_position=new unsigned*[_numOfJSegs];
   for(unsigned i=0;i<_numOfJSegs;i++)
@@ -489,7 +495,7 @@ bool match_J(const SequenceString& _seq,
 cout<<"***first****3"<<endl;
   for(unsigned int i=0;i<_numOfJSegs;i++) //for j=1:length(genJ)
     {
-      cout<<"***loop****"<<i<<endl;
+      cout<<"\t***loop****"<<i<<endl;
      //%j=1
      //%disp(['loop: ' num2str(j)])
      //% Get highest scoring alignment for this allele, with acceptable number of errors
@@ -503,12 +509,17 @@ cout<<"***first****3"<<endl;
      
      SequenceString rev_target=FlipSequenceString(_genJs[i].Get_Seq());
      unsigned l_target =rev_target.GetLength();
+     cout<<"\t&&&doing alignment :"<<endl;
+     cout<<"\trev_seq:"<<rev_seq.toString()<<endl;
+     cout<<"\trev_target:"<<rev_target.toString()<<endl;
      //now calling to do the alignment
      temp_align_length[i]=
        align_with_constraints_fast_left(rev_seq.GetSequence(), rev_target.GetSequence(), _J_allowed_errors, _error_cost,
-					  align_position_func, temp_n_errors+i, error_position_func);
+					align_position_func, temp_n_errors+i, error_position_func);
 					  
-
+     cout<<"\ttemp_align_length["<<i<<"]:"<<temp_align_length[i]<<endl;
+     cout<<"\ttemp_n_errors[i]"<<i<<"]:"<<temp_n_errors[i]<<endl;
+     cout<<"\talign_position_func"<<align_position_func[0]<<","<<align_position_func[1]<<endl;
      //_J->align_length.push_back(temp_align_length);
      
      //[align_length(j), rev_align_position, n_errors(j), rev_error_positions]=align_with_constraints_fast_no_fix(seq(end:-1:1) , genJ(j).seq(end:-1:1) , J_allowed_errors, error_cost);
@@ -599,18 +610,22 @@ cout<<"***first****4"<<endl;
        }
    }
  //bool seq_j_ok=true;
+ cout<<"*******first 4a check for status"<<endl;
  if(ok_count<=0)//empty
    {
-   
+     cout<<"*****inside false condition"<<endl;
      _J.numOfAligned=0;
      //do we want to clean up the memory, not necessary???
      //we have to clean up the memory, by now some of the arrays have been allocated
      //<--------
      //clean up
+     cout<<"\t555delete 1"<<endl;
      delete [] j_large_deletion_flag;
- 
+ cout<<"\t555delete 2"<<endl;
      delete [] temp_align_length;
+     cout<<"\t555delete 3"<<endl;
      CleanUpMemory(temp_align_position, _numOfJSegs);
+     cout<<"\t555delete 4"<<endl;
      delete [] temp_min_deletions;
      delete [] temp_n_errors;
      CleanUpMemory(temp_error_positions, _numOfJSegs);
@@ -618,11 +633,13 @@ cout<<"***first****4"<<endl;
  //CleanUpMemory(temp_excess_error_positions, _numOfJsegs);
  //delete [] temp_alleles_all;
  //delete [] alleles_from_distinc_gene;
- 
+ cout<<"\t555delete 5"<<endl;
      delete [] error_position_func;
-
+cout<<"\t555delete 6"<<endl;
      delete [] scores;
+     cout<<"\t555delete 7"<<endl;
      delete [] sorted_index;
+     cout<<"\t555delete 8"<<endl;
      delete [] ok_order; //ok order has not been referenced directly by J.alleles_all
      //and in this case, it will not. so we delete it.
  
@@ -630,7 +647,7 @@ cout<<"***first****4"<<endl;
  
      return false;
    }
-
+ cout<<"************first 4 bb keep going....."<<endl;
  //if we are here we are good, we still need to do more next
  //   % Store all the alignment information in J for acceptable alleles
  //NOTE: the following code to copy over the elements from one array to another

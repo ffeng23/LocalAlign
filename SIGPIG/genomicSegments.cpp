@@ -193,7 +193,8 @@ unsigned ReadGenomicJ(const string& _fastaFileName, GenomicJ** _gseg)
 {
   //first read the files into vector
   vector<SequenceString> seq;
-  unsigned totalNumber=ReadFasta(_fastaFileName, seq, true); 
+  unsigned totalNumber=ReadFasta(_fastaFileName, seq, true);
+  cout<<"$$$$$inside readGenomicJ function, seq 0:"<<seq[0].toString()<<endl;
   //get pointer to array of genomic segments
   *_gseg=new GenomicJ[totalNumber];
 

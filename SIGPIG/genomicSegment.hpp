@@ -24,7 +24,7 @@ public:
   unsigned Get_GeneIndex() const;
   unsigned Get_n_alleles() const;
   unsigned Get_Allele() const;
-  string Get_Gene() const;
+  string Get_Gene() const;//return the name of the gene.
 
   void Set_Seq(const SequenceString& _seq);
   void Set_GeneIndex(const unsigned int& _gene_index);

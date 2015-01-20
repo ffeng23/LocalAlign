@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
   unsigned totalNumJ=  ReadGenomicJ("genomicJs_all_curated.fasta",&genJ);
   
   cout<<totalNumJ<<" J genomic segments are read in."<<endl; 
-
+  cout<<"\tshowing the J seq 1:"<<genJ[1].Get_Sequence()<<endl;
   
   unsigned totalNumD=  ReadGenomicD("genomicDs.fasta",&genD);
   
@@ -253,16 +253,25 @@ int main(int argc, char* argv[])
   cout<<"\ttesting sequence 0:"<<endl;
   cout<<test_seq.toString()<<endl;
   
-  double error_cost=4;
+  double error_cost=5;
   Alignment_Object J_obj(totalNumJ);
   //now calling it
   bool seq_j_ok=match_J(test_seq, genJ, totalNumJ, AlignmentSettings::J_minimum_alignment_length, AlignmentSettings::J_maximum_deletion, AlignmentSettings::negative_excess_deletions_max, AlignmentSettings::J_allowed_errors, error_cost, J_obj);
   //now we check the output
-  cout<<"\tthe number of aligned:"<<J_obj.numOfAligned<<endl;
-  cout<<"\tthe aligned length:"<<J_obj.align_length[0]<<","
-      <<J_obj.align_length[1]<<","<<J_obj.align_length[2]<<endl;
-  
-
+  if(J_obj.numOfAligned>0)
+    {
+      cout<<"\tthe number of aligned:"<<J_obj.numOfAligned<<endl;
+      cout<<"\tthe aligned length:"<<J_obj.align_length[0]<<","
+	  <<J_obj.align_length[1]<<","<<J_obj.align_length[2]<<endl;
+      cout<<"\tthe min_deletions:"<<J_obj.min_deletions[0]<<"."
+	  <<J_obj.min_deletions[1]<<","<<J_obj.min_deletions[2]<<"."<<endl;
+      cout<<"\tthe n_errors:"<<J_obj.n_errors[0]<<","
+	  <<J_obj.n_errors[1]<<","<<J_obj.n_errors[2]<<","<<endl;
+    }
+  else
+    {
+      cout<<"failed alignment"<<endl;
+    }
   /*
   //now we are ready to do the alignment??
   //first need to figure out number of output files

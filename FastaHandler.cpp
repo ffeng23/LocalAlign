@@ -40,6 +40,8 @@ unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec,
 	}
       //found_one=false;
       getline(ifs_p, line);
+      chomp_ext(line);
+
       if(line.compare("\n")==0||line.length()==0||line.compare("\t")==0||line.compare("\t\t")==0)
 	{
 	  cout<<"...read an empty row (skip!)"<<endl;
