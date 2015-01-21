@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
 
   //start testing the alignment, first mathJ
   cout<<"%%%%%%%%%%%testing matchJ()>>>>>>"<<endl;
-  SequenceString test_seq=all_Sequences.at(0);
+  SequenceString test_seq=all_Sequences.at(11);
   cout<<"\ttesting sequence 0:"<<endl;
   cout<<test_seq.toString()<<endl;
   
@@ -332,6 +332,12 @@ int main(int argc, char* argv[])
 	    {
 	      cout<<J_obj.excess_error_positions[j][i]<<",";
 	    }
+	}
+      cout<<endl;
+      cout<<"\talleles from distinct gene:";
+      for(unsigned j=0;j<J_obj.numOfAligned;j++)
+	{
+	  cout<<J_obj.alleles_from_distinct_genes[j]<<",";
 	}
       cout<<endl;
     }

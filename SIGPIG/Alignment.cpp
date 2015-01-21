@@ -308,7 +308,7 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
       //cout<<"\t@@@sub loop(#errors):"<<j<<endl;
       running_score=(_error_positions[j]-1+1)-_error_cost*j;
       //cout<<"\t@@@running score:"<<running_score<<endl;
-      if(running_score>best_score)
+      if(running_score>=best_score)
 	{
 	  align_length=_error_positions[j]-1+1;
 	  best_score=running_score;
@@ -597,24 +597,42 @@ cout<<"***first****3"<<endl;
  double* scores=new double[_numOfJSegs];
  //prepare the sorted index of the array.
  unsigned* sorted_index=new unsigned[_numOfJSegs];
+ cout<<"=========>before sorting:";
  for(unsigned k=0;k<_numOfJSegs;k++)
    {
      sorted_index[k]=k;
      scores[k]=temp_align_length[k]-_error_cost*temp_n_errors[k];
+     cout<<scores[k]<<"-"<<sorted_index[k]<<"-"<<temp_min_deletions[k]<<",";
+     
    }
-cout<<"***first****3aa"<<endl;
+cout<<"\n***first****3aa"<<endl;
  //sorted index also holding the gene allele index
  QuickSort(scores, 0, _numOfJSegs-1, sorted_index, temp_min_deletions);
  //	      scores  = align_length - error_cost*n_errors;
  //S = [-scores, min_deletions];
  //	  [~,order]=sortrows(S);
- cout<<"***first****3bb"<<endl;
+cout<<"=========>after sorting:";
+ for(unsigned k=0;k<_numOfJSegs;k++)
+   {
+     //sorted_index[k]=k;
+     //scores[k]=temp_align_length[k]-_error_cost*temp_n_errors[k];
+     cout<<scores[k]<<"-"<<sorted_index[k]<<",";
+   }
+ 
+ cout<<"\n***first****3bb"<<endl;
  //now we need to reverse the order, since the QuickSort is ascending, but for our purpose we need to descending.
  Reverse(sorted_index, _numOfJSegs);
  Reverse(scores, _numOfJSegs);
  Reverse(temp_min_deletions, _numOfJSegs);
- 
- cout<<"***first****3ccc"<<endl;
+
+ cout<<"=========>after sorting:";
+ for(unsigned k=0;k<_numOfJSegs;k++)
+   {
+     //sorted_index[k]=k;
+     //scores[k]=temp_align_length[k]-_error_cost*temp_n_errors[k];
+     cout<<scores[k]<<"-"<<sorted_index[k]<<",";
+   }
+ cout<<"\n***first****3ccc"<<endl;
  //  % Set a score threshold for alleles. well, this is kind of arbitrary
  //we want to get the best ones, but limited numbers 
  double min_score=max_mf(scores,_numOfJSegs)-3*_J_minimum_alignment_length;
@@ -631,10 +649,17 @@ cout<<"***first****4"<<endl;
      //find( scores(order) >= min_score & align_length(order) >= J_minimum_alignment_length & j_large_deletion_flag(order)==0);
      if(scores[i]>=min_score&&temp_align_length[sorted_index[i]]>=_J_minimum_alignment_length&&!j_large_deletion_flag[sorted_index[i]])
        {
-	 ok_order[i]=sorted_index[i];
+	 ok_order[ok_count]=sorted_index[i];
 	 ok_count++;
        }
    }
+ cout<<"---------->showing the ok_order array:";
+ for(unsigned i=0;i<ok_count;i++)
+   {
+     cout<<ok_order[i]<<",";
+   }
+ cout<<endl;
+ 
  //bool seq_j_ok=true;
  cout<<"*******first 4a check for status"<<endl;
  if(ok_count<=0)//empty
@@ -685,6 +710,7 @@ cout<<"\t555delete 6"<<endl;
  _J.numOfAligned=ok_count;
 cout<<"***first****4aaa"<<endl;
  _J.align_length = new unsigned [ok_count];
+ cout<<"****ok_count***:"<<ok_count<<endl;
  if(!CopyElements(temp_align_length, _numOfJSegs,  _J.align_length, ok_count, ok_order, ok_count))
    return false;
  cout<<"***first****4bbbb"<<endl;
@@ -762,10 +788,13 @@ for(unsigned i=0;i<ok_count;i++)
  //		  %%%genJ_ok_gene_inds = [genJ(ok_order).gene_index];
  unsigned* genJ_ok_index = new unsigned[ok_count];
  //go through the genJ to figure out the distinct genes for the each allele, and then reture a array of indices to them  
+ cout<<"\t^^^^^showing the gene index of the alleles:";
  for(unsigned i=0;i<ok_count;i++)
    {
      genJ_ok_index[i]=_genJs[_J.alleles_all[i]].Get_GeneIndex();
+     cout<<genJ_ok_index[i]<<",";
    }
+ cout<<endl;
  //genJ_ok_gene_inds = zeros(1,numel(ok_order));
 
 cout<<"***first****6"<<endl;
@@ -774,7 +803,7 @@ cout<<"***first****6"<<endl;
 
  unsigned runningValue=genJ_ok_index[0];
  unsigned runningIndexOfAlleleArray=1;
- _J.alleles_from_distinct_genes[0]=runningValue;
+ _J.alleles_from_distinct_genes[0]=_J.alleles_all[0];
  for(unsigned i=1;i<ok_count;i++)
    {
      if(runningValue!=genJ_ok_index[i])
@@ -916,8 +945,10 @@ for(unsigned i=0;i<_numOfAligned;i++)
       for( k=0;k<n_excess;k++)
 	{
 	  cout<<"\t\tthird for loop:"<<k<<endl;
-	  if(target.at(_align_positions[j][1]-n_excess+k)==_seq.GetSequence().at(_align_positions[j][0]-n_excess+k))
+	  cout<<"\t\tposition:"<<_align_positions[j][0]<<endl;
+	  if(target.at(_align_positions[j][1]-n_excess+k)!=_seq.GetSequence().at(_align_positions[j][0]-n_excess+k))
 	    {
+	      cout<<"\t\tfound one!!pos:"<<_align_positions[j][0]-n_excess+k<<endl;
 	      _excess_error_position[j][runningIndex_excessError]=_align_positions[j][0]-n_excess+k;
 	      runningIndex_excessError++;
 	    }

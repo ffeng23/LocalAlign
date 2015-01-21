@@ -463,13 +463,16 @@ void Reverse(unsigned* _v, unsigned _size)
 bool CopyElements(const unsigned* _source, const unsigned& _s_size, unsigned* _target, const unsigned& _t_size,
 		  const unsigned* _indexOfElementToCopy, const unsigned& _i_size)
 {
+  cout<<"**&&^^^%%%%inside copy"<<endl;
   //first, need to check to make sure the target size has to be larger or equal to index array
   if (_t_size<_i_size||_s_size<_i_size)
     return false;
-  
+  cout<<"loop before"<<endl;
   for(unsigned i=0;i<_i_size;i++)
     {
+      cout<<"\tloop "<<i<<endl;
       _target[i]=_source[_indexOfElementToCopy[i]];
+      cout<<"\t\tend loop"<<endl;
     }
   return true;
 }
