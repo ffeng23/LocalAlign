@@ -736,6 +736,17 @@ cout<<"***first5****"<<endl;
  for(unsigned i=0;i<ok_count;i++)
    {
      _J.p_region_max_length[i]=new unsigned[_J_maximum_deletion+1];
+     std::memset(_J.p_region_max_length[i], 0, (_J_maximum_deletion+1)*sizeof(unsigned)/sizeof(char));//fill the default value with 0
+   }
+ cout<<"right after setting the memory:maxlength:"<<_J_maximum_deletion<<endl;
+for(unsigned i=0;i<ok_count;i++)
+   {
+     cout<<"\t"<<endl;
+     for(unsigned j=0;j<_J_maximum_deletion+1;j++)
+       {
+	 cout<<_J.p_region_max_length[i][j]<<",";
+       }
+     cout<<endl;
    }
  //zeros(numel(ok_order),J_maximum_deletion+1);
  _J.excess_error_positions =new unsigned* [ok_count];
@@ -794,22 +805,7 @@ cout<<"***first****6"<<endl;
      _J.p_region_max_length, _J.excess_error_positions  
      );
 
-/*else
-
-    % Since sequence is not ok, return empty values.
-    J.align_length = [];
-    J.align_position =  [];
-    J.min_deletions = [];
-    J.n_errors = [];
-    J.error_positions = [];
-    J.p_region_max_length = [];
-    J.excess_error_positions = [];
-    J.alleles_all = [];
-    J.alleles_from_distinct_genes = [];
-end
-
-end
-*/  
+  
 cout<<"***first****7"<<endl;
  //clean up
  delete [] j_large_deletion_flag;
@@ -853,6 +849,16 @@ void DeterminePalindromAndExcessError
   )
 {
   unsigned p=0;
+  cout<<"in the beginning p_Region_max_length:"<<endl;
+for(unsigned i=0;i<_numOfAligned;i++)
+   {
+     cout<<"\t"<<endl;
+     for(unsigned j=0;j<_J_maximum_deletion+1;j++)
+       {
+	 cout<<_p_region_max_length[i][j]<<",";
+       }
+     cout<<endl;
+   }
   bool still_palindrome=true;
   //go through and find palindromic nucleotides for various number of deletions,
   //    %as well as error positions for 'negative' deletions.
@@ -870,7 +876,7 @@ void DeterminePalindromAndExcessError
       int max_nd=_J_maximum_deletion;
       if(max_nd>_align_length[j]+_min_deletions[j])
 	max_nd=_align_length[j]+_min_deletions[j];
-      cout<<"\t\t^^^^^second loop before"<<endl;
+      cout<<"\t\t^^^^^second loop before, nd:"<<nd<<endl;
       for(;nd<=max_nd;nd++)
 	{
 	  //% For each value of deletions, find longest half-palindrome

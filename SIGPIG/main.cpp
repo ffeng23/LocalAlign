@@ -54,6 +54,8 @@ unsigned numberOfSeqProcessedEach;
 int numberOfThread=2;//the number of working thread, doesn't included 
 pthread_mutex_t progressMutex;
 
+bool flip_flag=false;
+
 static void printUsage(int argc, char* argv[]);
 static void parseArguments(int argc, char **argv, const char *opts);
 
@@ -61,7 +63,7 @@ int main(int argc, char* argv[])
 {
   //for parsing commandline arguement
 
-  const char *opts = "hiv:d:j:c:s:o:n:t:";
+  const char *opts = "hiv:d:j:c:s:o:n:t:r";
   //f: the input file name containing the fasta format gene sequence
   //c: flag to indicate to count each gene length.
   //o: output file name
@@ -97,7 +99,11 @@ int main(int argc, char* argv[])
   cout<<"\tJ gene segment file:\""<<jSegmentFileName<<"\"\n";
   cout<<"\tThe error cost: "<<errorCost<<"\n";
   cout<<"\tThe number of sequences processed for each file: "<<numberOfSeqProcessedEach<<"\n";
-  
+  if(flip_flag)
+    cout<<"\tFlip the input sequence read: true"<<endl;
+  else
+    cout<<"\tFlip the input sequence read: false"<<endl;
+
   AlignmentSettings::N_per_file=numberOfSeqProcessedEach;
 
   //testing the alignment string
@@ -207,7 +213,7 @@ int main(int argc, char* argv[])
   vector<SequenceString> data_vec;
   vector<string> header_vec;
   vector<unsigned> count_vec;
-  unsigned totalNumSequences=LoadData("sample.data", header_vec, data_vec, count_vec);
+  unsigned totalNumSequences=LoadData(seqFileName, header_vec, data_vec, count_vec);
   cout<<"Load Data: "<<totalNumSequences<<" sequences were read"<<endl;
   
   cout<<"header vector"<<endl;
@@ -228,10 +234,28 @@ int main(int argc, char* argv[])
       cout<<"\t"<<i<<":"<<data_vec.at(i).toString()<<endl;
     }
 
+  //now we need to see whether we need to flip the input sequence.
+  //sometime it is necessary depending on how the sequences are read
+  vector<SequenceString>all_Sequences=data_vec;
+  if(flip_flag)
+    {//need to flip them
+      for(unsigned i=0;i<all_Sequences.size();i++)
+	{
+	  SequenceString tempss=all_Sequences.at(i);
+	  tempss=FlipSequenceString(tempss);
+	  all_Sequences[i]=tempss;
+	}
+      cout<<"flipped sequence vector"<<endl;
+      for(unsigned int i=0;i<all_Sequences.size();i++)
+	{
+	  cout<<"\t"<<i<<":"<<all_Sequences.at(i).toString()<<endl;
+	}
+    }
+
   //testing parse field function
   cout<<"Testing parsefield function:\n";
   unsigned N_read=data_vec.size();
-  vector<SequenceString>all_Sequences=data_vec;
+
   unsigned Read_Length=ParseField(header_vec, "Read_Length");
   if((signed)Read_Length!=-1)
     {
@@ -249,7 +273,7 @@ int main(int argc, char* argv[])
 
   //start testing the alignment, first mathJ
   cout<<"%%%%%%%%%%%testing matchJ()>>>>>>"<<endl;
-  SequenceString test_seq=all_Sequences.at(1);
+  SequenceString test_seq=all_Sequences.at(0);
   cout<<"\ttesting sequence 0:"<<endl;
   cout<<test_seq.toString()<<endl;
   
@@ -261,14 +285,55 @@ int main(int argc, char* argv[])
   if(J_obj.numOfAligned>0)
     {
       cout<<"\tthe number of aligned:"<<J_obj.numOfAligned<<endl;
-      cout<<"\tthe aligned length:"<<J_obj.align_length[0]<<","
-	  <<J_obj.align_length[1]<<","<<J_obj.align_length[2]<<endl;
-      cout<<"\tthe min_deletions:"<<J_obj.min_deletions[0]<<"."
-	  <<J_obj.min_deletions[1]<<","<<J_obj.min_deletions[2]<<"."<<endl;
-      cout<<"\tthe n_errors:"<<J_obj.n_errors[0]<<","
-	  <<J_obj.n_errors[1]<<","<<J_obj.n_errors[2]<<","<<endl;
-      cout<<"\talleles_all:"<<J_obj.alleles_all[0]<<","
-	  <<J_obj.alleles_all[1]<<","<<J_obj.alleles_all[2]<<","<<endl;
+
+      cout<<"\tthe aligned length:";
+      for(unsigned i=0;i<J_obj.numOfAligned;i++)
+	{
+	  cout<<J_obj.align_length[i]<<",";
+	}
+      cout<<endl;
+
+      cout<<"\tthe min_deletions:";
+      for(unsigned i=0;i<J_obj.numOfAligned;i++)
+	{
+	  cout<<J_obj.min_deletions[i]<<",";
+	}
+      cout<<endl;
+
+      cout<<"\tthe n_errors:";
+      for(unsigned i=0;i<J_obj.numOfAligned;i++)
+	{
+	  cout<<J_obj.n_errors[i]<<",";
+	}
+      cout<<endl;
+
+      cout<<"\talleles_all:";
+      for(unsigned i=0;i<J_obj.numOfAligned;i++)
+	{
+	  cout<<J_obj.alleles_all[i]<<",";
+	}
+      cout<<endl;
+      
+      cout<<"\tp_reg_max_length:";
+      for(unsigned j=0;j<J_obj.numOfAligned;j++)
+	{
+
+	  for(unsigned i=0;i<AlignmentSettings::J_maximum_deletion+1;i++)
+	    {
+	      cout<<J_obj.p_region_max_length[j][i]<<",";
+	    }
+	  cout<<endl;
+	}
+      cout<<endl;
+      cout<<"\texcess_error_position:";
+      for(unsigned j=0;j<J_obj.numOfAligned;j++)
+	{
+	  for(unsigned i=0;i<AlignmentSettings::negative_excess_deletions_max;i++)
+	    {
+	      cout<<J_obj.excess_error_positions[j][i]<<",";
+	    }
+	}
+      cout<<endl;
     }
   else
     {
@@ -375,6 +440,9 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	case 't':
 	  numberOfThread=atoi(optarg);
 	  break;
+	case 'r':
+	  flip_flag=true;
+	  break;
 
 	  /*case 'e':
 	  gapextension=atoi(optarg);
@@ -450,6 +518,9 @@ static void printUsage(int argc, char* argv[])
       <<"\t\t\t main thread is managing, reporting, writing output, etc.\n"
       <<"\t\t\t only the working thread(s) doing the alignments."
       <<"\n";
+  cout<<"\t\t-r  flip/reverse the input sequence read\n"
+       <<"\t\t\t  This flag by default is false (no flipping)\n\n";
+
 
   /*
   cout<<"\t\t-a  -- the type of alignment a for protein alignment, aa; \n"
