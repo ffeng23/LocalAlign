@@ -607,7 +607,7 @@ cout<<"***first****3"<<endl;
    }
 cout<<"\n***first****3aa"<<endl;
  //sorted index also holding the gene allele index
- QuickSort(scores, 0, _numOfJSegs-1, sorted_index, temp_min_deletions);
+ QuickSort<double>(scores, 0, _numOfJSegs-1, sorted_index, temp_min_deletions);
  //	      scores  = align_length - error_cost*n_errors;
  //S = [-scores, min_deletions];
  //	  [~,order]=sortrows(S);

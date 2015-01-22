@@ -189,7 +189,7 @@ unsigned min_mf(const unsigned* _m, const unsigned& _len)
  * and prefilled with 1 through N in order.!!!!
  *
  */
-void QuickSort(double* _a, const unsigned& _first, const unsigned int& _last, unsigned* _index, unsigned* _b ) 
+template <class T> void QuickSort(T* _a, const unsigned& _first, const unsigned int& _last, unsigned* _index, unsigned* _b ) 
 {
   //cout<<"&&&&&&&&&&call QuickSort"<<endl;
   unsigned int pivotElement;
@@ -208,6 +208,8 @@ void QuickSort(double* _a, const unsigned& _first, const unsigned int& _last, un
     }
 }
  
+template  void QuickSort<double>(double* _a,const unsigned& _first, const unsigned int& _last, unsigned* _index, unsigned* _b ); 
+template  void QuickSort<unsigned>(unsigned* _a,const unsigned& _first, const unsigned int& _last, unsigned* _index, unsigned* _b ); 
 /**
  * Find and return the index of pivot element.
  * @param a - The array.
@@ -216,13 +218,13 @@ void QuickSort(double* _a, const unsigned& _first, const unsigned int& _last, un
  * @return - the pivot element
  */
 //here we use a new way to choose pivot. a median between [first], [middle] and [last]
-unsigned Pivot(double* _a, const unsigned int& _first, const unsigned int& _last, unsigned* _index, unsigned* _b) 
+template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsigned int& _last, unsigned* _index, unsigned* _b) 
 {
   //cout<<"%%%%%%%%%%%%call pivot:[_last, _first]:["<<_first<<","<<_last<<"];"<<endl;
   
   unsigned  p = _first;
   unsigned middle=(_first+_last)/2;
-  double pivotElement;
+  T pivotElement;
   unsigned pivotIndex=_first;
   
   if(middle!=_first&&middle!=_last)
@@ -304,13 +306,14 @@ unsigned Pivot(double* _a, const unsigned int& _first, const unsigned int& _last
   //cout<<"********end of pivot, p :"<<p<<endl;
   return p;
 }
- 
+template unsigned Pivot<double>(double* _a, const unsigned int& _first, const unsigned int& _last, unsigned* _index, unsigned* _b) ;
+template unsigned Pivot<unsigned>(unsigned* _a, const unsigned int& _first, const unsigned int& _last, unsigned* _index, unsigned* _b) ;
 //return 0,1,2 indicating which one is the median
 //input:
 // m is the array,
 // a, b, c is the index of the element that need to be considered
 // return index of the median value
-unsigned GetMedianIndex(const double* m, const unsigned& a, const unsigned& b, const unsigned& c)
+template <class T> unsigned GetMedianIndex(const T* m, const unsigned& a, const unsigned& b, const unsigned& c)
 {
   //unsigned index=0;
   if(m[a]>m[b])
@@ -341,19 +344,22 @@ unsigned GetMedianIndex(const double* m, const unsigned& a, const unsigned& b, c
     }
   return a;
 }
- 
+template unsigned GetMedianIndex<double>(const double* m, const unsigned& a, const unsigned& b, const unsigned& c); 
+template unsigned GetMedianIndex<unsigned>(const unsigned* m, const unsigned& a, const unsigned& b, const unsigned& c); 
 /**
  * Swap the parameters.
  * @param a - The first parameter.
  * @param b - The second parameter.
  */
-void Swap(int& _a, int& _b)
+template <class T> void Swap(T& _a, T& _b)
 {
   int temp = _a;
   _a = _b;
   _b = temp;
 }
- 
+template  void Swap<unsigned>(unsigned& _a, unsigned & _b);
+template  void Swap<int>(int& _a, int & _b);
+template  void Swap<double>(double& _a, double & _b);
 /**
  * Print an array.
  * @param a - The array.
@@ -497,6 +503,39 @@ bool CopyElements
     }
   return true;
 }
+
+void Unique(const unsigned* _in, const unsigned& _iSize, 
+	    /*output*/ unsigned* _out, unsigned* _out_index, 
+	     unsigned& _oSize)
+{
+  //first copy over the output array
+  std::memcpy(_out, _in, sizeof(unsigned)/sizeof(char)*_iSize);
+  //we first sort the array
+  QuickSort<unsigned>(_out, 0, _iSize-1, _out_index);
+
+  //now we need to go through the array to pick the unique ones only
+  _oSize=0;
+  unsigned runningValue=_out[0];
+  _out_index[_oSize]=0;
+  for(unsigned i=1;i<_iSize; i++)
+    {
+      if(_out[i]!=runningValue)
+	{
+	  runningValue=_out[i];
+	  _out_index[_oSize]=i;
+	  _oSize++;
+	}
+    }
+
+  //we are done with index, just need to populate the output array
+  for(unsigned i=0;i<_oSize;i++)
+    {
+      _out[i]=_out[_out_index[i]];
+    }
+
+  //done!!!
+} 
+
 
 
 

@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
 
   //start testing the alignment, first mathJ
   cout<<"%%%%%%%%%%%testing matchJ()>>>>>>"<<endl;
-  SequenceString test_seq=all_Sequences.at(11);
+  SequenceString test_seq=all_Sequences.at(0);
   cout<<"\ttesting sequence 0:"<<endl;
   cout<<test_seq.toString()<<endl;
   
