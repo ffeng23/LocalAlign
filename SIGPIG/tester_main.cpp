@@ -41,8 +41,8 @@ int main()
   cout<<"return min : "<<min_mf(vec_double)<<endl;
 
   cout<<"***********testing get median index***********"<<endl;
-  cout<<"\tmedian:first:"<<0<<";last:"<<7<<";middle:"<<3<<";median:"<<GetMedianIndex(array_double2,0,7,3)<<endl;
-  cout<<"\t\tpivot value:"<<array_double2[GetMedianIndex(array_double2,0,7,3)]<<endl;
+  cout<<"\tmedian:first:"<<0<<";last:"<<7<<";middle:"<<3<<";median:"<<GetMedianIndex(array_double2,0,7,3, NULL)<<endl;
+  cout<<"\t\tpivot value:"<<array_double2[GetMedianIndex(array_double2,0,7,3, NULL)]<<endl;
 
   cout<<"*******Testing quick sort*******"<<endl;
   unsigned index[]={0,1,2,3,4,5,6,7};
@@ -139,7 +139,27 @@ int main()
 
   cout<<"\talign positions:"<<align_positions[0]<<","<<align_positions[1]<<endl;
   cout<<"Done"<<endl;
+
+  //now testing Unique
+  cout<<"testing unique function:"<<endl;
+  unsigned test_array1[]={1,2,3,3,3,3,3,55,55,7,6,2,1};
+  //intialize the output array
+  unsigned size_test_array=13;
+  unsigned* test_out=new unsigned [size_test_array];
+  unsigned* test_out_index=new unsigned[size_test_array];
+  for(unsigned i=0;i<size_test_array;i++)
+    {
+      test_out_index[i]=i;
+    }
+  unsigned size_unique;
+  Unique(test_array1, size_test_array, test_out, test_out_index, size_unique);
+  cout<<"\treturn "<<size_unique<<" elements."<<endl;
   
+  for(unsigned i=0;i<size_test_array;i++)
+    {
+      cout<<test_out[i]<<"-"<<test_out_index[i]<<",";
+    }
+  cout<<endl;
   //clear the memory
   delete[] error_positions;
   									 

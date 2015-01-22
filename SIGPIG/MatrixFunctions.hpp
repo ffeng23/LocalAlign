@@ -41,7 +41,8 @@ template <class T> void Swap(T& _a, T& _b);
 //void swapNoTemp(int& a, int& b);
 void Print(const double* _array, const int& _N);
 // double* sorted, unsigned * sorted_index);
-template <class T> unsigned GetMedianIndex(const T* m, const unsigned& a, const unsigned& b, const unsigned& c);
+
+template <class T> unsigned GetMedianIndex(const T* m, const unsigned& a, const unsigned& b, const unsigned& c, const unsigned* _index);
 
 void Print(const unsigned* _array, const int& _N);
 
@@ -78,6 +79,6 @@ bool CopyElements
  */
 void Unique(const unsigned* _in, const unsigned& _iSize, 
 	    /*output*/ unsigned* _out, unsigned* _out_index, 
-	    const unsigned& _oSize); 
+	    unsigned& _oSize); 
 
 #endif

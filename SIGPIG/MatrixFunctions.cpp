@@ -197,6 +197,7 @@ template <class T> void QuickSort(T* _a, const unsigned& _first, const unsigned 
   if(_first < _last)
     {
       pivotElement = Pivot(_a, _first, _last, _index, _b);
+      cout<<"pivotE,ement:"<<pivotElement<<endl;
       if(pivotElement>0)
 	QuickSort(_a, _first, pivotElement-1, _index, _b);
       if(pivotElement< numeric_limits<unsigned int>::max())
@@ -220,21 +221,22 @@ template  void QuickSort<unsigned>(unsigned* _a,const unsigned& _first, const un
 //here we use a new way to choose pivot. a median between [first], [middle] and [last]
 template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsigned int& _last, unsigned* _index, unsigned* _b) 
 {
-  //cout<<"%%%%%%%%%%%%call pivot:[_last, _first]:["<<_first<<","<<_last<<"];"<<endl;
+  cout<<"%%%%%%%%%%%%call pivot:[_last, _first]:["<<_first<<","<<_last<<"];"<<endl;
   
   unsigned  p = _first;
   unsigned middle=(_first+_last)/2;
   T pivotElement;
   unsigned pivotIndex=_first;
   
-  if(middle!=_first&&middle!=_last)
+  if(middle!=_first&&middle!=_last) //middle==first==middel, we don't do anything, simply use the first one
     {
-      //cout<<"\t\t\t[first, last, middle]:["<<_first<<","<<_last<<","<<middle<<"]."<<endl;
-      pivotIndex = GetMedianIndex(_a, _first, _last, middle) ;
-      //cout<<"\t\t\t>>pivotIndex:"<<pivotIndex<<endl;
+      cout<<"\t\t\t[first, last, middle]:["<<_first<<","<<_last<<","<<middle<<"]."<<endl;
+      pivotIndex = GetMedianIndex(_a, _first, _last, middle, _index) ;
+      cout<<"\t\t\t>>pivotIndex:"<<pivotIndex<<endl;
       //swap the index
       if(pivotIndex!=_first)
 	{
+	  cout<<"#$$$$$$$$$$$$$$$$$$ SWAP the Median Starting Value:"<<endl;
 	  swap(_a[_first], _a[pivotIndex]);
 	  if(_index!=NULL)
 	    {
@@ -252,7 +254,7 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
   //just use the first one as pivot anyway
   pivotElement=_a[_first];
   pivotIndex=_first;
-  //cout<<"8888888888888>>pivote value:"<<_a[_first]<<endl;
+  cout<<"8888888888888>>pivote value:"<<_a[_first]<<endl;
   /*if(_index!=NULL)
     {
       _index[_first]=pivotIndex;
@@ -260,7 +262,7 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
   //Print(_a, _last-_first+1);
   for(unsigned int i = _first+1 ; i <= _last ; i++)
     {
-      //cout<<"\tround i:"<<i<<"--";
+      cout<<"\tround i:"<<i<<"--";
       
       /* If you want to sort the list in the other order, change "<=" to ">" */
       if( _a[i] < pivotElement ||
@@ -269,11 +271,11 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
         {
 	  
 	  p++;
-	  //	  cout<<"p:"<<p<<";i:"<<i<<endl;
+	  	  cout<<"p:"<<p<<";i:"<<i<<endl;
 	  if(p!=i)
 	    {
 	      swap(_a[i], _a[p]);
-	      //cout<<"********************SWAP*************!!!"<<endl;
+	      cout<<"********************SWAP*************!!!"<<endl;
 	      if(_index!=NULL)
 		{
 		  swap(_index[p], _index[i]);
@@ -285,13 +287,15 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
 	    }
 	  else
 	    {
-	      //cout<<"******swap step but no swap actions, since p==i"<<endl;
+	      cout<<"******swap step but no swap actions, since p==i"<<endl;
 	    }
         }
       //Print(_a, _last-_first+1);
+      Print(_a, _last+1);
     }
-  //cout<<"\t>>before pivot"<<endl;
+  cout<<"\t>>before pivot"<<endl;
   //Print(_a, _last-_first+1);
+  Print(_a, _last+1);
   swap(_a[p], _a[_first]);
   if(_index!=NULL)
     {
@@ -301,9 +305,10 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
     {
       swap(_b[p],_b[_first]);
     }
-  //cout<<"\t>>after"<<endl;
+  cout<<"\t>>after"<<endl;
   //Print(_a,_last-_first+1);
-  //cout<<"********end of pivot, p :"<<p<<endl;
+  Print(_a, _last+1);
+  cout<<"********end of pivot, p :"<<p<<endl;
   return p;
 }
 template unsigned Pivot<double>(double* _a, const unsigned int& _first, const unsigned int& _last, unsigned* _index, unsigned* _b) ;
@@ -313,8 +318,66 @@ template unsigned Pivot<unsigned>(unsigned* _a, const unsigned int& _first, cons
 // m is the array,
 // a, b, c is the index of the element that need to be considered
 // return index of the median value
-template <class T> unsigned GetMedianIndex(const T* m, const unsigned& a, const unsigned& b, const unsigned& c)
+template <class T> unsigned GetMedianIndex(const T* m, const unsigned& a, const unsigned& b, const unsigned& c, const unsigned* _index)
 {
+  if(m[a]==m[b]==m[c])
+    {
+      if(_index!=NULL)
+	{
+	  if(_index[a]<_index[b]&&_index[a]<_index[c])
+	    return a;
+	  if(_index[b]<_index[a]&&_index[b]<_index[c])
+	    return b;
+	  if(_index[c]<_index[a]&&_index[c]<_index[b])
+	    return c;
+	}
+      else
+	{
+	  if(a<b &&a<c)
+	    return a;
+	  if(b<a&&b<c)
+	    return b;
+	  if(c<a&&c<b)
+	    return c;
+	}
+    }
+  if(m[a]==m[b])
+    {
+      if(_index!=NULL)
+	{
+	  if(_index[a]<_index[b])
+	    return a;
+	  else
+	    return b;
+	}
+      else
+	return a<b?a:b;
+    }
+  if(m[a]==m[c])
+    {
+      if(_index!=NULL)
+	{
+	  if(_index[a]<_index[c])
+	    return a;
+	  else
+	    return c;
+	}
+      else
+	return a<c?a:c;
+    }
+  if(m[b]==m[c])
+    {
+      if(_index!=NULL)
+	{
+	  if(_index[b]<_index[c])
+	    return b;
+	  else
+	    return c;
+	}
+      else
+	return b<c?b:c;
+    }
+  //for unequal cases
   //unsigned index=0;
   if(m[a]>m[b])
     {
@@ -322,30 +385,40 @@ template <class T> unsigned GetMedianIndex(const T* m, const unsigned& a, const 
 	{
 	  return a;
 	}
-      else //c<=a//still not sure, compare b and c
+      else //c<a still not sure, compare b and c
 	{
-	  if(m[b]>m[c])
-	    return b;
-	  else
-	    return c;
-	}
+	  if(m[b]<m[c])//b<c
+	    {
+	      return c;
+	    }
+	  else //b>c
+	    {
+	      return b;
+	    }	  
+	}	
     }
-  else //a<=b
+  else //a<b
     {
-      if(m[c]<m[a]) 
-	return a;
-      else //c>a need to compare b and c
+      if(m[c]<m[a])
 	{
-	  if(m[c]<m[b])
-	    return c;
-	  else //c>b
-	    return b;
+	  return a;
 	}
+      else //c>a need to compare b and c
+	{	    
+	  if(m[c]>m[b]) //c>b
+	    {
+	      return b;
+	    }
+	  else //c<b
+	    {	      
+	      return c;
+	    }
+	}      
     }
-  return a;
+//  return a;
 }
-template unsigned GetMedianIndex<double>(const double* m, const unsigned& a, const unsigned& b, const unsigned& c); 
-template unsigned GetMedianIndex<unsigned>(const unsigned* m, const unsigned& a, const unsigned& b, const unsigned& c); 
+template unsigned GetMedianIndex<double>(const double* m, const unsigned& a, const unsigned& b, const unsigned& c, const unsigned* _index); 
+template unsigned GetMedianIndex<unsigned>(const unsigned* m, const unsigned& a, const unsigned& b, const unsigned& c, const unsigned* _index); 
 /**
  * Swap the parameters.
  * @param a - The first parameter.
@@ -512,25 +585,34 @@ void Unique(const unsigned* _in, const unsigned& _iSize,
   std::memcpy(_out, _in, sizeof(unsigned)/sizeof(char)*_iSize);
   //we first sort the array
   QuickSort<unsigned>(_out, 0, _iSize-1, _out_index);
-
+  cout<<"After sorting:"<<endl;
+  for(unsigned i=0;i<_iSize;i++)
+    {
+      cout<<_out[i]<<"-"<<_out_index[i]<<",";
+    }
+  cout<<endl;
   //now we need to go through the array to pick the unique ones only
   _oSize=0;
+
   unsigned runningValue=_out[0];
-  _out_index[_oSize]=0;
+  cout<<"initially runningValue:"<<runningValue;  
+  _out_index[_oSize]=_out_index[0];
+  
   for(unsigned i=1;i<_iSize; i++)
     {
       if(_out[i]!=runningValue)
 	{
-	  runningValue=_out[i];
-	  _out_index[_oSize]=i;
 	  _oSize++;
+	  runningValue=_out[i];
+	  _out_index[_oSize]=_out_index[i];
+	  
 	}
     }
-
+  _oSize++;//one more because it is the size, not index
   //we are done with index, just need to populate the output array
   for(unsigned i=0;i<_oSize;i++)
     {
-      _out[i]=_out[_out_index[i]];
+      _out[i]=_in[_out_index[i]];
     }
 
   //done!!!
