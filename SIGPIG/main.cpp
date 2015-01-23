@@ -273,79 +273,86 @@ int main(int argc, char* argv[])
 
   //start testing the alignment, first mathJ
   cout<<"%%%%%%%%%%%testing matchJ()>>>>>>"<<endl;
-  SequenceString test_seq=all_Sequences.at(0);
-  cout<<"\ttesting sequence 0:"<<endl;
-  cout<<test_seq.toString()<<endl;
   
   double error_cost=5;
-  Alignment_Object J_obj(totalNumJ);
+  Alignment_Object J_obj[N_read];
   //now calling it
-  bool seq_j_ok=match_J(test_seq, genJ, totalNumJ, AlignmentSettings::J_minimum_alignment_length, AlignmentSettings::J_maximum_deletion, AlignmentSettings::negative_excess_deletions_max, AlignmentSettings::J_allowed_errors, error_cost, J_obj);
-  //now we check the output
-  if(J_obj.numOfAligned>0)
+  for(unsigned _m=0;_m<N_read;_m++)
     {
-      cout<<"\tthe number of aligned:"<<J_obj.numOfAligned<<endl;
-
-      cout<<"\tthe aligned length:";
-      for(unsigned i=0;i<J_obj.numOfAligned;i++)
+      cout<<"---------------------------i:"<<_m<<endl;
+      SequenceString test_seq=all_Sequences.at(_m);
+      cout<<"\ttesting sequence 0:"<<endl;
+      cout<<test_seq.toString()<<endl;
+  
+      bool seq_j_ok=match_J(test_seq, genJ, totalNumJ, AlignmentSettings::J_minimum_alignment_length, AlignmentSettings::J_maximum_deletion, AlignmentSettings::negative_excess_deletions_max, AlignmentSettings::J_allowed_errors, error_cost, J_obj[_m]);
+  //now we check the output
+      if(J_obj[_m].numOfAligned>0)
 	{
-	  cout<<J_obj.align_length[i]<<",";
-	}
-      cout<<endl;
+	  /* cout<<"\tthe number of aligned:"<<J_obj.numOfAligned<<endl;
+	  
+	  cout<<"\tthe aligned length:";
+	  for(unsigned i=0;i<J_obj.numOfAligned;i++)
+	    {
+	      cout<<J_obj.align_length[i]<<",";
+	    }
+	  cout<<endl;
+	  
+	  cout<<"\tthe min_deletions:";
+	  for(unsigned i=0;i<J_obj.numOfAligned;i++)
+	    {
+	      cout<<J_obj.min_deletions[i]<<",";
+	    }
+	  cout<<endl;
 
-      cout<<"\tthe min_deletions:";
-      for(unsigned i=0;i<J_obj.numOfAligned;i++)
-	{
-	  cout<<J_obj.min_deletions[i]<<",";
-	}
-      cout<<endl;
+	  cout<<"\tthe n_errors:";
+	  for(unsigned i=0;i<J_obj.numOfAligned;i++)
+	    {
+	      cout<<J_obj.n_errors[i]<<",";
+	    }
+	  cout<<endl;
 
-      cout<<"\tthe n_errors:";
-      for(unsigned i=0;i<J_obj.numOfAligned;i++)
-	{
-	  cout<<J_obj.n_errors[i]<<",";
-	}
-      cout<<endl;
-
-      cout<<"\talleles_all:";
-      for(unsigned i=0;i<J_obj.numOfAligned;i++)
+	  cout<<"\talleles_all:";
+	  for(unsigned i=0;i<J_obj.numOfAligned;i++)
 	{
 	  cout<<J_obj.alleles_all[i]<<",";
 	}
-      cout<<endl;
-      
-      cout<<"\tp_reg_max_length:";
-      for(unsigned j=0;j<J_obj.numOfAligned;j++)
-	{
-
-	  for(unsigned i=0;i<AlignmentSettings::J_maximum_deletion+1;i++)
+	  cout<<endl;
+	  
+	  cout<<"\tp_reg_max_length:";
+	  for(unsigned j=0;j<J_obj.numOfAligned;j++)
 	    {
-	      cout<<J_obj.p_region_max_length[j][i]<<",";
+	      
+	      for(unsigned i=0;i<AlignmentSettings::J_maximum_deletion+1;i++)
+		{
+		  cout<<J_obj.p_region_max_length[j][i]<<",";
+		}
+	      cout<<endl;
 	    }
 	  cout<<endl;
-	}
-      cout<<endl;
-      cout<<"\texcess_error_position:";
-      for(unsigned j=0;j<J_obj.numOfAligned;j++)
-	{
-	  for(unsigned i=0;i<AlignmentSettings::negative_excess_deletions_max;i++)
+	  cout<<"\texcess_error_position:";
+	  for(unsigned j=0;j<J_obj.numOfAligned;j++)
 	    {
-	      cout<<J_obj.excess_error_positions[j][i]<<",";
+	      for(unsigned i=0;i<AlignmentSettings::negative_excess_deletions_max;i++)
+		{
+		  cout<<J_obj.excess_error_positions[j][i]<<",";
+		}
 	    }
-	}
-      cout<<endl;
-      cout<<"\talleles from distinct gene:";
-      for(unsigned j=0;j<J_obj.numOfAligned;j++)
-	{
+	  cout<<endl;
+	  cout<<"\talleles from distinct gene:";
+	  for(unsigned j=0;j<J_obj.numOfAligned;j++)
+	    {
 	  cout<<J_obj.alleles_from_distinct_genes[j]<<",";
+	    }
+	  cout<<endl;
+      */  
+	  //now print it.
+	  cout<<J_obj[_m].toString()<<endl;
 	}
-      cout<<endl;
+      else
+	{
+	  cout<<"failed alignment"<<endl;
+	}
     }
-  else
-    {
-      cout<<"failed alignment"<<endl;
-    }
-  
   /*
   //now we are ready to do the alignment??
   //first need to figure out number of output files

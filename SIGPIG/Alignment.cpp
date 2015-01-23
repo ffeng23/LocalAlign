@@ -1,5 +1,6 @@
 
 #include <cstring>
+#include <sstream>
 #include "../SequenceString.hpp"
 #include "genomicSegments.hpp"
 #include "Alignment.hpp"
@@ -192,6 +193,119 @@ Alignment_Object::~Alignment_Object()
     }
   
 }
+/*define the text output of the alignment object
+ */
+string Alignment_Object::toString()
+{
+  stringstream ss;
+  ss<<">>Alignment object J:\n";
+  //starting putting everything in order
+  ss<<"align_length:";
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      ss<<align_length[i];
+      if(i!=numOfAligned-1)
+	ss<<"\t";
+      else
+	ss<<"\n";
+    }
+  ss<<"align_position:\n";
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      ss<<"\t";
+      for(unsigned j=0;j<2;j++)
+	{
+	  ss<<align_position[i][j];
+	  if(j!=1)
+	    ss<<"\t";
+	  else
+	    ss<<"\n";
+	}
+    }
+  ss<<"min_deletions:";
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      ss<<min_deletions[i];
+      if(i!=numOfAligned-1)
+	ss<<"\t";
+      else
+	ss<<"\n";
+    }
+
+  ss<<"n_errors:";
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      ss<<n_errors[i];
+      if(i!=numOfAligned-1)
+	ss<<"\t";
+      else
+	ss<<"\n";
+    }
+
+  ss<<"error_positions:\n";
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      ss<<"\t";
+      for(unsigned j=0;j<n_errors[i];j++)
+	{
+	  ss<<error_positions[i][j];
+	  if(j!=n_errors[i]-1)
+	    ss<<"\t";
+	  else
+	    ss<<"\n";
+	}
+    }
+
+  ss<<"p_region_max_length:\n";
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      ss<<"\t";
+      for(unsigned j=0;j<AlignmentSettings::J_maximum_deletion+1;j++)
+	{
+	  ss<<p_region_max_length[i][j];
+	  if(j!=AlignmentSettings::J_maximum_deletion+1-1)
+	    ss<<"\t";
+	  else
+	    ss<<"\n";
+	}
+    }
+  ss<<"excess_error_positions:\n";
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      ss<<"\t";
+      for(unsigned j=0;j<AlignmentSettings::negative_excess_deletions_max;j++)
+	{
+	  ss<<excess_error_positions[i][j];
+	  if(j!=AlignmentSettings::negative_excess_deletions_max-1)
+	    ss<<"\t";
+	  else
+	    ss<<"\n";
+	}
+    }
+  
+  ss<<"alleles_all:";
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      ss<<alleles_all[i];
+      if(i!=numOfAligned-1)
+	ss<<"\t";
+      else
+	ss<<"\n";
+    }
+  
+  ss<<"alleles_from_distinct_genes:";
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      ss<<alleles_from_distinct_genes[i];
+      if(i!=numOfAligned-1)
+	ss<<"\t";
+      else
+	ss<<"\n";
+    }
+  
+  return ss.str();  
+}
+
 //this is the code to finds highest scoring alignement of seq1 and seq2 that forces their
 //left ends to match.
 //this is the one in the original code named "align_with_constraints_fixed_left_remove_right_errors". 
@@ -611,7 +725,7 @@ cout<<"\n***first****3aa"<<endl;
  //	      scores  = align_length - error_cost*n_errors;
  //S = [-scores, min_deletions];
  //	  [~,order]=sortrows(S);
-cout<<"=========>after sorting:";
+ cout<<"=========>after sorting:";
  for(unsigned k=0;k<_numOfJSegs;k++)
    {
      //sorted_index[k]=k;
@@ -670,13 +784,13 @@ cout<<"***first****4"<<endl;
      //we have to clean up the memory, by now some of the arrays have been allocated
      //<--------
      //clean up
-     cout<<"\t555delete 1"<<endl;
+     //cout<<"\t555delete 1"<<endl;
      delete [] j_large_deletion_flag;
- cout<<"\t555delete 2"<<endl;
+     //cout<<"\t555delete 2"<<endl;
      delete [] temp_align_length;
-     cout<<"\t555delete 3"<<endl;
+     //cout<<"\t555delete 3"<<endl;
      CleanUpMemory(temp_align_position, _numOfJSegs);
-     cout<<"\t555delete 4"<<endl;
+     //cout<<"\t555delete 4"<<endl;
      delete [] temp_min_deletions;
      delete [] temp_n_errors;
      CleanUpMemory(temp_error_positions, _numOfJSegs);
@@ -684,18 +798,17 @@ cout<<"***first****4"<<endl;
  //CleanUpMemory(temp_excess_error_positions, _numOfJsegs);
  //delete [] temp_alleles_all;
  //delete [] alleles_from_distinc_gene;
- cout<<"\t555delete 5"<<endl;
+     //cout<<"\t555delete 5"<<endl;
      delete [] error_position_func;
-cout<<"\t555delete 6"<<endl;
+     //cout<<"\t555delete 6"<<endl;
      delete [] scores;
-     cout<<"\t555delete 7"<<endl;
+     //cout<<"\t555delete 7"<<endl;
      delete [] sorted_index;
-     cout<<"\t555delete 8"<<endl;
+     //cout<<"\t555delete 8"<<endl;
      delete [] ok_order; //ok order has not been referenced directly by J.alleles_all
      //and in this case, it will not. so we delete it.
  
      //delete [] genJ_ok_index;
- 
      return false;
    }
  cout<<"************first 4 bb keep going....."<<endl;
@@ -981,3 +1094,6 @@ for(unsigned i=0;i<_numOfAligned;i++)
   cout<<"Done for the function"<<endl;
   //return true;
 }
+
+
+
