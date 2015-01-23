@@ -39,12 +39,12 @@ template <class T> unsigned Pivot(T* _a, const unsigned& _first, const unsigned&
 
 template <class T> void Swap(T& _a, T& _b);
 //void swapNoTemp(int& a, int& b);
-void Print(const double* _array, const int& _N);
+void Print(const double* _array, const int& _N, const unsigned* _index);
 // double* sorted, unsigned * sorted_index);
 
 template <class T> unsigned GetMedianIndex(const T* m, const unsigned& a, const unsigned& b, const unsigned& c, const unsigned* _index);
 
-void Print(const unsigned* _array, const int& _N);
+void Print(const unsigned* _array, const int& _N, const unsigned* _index);
 
 void Reverse( unsigned* _array, const unsigned& _N);
 void Reverse(double* _array, const unsigned& _N);

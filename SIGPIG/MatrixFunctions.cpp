@@ -258,7 +258,8 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
   /*if(_index!=NULL)
     {
       _index[_first]=pivotIndex;
-      }*/
+      }
+  */
   //Print(_a, _last-_first+1);
   for(unsigned int i = _first+1 ; i <= _last ; i++)
     {
@@ -266,7 +267,8 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
       
       /* If you want to sort the list in the other order, change "<=" to ">" */
       if( _a[i] < pivotElement ||
-	  (_a[i]==pivotElement&&(_b!=NULL&&_b[i]<_b[pivotIndex]))
+	  (_a[i]==pivotElement&&(_b!=NULL&&_b[i]<_b[pivotIndex]))||
+	  (_a[i]==pivotElement&&_b==NULL&&_index!=NULL&&_index[i]<_index[pivotIndex])
 	 )
         {
 	  
@@ -291,11 +293,11 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
 	    }
         }
       //Print(_a, _last-_first+1);
-      Print(_a, _last+1);
+      Print(_a, _last+1,_index);
     }
   cout<<"\t>>before pivot"<<endl;
   //Print(_a, _last-_first+1);
-  Print(_a, _last+1);
+  Print(_a, _last+1,_index);
   swap(_a[p], _a[_first]);
   if(_index!=NULL)
     {
@@ -307,7 +309,7 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
     }
   cout<<"\t>>after"<<endl;
   //Print(_a,_last-_first+1);
-  Print(_a, _last+1);
+  Print(_a, _last+1, _index);
   cout<<"********end of pivot, p :"<<p<<endl;
   return p;
 }
@@ -438,10 +440,17 @@ template  void Swap<double>(double& _a, double & _b);
  * @param a - The array.
  * @param N - The size of the array.
  */
-void Print(const double* a, const int& N)
+void Print(const double* a, const int& N, const unsigned* _index)
 {
   for(int i = 0 ; i < N ; i++)
-    cout << "array[" << i << "] = " << a[i] << endl;
+    {
+      cout << "array[" << i << "] = " << a[i]; 
+      if(_index!=NULL)
+	{
+	  cout<<"-"<<_index[i];
+	}
+      cout<< endl;
+    }
 }
 
  
@@ -450,10 +459,17 @@ void Print(const double* a, const int& N)
  * @param a - The array.
  * @param N - The size of the array.
  */
-void Print(const unsigned* a, const int& N)
+void Print(const unsigned* a, const int& N, const unsigned* _index)
 {
   for(int i = 0 ; i < N ; i++)
-    cout << "array[" << i << "] = " << a[i] << endl;
+    {
+      cout << "array[" << i << "] = " << a[i];// <<"-"<<_index[i]<< endl;
+      if(_index!=NULL)
+	{
+	  cout<<"-"<<_index[i];
+	}
+      cout<< endl;
+    }
 } 
  
 
@@ -581,6 +597,12 @@ void Unique(const unsigned* _in, const unsigned& _iSize,
 	    /*output*/ unsigned* _out, unsigned* _out_index, 
 	     unsigned& _oSize)
 {
+  //prepare the index, we assuming in the beginning, the index
+  //is in order
+  for(unsigned i=0;i<_iSize;i++)
+    {
+      _out_index[i]=i;
+    }
   //first copy over the output array
   std::memcpy(_out, _in, sizeof(unsigned)/sizeof(char)*_iSize);
   //we first sort the array

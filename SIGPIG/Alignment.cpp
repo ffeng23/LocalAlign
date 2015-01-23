@@ -787,7 +787,8 @@ for(unsigned i=0;i<ok_count;i++)
  //		      %%%codegen compatible version of
  //		  %%%genJ_ok_gene_inds = [genJ(ok_order).gene_index];
  unsigned* genJ_ok_index = new unsigned[ok_count];
- //go through the genJ to figure out the distinct genes for the each allele, and then reture a array of indices to them  
+ //go through the genJ to figure out the distinct genes for the each allele, and then reture a array of indices to them
+ 
  cout<<"\t^^^^^showing the gene index of the alleles:";
  for(unsigned i=0;i<ok_count;i++)
    {
@@ -796,25 +797,37 @@ for(unsigned i=0;i<ok_count;i++)
    }
  cout<<endl;
  //genJ_ok_gene_inds = zeros(1,numel(ok_order));
+//first we need to sort the J.alleles_all array 
+ unsigned* sorted_genJ_ok_index_temp=new unsigned [ok_count];
+ unsigned* sorted_genJ_ok_index_temp_index=new unsigned[ok_count];
+ unsigned numOfUnique;
+ Unique(genJ_ok_index, ok_count, sorted_genJ_ok_index_temp, sorted_genJ_ok_index_temp_index,numOfUnique);
+ cout<<"after unique:numOfUnique:"<<numOfUnique<<endl;
+ //now we got the distinct gene index index, just need to sort it, to make it in order
+ //because when we do the unique, we first sort it and the gene index might not in order
+ //so the index of the gene index is not in order either
+ QuickSort(sorted_genJ_ok_index_temp_index,0, numOfUnique-1);
+ cout<<"after sorting...."<<endl;
+ cout<<"the index index:"<< sorted_genJ_ok_index_temp_index[0]<<endl;
 
 cout<<"***first****6"<<endl;
  //compare and then get it copied to the alignment object
  _J.alleles_from_distinct_genes=new unsigned[ok_count];
 
- unsigned runningValue=genJ_ok_index[0];
- unsigned runningIndexOfAlleleArray=1;
- _J.alleles_from_distinct_genes[0]=_J.alleles_all[0];
- for(unsigned i=1;i<ok_count;i++)
+ //unsigned runningValue=genJ_ok_index[0];
+ //unsigned runningIndexOfAlleleArray=1;
+ //_J.alleles_from_distinct_genes[0]=_J.alleles_all[0];
+ for(unsigned i=0;i<numOfUnique;i++)
    {
-     if(runningValue!=genJ_ok_index[i])
-       {
-	 _J.alleles_from_distinct_genes[runningIndexOfAlleleArray] = ok_order[i];
-	 runningValue=genJ_ok_index[i];
-	 runningIndexOfAlleleArray++;
-       }
+     //if(runningValue!=genJ_ok_index[i])
+     //  {
+	 _J.alleles_from_distinct_genes[i] = ok_order[sorted_genJ_ok_index_temp_index[i]];
+	 //runningValue=genJ_ok_index[i];
+	 //runningIndexOfAlleleArray++;
+	 //}
    }
  //need to fill the rest of the distinc gene array with -1 as an indicator
- for(unsigned i=runningIndexOfAlleleArray;i<ok_count;i++)
+ for(unsigned i=numOfUnique;i<ok_count;i++)
    {
      _J.alleles_from_distinct_genes[i]=-1;
    }
@@ -856,7 +869,8 @@ cout<<"***first****7"<<endl;
  //delete [] ok_order; ok order is referenced directly by J.alleles_all
  
  delete [] genJ_ok_index;
- 
+ delete [] sorted_genJ_ok_index_temp;
+ delete [] sorted_genJ_ok_index_temp_index;
  return true;
 }
 

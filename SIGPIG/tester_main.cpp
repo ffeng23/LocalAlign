@@ -46,36 +46,36 @@ int main()
 
   cout<<"*******Testing quick sort*******"<<endl;
   unsigned index[]={0,1,2,3,4,5,6,7};
-  Print(array_double2, 8);
+  Print(array_double2, 8, NULL);
   QuickSort(array_double2, 0,7, index);
-  Print(array_double2, 8);
+  Print(array_double2, 8, NULL);
 
-  Print(index, 8);
+  Print(index, 8, NULL);
 
   cout<<"****New array********************>>>>>>>>>>>>>"<<endl;
   double array_double3[]={ 1.0, 23.0, 1.0,-1.5, -2990, 39.0, 1.0, 0.0, 34.5, 14, 1.0 };
   unsigned array_int2[]={11,1,2,3,4,5,6,7,8,9,1};
-  Print(array_double3, 11);
+  Print(array_double3, 11, NULL);
   unsigned index2[]={0,1,2,3,4,5,6,7,8,9,10};
   QuickSort(array_double3, 0,10, index2, array_int2);
   cout<<"***sorted array"<<endl;
-  Print(array_double3,11);
+  Print(array_double3,11, NULL);
   cout<<"***sorted index"<<endl;
-  Print(index2,11);
+  Print(index2,11, NULL);
   cout<<"****sorted secondary array"<<endl;
-  Print(array_int2, 11);
+  Print(array_int2, 11, NULL);
 
   cout<<"####now testing reverse array......"<<endl;
   cout<<"\t before.."<<endl;
-  Print(array_int,4);
+  Print(array_int,4, NULL);
   Reverse(array_int, 4);
   cout<<"\t after...."<<endl;
-  Print(array_int, 4);
+  Print(array_int, 4, NULL);
 
   //cout<<"#####new test of reverse:"<<endl;
-  Print(array_double, 4);
+  Print(array_double, 4, NULL);
   Reverse(array_double, 4);
-  Print(array_double, 4);
+  Print(array_double, 4, NULL);
 
   Reverse(vec_int);
   //Print(vec_int);
@@ -88,11 +88,11 @@ int main()
   unsigned* dest=new unsigned[4];
   unsigned index_array[]={2,1,2};
   cout<<"--source:"<<endl;
-  Print(array_int,4);
+  Print(array_int,4, NULL);
   if(CopyElements(array_int, 4, dest, 4, index_array,3))
     {
       cout<<"--Done"<<endl;
-      Print(dest, 4);
+      Print(dest, 4, NULL);
     }
   else
     {
@@ -142,15 +142,15 @@ int main()
 
   //now testing Unique
   cout<<"testing unique function:"<<endl;
-  unsigned test_array1[]={1,2,3,3,3,3,3,55,55,7,6,2,1};
+  unsigned test_array1[]={1,2,3,3,3,3,3,55,3,7,3,3,3};
   //intialize the output array
   unsigned size_test_array=13;
   unsigned* test_out=new unsigned [size_test_array];
   unsigned* test_out_index=new unsigned[size_test_array];
-  for(unsigned i=0;i<size_test_array;i++)
+  /*for(unsigned i=0;i<size_test_array;i++)
     {
       test_out_index[i]=i;
-    }
+    }*/
   unsigned size_unique;
   Unique(test_array1, size_test_array, test_out, test_out_index, size_unique);
   cout<<"\treturn "<<size_unique<<" elements."<<endl;
