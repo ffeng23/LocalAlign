@@ -112,29 +112,6 @@ class Alignment_Object
   
 };
 
-//defining the functions doing alignment
-
-//the function to do the V alignments
-//input:
-// _seq, the input seq that is being aligned against. constant reference 
-//_genVs, the V gen segments arrays.
-//_numOfVSegs, the number of v gene segments in the array
-//_V_minimum_alignment_length, length of v mininum alignement
-//_V_maximum_deletion, maximum deletion
-//_negative_excess_deletion_max, maximum excess deletion, usually 3
-//_v_allowed_errors, number maximum allowed errors in the alignment
-//_error_cost, mismatch error cost, -4 or -5 (?)
-//
-//output:
-// _V, the Alignment_obj pointer V holding the alignment details. The caller need to allocate the memory
-//bool, indicating whether the alignment is successful.
-bool match_V(const SequenceString& _seq,
-	      const GenomicV* _genVs, const unsigned& _numOfVSegs, 
-	      const unsigned& _V_minimum_alignment_length, const unsigned& _V_maximum_deletion, 
-	      const unsigned& _negative_excess_deletion_max, const unsigned& _V_allowed_errors, 
-	     const unsigned& _error_cost,
-	     /*output*/ Alignment_Object* _V
- );
 
 
 //see above for the definition (match_Vs)
@@ -214,7 +191,7 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
  *
  */
 
-void DeterminePalindromAndExcessError
+void DeterminePalindromAndExcessError_J
 ( const SequenceString& _seq, const GenomicJ* _genJs, const unsigned* _ok_order,
   const unsigned* _min_deletions, 
   const unsigned& _negative_excess_deletions_max, const unsigned& _J_maximum_deletion,

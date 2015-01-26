@@ -9,6 +9,9 @@ Alignment.o: Alignment.cpp ../SequenceString.hpp genomicSegments.hpp \
   ../score.hpp MatrixFunctions.hpp ../string_ext.hpp \
   AlignmentSettings.hpp
 AlignmentSettings.o: AlignmentSettings.cpp AlignmentSettings.hpp
+Alignment_V.o: Alignment_V.cpp Alignment.hpp ../SequenceString.hpp \
+  ../score.hpp GenomicV.hpp genomicSegment.hpp GenomicD.hpp GenomicJ.hpp \
+  Alignment_V.hpp
 GenomicD.o: GenomicD.cpp GenomicD.hpp genomicSegment.hpp \
   ../SequenceString.hpp
 GenomicJ.o: GenomicJ.cpp GenomicJ.hpp genomicSegment.hpp \

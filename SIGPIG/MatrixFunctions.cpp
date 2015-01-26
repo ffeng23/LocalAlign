@@ -90,9 +90,6 @@ unsigned max_mf(const unsigned* _m, const unsigned& _len)
   return temp;
 }
 
-
-
-
 double min_mf(const vector<double>& _m)
 {
   unsigned size=_m.size();
@@ -197,7 +194,7 @@ template <class T> void QuickSort(T* _a, const unsigned& _first, const unsigned 
   if(_first < _last)
     {
       pivotElement = Pivot(_a, _first, _last, _index, _b);
-      cout<<"pivotE,ement:"<<pivotElement<<endl;
+      //cout<<"pivotE,ement:"<<pivotElement<<endl;
       if(pivotElement>0)
 	QuickSort(_a, _first, pivotElement-1, _index, _b);
       if(pivotElement< numeric_limits<unsigned int>::max())
@@ -221,7 +218,7 @@ template  void QuickSort<unsigned>(unsigned* _a,const unsigned& _first, const un
 //here we use a new way to choose pivot. a median between [first], [middle] and [last]
 template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsigned int& _last, unsigned* _index, unsigned* _b) 
 {
-  cout<<"%%%%%%%%%%%%call pivot:[_last, _first]:["<<_first<<","<<_last<<"];"<<endl;
+  //cout<<"%%%%%%%%%%%%call pivot:[_last, _first]:["<<_first<<","<<_last<<"];"<<endl;
   
   unsigned  p = _first;
   unsigned middle=(_first+_last)/2;
@@ -230,13 +227,13 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
   
   if(middle!=_first&&middle!=_last) //middle==first==middel, we don't do anything, simply use the first one
     {
-      cout<<"\t\t\t[first, last, middle]:["<<_first<<","<<_last<<","<<middle<<"]."<<endl;
+      //cout<<"\t\t\t[first, last, middle]:["<<_first<<","<<_last<<","<<middle<<"]."<<endl;
       pivotIndex = GetMedianIndex(_a, _first, _last, middle, _index) ;
-      cout<<"\t\t\t>>pivotIndex:"<<pivotIndex<<endl;
+      //cout<<"\t\t\t>>pivotIndex:"<<pivotIndex<<endl;
       //swap the index
       if(pivotIndex!=_first)
 	{
-	  cout<<"#$$$$$$$$$$$$$$$$$$ SWAP the Median Starting Value:"<<endl;
+	  //cout<<"#$$$$$$$$$$$$$$$$$$ SWAP the Median Starting Value:"<<endl;
 	  swap(_a[_first], _a[pivotIndex]);
 	  if(_index!=NULL)
 	    {
@@ -254,7 +251,7 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
   //just use the first one as pivot anyway
   pivotElement=_a[_first];
   pivotIndex=_first;
-  cout<<"8888888888888>>pivote value:"<<_a[_first]<<endl;
+  //cout<<"8888888888888>>pivote value:"<<_a[_first]<<endl;
   /*if(_index!=NULL)
     {
       _index[_first]=pivotIndex;
@@ -263,7 +260,7 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
   //Print(_a, _last-_first+1);
   for(unsigned int i = _first+1 ; i <= _last ; i++)
     {
-      cout<<"\tround i:"<<i<<"--";
+      //cout<<"\tround i:"<<i<<"--";
       
       /* If you want to sort the list in the other order, change "<=" to ">" */
       if( _a[i] < pivotElement ||
@@ -277,7 +274,7 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
 	  if(p!=i)
 	    {
 	      swap(_a[i], _a[p]);
-	      cout<<"********************SWAP*************!!!"<<endl;
+	      //cout<<"********************SWAP*************!!!"<<endl;
 	      if(_index!=NULL)
 		{
 		  swap(_index[p], _index[i]);
@@ -289,15 +286,15 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
 	    }
 	  else
 	    {
-	      cout<<"******swap step but no swap actions, since p==i"<<endl;
+	      //cout<<"******swap step but no swap actions, since p==i"<<endl;
 	    }
         }
-      //Print(_a, _last-_first+1);
-      Print(_a, _last+1,_index);
+     
+      //Print(_a, _last+1,_index);
     }
-  cout<<"\t>>before pivot"<<endl;
-  //Print(_a, _last-_first+1);
-  Print(_a, _last+1,_index);
+  //cout<<"\t>>before pivot"<<endl;
+  
+  //Print(_a, _last+1,_index);
   swap(_a[p], _a[_first]);
   if(_index!=NULL)
     {
@@ -307,10 +304,10 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
     {
       swap(_b[p],_b[_first]);
     }
-  cout<<"\t>>after"<<endl;
-  //Print(_a,_last-_first+1);
-  Print(_a, _last+1, _index);
-  cout<<"********end of pivot, p :"<<p<<endl;
+  //cout<<"\t>>after"<<endl;
+  
+  //Print(_a, _last+1, _index);
+  //cout<<"********end of pivot, p :"<<p<<endl;
   return p;
 }
 template unsigned Pivot<double>(double* _a, const unsigned int& _first, const unsigned int& _last, unsigned* _index, unsigned* _b) ;
@@ -558,16 +555,16 @@ void Reverse(unsigned* _v, unsigned _size)
 bool CopyElements(const unsigned* _source, const unsigned& _s_size, unsigned* _target, const unsigned& _t_size,
 		  const unsigned* _indexOfElementToCopy, const unsigned& _i_size)
 {
-  cout<<"**&&^^^%%%%inside copy"<<endl;
+  //cout<<"**&&^^^%%%%inside copy"<<endl;
   //first, need to check to make sure the target size has to be larger or equal to index array
   if (_t_size<_i_size||_s_size<_i_size)
     return false;
-  cout<<"loop before"<<endl;
+  //cout<<"loop before"<<endl;
   for(unsigned i=0;i<_i_size;i++)
     {
-      cout<<"\tloop "<<i<<endl;
+      //cout<<"\tloop "<<i<<endl;
       _target[i]=_source[_indexOfElementToCopy[i]];
-      cout<<"\t\tend loop"<<endl;
+      //cout<<"\t\tend loop"<<endl;
     }
   return true;
 }
@@ -607,17 +604,17 @@ void Unique(const unsigned* _in, const unsigned& _iSize,
   std::memcpy(_out, _in, sizeof(unsigned)/sizeof(char)*_iSize);
   //we first sort the array
   QuickSort<unsigned>(_out, 0, _iSize-1, _out_index);
-  cout<<"After sorting:"<<endl;
+  /*cout<<"After sorting:"<<endl;
   for(unsigned i=0;i<_iSize;i++)
     {
       cout<<_out[i]<<"-"<<_out_index[i]<<",";
     }
-  cout<<endl;
+    cout<<endl;*/
   //now we need to go through the array to pick the unique ones only
   _oSize=0;
 
   unsigned runningValue=_out[0];
-  cout<<"initially runningValue:"<<runningValue;  
+  //cout<<"initially runningValue:"<<runningValue;  
   _out_index[_oSize]=_out_index[0];
   
   for(unsigned i=1;i<_iSize; i++)
