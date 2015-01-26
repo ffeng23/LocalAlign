@@ -58,9 +58,97 @@ bool match_V(const SequenceString& _seq,
 //return: 
 //   alignment_length, unsigned
 */
-unsigned align_with_constraints_fast_no_fix(const string& _seq, const string& _target, 
-					 const unsigned& _maximum_errors,  const double& _error_cost, 
-					 /*output*/unsigned* _align_position, unsigned* n_errors, 
-					 unsigned* _error_positions);
+unsigned align_with_constraints_fast_no_fix
+     (const string& _seq, const string& _target, 
+      const unsigned& _maximum_errors,  const double& _error_cost, 
+      /*output*/unsigned* _align_position, unsigned* n_errors, 
+      unsigned* _error_positions);
+
+/*the function wrapper for calculate the score of 
+ *the alignment.
+ *so far the score is simple, but we might want to change
+ *later. so make it easy for now.
+ * return: the score
+ */ 
+double CalculateScore
+  (const unsigned& _total_aligned_len, 
+   const unsigned* _error_positions,
+   const unsigned& _n_errors,
+   const double& _cost);
+
+/*the function used to figure out the sub_alignment with the best
+ *score along the full alignment. Here we add one more parameter
+ *allow the subalignment could move freely on the left side, 
+ *"_curr_error_position_index" (see below for explanation)
+ *
+ *input:
+ *   _total_align_len:the full length of the aligment we 
+ *            are working to get the best sub alignment 
+ *   _all_error_positions: the error positoins of the full 
+ *            alignment. The positions are relative to the
+ *            beginning of the alignment.
+ *   _curr_error_position_index: we add this one to make the 
+ *            best alignment could start not necessarily with 
+ *            the fixed left end. The outer caller can set up 
+ *            to make the search from the left, ie varying
+ *            left to make it removing left errors.
+ *            THIS VALUE COULD BE -1, which
+ *            means we started from very beginning of the full
+ *            alignment and include all the errors. If it is 0, 
+ *            it means we don't include first error and start
+ *            to consider the sequence beginning from 
+ *            error_position[0]+1 positoins.!!!!!
+ *output:
+ *   _best_n_errors: the n_errors give the best score. it starts
+ *            right after the curr_error_position_index (DON'T
+ *            include this one).
+ *   NOTE: we don't include the error positoins, since we can
+ *         figure it out by other information. 
+ * return: the best aligned length 
+ */
+unsigned  GetBestScoreAmongTheAlignment
+   (const unsigned& _total_align_len, 
+    const unsigned* _all_error_positions,
+    const unsigned& _all_n_errors,  
+    const unsigned& _curr_error_position_index,
+    const double& _cost,
+    /*output*/ 
+    unsigned& _best_n_errors  );
+
+
+//this is exactly identical to GetBestScoreAmongTheAlignment(),
+//see above for usage.
+unsigned  align_with_constraints_after_left_remove_right_errors
+   (const unsigned& _total_align_len, 
+    const unsigned* _all_error_positions,
+    const unsigned& _all_n_errors,  
+    const unsigned& _curr_error_position_index,
+    const double& _cost,
+    /*output*/ 
+    unsigned& _best_n_errors  );
+
+/*align the two strings, but need to find the best scores for
+ *the subalignments that could remove both left and right errors
+ *
+ *input:
+ *     seq1 and seq2: two string to align fixed left (both start
+ *           at position 0
+ *     _cost, error cost
+ *output:
+ *     _n_errors: number of errors after return
+ *     _error_positions: holding the position, need 
+ *               to be initialized by the caller and 
+ *               the size of _v_allowed_errors
+ *     _align_position_start
+ */
+unsigned align_with_constraints_fixed_left_remove_both_errors
+(const string& _seq1, const string& _seq2, 
+ const unsigned& _v_allowed_errors, 
+ const double& _cost,
+ /*output*/ unsigned& _n_errors, unsigned* _error_positions, 
+ unsigned& _align_position_start);
+
+
+
 
 #endif
