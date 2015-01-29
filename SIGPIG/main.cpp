@@ -3,6 +3,7 @@
 #include <vector>
 #include "../string_ext.hpp"
 
+
 //#include "read_gene_info_func.hpp"
 
 //from on you need to specify the c libraries explicitly, 11/
@@ -27,6 +28,7 @@
 #include "LoadData.hpp"
 #include "AlignmentSettings.hpp"
 #include "Alignment.hpp"
+#include "Alignment_V.hpp"
 //#include 
 
 using namespace std;
@@ -276,8 +278,9 @@ int main(int argc, char* argv[])
   
   double error_cost=5;
   Alignment_Object J_obj[N_read];
-  //now calling it
-  for(unsigned _m=0;_m<N_read;_m++)
+  Alignment_Object V_obj;
+  //now calling it, FOR NOW, STOP DOING J alignment
+  for(unsigned _m=0;_m<N_read-N_read+0;_m++)
     {
       cout<<"---------------------------i:"<<_m<<endl;
       SequenceString test_seq=all_Sequences.at(_m);
@@ -285,66 +288,11 @@ int main(int argc, char* argv[])
       cout<<test_seq.toString()<<endl;
   
       bool seq_j_ok=match_J(test_seq, genJ, totalNumJ, AlignmentSettings::J_minimum_alignment_length, AlignmentSettings::J_maximum_deletion, AlignmentSettings::negative_excess_deletions_max, AlignmentSettings::J_allowed_errors, error_cost, J_obj[_m]);
-  //now we check the output
+
+      //now we check the output
       if(J_obj[_m].numOfAligned>0)
 	{
-	  /* cout<<"\tthe number of aligned:"<<J_obj.numOfAligned<<endl;
 	  
-	  cout<<"\tthe aligned length:";
-	  for(unsigned i=0;i<J_obj.numOfAligned;i++)
-	    {
-	      cout<<J_obj.align_length[i]<<",";
-	    }
-	  cout<<endl;
-	  
-	  cout<<"\tthe min_deletions:";
-	  for(unsigned i=0;i<J_obj.numOfAligned;i++)
-	    {
-	      cout<<J_obj.min_deletions[i]<<",";
-	    }
-	  cout<<endl;
-
-	  cout<<"\tthe n_errors:";
-	  for(unsigned i=0;i<J_obj.numOfAligned;i++)
-	    {
-	      cout<<J_obj.n_errors[i]<<",";
-	    }
-	  cout<<endl;
-
-	  cout<<"\talleles_all:";
-	  for(unsigned i=0;i<J_obj.numOfAligned;i++)
-	{
-	  cout<<J_obj.alleles_all[i]<<",";
-	}
-	  cout<<endl;
-	  
-	  cout<<"\tp_reg_max_length:";
-	  for(unsigned j=0;j<J_obj.numOfAligned;j++)
-	    {
-	      
-	      for(unsigned i=0;i<AlignmentSettings::J_maximum_deletion+1;i++)
-		{
-		  cout<<J_obj.p_region_max_length[j][i]<<",";
-		}
-	      cout<<endl;
-	    }
-	  cout<<endl;
-	  cout<<"\texcess_error_position:";
-	  for(unsigned j=0;j<J_obj.numOfAligned;j++)
-	    {
-	      for(unsigned i=0;i<AlignmentSettings::negative_excess_deletions_max;i++)
-		{
-		  cout<<J_obj.excess_error_positions[j][i]<<",";
-		}
-	    }
-	  cout<<endl;
-	  cout<<"\talleles from distinct gene:";
-	  for(unsigned j=0;j<J_obj.numOfAligned;j++)
-	    {
-	  cout<<J_obj.alleles_from_distinct_genes[j]<<",";
-	    }
-	  cout<<endl;
-      */  
 	  //now print it.
 	  cout<<J_obj[_m].toString()<<endl;
 	}
@@ -353,6 +301,87 @@ int main(int argc, char* argv[])
 	  cout<<"failed alignment"<<endl;
 	}
     }
+
+//now calling Match V function
+
+  cout<<"=======>doing match V"<<endl;
+  for(unsigned _m=0;_m<N_read-N_read+1;_m++)
+    {
+      cout<<"---------------------------i:"<<_m<<endl;
+      SequenceString test_seq=all_Sequences.at(_m);
+      cout<<"\ttesting sequence 0:"<<endl;
+      cout<<test_seq.toString()<<endl;
+  
+      bool seq_v_ok=match_V(test_seq, genV, totalNumV, AlignmentSettings::V_minimum_alignment_length, AlignmentSettings::V_maximum_deletion, AlignmentSettings::negative_excess_deletions_max, AlignmentSettings::V_allowed_errors, error_cost, V_obj);
+      //now we check the output
+      if(V_obj.numOfAligned>0)
+	{
+	  cout<<"\tthe number of aligned:"<<V_obj.numOfAligned<<endl;
+	  
+	  cout<<"\tthe aligned length:";
+	  for(unsigned i=0;i<V_obj.numOfAligned;i++)
+	    {
+	      cout<<V_obj.align_length[i]<<",";
+	    }
+	  cout<<endl;
+	  
+	  cout<<"\tthe min_deletions:";
+	  for(unsigned i=0;i<V_obj.numOfAligned;i++)
+	    {
+	      cout<<V_obj.min_deletions[i]<<",";
+	    }
+	  cout<<endl;
+
+	  cout<<"\tthe n_errors:";
+	  for(unsigned i=0;i<V_obj.numOfAligned;i++)
+	    {
+	      cout<<V_obj.n_errors[i]<<",";
+	    }
+	  cout<<endl;
+
+	  cout<<"\talleles_all:";
+	  for(unsigned i=0;i<V_obj.numOfAligned;i++)
+	{
+	  cout<<V_obj.alleles_all[i]<<",";
+	}
+	  cout<<endl;
+	  
+	  cout<<"\tp_reg_max_length:";
+	  for(unsigned j=0;j<V_obj.numOfAligned;j++)
+	    {
+	      
+	      for(unsigned i=0;i<AlignmentSettings::V_maximum_deletion+1;i++)
+		{
+		  cout<<V_obj.p_region_max_length[j][i]<<",";
+		}
+	      cout<<endl;
+	    }
+	  cout<<endl;
+	  cout<<"\texcess_error_position:";
+	  for(unsigned j=0;j<V_obj.numOfAligned;j++)
+	    {
+	      for(unsigned i=0;i<AlignmentSettings::negative_excess_deletions_max;i++)
+		{
+		  cout<<V_obj.excess_error_positions[j][i]<<",";
+		}
+	    }
+	  cout<<endl;
+	  cout<<"\talleles from distinct gene:";
+	  for(unsigned j=0;j<V_obj.numOfAligned;j++)
+	    {
+	  cout<<V_obj.alleles_from_distinct_genes[j]<<",";
+	    }
+	  cout<<endl;
+      
+	  //now print it.
+	  //cout<<J_obj[_m].toString()<<endl;
+	}
+      else
+	{
+	  cout<<"failed alignment"<<endl;
+	}
+    }
+
   /*
   //now we are ready to do the alignment??
   //first need to figure out number of output files

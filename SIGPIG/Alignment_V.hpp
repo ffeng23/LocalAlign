@@ -2,7 +2,7 @@
 #define ALIGNMENT_V_HPP
 
 #include "Alignment.hpp"
-
+#include "MatrixFunctions.hpp"
 void DeterminePalindromAndExcessError_V
 ( const SequenceString& _seq, const GenomicV* _genVs, const unsigned* _ok_order,
   const unsigned* _min_deletions, 
@@ -33,7 +33,7 @@ bool match_V(const SequenceString& _seq,
 	      const unsigned& _V_minimum_alignment_length, const unsigned& _V_maximum_deletion, 
 	      const unsigned& _negative_excess_deletion_max, const unsigned& _V_allowed_errors, 
 	     const unsigned& _error_cost,
-	     /*output*/ Alignment_Object* _V
+	     /*output*/ Alignment_Object& _V
  );
 
 
@@ -61,7 +61,7 @@ bool match_V(const SequenceString& _seq,
 unsigned align_with_constraints_fast_no_fix
      (const string& _seq, const string& _target, 
       const unsigned& _maximum_errors,  const double& _error_cost, 
-      /*output*/unsigned* _align_position, unsigned* n_errors, 
+      /*output*/unsigned* _align_position, unsigned& n_errors, 
       unsigned* _error_positions);
 
 /*the function wrapper for calculate the score of 
@@ -147,8 +147,4 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
  const double& _cost,
  /*output*/ unsigned& _n_errors, unsigned* _error_positions, 
  unsigned& _align_position_start);
-
-
-
-
 #endif

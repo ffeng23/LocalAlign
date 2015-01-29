@@ -766,6 +766,7 @@ bool match_J(const SequenceString& _seq,
      if(scores[i]>=min_score&&temp_align_length[sorted_index[i]]>=_J_minimum_alignment_length&&!j_large_deletion_flag[sorted_index[i]])
        {
 	 ok_order[ok_count]=sorted_index[i];
+	 temp_min_deletions[ok_count]=temp_min_deletions[i];
 	 ok_count++;
        }
    }

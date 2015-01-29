@@ -11,7 +11,7 @@ Alignment.o: Alignment.cpp ../SequenceString.hpp genomicSegments.hpp \
 AlignmentSettings.o: AlignmentSettings.cpp AlignmentSettings.hpp
 Alignment_V.o: Alignment_V.cpp Alignment.hpp ../SequenceString.hpp \
   ../score.hpp GenomicV.hpp genomicSegment.hpp GenomicD.hpp GenomicJ.hpp \
-  Alignment_V.hpp
+  Alignment_V.hpp MatrixFunctions.hpp ../string_ext.hpp
 GenomicD.o: GenomicD.cpp GenomicD.hpp genomicSegment.hpp \
   ../SequenceString.hpp
 GenomicJ.o: GenomicJ.cpp GenomicJ.hpp genomicSegment.hpp \
@@ -35,7 +35,11 @@ main.o: main.cpp ../string_ext.hpp ../score.hpp ../SequenceString.hpp \
   ../SequenceHandler.hpp ../SequenceHandlerCommon.hpp \
   ../AlignmentString.hpp GenomicJ.hpp genomicSegment.hpp GenomicD.hpp \
   GenomicV.hpp genomicSegments.hpp LoadData.hpp AlignmentSettings.hpp \
-  Alignment.hpp
+  Alignment.hpp Alignment_V.hpp MatrixFunctions.hpp
 tester_main.o: tester_main.cpp MatrixFunctions.hpp Alignment.hpp \
   ../SequenceString.hpp ../score.hpp GenomicV.hpp genomicSegment.hpp \
   GenomicD.hpp GenomicJ.hpp
+tester_main_matchV.o: tester_main_matchV.cpp MatrixFunctions.hpp \
+  Alignment.hpp ../SequenceString.hpp ../score.hpp GenomicV.hpp \
+  genomicSegment.hpp GenomicD.hpp GenomicJ.hpp Alignment_V.hpp \
+  AlignmentSettings.hpp

@@ -270,7 +270,7 @@ template <class T> unsigned Pivot(T* _a, const unsigned int& _first, const unsig
         {
 	  
 	  p++;
-	  	  cout<<"p:"<<p<<";i:"<<i<<endl;
+	  //cout<<"p:"<<p<<";i:"<<i<<endl;
 	  if(p!=i)
 	    {
 	      swap(_a[i], _a[p]);

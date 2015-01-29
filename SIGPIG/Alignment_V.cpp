@@ -1,7 +1,7 @@
 
 #include "Alignment.hpp"
 #include "Alignment_V.hpp"
-
+#include "../string_ext.hpp"
 
 
 
@@ -14,8 +14,8 @@ void DeterminePalindromAndExcessError_V
   )
 {
   unsigned p=0;
-  cout<<"in the beginning p_Region_max_length:"<<endl;
-for(unsigned i=0;i<_numOfAligned;i++)
+  //cout<<"in the beginning p_Region_max_length:"<<endl;
+  /*for(unsigned i=0;i<_numOfAligned;i++)
    {
      cout<<"\t"<<endl;
      for(unsigned j=0;j<_V_maximum_deletion+1;j++)
@@ -23,15 +23,22 @@ for(unsigned i=0;i<_numOfAligned;i++)
 	 cout<<_p_region_max_length[i][j]<<",";
        }
      cout<<endl;
-   }
+     }*/
   bool still_palindrome=true;
   //go through and find palindromic nucleotides for various number of deletions,
   //    %as well as error positions for 'negative' deletions.
-  cout<<"\tinside palindro.....before loop"<<endl;
+  cout<<"\tinside palindro.....before loop. _numOfAligned:"<<_numOfAligned<<endl;
   for(unsigned  j=0;j<_numOfAligned;j++)
     {
       cout<<"\t*^^^^^^loop "<<j<<endl;
-      string target=_genJs[_ok_order[j]].Get_Sequence();
+      cout<<"\t*^^^^^^seq:  "<<_seq.toString()<<endl;
+      
+      string target=_genVs[_ok_order[j]].Get_Sequence();
+      cout<<"\t*^^^^^^target:  "<<target<<endl;
+      cout<<"\tlength:"<<_align_length[j]<<endl;
+      cout<<"\talign_position:"<<_align_positions[j][0]<<","<<_align_positions[j][1]<<endl;
+      cout<<"\t_min_deletion:"<<_min_deletions[j]<<endl;
+
       //% Loop over number of deletions (nd is actual number of genomic deletions).
       //  % Lower bound is maximum of 0 and min_deletions - negative_excess_deletions_max (usually 3).
       //  % Upper bound is minimum of J_maximum_deletion (usually 12) and the whole alignment being random insertions
@@ -44,6 +51,7 @@ for(unsigned i=0;i<_numOfAligned;i++)
       cout<<"\t\t^^^^^second loop before, nd:"<<nd<<endl;
       for(;nd<=max_nd;nd++)
 	{
+	  cout<<"\t\t\tsub loop:"<<nd<<endl;
 	  //% For each value of deletions, find longest half-palindrome
           //  % from the implied end of the gene sequence
 	  p=0;
@@ -52,16 +60,18 @@ for(unsigned i=0;i<_numOfAligned;i++)
 	  unsigned max_p_length=_align_length[j]-(nd-_min_deletions[j]);
 	  if(max_p_length>_seq.GetLength()-(_align_positions[j][0])-_align_length[j]+nd-_min_deletions[j])
 	    max_p_length=_seq.GetLength()-(_align_positions[j][0])-_align_length[j]+nd-_min_deletions[j];
+
+	  cout<<"\t\t\tchecking while loop"<<endl;
 	  while( still_palindrome && p < max_p_length)
 	    {
 	      
-	      still_palindrome = target.at(_align_positions[j][1] +_align_length[j] -1 - p - (nd - _min_deletions[j] )-0) == DnaComplement(_seq.GetSequence().at(_align_positions[j][0]+ _align_length[j][0]-1 -(nd - _min_deletions[j])+p +1) );
+	      still_palindrome = target.at(_align_positions[j][1] +_align_length[j] -1 - p - (nd - _min_deletions[j] )-0) == DnaComplement(_seq.GetSequence().at(_align_positions[j][0]+ _align_length[j]-1 -(nd - _min_deletions[j])+p +1) );
 	      if (still_palindrome)
 		{
 		  p ++;
 		}
 	    }
-	  
+	  cout<<"\t\t\tdone!!!"<<endl;
 	  //% Store length of longest half-palindrome for each value of
 	  //% deletions.
 	  _p_region_max_length[j][ nd] = p;
@@ -73,27 +83,27 @@ for(unsigned i=0;i<_numOfAligned;i++)
       //        % Number of 'negative' deletions to consider:
       unsigned tempArry[]={_negative_excess_deletions_max, _min_deletions[j], _seq.GetLength()-(_align_positions[j][0])-_align_length[j] };
       unsigned n_excess = min_mf(tempArry,3);
-      cout<<"n_excess :"<<n_excess<<endl;
+      //cout<<"n_excess :"<<n_excess<<endl;
       unsigned k;    
       unsigned runningIndex_excessError=0;
       cout<<"\tready to do the excess error"<<endl;
       // % Find mismatches between sequence and genomic J at those positions.
       for( k=0;k<n_excess;k++)
 	{
-	  cout<<"\t\tthird for loop:"<<k<<endl;
-	  cout<<"\t\tposition:"<<_align_positions[j][0]<<endl;
+	  //cout<<"\t\tthird for loop:"<<k<<endl;
+	  //cout<<"\t\tposition:"<<_align_positions[j][0]<<endl;
 	  if(target.at(_align_positions[j][1]+_align_length[j]+k)!=_seq.GetSequence().at(_align_positions[j][0]+_align_length[j]+k))
 	    {
-	      cout<<"\t\tfound one!!pos:"<<_align_positions[j][0]-n_excess+k<<endl;
+	      //cout<<"\t\tfound one!!pos:"<<_align_positions[j][0]-n_excess+k<<endl;
 	      _excess_error_position[j][runningIndex_excessError]=_align_positions[j][0]+_align_length[j]+k;
 	      runningIndex_excessError++;
 	    }
-	  cout<<"\t\t$$$$end of third for loop"<<endl;
+	  //cout<<"\t\t$$$$end of third for loop"<<endl;
 	}
-      cout<<"runningIndex_excessError:"<<runningIndex_excessError<<endl;
+      //cout<<"runningIndex_excessError:"<<runningIndex_excessError<<endl;
       for(;runningIndex_excessError<_negative_excess_deletions_max;runningIndex_excessError++)
 	{
-	  cout<<"\t\tfor loop"<<endl;
+	  //cout<<"\t\tfor loop"<<endl;
 	  _excess_error_position[j][runningIndex_excessError]=0;
 	}
       cout <<"\t end of first for loop"<<endl;     
@@ -128,7 +138,7 @@ bool match_V(const SequenceString& _seq,
 	     const unsigned& _negative_excess_deletion_max,
 	     const unsigned& _V_allowed_errors, 
 	     const unsigned& _error_cost,
-	     /*output*/ Alignment_Object* _V
+	     /*output*/ Alignment_Object& _V
  )
 {
   //***from Matlab code
@@ -144,14 +154,14 @@ bool match_V(const SequenceString& _seq,
 
   //now we assume the return Aligment_obj is initialized, but the data they point to are filled and initialized here in this function. so we can use
   //the pointers to point the data and use them
-  //***1) unsigned* align_length, size numOfJSegs maximumly ; ---temp_align_length//% contains the length of the alignment
+  //***1) unsigned* align_length, size numOfVSegs maximumly ; ---temp_align_length//% contains the length of the alignment
 
-  //***2) align_position, 2D, numOfJSegs by 2
+  //***2) align_position, 2D, numOfVSegs by 2
   //% align_position(1,j) contains the first matched nt in seq (redundant, same as length(seq) - align_length +1 ),
   //% align_position_(2,j) is the first matched nt in genJ.seq{j} - also redundant information because we know where the sequencing primer ends.
   // temp_align_position = J->align_position;
 
-  //***3) min_deletions, 1D, maximumly numOfJSegs long, temp_min_deletions;
+  //***3) min_deletions, 1D, maximumly numOfVSegs long, temp_min_deletions;
 
   //***4)n_errors,  temp_n_errors=J->n_errors;//zeros(length(genJ),1); % number of mismatches in alignment
 
@@ -167,16 +177,16 @@ bool match_V(const SequenceString& _seq,
   //***8)alleles_all, 1D numOfAligned
   //***9)alleles_from_distinct_gene, 1D numOfAligned
 
-  cout<<"***first****:sequence:"<<_seq.GetSequence()<<endl;
+  /*  cout<<"***first****:sequence:"<<_seq.GetSequence()<<endl;
   cout<<"\t_numOfVSegs:"<<_numOfVSegs
       <<"\n\t_V_minmum_alignment_length:"<<_V_minimum_alignment_length
       <<"\n\t_V_maximum_deletion:"<<_V_maximum_deletion
       <<"\n\t_negative_excess_deletion_max:"<<_negative_excess_deletion_max
       <<"\n\t_V_allowed_errors"<<_V_allowed_errors
-      <<"\n\t_error_cost"<<_error_cost<<endl;
+      <<"\n\t_error_cost"<<_error_cost<<endl;*/
   bool* v_large_deletion_flag=new bool [_numOfVSegs]; //=zeros(length(genJ),1); % Flag if deletions is too large
   unsigned l_seq = _seq.GetLength(); //length of the input sequence
-  cout<<"l_seq:"<<l_seq<<endl;
+  //cout<<"l_seq:"<<l_seq<<endl;
   unsigned* temp_align_length=new unsigned[_numOfVSegs];
   unsigned** temp_align_position=new unsigned*[_numOfVSegs];
   for(unsigned i=0;i<_numOfVSegs;i++)
@@ -197,7 +207,7 @@ bool match_V(const SequenceString& _seq,
   //unsigned* temp_alleles_all; unsigned* alleles_from_distinct_gene;
   //temp_alleles_all=NULL; alleles_from_distinct_gene=NULL;
 
-  cout<<"***f2irst****"<<endl;
+  //cout<<"***f2irst****"<<endl;
   
   //the following are only for setting up the output for the 
   //unsigned align_length_func;
@@ -209,7 +219,7 @@ bool match_V(const SequenceString& _seq,
   cout<<"***first****3"<<endl;
   for(unsigned int i=0;i<_numOfVSegs;i++) //for j=1:length(genJ)
     {
-      cout<<"\t***loop****"<<i<<endl;
+     cout<<"\t***loop****"<<i<<endl;
      //%j=1
      //%disp(['loop: ' num2str(j)])
      //% Get highest scoring alignment for this allele, with acceptable number of errors
@@ -221,18 +231,19 @@ bool match_V(const SequenceString& _seq,
      //before doing the alignment, we need to flip/reverse the sequence, since the function do it assume doing
      //fixed on the left. 
      
-     SequenceString target=_genJs[i].Get_Seq();
-     //unsigned l_target =rev_target.GetLength();
-     cout<<"\t&&&doing alignment :"<<endl;
-     cout<<"\t_seq:"<<_seq.toString()<<endl;
-     cout<<"\ttarget:"<<target.toString()<<endl;
+     SequenceString target=_genVs[i].Get_Seq();
+     unsigned l_target =target.GetLength();
+     //cout<<"\t&&&doing alignment :"<<endl;
+     //cout<<"\t_seq:"<<_seq.toString()<<endl;
+     //cout<<"\ttarget:"<<target.toString()<<endl;
      //now calling to do the alignment
      temp_align_length[i]= align_with_constraints_fast_no_fix(_seq.GetSequence(), target.GetSequence(), _V_allowed_errors, _error_cost,
-					temp_align_position[i], temp_n_errors+i, temp_error_position[i]);
+					temp_align_position[i], temp_n_errors[i], temp_error_positions[i]);
 					  
      cout<<"\ttemp_align_length["<<i<<"]:"<<temp_align_length[i]<<endl;
      cout<<"\ttemp_n_errors[i]"<<i<<"]:"<<temp_n_errors[i]<<endl;
-     cout<<"\talign_position_func"<<align_position_func[0]<<","<<align_position_func[1]<<endl;
+     cout<<"\talign_position_func"<<temp_align_position[i][0]<<","<<temp_align_position[i][1]<<endl;
+     cout<<"\tscore"<<CalculateScore(temp_align_length[i], temp_error_positions[i], temp_n_errors[i], _error_cost);
      
      //_J->align_length.push_back(temp_align_length);
      
@@ -267,13 +278,13 @@ bool match_V(const SequenceString& _seq,
      */
      
      // % Calculate deletions implied by alignment
-     temp_min_deletions[i]=l_target-(align_position_func[1]+temp_align_length[i]-1) - 1;
+     temp_min_deletions[i]=l_target-(temp_align_position[i][1]+temp_align_length[i]-1) - 1;
      cout<<"\tmin_deletion:"<<temp_min_deletions[i]<<endl;
      //    % Flag if number of deletions is too many
-     j_large_deletion_flag[i]=false;
-     if( temp_min_deletions[i] > _J_maximum_deletion)
+     v_large_deletion_flag[i]=false;
+     if( temp_min_deletions[i] > _V_maximum_deletion)
 	{
-	  j_large_deletion_flag[i] = true;
+	  v_large_deletion_flag[i] = true;
 	  //%continue;
         }//  end
       //    end
@@ -285,19 +296,20 @@ bool match_V(const SequenceString& _seq,
  //	  % sort the genomic Js in descending order of 'score' and ascending order of min_deletions
 
  //calculate the score first
-cout<<"***first****3"<<endl;
+  //cout<<"***first****3"<<endl;
  double* scores=new double[_numOfVSegs];
  //prepare the sorted index of the array.
- unsigned* sorted_index=new unsigned[_numOfJSegs];
+ unsigned* sorted_index=new unsigned[_numOfVSegs];
  cout<<"=========>before sorting:";
- for(unsigned k=0;k<_numOfVscholoSegs;k++)
+ for(unsigned k=0;k<_numOfVSegs;k++)
    {
      sorted_index[k]=k;
-     scores[k]=CalculateScore(temp_align_length[k], temp_error_positions[k], temp_n_errors[k], _cost);//temp_align_length[k]-_error_cost*temp_n_errors[k];
-     cout<<scores[k]<<"-"<<sorted_index[k]<<"-"<<temp_min_deletions[k]<<",";
+     scores[k]=CalculateScore(temp_align_length[k], temp_error_positions[k], temp_n_errors[k], _error_cost);//temp_align_length[k]-_error_cost*temp_n_errors[k];
+     cout<<scores[k]<<"-"<<sorted_index[k]<<"-"<<temp_min_deletions[k]<<"-"<<temp_align_length[k]<<",";
      
    }
-cout<<"\n***first****3aa"<<endl;
+ cout<<endl;
+ // cout<<"\n***first****3aa"<<endl;
  //sorted index also holding the gene allele index
  QuickSort<double>(scores, 0, _numOfVSegs-1, sorted_index, temp_min_deletions);
  //	      scores  = align_length - error_cost*n_errors;
@@ -308,76 +320,80 @@ cout<<"\n***first****3aa"<<endl;
    {
      //sorted_index[k]=k;
      //scores[k]=temp_align_length[k]-_error_cost*temp_n_errors[k];
-     cout<<scores[k]<<"-"<<sorted_index[k]<<",";
-   }
- 
- cout<<"\n***first****3bb"<<endl;
+     cout<<k<<":"<<scores[k]<<"-"<<sorted_index[k]<<"-"<<temp_min_deletions[k]<<"-"<<temp_align_length[sorted_index[k]]<<",";
+     }
+ cout<<endl;
+ //cout<<"\n***first****3bb"<<endl;
  //now we need to reverse the order, since the QuickSort is ascending, but for our purpose we need to descending.
- Reverse(sorted_index, _numOfJSegs);
- Reverse(scores, _numOfJSegs);
- Reverse(temp_min_deletions, _numOfJSegs);
-
+ Reverse(sorted_index, _numOfVSegs);
+ Reverse(scores, _numOfVSegs);
+ Reverse(temp_min_deletions, _numOfVSegs);
+ /*
  cout<<"=========>after sorting:";
- for(unsigned k=0;k<_numOfJSegs;k++)
+ for(unsigned k=0;k<_numOfVSegs;k++)
    {
      //sorted_index[k]=k;
      //scores[k]=temp_align_length[k]-_error_cost*temp_n_errors[k];
      cout<<scores[k]<<"-"<<sorted_index[k]<<",";
-   }
- cout<<"\n***first****3ccc"<<endl;
+     }*/
+ //cout<<"\n***first****3ccc"<<endl;
  //  % Set a score threshold for alleles. well, this is kind of arbitrary
  //we want to get the best ones, but limited numbers 
- double min_score=max_mf(scores,_numOfJSegs)-3*_V_minimum_alignment_length;
+ double min_score=max_mf(scores,_numOfVSegs)-3*_V_minimum_alignment_length;
  //	      min_score = max(scores) - 3*J_minimum_alignment_length;
-
+ cout<<"min_score:"<<min_score<<endl;
  //% Subset of alleles that have high enough score, long enough alignment, and
  //	      % not too many deletions.
  unsigned* ok_order = new unsigned[_numOfVSegs]; //this will directly used by J.alleles_all, so do NOT delete/clean later
  unsigned ok_count=0;
-cout<<"***first****4"<<endl;
+ //cout<<"***first****4"<<endl;
  for(unsigned i=0;i<_numOfVSegs;i++)
    { 
+
+     cout<<"index i:"<<i<<"----****"<<ok_count<<endl;
      
-     //find( scores(order) >= min_score & align_length(order) >= J_minimum_alignment_length & j_large_deletion_flag(order)==0);
-     if(scores[i]>=min_score&&temp_align_length[sorted_index[i]]>=_J_minimum_alignment_length&&!j_large_deletion_flag[sorted_index[i]])
+     //find( scores(order) >= min_score & align_length(order) >= J_minimum_alignment_length & v_large_deletion_flag(order)==0);
+     if(scores[i]>=min_score&&temp_align_length[sorted_index[i]]>=_V_minimum_alignment_length&&!v_large_deletion_flag[sorted_index[i]])
        {
 	 ok_order[ok_count]=sorted_index[i];
+	 temp_min_deletions[ok_count]=temp_min_deletions[i];
 	 ok_count++;
        }
+
    }
  cout<<"---------->showing the ok_order array:";
  for(unsigned i=0;i<ok_count;i++)
    {
-     cout<<ok_order[i]<<",";
+   cout<<i<<"-"<<ok_order[i]<<",";
    }
  cout<<endl;
  
  //bool seq_j_ok=true;
- cout<<"*******first 4a check for status"<<endl;
+ //cout<<"*******first 4a check for status"<<endl;
  if(ok_count<=0)//empty
    {
-     cout<<"*****inside false condition"<<endl;
+     //cout<<"*****inside false condition"<<endl;
      _V.numOfAligned=0;
      //do we want to clean up the memory, not necessary???
      //we have to clean up the memory, by now some of the arrays have been allocated
      //<--------
      //clean up
      //cout<<"\t555delete 1"<<endl;
-     delete [] j_large_deletion_flag;
+     delete [] v_large_deletion_flag;
      //cout<<"\t555delete 2"<<endl;
      delete [] temp_align_length;
      //cout<<"\t555delete 3"<<endl;
-     CleanUpMemory(temp_align_position, _numOfJSegs);
+     CleanUpMemory(temp_align_position, _numOfVSegs);
      //cout<<"\t555delete 4"<<endl;
      delete [] temp_min_deletions;
      delete [] temp_n_errors;
-     CleanUpMemory(temp_error_positions, _numOfJSegs);
- //CleanUpMemory(temp_p_region_max_length, _numOfJSegs);
- //CleanUpMemory(temp_excess_error_positions, _numOfJsegs);
+     CleanUpMemory(temp_error_positions, _numOfVSegs);
+ //CleanUpMemory(temp_p_region_max_length, _numOfVSegs);
+ //CleanUpMemory(temp_excess_error_positions, _numOfVsegs);
  //delete [] temp_alleles_all;
  //delete [] alleles_from_distinc_gene;
      //cout<<"\t555delete 5"<<endl;
-     delete [] error_position_func;
+     //delete [] error_position_func;
      //cout<<"\t555delete 6"<<endl;
      delete [] scores;
      //cout<<"\t555delete 7"<<endl;
@@ -389,7 +405,7 @@ cout<<"***first****4"<<endl;
      //delete [] genJ_ok_index;
      return false;
    }
- cout<<"************first 4 bb keep going....."<<endl;
+ //cout<<"************first 4 bb keep going....."<<endl;
  //if we are here we are good, we still need to do more next
  //   % Store all the alignment information in J for acceptable alleles
  //NOTE: the following code to copy over the elements from one array to another
@@ -399,60 +415,60 @@ cout<<"***first****4"<<endl;
  //time of false, we will not clean up memeory, since it will never 
  //happen
  _V.numOfAligned=ok_count;
-cout<<"***first****4aaa"<<endl;
+ //cout<<"***first****4aaa"<<endl;
  _V.align_length = new unsigned [ok_count];
- cout<<"****ok_count***:"<<ok_count<<endl;
+ //cout<<"****ok_count***:"<<ok_count<<endl;
  if(!CopyElements(temp_align_length, _numOfVSegs,  _V.align_length, ok_count, ok_order, ok_count))
    return false;
- cout<<"***first****4bbbb"<<endl;
+ //cout<<"***first****4bbbb"<<endl;
  _V.align_position =new unsigned* [ok_count];
  for(unsigned m=0;m<ok_count;m++)
    {
      _V.align_position[m]=new unsigned [2];
    }
- if(!CopyElements(temp_align_position, _numOfJSegs, 2, _V.align_position, ok_count, 2, ok_order, ok_count))//(:,ok_order);
+ if(!CopyElements(temp_align_position, _numOfVSegs, 2, _V.align_position, ok_count, 2, ok_order, ok_count))//(:,ok_order);
    {
      return false;
    }
- cout<<"***first****4cccc"<<endl;
+ //cout<<"***first****4cccc"<<endl;
  _V.min_deletions =new unsigned [ok_count];
- cout<<"\t***&&&&&&showing min deletions"<<endl;
- cout<<"\t\t";
- for(unsigned _m=0;_m<_numOfVSegs;_m++)
+ //cout<<"\t***&&&&&&showing min deletions"<<endl;
+ //cout<<"\t\t";
+ /*for(unsigned _m=0;_m<_numOfVSegs;_m++)
    {
      cout<<temp_min_deletions[_m]<<","<<endl;
    }
- cout<<endl;
+   cout<<endl;*/
  //****NOTE:important, temp_min_deletions, is different than others, it is sorted together with socres, so we only need to copy over
  //what is in the front (best values) according to ok_count
  for(unsigned _m=0;_m<ok_count;_m++)
    {
      _V.min_deletions[_m]=temp_min_deletions[_m];//<<","<<endl;
    }
-cout<<"***first****4dddd"<<endl;
+ //cout<<"***first****4dddd"<<endl;
  _V.n_errors = new unsigned [ok_count];
  if(!CopyElements(temp_n_errors, _numOfVSegs, _V.n_errors, ok_count, ok_order, ok_count))
    return false;
- cout<<"***first****4eee"<<endl;
+ //cout<<"***first****4eee"<<endl;
  _V.error_positions = new unsigned* [ok_count];
  for(unsigned m=0;m<ok_count;m++)
    {
      _V.error_positions[m]=new unsigned [_V_allowed_errors];
    }
-cout<<"***first****4fff"<<endl;
+ //cout<<"***first****4fff"<<endl;
  if(!CopyElements(temp_error_positions, _numOfVSegs, _V_allowed_errors, _V.error_positions, ok_count, _V_allowed_errors, ok_order, ok_count))
    return false;//error_positions(ok_order,:);
 
  //now we are done so, and need to run initialization for the later assignments
  _V.p_region_max_length = new unsigned* [ok_count];
 
-cout<<"***first5****"<<endl;
+ //cout<<"***first5****"<<endl;
  for(unsigned i=0;i<ok_count;i++)
    {
      _V.p_region_max_length[i]=new unsigned[_V_maximum_deletion+1];
      std::memset(_V.p_region_max_length[i], 0, (_V_maximum_deletion+1)*sizeof(unsigned)/sizeof(char));//fill the default value with 0
    }
- cout<<"right after setting the memory:maxlength:"<<_V_maximum_deletion<<endl;
+ /*cout<<"right after setting the memory:maxlength:"<<_V_maximum_deletion<<endl;
 for(unsigned i=0;i<ok_count;i++)
    {
      cout<<"\t"<<endl;
@@ -461,7 +477,7 @@ for(unsigned i=0;i<ok_count;i++)
 	 cout<<_V.p_region_max_length[i][j]<<",";
        }
      cout<<endl;
-   }
+     }*/
  //zeros(numel(ok_order),J_maximum_deletion+1);
  _V.excess_error_positions =new unsigned* [ok_count];
  //zeros(numel(ok_order),negative_excess_deletions_max);
@@ -481,7 +497,7 @@ for(unsigned i=0;i<ok_count;i++)
  for(unsigned i=0;i<ok_count;i++)
    {
      genV_ok_index[i]=_genVs[_V.alleles_all[i]].Get_GeneIndex();
-     cout<<genV_ok_index[i]<<",";
+     //cout<<genV_ok_index[i]<<",";
    }
  cout<<endl;
  //genJ_ok_gene_inds = zeros(1,numel(ok_order));
@@ -496,9 +512,9 @@ for(unsigned i=0;i<ok_count;i++)
  //so the index of the gene index is not in order either
  QuickSort(sorted_genV_ok_index_temp_index,0, numOfUnique-1);
  cout<<"after sorting...."<<endl;
- cout<<"the index index:"<< sorted_genV_ok_index_temp_index[0]<<endl;
+ //cout<<"the index index:"<< sorted_genV_ok_index_temp_index[0]<<endl;
 
-cout<<"***first****6"<<endl;
+ //cout<<"***first****6"<<endl;
  //compare and then get it copied to the alignment object
  _V.alleles_from_distinct_genes=new unsigned[ok_count];
 
@@ -517,7 +533,7 @@ cout<<"***first****6"<<endl;
  //need to fill the rest of the distinc gene array with -1 as an indicator
  for(unsigned i=numOfUnique;i<ok_count;i++)
    {
-     _J.alleles_from_distinct_genes[i]=-1;
+     _V.alleles_from_distinct_genes[i]=-1;
    }
  //
  //% Get list of distinct genes from acceptable alleles.
@@ -526,7 +542,7 @@ cout<<"***first****6"<<endl;
  //% Only one (best) allele from each gene
  //J.alleles_from_distinct_genes = ok_order(Jg'); '
  //done so far
- cout<<"******second ****6aaaa"<<endl; 
+ //cout<<"******second ****6aaaa"<<endl; 
  //now call to generate panlindrol and negative access errors
  DeterminePalindromAndExcessError_V
    ( _seq, _genVs, ok_order,_V.min_deletions, 
@@ -536,7 +552,7 @@ cout<<"***first****6"<<endl;
      );
 
   
-cout<<"***first****7"<<endl;
+ //cout<<"***first****7"<<endl;
  //clean up
  delete [] v_large_deletion_flag;
  
@@ -564,15 +580,16 @@ cout<<"***first****7"<<endl;
 
 unsigned align_with_constraints_fast_no_fix
      (const string& _seq, const string& _target, 
-      const unsigned& _maximum_errors,  const double& _error_cost, 
-      /*output*/unsigned* _align_position, unsigned* n_errors, 
+      const unsigned& _maximum_errors,  const double& _cost, 
+      /*output*/unsigned* _align_position, unsigned& _n_errors, 
       unsigned* _error_positions)
 {
   unsigned align_length=0;
   
+  
   unsigned l_seq=_seq.size();
   unsigned l_target=_target.size();
-  unsigned best_match_index=0;
+  int best_match_index=0;
   double score=-1E200;
 
   unsigned current_align_length, current_n_errors;
@@ -582,13 +599,14 @@ unsigned align_with_constraints_fast_no_fix
   unsigned target_start=0, seq_start=0;
 
   string current_seq, current_target;
-  
+  unsigned align_position_start=0;
+  unsigned curr_l_seq, curr_l_target;
   //cout<<"param:maximum_errors:"<<_maximum_errors<<";cost:"<<_error_cost<<endl;
   //looping through the positions of sequence not to force  the left side  to align 
   //here start at -l_target+1 since they have to be overlap otherwise no way to
   //align. Same here for l_seq-1, we need them to be overlap at least with one nucleotide
   //the total aligned position is l_seq+l_target-2.
-  for(int i=-1*(l_target-1);i<=l_seq-1;i++)  //this i is the length, not index; so the index =i-1?
+  for(signed int i=-1*(l_target-1);i<=((signed)(l_seq-1));i++)  //this i is the length, not index; so the index =i-1?
     {
       //cout<<"*************doing loop "<<i<<endl;
       target_start=0;
@@ -626,14 +644,14 @@ unsigned align_with_constraints_fast_no_fix
       //cout<<"\ttarget:"<<current_target<<endl;
       //call to do alignment forcing fixed left ends
       current_align_length= align_with_constraints_fixed_left_remove_both_errors
-	(current_seq, current_seq2, _maximum_errors, _cost,
+	(current_seq, current_target, _maximum_errors, _cost,
 	 /*output*/ current_n_errors, current_error_positions, current_align_position_start);
       //***---> NOTE: the current_align_position_start and current_error_positions are all relative to the begining of the current sub seq and target 
       
       if(current_align_length==0)
 	continue;
       
-      current_score=CalculateScore(current_align_length, current_error_posiitons, current_n_errors, _cost);
+      current_score=CalculateScore(current_align_length, current_error_positions, current_n_errors, _cost);
       //cout<<"\tcurrent_score:"<<current_score<<";current_align_length:"<<current_align_length<<endl;
 
       //we got a better one or got an identical score, but long, we are good
@@ -654,7 +672,7 @@ unsigned align_with_constraints_fast_no_fix
 	}//if loop
       
     }//end of looping over the seq positions
-
+  //cout<<"best_match_index:"<<best_match_index<<endl;
   //now to prepare the output
   if(best_match_index<0)  //starting in the middle of target
     {
@@ -735,6 +753,7 @@ unsigned  GetBestScoreAmongTheAlignment
     /*output*/ 
     unsigned& _best_n_errors  )
 {
+
   //_best_n_errors has been defined in the function definition
   unsigned best_align_len;
   double best_score;
@@ -742,7 +761,7 @@ unsigned  GetBestScoreAmongTheAlignment
 
   //
   unsigned temp_align_len;
-  unsigned temp_score;
+  double temp_score;
   unsigned temp_n_errors;
   //get the longest one as the best to start with
   //check to see whether are doing the special case, -1
@@ -752,6 +771,8 @@ unsigned  GetBestScoreAmongTheAlignment
       best_align_len=_total_align_len;
       best_score=CalculateScore(best_align_len, _all_error_positions,
 				_best_n_errors, _cost);	
+
+      
     }
   else
     {
@@ -763,7 +784,7 @@ unsigned  GetBestScoreAmongTheAlignment
 	      _all_error_positions+_curr_error_position_index+1, 
 		       _best_n_errors, _cost);
     }
-
+  //cout<<"-->start sub looping"<<endl;
   //now we have the starting point, go through to find the alignment
   //that starts from position at the 
   //error_positions[current_error_position_index]+1 but removing
@@ -771,11 +792,13 @@ unsigned  GetBestScoreAmongTheAlignment
   for(unsigned i=_curr_error_position_index+1;i<_all_n_errors;
       i++)
     {
+      //cout<<"\t-->loop:"<<endl;
       //check for special case
       if(((int)_curr_error_position_index)==-1)
 	{
+	  //cout<<"\t\t-->special case"<<endl;
 	  temp_n_errors=i;
-	  temp_align_len=_all_error_positions[i]-1;
+	  temp_align_len=_all_error_positions[i]-1+1;
 	  temp_score=CalculateScore(temp_align_len, 
 				    _all_error_positions,
 				    temp_n_errors, _cost);	
@@ -789,6 +812,7 @@ unsigned  GetBestScoreAmongTheAlignment
 				    _all_error_positions+_curr_error_position_index+1,
 				    temp_n_errors, _cost);
 	}
+      //cout<<"\t\t--->temp score:"<<temp_score<<endl;
       //now check to see whether this is the best,
       if(temp_score>best_score||
 	 (temp_score==best_score&&temp_align_len>best_align_len))//update everything
@@ -800,6 +824,7 @@ unsigned  GetBestScoreAmongTheAlignment
     }
   //again, we did not explicitly return best_error_positions, it
   //it is redundent.
+  return best_align_len;
 }
 
 //this is exactly identical to GetBestScoreAmongTheAlignment(),
@@ -813,6 +838,7 @@ unsigned  align_with_constraints_after_left_remove_right_errors
     /*output*/ 
     unsigned& _best_n_errors  )
 {
+  //cout<<"@@@@@Calling surrogate function"<<endl;
   return GetBestScoreAmongTheAlignment(_total_align_len,
 				       _all_error_positions,
 				       _all_n_errors,
@@ -842,6 +868,7 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
  /*output*/ unsigned& _n_errors, unsigned* _error_positions, 
  unsigned& _align_position_start)
 {
+  //cout<<"=======inside remove both errors function"<<endl;
   unsigned l_seq1=_seq1.size();
   unsigned l_seq2=_seq2.size();
   unsigned align_length=0;
@@ -879,6 +906,18 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
 
     }
   align_length=max_match_length;
+  /*cout<<"\tafter matching:"<<endl;
+  cout<<"\tn_errors:"<<_n_errors<<endl;
+  
+  cout<<"\talength:"<<align_length<<endl;
+  cout<<"\tn_errors:"<<_n_errors<<endl;
+  cout<<"\talign_position_start:"<<_align_position_start<<endl;
+  cout<<"\terror_positions:";
+  for(unsigned int i=0;i<_n_errors;i++)
+    {
+      cout<<temp_error_positions[i]<<",";
+    }
+    cout<<endl;*/
 
   //now we need to go through the alignment to see whether we end
   //up at error. if so we remove the error and stop at match
@@ -899,12 +938,23 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
 	  _n_errors--;
 	}
     }
-
+  
+  /*  cout<<"After removing the trailing errors"<<endl;
+  cout<<"\talength:"<<align_length<<endl;
+  cout<<"\tn_errors:"<<_n_errors<<endl;
+  cout<<"\talign_position_start:"<<_align_position_start<<endl;
+  cout<<"\terror_positions:";
+  for(unsigned int i=0;i<_n_errors;i++)
+    {
+      cout<<temp_error_positions[i]<<",";
+    }
+    cout<<endl;*/
+  
   //now we are ready to do the alignment
   double best_score=CalculateScore(align_length,
 				    temp_error_positions,
 				    _n_errors, _cost);
-  _align_position_start=1;
+  _align_position_start=0;
   unsigned best_align_length=align_length;
   unsigned best_n_errors=_n_errors;
   unsigned best_align_position_start=_align_position_start;
@@ -914,8 +964,12 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
   unsigned temp_n_errors;
   unsigned* best_error_position;
   double temp_best_score;
-  for(int j=-1;j<_n_errors;j++)
+  /*cout<<"Best score so far:"<<best_score<<endl;
+  cout<<"\tstart the looping...."<<endl;
+  */
+  for(signed int j=-1;j<(signed)_n_errors;j++)
     {
+      //cout<<"%%%%%loop:"<<j<<endl;
       if(j==-1)
 	{
 	  curr_error_position=-1;
@@ -927,6 +981,7 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
       if((align_length-1-curr_error_position)<best_score)
 	{//in this case, the length is too small and we will not
 	  //get a better score than best_score.
+	  //cout<<"break out!!!"<<endl;
 	  break;
 	}
       //call alignment
@@ -943,6 +998,19 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
 				     temp_error_positions+j+1, 
 				     temp_n_errors,
 				       _cost);
+      /*cout<<"after aligning:"<<endl;
+      cout<<"\talength:"<<temp_align_length<<endl;
+      cout<<"\tn_errors:"<<temp_n_errors<<endl;
+      cout<<"\tbest score:"<<temp_best_score<<endl;*/
+      /*cout<<"\talign_position_start:"<<_align_position_start<<endl;
+      cout<<"\terror_positions:";
+      for(unsigned int i=0;i<_n_errors;i++)
+	{
+	  cout<<temp_error_positions[i]<<",";
+	}
+      cout<<endl;
+      */
+
       //check for best score
       if(temp_best_score>best_score)
 	{
@@ -978,7 +1046,8 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
       
       for(unsigned m=0;m<_n_errors;m++)
 	{
-	  _error_positions[m]=best_error_position[m];
+	  _error_positions[m]=best_error_position[m]-
+	    _align_position_start;
 	} 
       
     }
