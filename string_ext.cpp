@@ -77,30 +77,60 @@ int split_ext(const string& s, string* buf, const char& delim)
 int is_number(const char* str)
 {
   int index=0;
-  int flag=0;//this is the flag to indicate whether the
-  //bit could be '+','-', '.' in addition to numbers and dot '.',
-  //the first bit could be '+','-', flag==1;
-  //other bit is numbers or dot '.' flag==0;
+
+  bool whiteSpaceFlag=false; //used to get rid of white space ' ','\t', '\n','\r'
+  //white space has to be on the front end, not in between. (for end white space in
+  //the end, check for trailingWhiteSpace
+  
+  int flag=0;//this is the flag to indicate whether the  
+  //bit could be '+','-' in addition to numbers and dot '.',
+  //this the first bit and it could be '+','-', flag==1;
+  //this is not the first bit, it has to be numbers or dot '.' flag==0;
   //no scientific format allowed
-  int dotflag=0;
+  bool trailingWhiteSpace=false;
+  int dotflag=0;//used to count dots
   int trueFloat=0;
+  bool signFlag=false;//used to indicate whether the sing is in the end.
+  
   while(str[index]!='\0')
     {
-      if(index==0)
+      if(index==0||whiteSpaceFlag)
 	{
+	  whiteSpaceFlag=true;
 	  flag=1;
 	}
       else
-	flag=0;
+	{
+	  flag=0;
+	  whiteSpaceFlag=false;
+	}
 
       //cout<<"Index is "<<index<<endl;
       switch (str[index])
 	{
+	case ' ':
+	  ;
+	case '\r':
+	  ;
+	case '\n':
+	  ;
+	case '\t':
+	  if(!whiteSpaceFlag)
+	    {
+	      trailingWhiteSpace=true;
+	      break;
+	    }
+	  break;  
 	case '+':
 	  ;
 	case '-':
 	  if(!flag)
-	    return 0;
+	    {
+	      return 0;
+	    }
+	  whiteSpaceFlag=false;
+	  trailingWhiteSpace=false;
+	  signFlag=true;
 	  break;
 	case '.':
 	  if(dotflag>=1)//there is more than one 'dot',so it is not ok
@@ -132,14 +162,18 @@ int is_number(const char* str)
 	    trueFloat++;
 	  ;
 	case '0':
+	  signFlag=false;
+	  if(trailingWhiteSpace) //following trailing space with a number, not allowed
+	    return 0;
 	  break;
 	default:
 	  return 0;
 
-
 	}
       index++;
     }
+  if(signFlag)//means we have '+' or '-' in the end, we don't allow this at this momnet
+    return 0;
   if(dotflag==1&&trueFloat>0)
     {
       return 2;//for flat number

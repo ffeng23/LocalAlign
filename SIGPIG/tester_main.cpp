@@ -4,11 +4,20 @@
 
 #include "MatrixFunctions.hpp"
 #include "Alignment.hpp"
+#include "../string_ext.hpp"
 //this is a testing module for testing various functions
 
 using namespace std;
-int main()
+int main(int argc, char* argv[])
 {
+  //first testing is_number();
+  char* numStr=NULL;
+  if(argargv[1];
+  //numStr=" 25";
+  //numStr="\t \r\n 25";
+  
+  int ret=is_number(numStr);
+  cout<<"the numStr ("<<numStr<<"):"<<ret<<endl;
   //first testing matrixFunctions
   cout<<"Testing max and min functions:"<<endl;
   vector<unsigned> vec_int;
@@ -99,6 +108,8 @@ int main()
       cout<<"ERROR, can not copy"<<endl;
     }
 
+  
+  
   //testing align with constraints fixed left remove right errors
   cout<<"%%%%%%%%testing alignment function 1 fixed left remove"<<endl;
   double error_cost=5;

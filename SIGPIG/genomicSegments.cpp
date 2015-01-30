@@ -11,15 +11,78 @@
 
 bool GenomicVCompare_bySequenceName(const GenomicV& ss1,const GenomicV& ss2)
 {
-  int ret=ss1.Get_Name().compare(ss2.Get_Name());
+  int ret;
+  //here we need to do more job to compare, by splitting and checking the sub strings
   
-
-  if(ret<=0)
-    {
-      return true;
+  string buffer1[10];
+  string buffer2[10];
+  unsigned num1 =split_ext(ss1.Get_Name(),buffer1, '-');
+  unsigned num2 =split_ext(ss2.Get_Name(), buffer2, '-');
+  if(num1<1||num2<1)
+    {//something wrong 
+      throw "bad format of the sequence name";
     }
-  else
-    return false;
+  //now check the first thing as strings
+  ret=buffer1[0].compare(buffer2[0]);
+  if(ret!=0) 
+    {      
+      if(ret<0)
+	{
+	  return true;
+	}
+      else
+	return false;
+    }
+
+  //we are means we are in the same group, we need to check gene number
+  string subgene1(buffer1[1]);
+  string subgene2(buffer2[1]);
+  num1=split_ext(subgene1, buffer1, '*');
+  num2=split_ext(subgene2, buffer2, '*');
+
+  if(num1<1||num2<1)
+    {
+      //something wrong 
+      throw "bad format of the sequence name";
+    }
+  //now check to compare
+  if(subgene1.at(0)>'9') //must not be a number
+    {
+      if(subgene2.at(0)>'9')//not a number
+	{
+	  ret=subgene1.compare(subgene2);
+	}
+      else //subgene2 is a number
+	{
+	  ret=1000;//
+	}
+    }
+  else //it is a number
+    {
+      if(subgene2.at(0)>'9') //not a number
+	{
+	  ret=-1000;
+	}
+      else  //is a number
+	{
+	  num1=atoi(subgene1.c_str());
+	  num2=atoi(subgene2.c_str());
+	  ret=num1-num2;
+	}
+    }
+  if(ret!=0)//we have to even further for testing
+    {
+      if(ret<0)
+	{
+	  return true;
+	}
+      else
+	return false;
+    }
+  //we are here, means we need to check the allele numbers to compare
+  subgene1=buffer1[1];
+  subgene2=buffer2[1];
+  //all the alleles should be number???
 }
 
 
