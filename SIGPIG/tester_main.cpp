@@ -12,10 +12,15 @@ int main(int argc, char* argv[])
 {
   //first testing is_number();
   char* numStr=NULL;
-  if(argargv[1];
+  char p_numStr[]=
+  {'1','\0'};
+  if(argc<2)
+    numStr=p_numStr;
+  else
+    numStr=argv[1];
   //numStr=" 25";
   //numStr="\t \r\n 25";
-  
+  cout<<"we are here"<<endl;
   int ret=is_number(numStr);
   cout<<"the numStr ("<<numStr<<"):"<<ret<<endl;
   //first testing matrixFunctions

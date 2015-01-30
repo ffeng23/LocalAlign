@@ -163,6 +163,7 @@ int is_number(const char* str)
 	  ;
 	case '0':
 	  signFlag=false;
+	  whiteSpaceFlag=false;
 	  if(trailingWhiteSpace) //following trailing space with a number, not allowed
 	    return 0;
 	  break;

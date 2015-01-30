@@ -18,10 +18,12 @@ bool GenomicVCompare_bySequenceName(const GenomicV& ss1,const GenomicV& ss2)
   string buffer2[10];
   unsigned num1 =split_ext(ss1.Get_Name(),buffer1, '-');
   unsigned num2 =split_ext(ss2.Get_Name(), buffer2, '-');
-  if(num1<1||num2<1)
+
+  if(num1<1||num2<1||num1>3||num2>3)
     {//something wrong 
       throw "bad format of the sequence name";
     }
+
   //now check the first thing as strings
   ret=buffer1[0].compare(buffer2[0]);
   if(ret!=0) 
@@ -35,8 +37,10 @@ bool GenomicVCompare_bySequenceName(const GenomicV& ss1,const GenomicV& ss2)
     }
 
   //we are means we are in the same group, we need to check gene number
-  string subgene1(buffer1[1]);
-  string subgene2(buffer2[1]);
+  string gene1(buffer1[1]);
+  string gene2(buffer2[1]);
+  if(num1==3)
+    gene1=
   num1=split_ext(subgene1, buffer1, '*');
   num2=split_ext(subgene2, buffer2, '*');
 
