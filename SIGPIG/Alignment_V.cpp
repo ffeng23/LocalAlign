@@ -237,7 +237,7 @@ bool match_V(const SequenceString& _seq,
      //cout<<"\t_seq:"<<_seq.toString()<<endl;
      //cout<<"\ttarget:"<<target.toString()<<endl;
      //now calling to do the alignment
-     temp_align_length[i]= align_with_constraints_fast_no_fix(_seq.GetSequence(), target.GetSequence(), _V_allowed_errors, _error_cost,
+     temp_align_length[i]= align_with_constraints_fast_no_fix(_seq.GetSequence(), target.GetSequence(), _V_allowed_errors, _V_minimum_alignment_length,_error_cost,
 					temp_align_position[i], temp_n_errors[i], temp_error_positions[i]);
 					  
      cout<<"\ttemp_align_length["<<i<<"]:"<<temp_align_length[i]<<endl;
@@ -321,7 +321,7 @@ bool match_V(const SequenceString& _seq,
      //sorted_index[k]=k;
      //scores[k]=temp_align_length[k]-_error_cost*temp_n_errors[k];
      cout<<k<<":"<<scores[k]<<"-"<<sorted_index[k]<<"-"<<temp_min_deletions[k]<<"-"<<temp_align_length[sorted_index[k]]<<",";
-     }
+   }
  cout<<endl;
  //cout<<"\n***first****3bb"<<endl;
  //now we need to reverse the order, since the QuickSort is ascending, but for our purpose we need to descending.
@@ -361,7 +361,7 @@ bool match_V(const SequenceString& _seq,
        }
 
    }
- cout<<"---------->showing the ok_order array:";
+ cout<<"---------->showing the ok_order array:"<<ok_count<<endl;
  for(unsigned i=0;i<ok_count;i++)
    {
    cout<<i<<"-"<<ok_order[i]<<",";
@@ -580,7 +580,8 @@ for(unsigned i=0;i<ok_count;i++)
 
 unsigned align_with_constraints_fast_no_fix
      (const string& _seq, const string& _target, 
-      const unsigned& _maximum_errors,  const double& _cost, 
+      const unsigned& _maximum_errors, const unsigned& _minimum_align_length,  
+      const double& _cost,
       /*output*/unsigned* _align_position, unsigned& _n_errors, 
       unsigned* _error_positions)
 {
@@ -632,10 +633,18 @@ unsigned align_with_constraints_fast_no_fix
 	{
 	  max_length=curr_l_target;
 	}
-      //can not be better
+      //can not be better, this is for i>0, in the middle of seq with whole target case
       if(i>0&&max_length<score)
 	{
 	  break;
+	}
+      if(i>0&&max_length< _minimum_align_length)
+	{
+	  break;
+	}
+      if(i<0&&max_length< _minimum_align_length)
+	{
+	  continue;//don't do this one.
 	}
       current_seq=_seq.substr(seq_start, max_length);
       current_target=_target.substr(target_start, max_length);

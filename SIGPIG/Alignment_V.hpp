@@ -60,7 +60,8 @@ bool match_V(const SequenceString& _seq,
 */
 unsigned align_with_constraints_fast_no_fix
      (const string& _seq, const string& _target, 
-      const unsigned& _maximum_errors,  const double& _error_cost, 
+      const unsigned& _maximum_errors, const unsigned& _minimum_align_length,  
+      const double& _error_cost,
       /*output*/unsigned* _align_position, unsigned& n_errors, 
       unsigned* _error_positions);
 

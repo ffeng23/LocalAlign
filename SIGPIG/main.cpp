@@ -44,7 +44,7 @@ double gapextension=-8;
 //static double scale=1; //this is the one on top of matrix, the programe will run score and use the 
 //matrix specified scale first and then apply the scale set by this one.
 
-double errorCost=-4;
+double errorCost=4;
 string seqFileName;
 string vSegmentFileName("genomicVs_alleles.fasta");;
 string dSegmentFileName("genomicDs.fasta");
@@ -205,11 +205,15 @@ int main(int argc, char* argv[])
   unsigned totalNumD=  ReadGenomicD("genomicDs.fasta",&genD);
   
   cout<<totalNumD<<" D genomic segments are read in."<<endl; 
+  
 
   unsigned totalNumV=  ReadGenomicV("genomicVs_alleles.fasta",&genV);
   
   cout<<totalNumV<<" V genomic segments are read in."<<endl; 
-
+  cout<<0<<":"<<genV[0].Get_Seq().toString()<<endl;
+  cout<<100<<":"<<genV[100].Get_Seq().toString()<<endl;
+  cout<<216<<":"<<genV[216].Get_Seq().toString()<<endl;
+  cout<<217<<":"<<genV[217].Get_Seq().toString()<<endl;
 
   //now testing load sequence data
   vector<SequenceString> data_vec;
@@ -274,9 +278,9 @@ int main(int argc, char* argv[])
   outFileNames=DetermineOutputFileNames(outputFileNameBase, AlignmentSettings::N_per_file, N_read);
 
   //start testing the alignment, first mathJ
-  cout<<"%%%%%%%%%%%testing matchJ()>>>>>>"<<endl;
+  cout<<"%%%%%%%%%%%testing matchJ()>>>>>>cost:"<<errorCost<<endl;
   
-  double error_cost=5;
+  double error_cost=errorCost;
   Alignment_Object J_obj[N_read];
   Alignment_Object V_obj;
   //now calling it, FOR NOW, STOP DOING J alignment
@@ -477,7 +481,8 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	  break;
 	case 'c':
 	  errorCost=atoi(optarg);
-	  errorCost*=-1;
+	  if(errorCost<0)
+	    errorCost*=-1;
 	  break;
 	case 't':
 	  numberOfThread=atoi(optarg);

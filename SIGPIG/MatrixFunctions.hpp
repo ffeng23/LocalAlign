@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <cstring>
 
 //this is the module to define some basic and necessary functions for matrix/array manipulations
 using namespace std;

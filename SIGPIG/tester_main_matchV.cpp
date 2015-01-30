@@ -56,7 +56,8 @@ int main()
 
   cout<<"#####################start doing align fast no fix:"<<endl;
   alength=align_with_constraints_fast_no_fix
-     (seq1, seq2, AlignmentSettings::V_allowed_errors ,error_cost,
+     (seq1, seq2, AlignmentSettings::V_allowed_errors ,
+      AlignmentSettings::V_minimum_alignment_length, error_cost,
       /*output*/align_positions, n_errors, error_positions);
   cout<<"\talength:"<<alength<<endl;
   cout<<"\tn_errors:"<<n_errors<<endl;
