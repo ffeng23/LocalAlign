@@ -46,6 +46,9 @@ namespace AlignmentSettings
   //% deletions is less than the 'min_deletions' (from alignments), how far do
   //% you go:
    unsigned negative_excess_deletions_max= 3;
+  
+  unsigned flank_length=3;
+  unsigned n_D_alleles=34;
 }
 
 
