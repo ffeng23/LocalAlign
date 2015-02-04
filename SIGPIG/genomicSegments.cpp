@@ -36,44 +36,98 @@ bool GenomicVCompare_bySequenceName(const GenomicV& ss1,const GenomicV& ss2)
 	return false;
     }
 
-  //we are means we are in the same group, we need to check gene number
-  string gene1(buffer1[1]);
+  //we are means we are in the same family group, we need to check gene number
+  string gene1(buffer1[1]);//gene is the number# within the family, eg. IGHV1-2, 2 is the gene number
   string gene2(buffer2[1]);
-  if(num1==3)
-    gene1=
-  num1=split_ext(subgene1, buffer1, '*');
-  num2=split_ext(subgene2, buffer2, '*');
+  string gene_sub1("");//taking care of the case, where we have IGHV1-3-30, 30 is the gene_sub
+  string gene_sub2("");//when this gene_sub is not specified, it is "" empty string.
+  string buffer_sub1[10];
+  string buffer_sub2[10];
+  unsigned int num_sub1;
+  unsigned int num_sub2;
 
-  if(num1<1||num2<1)
-    {
-      //something wrong 
-      throw "bad format of the sequence name";
+  string allele1;
+  string allele2;
+
+  if(num1==2)//we need split further to get geneName
+    {       
+      num_sub1=split_ext(buffer1[1], buffer_sub1, '*');
+      //num_sub2=split_ext(buffer2[1], buffer_sub2, '*');
+      if(num_sub1!=2)
+	{//something wrong 
+	  throw "bad format of the sequence name";
+	}
+      gene1=buffer_sub1[0];
+      allele1=buffer_sub1[1];
+      //in this case the gene sub is not specified, keep it empty
     }
-  //now check to compare
-  if(subgene1.at(0)>'9') //must not be a number
-    {
-      if(subgene2.at(0)>'9')//not a number
-	{
-	  ret=subgene1.compare(subgene2);
+  if(num2==2)//we need split further to get geneName
+    {       
+      //num_sub1=split_ext(buffer1[1], buffer_sub1, '*');
+      num_sub2=split_ext(buffer2[1], buffer_sub2, '*');
+      if(num_sub2!=2)
+	{//something wrong 
+	  throw "bad format of the sequence name";
 	}
-      else //subgene2 is a number
+      gene2=buffer_sub2[0];
+      allele2=buffer_sub2[1];
+      //keep the gene_sub2 as empty string
+    }
+  
+  //in other case,
+if(num1==3)//we need split further to get geneName
+    {       
+      num_sub1=split_ext(buffer1[2], buffer_sub1, '*');
+      //num_sub2=split_ext(buffer2[1], buffer_sub2, '*');
+      if(num_sub1!=2)
+	{//something wrong 
+	  throw "bad format of the sequence name";
+	}
+      //gene1=buffer_sub1[0];  //in this case gene1 has been set up in above
+      allele1=buffer_sub1[1];
+      //in this case the gene sub is not empty
+      gene_sub1=buffer_sub1[0];
+    }
+  if(num2==3)//we need split further to get geneName
+    {       
+      //num_sub1=split_ext(buffer1[1], buffer_sub1, '*');
+      num_sub2=split_ext(buffer2[2], buffer_sub2, '*');
+      if(num_sub2!=2)
+	{//something wrong 
+	  throw "bad format of the sequence name";
+	}
+      //gene2=buffer_sub2[0]; in this case the gene2 has been specified
+      allele2=buffer_sub2[1];
+      //the gene_sub2 is not an empty string
+      gene_sub2=buffer_sub2[0];
+    }
+  
+  //now check to compare, we have done with familyName
+  if(is_number(gene1.c_str())) //gene1 is a number
+    {
+      if(is_number(gene2.c_str()))//gene2 is a number
 	{
-	  ret=1000;//
+	  ret=atoi(gene1.c_str())-atoi(gene2.c_str());
+	}
+      else //gene2 is not a number
+	{
+	  ret=-1000;//
 	}
     }
-  else //it is a number
+  else //gene1 is  not a number
     {
-      if(subgene2.at(0)>'9') //not a number
+      if(is_number(gene2.c_str())) //gene2 is a number
 	{
-	  ret=-1000;
+	  ret=1000;
 	}
-      else  //is a number
+      else  //is not a number
 	{
-	  num1=atoi(subgene1.c_str());
-	  num2=atoi(subgene2.c_str());
-	  ret=num1-num2;
+	  //num1=atoi(subgene1.c_str());
+	  //num2=atoi(subgene2.c_str());
+	  ret=gene1.compare(gene2);
 	}
     }
+
   if(ret!=0)//we have to even further for testing
     {
       if(ret<0)
@@ -83,10 +137,95 @@ bool GenomicVCompare_bySequenceName(const GenomicV& ss1,const GenomicV& ss2)
       else
 	return false;
     }
-  //we are here, means we need to check the allele numbers to compare
-  subgene1=buffer1[1];
-  subgene2=buffer2[1];
-  //all the alleles should be number???
+
+  if(gene_sub1.size()==0)
+    {
+      if(gene_sub2.size()==0)
+	{
+	  //equal and go next for comparison
+	}
+      else
+	{
+	  return true;
+	}
+    }
+  else  //not empty, means there is gene_sub1
+    {
+      if(gene_sub2.size()==0)
+	{
+	  return false;
+	}
+    }
+      
+  //means, gene sub1 is 
+
+  //we are here, means we need to check the sub gene numbers to compare
+  if(is_number(gene_sub1.c_str())) //gene_sub1 is a number
+    {
+      if(is_number(gene_sub2.c_str()))//gene_sub2 is a number
+	{
+	  ret=atoi(gene_sub1.c_str())-atoi(gene_sub2.c_str());
+	}
+      else //gene_sub2 is not a number
+	{
+	  ret=-1000;//
+	}
+    }
+  else //gene_sub1 is  not a number
+    {
+      if(is_number(gene_sub2.c_str())) //gene2 is a number
+	{
+	  ret=1000;
+	}
+      else  //is not a number
+	{
+	  //num1=atoi(subgene1.c_str());
+	  //num2=atoi(subgene2.c_str());
+	  ret=gene_sub1.compare(gene_sub2);
+	}
+    }
+
+  if(ret!=0)//we have to even further for testing
+    {
+      if(ret<0)
+	{
+	  return true;
+	}
+      else
+	return false;
+    }
+
+  //if we are here, means we still have to check for the allele numbers
+if(is_number(allele1.c_str())) //gene1 is a number
+    {
+      if(is_number(allele2.c_str()))//gene2 is a number
+	{
+	  ret=atoi(allele1.c_str())-atoi(allele2.c_str());
+	}
+      else //gene2 is not a number
+	{
+	  throw "something is wrong";
+	  ret=-1000;//
+	}
+    }
+  else //gene1 is  not a number
+    {
+      throw "something is wrong";
+    }
+
+  if(ret!=0)//we have to even further for testing
+    {
+      if(ret<0)
+	{
+	  return true;
+	}
+      else
+	return false;
+    }
+  
+  //if we are here. we are equal
+  //cout<<"WARNING:Something wrong!!Please check "<<endl;
+  return true;
 }
 
 
@@ -99,8 +238,8 @@ unsigned ReadGenomicV(const string& _fastaFileName, GenomicV** _gseg)
   *_gseg=new GenomicV[totalNumber];
 
   GenomicV* p_arr=*_gseg;
-  vector<string> gene_vec;
-  //cout<<"here it is"<<endl;
+  vector<string> gene_vec;//containing the gene name only
+  cout<<"here it is"<<endl;
   //now start reading into the segments
   for(unsigned int i=0;i<totalNumber;i++)
     {
@@ -121,9 +260,10 @@ unsigned ReadGenomicV(const string& _fastaFileName, GenomicV** _gseg)
 
       //now, we parse gene name
       string gene;
+      //string gene_last;
       try
 	{
-	  gene=ParseGeneName(seqName);
+	  gene=ParseGeneName(seqName);//this is the gene name without allele#
 	}
       catch (const char* msg)
 	{
@@ -139,24 +279,25 @@ unsigned ReadGenomicV(const string& _fastaFileName, GenomicV** _gseg)
 
       //now go on further to parse the gene name and allele number
       p_arr[i].Set_Seq(seq.at(i));
-      p_arr[i].Set_Gene(gene);
-      gene_vec.push_back(gene);
+      p_arr[i].Set_Gene(gene);//gene name without allele
+      //gene_vec.push_back(gene);
     }
-  
+  cout<<"reading in the sequence, now figure out gnee index"<<endl;
   //now we want to figure out gene_index
   //get unique gene vector first
-  vector< string> unique_gene_vec;
+  //vector< string> unique_gene_vec;
   vector<unsigned> n_allele_vec;
-  sort(gene_vec.begin(),gene_vec.end(), stringCompare_ext);
+  //sort(gene_vec.begin(),gene_vec.end(), stringCompare_ext);
   
   //here, we need to sort the sequence string array, in order to 
   //later no compare to get the number of alleles and allele number 
   //for each gene
   sort(p_arr,p_arr+totalNumber,GenomicVCompare_bySequenceName);
 
+  cout<<"fater sorting...."<<endl;
   //now with sorted gene name vector
   //we need to get the unique genes
-  unique_gene_vec.push_back(gene_vec.at(0));
+  //unique_gene_vec.push_back(gene_vec.at(0));
 
   unsigned running_gene_index=0;
   unsigned running_allele=1; //this is the number of this current allele, it is starting from 1, not zero
@@ -165,23 +306,37 @@ unsigned ReadGenomicV(const string& _fastaFileName, GenomicV** _gseg)
   
   p_arr[0].Set_GeneIndex(running_gene_index);
   p_arr[0].Set_Allele(running_allele);
+  string curr_gene_name, last_gene_name;  
+  last_gene_name=ParseGeneName(p_arr[0].Get_Gene());
+  unsigned startingIndexOfCurrentRun=0;
+  //unsigned endingIndexOfCurrentRun=0;
   for(unsigned i=1;i<totalNumber;i++)
     {
       //now we need first get the unique genes
-      //for each identifical one, we go next
+      //for each identical one, we go next
       running_allele++;
       running_total_n_allele++;
-      if(gene_vec.at(i).compare(gene_vec.at(i-1))!=0)
+      curr_gene_name=ParseGeneName(p_arr[i].Get_Gene());
+      //last_gene_name=ParseGeneName(p_arr[i-1].Get_Gene());
+      if(curr_gene_name.compare(last_gene_name)!=0)
 	{
 	  //found a unique gene
 	  running_gene_index++;
 	  running_allele=1;
-	  unique_gene_vec.push_back(gene_vec.at(i));
+	  //unique_gene_vec.push_back(gene_vec.at(i));
 	  n_allele_vec.push_back(running_total_n_allele);
+	  running_total_n_allele--;
+	  //now we need to update the n_allele for current run
+	  for(unsigned j=startingIndexOfCurrentRun;j<=i-1;j++)
+	    {
+	      p_arr[j].Set_n_alleles(running_total_n_allele);
+	    }
 	  running_total_n_allele=1;
+	  startingIndexOfCurrentRun=i;
 	}
       p_arr[i].Set_GeneIndex(running_gene_index);
-      p_arr[0].Set_Allele(running_allele);
+      p_arr[i].Set_Allele(running_allele);
+      last_gene_name=curr_gene_name;
     }
 
   return totalNumber; 
@@ -219,7 +374,7 @@ string ParseGeneName(const string& _seqName)
   //we split and return the gene name
   string buffer[100];
   int num=split_ext(_seqName,buffer, '*');
-  if(num<2)
+  if(num<1)
     {//something wrong 
       throw "bad format of the gene sequence name";
     }

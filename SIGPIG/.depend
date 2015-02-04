@@ -38,7 +38,7 @@ main.o: main.cpp ../string_ext.hpp ../score.hpp ../SequenceString.hpp \
   Alignment.hpp Alignment_V.hpp MatrixFunctions.hpp
 tester_main.o: tester_main.cpp MatrixFunctions.hpp Alignment.hpp \
   ../SequenceString.hpp ../score.hpp GenomicV.hpp genomicSegment.hpp \
-  GenomicD.hpp GenomicJ.hpp ../string_ext.hpp
+  GenomicD.hpp GenomicJ.hpp ../string_ext.hpp genomicSegments.hpp
 tester_main_matchV.o: tester_main_matchV.cpp MatrixFunctions.hpp \
   Alignment.hpp ../SequenceString.hpp ../score.hpp GenomicV.hpp \
   genomicSegment.hpp GenomicD.hpp GenomicJ.hpp Alignment_V.hpp \

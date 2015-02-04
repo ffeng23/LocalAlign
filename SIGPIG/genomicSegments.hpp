@@ -76,4 +76,6 @@ SequenceString FlipSequenceString(const SequenceString& _ss);
 
 vector<string> DetermineOutputFileNames(const string& _outFileNameBase, const unsigned& _NPerFile, const unsigned& _totalNSeq);
 
+bool GenomicVCompare_bySequenceName(const GenomicV& ss1,const GenomicV& ss2);
+
 #endif

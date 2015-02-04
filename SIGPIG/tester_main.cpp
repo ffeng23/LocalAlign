@@ -5,6 +5,8 @@
 #include "MatrixFunctions.hpp"
 #include "Alignment.hpp"
 #include "../string_ext.hpp"
+#include "genomicSegments.hpp"
+
 //this is a testing module for testing various functions
 
 using namespace std;
@@ -20,9 +22,25 @@ int main(int argc, char* argv[])
     numStr=argv[1];
   //numStr=" 25";
   //numStr="\t \r\n 25";
-  cout<<"we are here"<<endl;
   int ret=is_number(numStr);
   cout<<"the numStr ("<<numStr<<"):"<<ret<<endl;
+
+  //now we want to test compare empty string with anything "
+  string emptyStr("");
+  cout<<"empty string vs. 0:"<<emptyStr.compare("0")<<endl;
+
+  //now testing compare the gene name
+  string geneVname1("IGHV1-NL*01");
+  string geneVname2("IGHV1-NL-D*03");
+  SequenceString ss1(geneVname1, "");
+  SequenceString ss2(geneVname2, "");
+  GenomicV gv1;
+  GenomicV gv2;
+  gv1.Set_Seq(ss1);
+  gv2.Set_Seq(ss2);
+  
+  cout<<"compare gv1 vs. gv2:"<<GenomicVCompare_bySequenceName(gv1, gv2)<<endl;
+
   //first testing matrixFunctions
   cout<<"Testing max and min functions:"<<endl;
   vector<unsigned> vec_int;

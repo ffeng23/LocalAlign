@@ -95,7 +95,7 @@ void DeterminePalindromAndExcessError_V
 	  if(target.at(_align_positions[j][1]+_align_length[j]+k)!=_seq.GetSequence().at(_align_positions[j][0]+_align_length[j]+k))
 	    {
 	      //cout<<"\t\tfound one!!pos:"<<_align_positions[j][0]-n_excess+k<<endl;
-	      _excess_error_position[j][runningIndex_excessError]=_align_positions[j][0]+_align_length[j]+k;
+	      _excess_error_position[j][runningIndex_excessError]=/*_align_positions[j][0]+*/_align_length[j]+k;
 	      runningIndex_excessError++;
 	    }
 	  //cout<<"\t\t$$$$end of third for loop"<<endl;
@@ -106,9 +106,7 @@ void DeterminePalindromAndExcessError_V
 	  //cout<<"\t\tfor loop"<<endl;
 	  _excess_error_position[j][runningIndex_excessError]=0;
 	}
-      cout <<"\t end of first for loop"<<endl;     
-      //excess_err_pos = J.align_position(1,j) - ( n_excess + 1 - find((genJ(ok_order(j)).seq((J.align_position(2,j)-n_excess): (J.align_position(2,j)-1) )~=seq((J.align_position(1,j) -n_excess): (J.align_position(1,j)-1) ))) );
-      //  J.excess_error_positions(j, 1:length(excess_err_pos)) = excess_err_pos;
+      //cout <<"\t end of first for loop"<<endl;         
     }//end of outer for loop for all the aligned strings
   cout<<"Done for the function"<<endl;
   //return true;
@@ -340,7 +338,7 @@ bool match_V(const SequenceString& _seq,
  //  % Set a score threshold for alleles. well, this is kind of arbitrary
  //we want to get the best ones, but limited numbers 
  double min_score=max_mf(scores,_numOfVSegs)-3*_V_minimum_alignment_length;
- //	      min_score = max(scores) - 3*J_minimum_alignment_length;
+ unsigned max_error=temp_n_errors[sorted_index[0]]+3;//another arbitrary threshold
  cout<<"min_score:"<<min_score<<endl;
  //% Subset of alleles that have high enough score, long enough alignment, and
  //	      % not too many deletions.
@@ -353,7 +351,8 @@ bool match_V(const SequenceString& _seq,
      cout<<"index i:"<<i<<"----****"<<ok_count<<endl;
      
      //find( scores(order) >= min_score & align_length(order) >= J_minimum_alignment_length & v_large_deletion_flag(order)==0);
-     if(scores[i]>=min_score&&temp_align_length[sorted_index[i]]>=_V_minimum_alignment_length&&!v_large_deletion_flag[sorted_index[i]])
+     if(scores[i]>=min_score&&temp_align_length[sorted_index[i]]>=_V_minimum_alignment_length&&!v_large_deletion_flag[sorted_index[i]]
+	&&temp_n_errors[sorted_index[i]]<=max_error)
        {
 	 ok_order[ok_count]=sorted_index[i];
 	 temp_min_deletions[ok_count]=temp_min_deletions[i];
@@ -480,7 +479,7 @@ for(unsigned i=0;i<ok_count;i++)
      }*/
  //zeros(numel(ok_order),J_maximum_deletion+1);
  _V.excess_error_positions =new unsigned* [ok_count];
- //zeros(numel(ok_order),negative_excess_deletions_max);
+ 
  for(unsigned i=0;i<ok_count;i++)
    {
      _V.excess_error_positions[i]=new unsigned [_negative_excess_deletion_max];
@@ -497,7 +496,7 @@ for(unsigned i=0;i<ok_count;i++)
  for(unsigned i=0;i<ok_count;i++)
    {
      genV_ok_index[i]=_genVs[_V.alleles_all[i]].Get_GeneIndex();
-     //cout<<genV_ok_index[i]<<",";
+     cout<<genV_ok_index[i]<<",";
    }
  cout<<endl;
  //genJ_ok_gene_inds = zeros(1,numel(ok_order));
@@ -662,10 +661,10 @@ unsigned align_with_constraints_fast_no_fix
       
       current_score=CalculateScore(current_align_length, current_error_positions, current_n_errors, _cost);
       //cout<<"\tcurrent_score:"<<current_score<<";current_align_length:"<<current_align_length<<endl;
-
+      //cout<<"\tbest score so far:"<<score<<endl;
       //we got a better one or got an identical score, but long, we are good
       if(current_score>score||
-	 ((current_score-score<1E-6||current_score-score>-1E-6)&&(current_align_length>align_length))
+	 ((current_score-score<1E-6&&current_score-score>-1E-6)&&(current_align_length>align_length))
 	 )
 	{
 	  align_length=current_align_length;
@@ -926,8 +925,8 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
     {
       cout<<temp_error_positions[i]<<",";
     }
-    cout<<endl;*/
-
+    cout<<endl;
+  */
   //now we need to go through the alignment to see whether we end
   //up at error. if so we remove the error and stop at match
   //this might not be necessary, but will get a short sequence
@@ -1010,8 +1009,8 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
       /*cout<<"after aligning:"<<endl;
       cout<<"\talength:"<<temp_align_length<<endl;
       cout<<"\tn_errors:"<<temp_n_errors<<endl;
-      cout<<"\tbest score:"<<temp_best_score<<endl;*/
-      /*cout<<"\talign_position_start:"<<_align_position_start<<endl;
+      cout<<"\tbest score:"<<temp_best_score<<endl;
+      cout<<"\talign_position_start:"<<_align_position_start<<endl;
       cout<<"\terror_positions:";
       for(unsigned int i=0;i<_n_errors;i++)
 	{
@@ -1065,5 +1064,5 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
   delete[] temp_error_positions;
 
   return align_length;
-}//end of align remove both errors
+}//nd of align remove both errors
  

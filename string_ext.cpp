@@ -173,6 +173,11 @@ int is_number(const char* str)
 	}
       index++;
     }
+  if(index==0)
+    {
+      //this is an empty string. 
+      return 0;
+    }
   if(signFlag)//means we have '+' or '-' in the end, we don't allow this at this momnet
     return 0;
   if(dotflag==1&&trueFloat>0)
@@ -181,6 +186,7 @@ int is_number(const char* str)
     }
   else
     return 1;//for integer
+  return 0;
 }
 
 

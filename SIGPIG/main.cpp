@@ -210,11 +210,17 @@ int main(int argc, char* argv[])
   unsigned totalNumV=  ReadGenomicV("genomicVs_alleles.fasta",&genV);
   
   cout<<totalNumV<<" V genomic segments are read in."<<endl; 
-  cout<<0<<":"<<genV[0].Get_Seq().toString()<<endl;
-  cout<<100<<":"<<genV[100].Get_Seq().toString()<<endl;
+  for(unsigned i=0;i<totalNumV;i++)
+    {
+      cout<<i<<":"<<genV[i].Get_Seq().toString()<<endl;
+      cout<<"\t==>geneIndex:"<<genV[i].Get_GeneIndex()<<endl;
+      cout<<"\t==>n_allele:"<<genV[i].Get_n_alleles()<<endl;
+      cout<<"\t==>allele:"<<genV[i].Get_Allele()<<endl;
+    }
+  /*  cout<<100<<":"<<genV[100].Get_Seq().toString()<<endl;
   cout<<216<<":"<<genV[216].Get_Seq().toString()<<endl;
   cout<<217<<":"<<genV[217].Get_Seq().toString()<<endl;
-
+  */
   //now testing load sequence data
   vector<SequenceString> data_vec;
   vector<string> header_vec;
@@ -343,11 +349,22 @@ int main(int argc, char* argv[])
 	    }
 	  cout<<endl;
 
+	  cout<<"\t1error positions:"<<endl;
+	  for(unsigned i=0;i<V_obj.numOfAligned;i++)
+	    {
+	      for(unsigned j=0;j<V_obj.n_errors[i];j++)
+		{
+		  cout<<V_obj.error_positions[i][j]<<",";
+		}
+	      cout<<endl;
+	    }
+	  cout<<endl;
+
 	  cout<<"\talleles_all:";
 	  for(unsigned i=0;i<V_obj.numOfAligned;i++)
-	{
-	  cout<<V_obj.alleles_all[i]<<",";
-	}
+	    {
+	      cout<<V_obj.alleles_all[i]<<",";
+	    }
 	  cout<<endl;
 	  
 	  cout<<"\tp_reg_max_length:";
@@ -368,6 +385,7 @@ int main(int argc, char* argv[])
 		{
 		  cout<<V_obj.excess_error_positions[j][i]<<",";
 		}
+	      cout<<endl;
 	    }
 	  cout<<endl;
 	  cout<<"\talleles from distinct gene:";
