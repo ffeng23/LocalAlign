@@ -24,41 +24,44 @@ Alignment_Object::Alignment_Object(const unsigned& numOfGenTemplates):
 Alignment_Object::Alignment_Object(const Alignment_Object& _ao) :
   numOfAligned(_ao.numOfAligned)
 {
+  //first determine the size of unsigned in term of char
+  unsigned sizeOfUnsigned=sizeof(unsigned)/sizeof(char);
+  
   align_length=new unsigned [numOfAligned];
-  memcpy(align_length, _ao.align_length, numOfAligned);
+  memcpy(align_length, _ao.align_length, numOfAligned*sizeOfUnsigned);
 
   align_position=new unsigned* [numOfAligned];
   for(unsigned i=0;i<numOfAligned;i++)
     {
       align_position[i]=new unsigned [2];
-      memcpy(align_position[i], _ao.align_position[i], 2);
+      memcpy(align_position[i], _ao.align_position[i], 2*sizeOfUnsigned);
     }
 
   min_deletions=new unsigned [numOfAligned];
-  memcpy(min_deletions, _ao.min_deletions, numOfAligned);
+  memcpy(min_deletions, _ao.min_deletions, numOfAligned*sizeOfUnsigned);
 
   n_errors=new unsigned [numOfAligned];
-  memcpy(n_errors, _ao.n_errors, numOfAligned);
+  memcpy(n_errors, _ao.n_errors, numOfAligned*sizeOfUnsigned);
 
   p_region_max_length=new unsigned*[numOfAligned];
   for(unsigned i=0;i<numOfAligned;i++)
     {
       p_region_max_length[i]=new unsigned[AlignmentSettings::J_allowed_errors+1];
-      memcpy(p_region_max_length[i], _ao.p_region_max_length[i], AlignmentSettings::J_allowed_errors+1);
+      memcpy(p_region_max_length[i], _ao.p_region_max_length[i], (AlignmentSettings::J_allowed_errors+1)*sizeOfUnsigned);
     }
 
   excess_error_positions=new unsigned*[numOfAligned];
   for(unsigned i=0;i<numOfAligned;i++)
     {
       excess_error_positions[i]=new unsigned[AlignmentSettings::negative_excess_deletions_max];
-      memcpy(excess_error_positions[i], _ao.excess_error_positions[i],AlignmentSettings::negative_excess_deletions_max);
+      memcpy(excess_error_positions[i], _ao.excess_error_positions[i],AlignmentSettings::negative_excess_deletions_max * sizeOfUnsigned);
     }
 
   alleles_all=new unsigned[numOfAligned];
-  memcpy(alleles_all, _ao.alleles_all, numOfAligned);
+  memcpy(alleles_all, _ao.alleles_all, numOfAligned*sizeOfUnsigned);
 
   alleles_from_distinct_genes=new unsigned[numOfAligned];
-  memcpy(alleles_from_distinct_genes, _ao.alleles_from_distinct_genes, numOfAligned);
+  memcpy(alleles_from_distinct_genes, _ao.alleles_from_distinct_genes, numOfAligned*sizeOfUnsigned);
   //done!!!
 }
 
@@ -68,43 +71,45 @@ Alignment_Object& Alignment_Object::operator = (const Alignment_Object& _ao)
   if(this==&_ao)
     return *this;
 
+  unsigned sizeOfUnsigned=sizeof(unsigned)/sizeof(char);
+  
   numOfAligned=_ao.numOfAligned;
   
   align_length=new unsigned [numOfAligned];
-  memcpy(align_length, _ao.align_length, numOfAligned);
+  memcpy(align_length, _ao.align_length, numOfAligned*sizeOfUnsigned);
 
   align_position=new unsigned* [numOfAligned];
   for(unsigned i=0;i<numOfAligned;i++)
     {
       align_position[i]=new unsigned [2];
-      memcpy(align_position[i], _ao.align_position[i], 2);
+      memcpy(align_position[i], _ao.align_position[i], 2*sizeOfUnsigned);
     }
 
   min_deletions=new unsigned [numOfAligned];
-  memcpy(min_deletions, _ao.min_deletions, numOfAligned);
+  memcpy(min_deletions, _ao.min_deletions, numOfAligned*sizeOfUnsigned);
 
   n_errors=new unsigned [numOfAligned];
-  memcpy(n_errors, _ao.n_errors, numOfAligned);
+  memcpy(n_errors, _ao.n_errors, numOfAligned*sizeOfUnsigned);
 
   p_region_max_length=new unsigned*[numOfAligned];
   for(unsigned i=0;i<numOfAligned;i++)
     {
       p_region_max_length[i]=new unsigned[AlignmentSettings::J_allowed_errors+1];
-      memcpy(p_region_max_length[i], _ao.p_region_max_length[i], AlignmentSettings::J_allowed_errors+1);
+      memcpy(p_region_max_length[i], _ao.p_region_max_length[i], (AlignmentSettings::J_allowed_errors+1)*sizeOfUnsigned);
     }
 
   excess_error_positions=new unsigned*[numOfAligned];
   for(unsigned i=0;i<numOfAligned;i++)
     {
       excess_error_positions[i]=new unsigned[AlignmentSettings::negative_excess_deletions_max];
-      memcpy(excess_error_positions[i], _ao.excess_error_positions[i],AlignmentSettings::negative_excess_deletions_max);
+      memcpy(excess_error_positions[i], _ao.excess_error_positions[i],AlignmentSettings::negative_excess_deletions_max * sizeOfUnsigned);
     }
 
   alleles_all=new unsigned[numOfAligned];
-  memcpy(alleles_all, _ao.alleles_all, numOfAligned);
+  memcpy(alleles_all, _ao.alleles_all, numOfAligned*sizeOfUnsigned);
 
   alleles_from_distinct_genes=new unsigned[numOfAligned];
-  memcpy(alleles_from_distinct_genes, _ao.alleles_from_distinct_genes, numOfAligned);
+  memcpy(alleles_from_distinct_genes, _ao.alleles_from_distinct_genes, numOfAligned*sizeOfUnsigned);
   //done!!!
   
   return *this;
