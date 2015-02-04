@@ -19,7 +19,7 @@ namespace AlignmentSettings
 
   //% Alignment Score Matrix. USED ONLY FOR D MATCHING
   //====>>>>>>>>>we need to take care of this later
-extern std::string scorematrix;//("nuc44");
+  extern std::string scorematrix;//("nuc44");
   //scorematrix=scorematrix(1:4,1:4);
   //scorematrix(scorematrix==-4)=-14;
   //*/
@@ -44,6 +44,10 @@ extern std::string scorematrix;//("nuc44");
   //% you go:
   extern unsigned negative_excess_deletions_max;// = 3;
 
+  //to define the length of the flank sequences used to run D match
+  extern unsinged flank_length;
+
+  extern unsigned n_D_alleles;
 }
 
 

@@ -11,35 +11,6 @@
 //for each object here, it contains possibly more then one alignment that passed the filter
 //so, it is variable for each input sequences. that is why we need use vector
 
-class Alignment_D
-{
-  vector<unsigned> numOfAligned;
-  vector<vector<unsigned> > align_length; //2D vector, 
-  // 1D:numOfGenD alleles; 2D:numOfAligned;
-  vector<vector<unsigned> > score; //same dimension as above
-  vector<vector<unsigned> > n_errors; //same dimension as above
-  vector<vector<vector<unsigned> > > error_positions;//3D,
-  //1D,fixed, numOf alleles; 2D:numOfAligned;
-  //3D,having a size of n_errors;
-  vector<vector<vector<unsigned> > > excess_error_positions_left;// alleles by numOfAligned by max_negative_excess_errors
-  vector<vector<vector<unsigned> > > excess_error_positions_right;//same as above
-  
-  vector<vector<unsigned> > align_position_left;//alleles by numOfAligned
-  vector<vector<unsigned> > align_position_right;//same as above
-
-  vector<vector<unsigned> > deletions_left; //alleles by numOfAligned
-  vector<vector<unsigned> > deletions_right; //alleles by numOfAligned
-
-  vector<vector<vector<unsigned> > >p_region_max_length_left;//allele by numOfAligned by  max_number of deletions
-  vector<vector<vector<unsigned> > > p_region_max_length_right; //above
-
-  static unsigned allele_order [];//={ 0,
-  //1, 2, 3, 4, 5, 6, 7, 8, 9,10,
-  //			   11,12,13,14,15,16,17,18,19,20,
-  //			    21,22,23,24,25,26,27,28,29,30,
-  //			    31,32,33};
-  
-};
 
 //will implement this later************
 //the reason that we want to have a class instead of struct because we want to more control also more abstraction
