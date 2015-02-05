@@ -94,27 +94,6 @@ bool match_J(const SequenceString& _seq,
 	     /*output*/ Alignment_Object& _J
  );
 
-//input:
-// _seq, the input seq that is being aligned against. constant reference 
-//_genDs, the V gen segments arrays.
-//_numOfDSegs, the number of D gene segments in the array
-//_V_end, the position where the previous V alignemnt stops
-//_J_start, the position where the previous J alignment starts, 
-//_scoreMatrix, the matrix do the alignment. pointer to the scorematrix
-//_D_maximum_deletion, maximum deletion
-//_negative_excess_deletion_max, maximum excess deletion, usually 3
-//_max_align, the maximum number of alignments for the D align, 200 usually.
-//
-//output:
-// _D, the Alignment_obj pointer V holding the alignment details. The caller need to allocate the memory
-//bool, indicating whether the alignment is successful.
-bool match_D(const SequenceString& _seq,
-	      const GenomicV* _genDs, const unsigned& _numOfDSegs,
-	      const unsigned& _V_end, const unsigned& _J_start,
-	      const ScoreMatrix* _ScoreMatrix, const unsigned& _D_maximum_deletion, 
-	     const unsigned& _negative_excess_deletion_max, const unsigned& _max_align,
-	     /*output*/ Alignment_D* _D
- );
 
 //finds highest scoring alignment of between seq and target 
 //doing the alignment forcing the alignment to begin from the first nucleotide on
