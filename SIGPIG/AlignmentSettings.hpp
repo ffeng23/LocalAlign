@@ -48,6 +48,8 @@ namespace AlignmentSettings
   extern unsinged flank_length;
 
   extern unsigned n_D_alleles;
+
+  extern unsinged max_length_D_genes;//used by match D to determine the max number of errors 
 }
 
 

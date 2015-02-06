@@ -49,6 +49,8 @@ namespace AlignmentSettings
   
   unsigned flank_length=3;
   unsigned n_D_alleles=34;
+  
+  unsigned max_length_D_genes=37;
 }
 
 

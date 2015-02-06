@@ -6,17 +6,18 @@
 #include "MatrixFunctions.hpp"
 #include "../string_ext.hpp"
 #include "AlignmentSettings.hpp"
-
+#include "../score.hpp"
+#include "../LocalAlignment.hpp"
 #include "Alignment_D.hpp"
 
 
-unsigned Alignment_D::allele_order []={ 0,
+/*unsigned Alignment_D::allele_order []={ 0,
 					  1, 2, 3, 4, 5, 6, 7, 8, 9,10,
 					  11,12,13,14,15,16,17,18,19,20,
 					  21,22,23,24,25,26,27,28,29,30,
 					  31,32,33
 					  };
-
+*/
 unsigned Alignment_D:n_D_alleles=AlignmentSettings::n_D_alleles;
 
 
@@ -27,7 +28,8 @@ Alignment_D::Alignment_D(): numOfAligned(NULL), align_length(NULL), score(NULL),
 			    align_position_left(NULL), align_position_right(NULL),
 			    deletions_left(NULL), deletions_right(NULL),
 			    p_region_max_length_left(NULL),
-			    p_region_max_length_right(NULL)
+			    p_region_max_length_right(NULL),
+			    allele_order(NULL)
 {
   //empty one
 }
@@ -41,7 +43,8 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
 			    align_position_left(NULL), align_position_right(NULL),
 			    deletions_left(NULL), deletions_right(NULL),
 			    p_region_max_length_left(NULL),
-			    p_region_max_length_right(NULL)
+	     p_region_max_length_right(NULL),
+	     allele_order(NULL)
 {
   unsigned sizeOfUnsigned=sizeof(unsigned)/sizeof(char);
   if(_aod.numOfAligned!=NULL)
@@ -68,14 +71,14 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
   //score **
   if(_aod.score!=NULL)
     {
-      score=new unsigned* [n_D_alleles];
+      score=new double* [n_D_alleles];
       for(unsigned i=0;i<n_D_alleles;i++)
 	{
 	  score[i]=NULL;
 	  if(_aod.score[i]!=NULL)
 	    {
-	      score[i]=new unsigned [numOfAligned[i]];
-	      memcpy(score[i], _aod.score[i], numOfAligned[i]*sizeOfUnsigned);
+	      score[i]=new double [numOfAligned[i]];
+	      memcpy(score[i], _aod.score[i], numOfAligned[i]*sizeof(double)/sizeof(char));
 	    }
 	}
     }//end of socre
@@ -169,31 +172,31 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
     }//excess_error_positions_right
 
   //align_position_left **
-  if(_aod.align_length_left!=NULL)
+  if(_aod.align_position_left!=NULL)
     {
-      align_length_left=new unsigned* [n_D_alleles];
+      align_position_left=new unsigned* [n_D_alleles];
       for(unsigned i=0;i<n_D_alleles;i++)
 	{
-	  align_length_left[i]=NULL;
-	  if(_aod.align_length_left[i]!=NULL);
+	  align_position_left[i]=NULL;
+	  if(_aod.align_position_left[i]!=NULL);
 	  {
-	    align_length_left[i]=nw unsigned [numOfAligned];
-	    memcpy(align_length_left[i], _aod.align_length_left[i], numOfAligned*sizeOfUnsigned);
+	    align_position_left[i]=nw unsigned [numOfAligned];
+	    memcpy(align_position_left[i], _aod.align_position_left[i], numOfAligned*sizeOfUnsigned);
 	  }
 	}
     }//end of align_length_left**
 
   //align_position_right **
-  if(_aod.align_length_right!=NULL)
+  if(_aod.align_position_right!=NULL)
     {
-      align_length_right=new unsigned* [n_D_alleles];
+      align_position_right=new unsigned* [n_D_alleles];
       for(unsigned i=0;i<n_D_alleles;i++)
 	{
-	  align_length_right[i]=NULL;
-	  if(_aod.align_length_right[i]!=NULL);
+	  align_position_right[i]=NULL;
+	  if(_aod.align_position_right[i]!=NULL);
 	  {
 	    align_length_right[i]=nw unsigned [numOfAligned];
-	    memcpy(align_length_right[i], _aod.align_length_right[i], numOfAligned*sizeOfUnsigned);
+	    memcpy(align_position_right[i], _aod.align_position_right[i], numOfAligned*sizeOfUnsigned);
 	  }
 	}
     }//end of align_length_left**
@@ -273,7 +276,11 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
 	    }
 	}
     }//end of p_region_max_length_right
-
+  if(_aod.allele_order!=NULL)
+    {
+      allele.order=new unsigned[n_D_alleles];
+      memcpy(allele_order, _aod.allele_order, n_D_alleles*sizeOfUnsigned);
+    }
   //Gosh finally done.
 }
 
@@ -285,7 +292,7 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 			    align_position_left(NULL), align_position_right(NULL),
 			    deletions_left(NULL), deletions_right(NULL),
 			    p_region_max_length_left(NULL),
-			    p_region_max_length_right(NULL)
+  p_region_max_length_right(NULL),allele_order(NUL)
 {
   if(this==&_aod)
     {
@@ -318,14 +325,14 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
   //score **
   if(_aod.score!=NULL)
     {
-      score=new unsigned* [n_D_alleles];
+      score=new double* [n_D_alleles];
       for(unsigned i=0;i<n_D_alleles;i++)
 	{
 	  score[i]=NULL;
 	  if(_aod.score[i]!=NULL)
 	    {
-	      score[i]=new unsigned [numOfAligned[i]];
-	      memcpy(score[i], _aod.score[i], numOfAligned[i]*sizeOfUnsigned);
+	      score[i]=new double [numOfAligned[i]];
+	      memcpy(score[i], _aod.score[i], numOfAligned[i]*sizeof(double)/sizeof(char));
 	    }
 	}
     }//end of socre
@@ -523,7 +530,12 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 	    }
 	}
     }//end of p_region_max_length_right
-
+  //allele_order
+  if(_aod.allele_order!=NULL)
+    {
+      allele.order=new unsigned[n_D_alleles];
+      memcpy(allele_order, _aod.allele_order, n_D_alleles*sizeOfUnsigned);
+    }
   //Gosh finally done.
   return *this;
 }
@@ -731,7 +743,10 @@ Alignment_D::~Alignment_D()
 	}
       delete [] p_region_max_length_right;
     }//end of p_region_max_length_right
-
+  
+  //allele_order
+  if(allele_order!=NULL)
+    delete[] allele_order;
   //Gosh finally done.
 }
 
@@ -740,16 +755,66 @@ string Alignment_D::toString()
   //to be implemented 
 }
 
+//need to implement the error catch system
+bool initialize(const unsigned& _n_D_alleles)
+{
+  n_D_alleles=_n_D_alleles;
+  
+  //start initialize it
+  unsigned sizeOfUnsigned=sizeof(unsigned)/sizeof(char);
+  
+  numOfAligned=new unsigned[n_D_alleles];
+  std::memset(numOfAligned, 0, n_D_alleles*sizeOfUnsigned);
+  //set a default value of zero,in case of error. 
+  
+  align_length=new unsigned* [n_D_alleles];
+  
+  //score **
+  score=new double* [n_D_alleles];
+  
+  //n_errors **
+  n_errors=new unsigned* [n_D_alleles];
+  
+  //error_positions ***
+  error_positions=new unsigned**[n_D_alleles];
+  
+  //excess_error_postions_left **
+  excess_error_positions_left=new unsigned**[n_D_alleles];
+  
+  //excess_error_postions_right **
+  excess_error_positions_right=new unsigned**[n_D_alleles];
+  
+  //align_position_left **
+  align_position_left=new unsigned* [n_D_alleles];
+  
+  //align_position_right **
+  align_position_right=new unsigned* [n_D_alleles];
+  
+  //deletion_left **
+  deletions_left=new unsigned* [n_D_alleles];
+  
+  //deletion_left **
+  deletions_right=new unsigned* [n_D_alleles];
+  
+  //p_region_max_length_left
+  p_region_max_length_left=new unsigned**[n_D_alleles];
+  
+  //p_region_max_length_left
+  p_region_max_length_right=new unsigned**[n_D_alleles];
+  
+  //allele_order
+  allele_order=new unsigned [n_D_alleles];
+  return true;
+}
+
 bool match_D(const SequenceString& _seq,
 	     const GenomicD* _genDs, const unsigned& _numOfDSegs,
 	     const unsigned& _V_end, const unsigned& _J_start,
 	     const unsigned& _flank_length,
-	     const ScoreMatrix* _nuc44,
-	     const unsigned& _D_minimum_alignment_length,
+	     const ScoreMatrix* _sm,
 	     const unsigned& _D_maximum_deletion, 
 	     const unsigned& _negative_excess_deletion_max,
-	     const unsigned& _D_allowed_errors, 
-	     const unsigned& _error_cost,
+	     const unsigned& _max_aligns,
 	     /*output*/ Alignment_D& _D)
 {
   unsigned l_seq=_seq.GetLength();
@@ -765,8 +830,110 @@ bool match_D(const SequenceString& _seq,
     }
   string seqNDN=_seq.GetSequence().substr(start_index, end_index-start_index+1);
   unsigned flank_offset=start_index-1;
-}
+  unsigned D_max_errors=(int)(AlignmentSettings::max_length_D_genes*_sm(1,1)/(_sm(1,1)-_sm(1,2)));  
+  //start doing the alignment by calling the localAlign function
+  if(seqNDN.size()==0)
+    {
+      std::memset(_D.numOfAligned, 0, _numOfDSegs,sizeof(unsigned)/sizeof(char));
+      return false;
+    }
+  
+  //good, let's do the alignment
+  SequenceString ss_seqNDN("temp", seqNDN);
+  unsigned curr_numOfAligned;
+  _D.initialize(_numOfDSegs);
+  AlignmentString* las;
+  for(unsigned d=0;d<n_D_alleles;d++)
+    {
+      LocalAlignment la(&ss_seqNDN, _genDs+d, _nuc44,
+			100000/*gapopen*/ ,100000 /*gapextension*/,
+			1/*scale*/, _max_aligns);
+      //first determine the number of aligned for this current one
+      curr_numOfAligned=la.GetNumberOfAlignments();
+      las=la.GetAlignmentArr();
 
+      _D.numOfAligned[d]=curr_numOfAligned;
+      _D.align_length[d]=new unsigned[curr_numOfAligned];
+      _D.score[d]=new double[curr_numOfAligned];
+      _D.n_errors[d]=new unsigned[curr_numOfaligned];
+      _D.error_positions[d]=new unsigned*[curr_numOfAligned];
+      unsigned* temp_error_positions;
+      
+      _D.aligned_positions_left[d]=new unsigned*[curr_numOfAligned];
+      _D.aligned_positions_right[d]=new unsigned*[curr_numOfAligned];
+      
+      _D.deletions_left[d]=new unsigned* [curr_numOfAligned];
+      _D.deletions_right[d]=new unsigned* [curr_numOfAligned];
+
+      for(unsigned i=0;i<curr_numOfAligned;i++)
+	{
+	  _D.align_length[d][i]=las[i].GetPatternIndexEnd()-las[i].GetPatternIndexStart()+1;
+	  _D.score[d][i]=las[i].GetScore();
+	  _D.aligned_positions_left[d][i]=las[i].GetPatternIndexStart()+flank_offset+1;
+	  _D.aligned_positions_right[d][i]=las[i].GetPatternIndexEnd()+flank_offset+1;
+	  _D.deletions_left[d][i]=las[i].GetSubjectIndexStart();
+	  _D.deletion_right[d][i]=genDs[d].Get_Seq().GetLength()-las[i].GetSubjectIndexEnd()-1;
+
+	  temp_error_positions=new unsigned[max_n_errors];
+	  _D.n_errors[d][i]=findErrors
+	    (seqNDN, _genDs+d, _D.aligned_positions_left[d][i],
+	     _D.aligned_position_right[d][i],
+	     _D.deletions_left[d][i], _D.deletions_right[d][i],
+	     max_n_errors, temp_error_positions);
+	  //now copy over the elements
+	  _D.error_positions[d][i]=new unsigned[_D.n_errors[d][i]];
+	  memcpy(_D.error_positions[d][i], temp_error_positions,
+		 _D.n_errors[d][i]*sizeof(unsigned)/sizeof(char));
+	  
+	  //clean up the memory
+	  delete [] temp_error_positions;
+	}
+    }//end of num of D gene segs for loop
+  
+  //now we are ready with alignment, first sort in order to figure
+  //out the D.allele_order, prepare the index array first
+  unsigned highestScore=new unsigned[n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      _D.allele_order[i]=i;
+      highestScore[i]=_D.score[i][0];
+    }
+  
+  QuickSort(highestScore, 0, _n_D_alleles-1, _D.allele_order,NULL);
+  
+  //now we are ready to take care of p_nucleotides and negative excess error
+
+    
+}
+/*find the error positions for two sequence aligned.
+ * the output array has to be allocated by the caller outside 
+ */
+unsigned findErrors(const string& _seq1, const string& _seq2,
+	   const unsigned& pos_start1, const unsigned& pos_end1,
+		    const unsigned& post_start2, const unsigned& pos_end2,
+		    const unsigned& max_n_errors,
+		    /*output*/unsigned* error_position
+		    )
+{
+  //first, do some checking
+  if(pos_end1-pos_start1!=pos_end2-pos_start2)
+    {
+      throw "bad array index, the seq to be check for match/mismatch are not of same length!";
+    }
+  
+  unsigned n_error=0;
+  for(unsigned i=0;i<pos_end2-pos_start1+1;i++)
+    {
+      if(_seq1.at(pos_start1+i)!=_seq2.at(pos_start2+i))
+	{	  
+	  if(n_error<max_n_errors)
+	    error_position[n_error]=i;
+	  n_error++;
+	}
+    }
+  
+  return n_error;
+}
 void DeterminePalindromAndExcessError_D(
 					)
 {

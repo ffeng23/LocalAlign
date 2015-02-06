@@ -21,6 +21,12 @@ public:
 
   string toString();
   
+  /*initialize the array elements before doing the alignment
+   *at this point, we still don't know the numOfAligned in each
+   *D allele. so inside this we only intialize the first level
+   *n_D_alleles level;
+   */
+  bool initialize(const unsigned& _n_D_alleles);
   static unsigned n_D_alleles;//total number of D alleles
   unsigned* numOfAligned;//of length n_D_alleles, indicating the length of align
                          //for each D alleles
@@ -28,7 +34,7 @@ public:
   unsigned** align_length; //2D vector, n_D_alleles x numOfAligned 
   // 1D:numOfGenD alleles; 2D:numOfAligned;
   
-  unsigned** score; //same dimension as above, holding the alignment score
+  double** score; //same dimension as above, holding the alignment score
   unsigned** n_errors; //same dimension as above
   unsigned*** error_positions;//3D,
   //1D,fixed, numOf alleles; 2D:numOfAligned;
@@ -47,7 +53,7 @@ public:
   unsigned*** p_region_max_length_left;//allele x numOfAligned x  max_number of deletions
   unsigned*** p_region_max_length_right; //above
 
-  static unsigned allele_order [];//={ 0,
+  unsigned* allele_order;//={ 0,
   //1, 2, 3, 4, 5, 6, 7, 8, 9,10,
   //			   11,12,13,14,15,16,17,18,19,20,
   //			    21,22,23,24,25,26,27,28,29,30,
