@@ -45,7 +45,7 @@ namespace AlignmentSettings
   extern unsigned negative_excess_deletions_max;// = 3;
 
   //to define the length of the flank sequences used to run D match
-  extern unsinged flank_length;
+  extern unsigned flank_length;
 
   extern unsigned n_D_alleles;
 
