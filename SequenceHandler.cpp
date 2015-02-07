@@ -244,7 +244,8 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
   string strSubject;
   
   double mismatch_rate=0.0;
-  
+
+  cout<<"===>>inside the adaptor mapping function, start the looping......."<<endl;   
   for(unsigned int i=0;i<_vecSeq.size();i++)
     {
       //printing progress
@@ -270,7 +271,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
       for(unsigned int j=0;j<_vecForward.size();j++)
 	{
 	  cout<<"forward set:"<<j<<endl;
-	  //cout<<_vecForward.at(j).toString()<<endl;
+	  cout<<_vecForward.at(j).toString()<<endl;
 	  //OverlapAlignment ola (&(_vecSeq.at(i)), &(_vecForward.at(j)), _sm, _gapOpen, _gapExtension,1);
 		LocalAlignment la (&(_vecSeq.at(i)), &(_vecForward.at(j)), _sm, _gapOpen, _gapExtension,1);
 	  tempAS=la.GetAlignment();
@@ -295,7 +296,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 	      //the primer should be in the beginning, not too far,
 	      if(tempAS.GetPatternIndexStart()<_offsetForward )
 		{//we good
-		  //cout<<"\t***get one bigger"<<endl;
+		  cout<<"\t***get one bigger"<<endl;
 		  bestForwardScore=tempAS.GetScore();
 		  bestForwardAlign=tempAS;//with name
 		  bestForwardIndex=j;
@@ -343,12 +344,12 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 	    }
 	}
 	//done doing reverse mapping
-	//cout<<"done with reverse mapping"<<endl;
+	cout<<"done with reverse mapping"<<endl;
 
-      //get trimmed original sequence
+      //get trimmed original sequence, pattern.
       //we will do it from reverse side to forward side
       string tempTrimSeq=_vecSeq.at(i).GetSequence();
-      //cout<<"i:"<<i<<endl;
+      cout<<"------>i:"<<i<<endl;
       unsigned tempReverseTrimIndex=tempTrimSeq.length()-1;
       if(foundReverseFlag)
 	{
@@ -374,7 +375,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 	    }
 	  
 	}
-      //cout<<"****DONE wit trimming"<<endl;
+      cout<<"****DONE wit trimming"<<endl;
       
       //vec_trimmed.push_back(SequenceString(_vecSeq.at(i).GetName(), tempTrimSeq));
       //cout<<"Done with mapping"<<endl;
@@ -385,12 +386,12 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
       string leadingSpaceForward("");
       string leadingSpaceReverse("");
       string replaceOne;
-      SequenceString tempLstF;
-      SequenceString tempLstR;
-      SequenceString tempLstSeq;
+      SequenceString tempLstF;//for forward primer
+      SequenceString tempLstR;//for reverse primer
+      SequenceString tempLstSeq;//for the original sequence to be mapper
       
       
-      //cout<<"forwardSet Output read"<<endl;
+      cout<<"forwardSet Output read"<<endl;
       if(foundForwardFlag)
 	{
 	  //###we need to figure out the leading spaces in front of the original sequences
@@ -444,7 +445,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
       //tempLstF$seq<-paste(leadingSpaceForward, tempLstF$s
       
       //#the revverse
-      //cout<<"reverse set output read"<<endl;
+      cout<<"reverse set output read"<<endl;
 	if(foundReverseFlag)
 	  {
 	    //#now we need to add the aligned sequence to replace the original one
@@ -485,10 +486,12 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 	//cout<<"end of reverse on, tempLstR.seq:"<<tempLstR.toString()<<endl;
 	//#now we need to take care of the read sequence alignment string
 	//#on the reverse part first
-	//cout<<"seq string output read...."<<endl;
+	cout<<"seq string output read...."<<endl;
 	unsigned int spaceCarryOverFTR=0;//####this is the leading space for reverse adaptor primer, because the insertion in the forward alignment
 	tempLstSeq.SetSequence(_vecSeq.at(i).GetSequence());
 	tempLstSeq.SetName(_vecSeq.at(i).GetName());
+	//cout<<"^^^^^^^^^^at this one what is the replace string:"<<replaceOne<<endl;
+	replaceOne=_vecSeq.at(i).GetSequence();
 	if(foundReverseFlag)
 	{
 	  //cout<<"1.."<<endl;
@@ -533,7 +536,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 	tempLstSeq.SetSequence(leadingSpaceOriginal+tempLstSeq.GetSequence());
 	
 	//#now put the sequences to the correct vectors
-	//cout<<"ready to output strings........"<<endl;
+	cout<<"ready to output strings........"<<endl;
 	vector<SequenceString>* p_vec_map;
 	vector<unsigned int>* p_vec_len_map;
 	vector<SequenceString>* p_vec_map_trim=NULL;
@@ -738,17 +741,17 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 	
 	p_vec_len_map->push_back(_vecSeq.at(i).GetSequence().length());
 	
-	//cout<<"start writing output........"<<endl;
+	cout<<"start writing output........"<<endl;
 	if(i%numOfSeqsUnit==0||i==_vecSeq.size()-1) //#write once every 1000 sequences
 	{
-	  //cout<<"i round:"<<i<<endl;
+	  cout<<"i round:"<<i<<endl;
 	  //mapBoth first, of course!!!
-	  for(unsigned int s=0;s<=g_vec_mapBoth.size();s++)
+	  for(unsigned int s=0;s<g_vec_mapBoth.size();s++)
 	    {
 	      if(g_vec_mapBoth.at(s).size()>0)
 		{
-		  //cout<<"------writing at i:"<<i<<endl;
-		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		  cout<<"------writing at i:"<<i<<endl;
+		  cout<<"vecBoth:"<<g_vec_mapBoth.size()<<endl;
 		  string t_fileName=_mapBoth_fname;
 		  if(g_by_isotype_flag)
 		    {
@@ -769,6 +772,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 		      g_vec_mapBoth_trim.at(s).clear();
 		    }
 		}
+	      cout<<"\twriting......"<<endl;
 	    }
 	  cout<<"done map both"<<endl;
 

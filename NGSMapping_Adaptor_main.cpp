@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
       <<"\toffset on reverse end:"<<OffsetReverse<<"\n"
       <<"\tmismatch rate threshold:"<<MismatchRateThreshold<<"\n"
       <<"\tminimum overlap length:"<<MinimumOverlapLength<<"\n";
-  if(trim==1)
+  if(trim==0)
     cout<<"\ttrimmed data to be written:FALSE"<<endl;
   else
     cout<<"\ttrimmed data to be written:TRUE"<<endl;
@@ -163,16 +163,18 @@ int main(int argc, char* argv[])
   vector<SequenceString> vec_forward_seq;//this will hold processed sequences on the forward end
   vector<SequenceString> vec_reverse_seq;//this will hold processed sequences on the reverse end
   
-  cout<<"reading sequence data file: "<<ReadFasta(sequenceFile_name, vec_seq)<<endl;
+  cout<<"======>reading sequence data file: "<<ReadFasta(sequenceFile_name, vec_seq)<<endl;
   
   
   cout<<"1/1000:"<<vec_seq.at(0).toString()<<endl;
   //cout<<"1000/1000;"<<vec_seq.at(999).toString()<<endl;
 
-  cout<<"reading and processing adaptor sequences for mapping......"<<endl;
-  if(trim==1)  
-    SetUpTrimFlag(true);
-
+  cout<<"===>reading and processing adaptor sequences for mapping......"<<endl;
+  if(trim==1)
+    {
+      cout<<"set up the trim flag"<<endl;
+      SetUpTrimFlag(true);
+    }
   SetUpByIsotypeOutputFlag(isotype_flag);
   ProcessAdaptorSequences(adaptorFile_name, barcodeFile_name, forwardFile_name, reverseFile_name, vec_forward_seq, vec_reverse_seq);
 
@@ -183,6 +185,7 @@ int main(int argc, char* argv[])
 
   //SetupConstantPrimerInfo(1,forwardFile_name);
 //now we have everything, we just need to do the job, I mean mapping, here.
+  cout<<"Start doing the mapping..........."<<endl;
   MappingAdaptors(vec_forward_seq, vec_reverse_seq, vec_seq, 
 		  sm, gapopen, gapextension, trim,
 		  MismatchRateThreshold, MinimumOverlapLength, OffsetForward, OffsetReverse, 

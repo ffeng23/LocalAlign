@@ -16,8 +16,8 @@ bool comparePathElement(Path* p1, Path* p2)
 
 LocalAlignment::LocalAlignment(SequenceString* _pattern, SequenceString* _subject, 
 			       ScoreMatrix* _m, const double& _gopen, 
-			       const double& _gextension, const double& _scale, const int& _numOfAlignments):
-  PairwiseAlignment(_pattern, _subject, _m, _gopen, _gextension, _scale),c_numOfAlignments(_numOfAlignments),
+			       const double& _gextension, const double& _scale, const int& _numOfAlignments, const short& _typeOfGapModel):
+  PairwiseAlignment(_pattern, _subject, _m, _gopen, _gextension, _scale,_typeOfGapModel),c_numOfAlignments(_numOfAlignments),
   c_alignmentArr(NULL), c_scoreArr(NULL)
 {
   //now we need to

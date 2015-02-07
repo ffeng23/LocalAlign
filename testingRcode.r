@@ -8,8 +8,8 @@ BLOSUM50<-as.matrix(read.table("BLOSUM50", check.names=FALSE))
 tm<-as.matrix(read.table("TestMatrix", check.names=FALSE))
 tm2<-as.matrix(read.table("TestMatrix2", check.names=FALSE))
 #define gap
-gapOpening<- -0;
-gapExtension<- -20;
+gapOpening<- -8;
+gapExtension<- -8;
 
 seq1<-AAString("VSPAGMASGYDPGKA");
 seq2 <-AAString("IPGKATREYDVSPAG");
@@ -29,5 +29,10 @@ seq1<-DNAString("CCAATCTACTACTGCTTGCAGTAC");
 
 seq2<-DNAString("AGTCCGAGGGCTACTCTACTGAAC");
 
+seq1<-DNAString("ATGACGGTGATGATGGTAGTGGCCATTTCTTTGCCTACCCACTGTGGCCTTGTTGTGAAGAACTTTGATGCCCTGTTGTATGTGATCGTTATGACAATCCTGTGAAGTTTTTCAATGATGAAGGAAACTGAGGCTTAGAGAGTTGGAGTAATCTGTGAAGGCTCAGGATGGGCAAGAGGTCCCGCCCAGGTTTGAGCCCAGATGCGAGGTTACCACGCTTCCTGGTGAGGTGTTTTACAACTAAGGCCAAGCCAGGCAAAACCCATTGTTCTGCAGCTTCTGGCTTGGATTGGGTGTCTTGTTGAGTATGTGGGCAGTGGATCTGATGTTTTCCACTTCCACCAAGGGCCCATCGGTCTTCCCCCTGT");
 
-LocalAlign <-    pairwiseAlignment(seq1, seq2, type = "local", substitutionMatrix = tm2, gapOpening = gapOpening, gapExtension = gapExtension)
+seq2<-DNAString("GTATTATGATTACGTTTGGGGGAGTTATCGTTATACC");
+
+
+
+LocalAlign <-    pairwiseAlignment(seq1, seq2, type = "local", substitutionMatrix = NUC44, gapOpening = gapOpening, gapExtension = gapExtension)

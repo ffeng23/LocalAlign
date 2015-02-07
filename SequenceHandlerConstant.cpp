@@ -389,6 +389,7 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 	unsigned int spaceCarryOverFTR=0;//####this is the leading space for reverse adaptor primer, because the insertion in the forward alignment
 	tempLstSeq.SetSequence(_vecSeq.at(i).GetSequence());
 	tempLstSeq.SetName(_vecSeq.at(i).GetName());
+	replaceOne=_vecSeq.at(i).GetSequence();
 	if(foundReverseFlag)
 	{
 	  //cout<<"1.."<<endl;
