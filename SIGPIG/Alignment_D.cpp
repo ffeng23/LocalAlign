@@ -902,7 +902,7 @@ bool match_D(const SequenceString& _seq,
   QuickSort(highestScore, 0, _n_D_alleles-1, _D.allele_order,NULL);
   
   //now we are ready to take care of p_nucleotides and negative excess error
-
+  //first need to initialize the p_region array to all zeros
     
 }
 /*find the error positions for two sequence aligned.
@@ -934,7 +934,90 @@ unsigned findErrors(const string& _seq1, const string& _seq2,
   
   return n_error;
 }
-void DeterminePalindromAndExcessError_D(
-					)
+
+/*Again in this function, the output has been correctly initialized
+ *correctly in the caller outside.
+ */
+void DeterminePalindromAndExcessError_D
+( const SequenceString& _seq, const GenomicJ* _genJs,
+  /*const unsigned* _ok_order,*/ unsigned** _deletions_left,
+  unsigned** _deletions_right,
+  const unsigned& _negative_excess_deletions_max, 
+  const unsigned& _D_maximum_deletion,
+  const unsigned** _align_length, const unsigned& _numOfDSegs,
+  const unsigned* _numOfAligned, 
+  unsigned** _align_positions_left, unsigned** _align_position_right,
+  /*output*/ unsigned*** _p_region_max_length_left, 
+  unsigned*** _p_region_max_length_right,
+  unsigned*** _excess_error_position_left,
+  unsigned*** _excess_error_position_right
+  )
 {
-}
+  bool still_palindrome=true;
+  unsigned p=0;
+  //now go through to find palindromic nucleotides for each alignment
+  for(unsigned d=0;d<_numOfDSegs;d++)
+    {
+      string target=_genD[d].Get_Sequence();
+      //for each aligned in this D seg
+      for(unsigned na=0;na<_numOfAligned[d];na++)
+	{
+	  //getting the left p-nucleotides first
+	  //for each possible deletions
+	  int nd=_deletions_left[d][na]-_negative_excess_deletions_max;
+	  if(nd<0)
+	    nd=0;
+	  int max_nd=_D_maximum_deletion;
+	  if(max_nd>_align_lenth[d][na]+_deletions_left[d][na])
+	    max_nd=_align_length[d][na]+_deletions_left[d][na];
+	  un
+	  for(;nd<=max_nd;nd++)
+	    {
+	      //for each value of deletions, find longest half-p from the implied end of the gene sequence
+	      p=0;
+	      still_palindrome=true;
+	      //upper bound on p is the length of the match seq or seq to the left of the aligned ones
+	      int max_p_length=_align_length[d][na]-(nd-_deletions_left[d][na]);
+	      if(max_p_length<0)
+		max_p_length=0;
+	      if(max_p_length<_align_positions_left[d][na]+(nd-_deletions_left[d][na]))
+		{
+		  max_p_length=_align_positions_left[d][na]+(nd-_deletions_left[d][na]);
+		}
+	      while(still_pa&&((signed)p<(signed)max_p_length))
+		{
+		  still_palindrome=target.at(nd+p)==DnaComplement(_seq.GetSequence().at(_align_positions_left[d][na]-p+nd-_deletions_left[d][na]-1));
+		  if(still_palindrome)
+		    {
+		      p++;
+		    }
+		}
+		
+	      _p_region_max_length_left[d][na][1+nd]=p;
+	    }//end of for nd<max_nd
+	  //start doing excess error 
+	  unsigned tempArray[]={_negative_excess_deletions_max, _deletions_left[d][na], align_positions_left[d][na]};
+	  unsigned n_excess=min_mf(tempArray,3);
+	  unsigned k;
+	  unsigned runningIndex_excessError=0;
+	  //find the mismatchs
+	  for(k=0;k<n_excess;k++)
+	    {
+	      if(target.at(_deletions_left[d][na]-n_excess+k)!=
+		 _seq.GetSequence(_align_position_left[d][na]-n_excess+k))
+		{
+		  _excess_error_positions_left[d][na][runningIndex_excessError]=
+		    _align_positions_left[d][na]-n_excess+k;
+		  runningIndex_excessError++;
+		}
+	    }//end n_excess
+	  for(;runningIndex_excessError<_negative_excess_deletions_max;runningIndex_excessError++)
+	    {
+	      _excess_error_positions_left[d][na][runningIndex_excessError]=0;
+	    }
+
+	  //===>>>>doing right side things
+
+	}//end of _numOfAligned
+    }//end of outer for loop d : numOfDSegs
+}//end of functio find p-nucleotides

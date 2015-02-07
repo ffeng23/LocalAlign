@@ -45,6 +45,9 @@ public:
   unsigned*** excess_error_positions_right;//same as above
   
   unsigned** align_position_left;//alleles by numOfAligned
+  //only record in here the starting index of Seq. the 
+  //starting align position of target is in deletions array
+
   unsigned** align_position_right;//same as above
 
   unsigned** deletions_left; //alleles by numOfAligned
