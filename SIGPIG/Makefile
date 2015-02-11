@@ -17,12 +17,14 @@ AlignmentLibDir=../
 
 CXXFLAG=${CFLAG}
 
+SRCS_0=main.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}score.cpp ${AlignmentLibDir}SequenceString.cpp ${AlignmentLibDir}AlignmentString.cpp ${AlignmentLibDir}AffineGapModel.cpp ${AlignmentLibDir}MarkovChainGapModel_454.cpp ${AlignmentLibDir}TracebackTable.cpp ${AlignmentLibDir}pairwiseAlignment.cpp ${AlignmentLibDir}OverlapAlignment.cpp ${AlignmentLibDir}GapModel.cpp ${AlignmentLibDir}FastaHandler.cpp ${AlignmentLibDir}LocalAlignment.cpp ${AlignmentLibDir}SequenceHandlerCommon.cpp ${AlignmentLibDir}GlobalAlignment.cpp GenomicV.cpp genomicSegments.cpp genomicSegment.cpp GenomicJ.cpp GenomicD.cpp LoadData.cpp MatrixFunctions.cpp Alignment.cpp AlignmentSettings.cpp Alignment_V.cpp Alignment_D.cpp
 
-SRCS_1=tester_main.cpp MatrixFunctions.cpp Alignment.cpp genomicSegments.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}SequenceString.cpp genomicSegment.cpp GenomicV.cpp GenomicD.cpp GenomicJ.cpp ${AlignmentLibDir}FastaHandler.cpp AlignmentSettings.cpp
+SRCS_1=tester_main.cpp MatrixFunctions.cpp Alignment.cpp genomicSegments.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}SequenceString.cpp genomicSegment.cpp GenomicV.cpp GenomicD.cpp GenomicJ.cpp ${AlignmentLibDir}FastaHandler.cpp AlignmentSettings.cpp Alignment_D.cpp ${AlignmentLibDir}score.cpp ${AlignmentLibDir}AlignmentString.cpp ${AlignmentLibDir}LocalAlignment.cpp ${AlignmentLibDir}pairwiseAlignment.cpp ${AlignmentLibDir}TracebackTable.cpp ${AlignmentLibDir}AffineGapModel.cpp ${AlignmentLibDir}MarkovChainGapModel_454.cpp ${AlignmentLibDir}GapModel.cpp
 
-SRCS_0=main.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}score.cpp ${AlignmentLibDir}SequenceString.cpp ${AlignmentLibDir}AlignmentString.cpp ${AlignmentLibDir}AffineGapModel.cpp ${AlignmentLibDir}MarkovChainGapModel_454.cpp ${AlignmentLibDir}TracebackTable.cpp ${AlignmentLibDir}pairwiseAlignment.cpp ${AlignmentLibDir}OverlapAlignment.cpp ${AlignmentLibDir}GapModel.cpp ${AlignmentLibDir}FastaHandler.cpp ${AlignmentLibDir}LocalAlignment.cpp ${AlignmentLibDir}SequenceHandlerCommon.cpp ${AlignmentLibDir}GlobalAlignment.cpp GenomicV.cpp genomicSegments.cpp genomicSegment.cpp GenomicJ.cpp GenomicD.cpp LoadData.cpp MatrixFunctions.cpp Alignment.cpp AlignmentSettings.cpp Alignment_V.cpp
 
-SRCS_2=tester_main_matchV.cpp MatrixFunctions.cpp Alignment.cpp genomicSegments.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}SequenceString.cpp genomicSegment.cpp GenomicV.cpp GenomicD.cpp GenomicJ.cpp ${AlignmentLibDir}FastaHandler.cpp AlignmentSettings.cpp Alignment_V.cpp
+SRCS_2=tester_main_matchV.cpp MatrixFunctions.cpp Alignment.cpp genomicSegments.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}SequenceString.cpp genomicSegment.cpp GenomicV.cpp GenomicD.cpp GenomicJ.cpp ${AlignmentLibDir}FastaHandler.cpp AlignmentSettings.cpp Alignment_V.cpp Alignment_D.cpp ${AlignmentLibDir}score.cpp ${AlignmentLibDir}AlignmentString.cpp ${AlignmentLibDir}LocalAlignment.cpp ${AlignmentLibDir}pairwiseAlignment.cpp ${AlignmentLibDir}TracebackTable.cpp ${AlignmentLibDir}AffineGapModel.cpp ${AlignmentLibDir}MarkovChainGapModel_454.cpp ${AlignmentLibDir}GapModel.cpp
+
+SRCS_3=tester_main_matchD.cpp MatrixFunctions.cpp Alignment.cpp genomicSegments.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}SequenceString.cpp genomicSegment.cpp GenomicV.cpp GenomicD.cpp GenomicJ.cpp ${AlignmentLibDir}FastaHandler.cpp AlignmentSettings.cpp Alignment_V.cpp Alignment_D.cpp ${AlignmentLibDir}score.cpp ${AlignmentLibDir}AlignmentString.cpp ${AlignmentLibDir}LocalAlignment.cpp ${AlignmentLibDir}pairwiseAlignment.cpp ${AlignmentLibDir}TracebackTable.cpp ${AlignmentLibDir}AffineGapModel.cpp ${AlignmentLibDir}MarkovChainGapModel_454.cpp ${AlignmentLibDir}GapModel.cpp
 
 
 #SRCS_3=tester_serialization.cpp
@@ -40,7 +42,7 @@ SRCS_2=tester_main_matchV.cpp MatrixFunctions.cpp Alignment.cpp genomicSegments.
 OBJS_0=${SRCS_0:.cpp=.o}
 OBJS_1=${SRCS_1:.cpp=.o}
 OBJS_2=${SRCS_2:.cpp=.o}
-#OBJS_3=${SRCS_3:.cpp=.o}
+OBJS_3=${SRCS_3:.cpp=.o}
 
 #OBJS_3=${SRCS_3:.cpp=.o}
 #OBJS_4=${SRCS_4:.cpp=.o}
@@ -50,6 +52,7 @@ OBJS_2=${SRCS_2:.cpp=.o}
 PROG_0=sigpig
 PROG_1=tester
 PROG_2=tester_matchV
+PROG_3=tester_matchD
 #PROG_3=tester_serialization
 #PROG_3=ngsmapping_constant
 #PROG_4=ngschecking_gcg_atg
@@ -92,11 +95,11 @@ $(PROG_2): $(OBJS_2)
 	@echo "******Make complete"
 	@echo ""
 
-#$(PROG_3): $(OBJS_3)
-#	$(GXX) -o $@ $(CXXFLAG) $(LOADFLAG) $+
-#	@echo ""
-#	@echo "******Make complete"
-#	@echo ""
+$(PROG_3): $(OBJS_3)
+	$(GXX) -o $@ $(CXXFLAG) $(LOADFLAG) $+
+	@echo ""
+	@echo "******Make complete"
+	@echo ""
 
 
 
@@ -114,7 +117,7 @@ $(PROG_2): $(OBJS_2)
 
 depend: .depend
 
-.depend: Makefile $(SRCS_0) $(SRCS_1) $(SRCS_2) #$(SRCS_3) #$(SRCS_4)
+.depend: Makefile $(SRCS_0) $(SRCS_1) $(SRCS_2) $(SRCS_3) #$(SRCS_4)
 	$(GXX) -MM *.cpp >.depend
 	@echo " "
 	@echo "****Dependencies generated successfully."

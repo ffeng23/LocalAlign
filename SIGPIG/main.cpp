@@ -29,16 +29,17 @@
 #include "AlignmentSettings.hpp"
 #include "Alignment.hpp"
 #include "Alignment_V.hpp"
+#include "Alignment_D.hpp"
 //#include 
 
 using namespace std;
 
 static string scoreMatrixName="nuc44"; //name as an input for specifing the name of the score matrix. for example nuc44
 
-static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1", "tsm2", "nuc44HP"};
+static string supportedScoreMatrixNameArr[]={"nuc44_v","blosum50", "tsm1", "tsm2", "nuc44HP"};
 //tsm2: score matrix from Geoffrey Barton reference.
 
-static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1, &tsm2, &nuc44HP};
+static ScoreMatrix* ScoreMatrixArr[]={&nuc44_v, &blosum50, &tsm1, &tsm2, &nuc44HP};
 double gapopen=-8;
 double gapextension=-8;
 //static double scale=1; //this is the one on top of matrix, the programe will run score and use the 
@@ -46,7 +47,7 @@ double gapextension=-8;
 
 double errorCost=4;
 string seqFileName;
-string vSegmentFileName("genomicVs_alleles.fasta");;
+string vSegmentFileName("genomicVs_alleles.fasta");
 string dSegmentFileName("genomicDs.fasta");
 string jSegmentFileName("genomicJs_all_curated.fasta");
 
@@ -289,6 +290,7 @@ int main(int argc, char* argv[])
   double error_cost=errorCost;
   Alignment_Object J_obj[N_read];
   Alignment_Object V_obj;
+  Alignment_D D_obj;
   //now calling it, FOR NOW, STOP DOING J alignment
   for(unsigned _m=0;_m<N_read-N_read+0;_m++)
     {
@@ -297,7 +299,13 @@ int main(int argc, char* argv[])
       cout<<"\ttesting sequence 0:"<<endl;
       cout<<test_seq.toString()<<endl;
   
-      bool seq_j_ok=match_J(test_seq, genJ, totalNumJ, AlignmentSettings::J_minimum_alignment_length, AlignmentSettings::J_maximum_deletion, AlignmentSettings::negative_excess_deletions_max, AlignmentSettings::J_allowed_errors, error_cost, J_obj[_m]);
+      bool seq_j_ok=match_J
+	(test_seq, genJ, totalNumJ, 
+	 AlignmentSettings::J_minimum_alignment_length, 
+	 AlignmentSettings::J_maximum_deletion, 
+	 AlignmentSettings::negative_excess_deletions_max, 
+	 AlignmentSettings::J_allowed_errors, error_cost, 
+	 J_obj[_m]);
 
       //now we check the output
       if(J_obj[_m].numOfAligned>0)
@@ -315,14 +323,20 @@ int main(int argc, char* argv[])
 //now calling Match V function
 
   cout<<"=======>doing match V"<<endl;
-  for(unsigned _m=0;_m<N_read-N_read+1;_m++)
+  //for NOW, STOP DOING V alignment
+  for(unsigned _m=0;_m<N_read-N_read+0;_m++)
     {
       cout<<"---------------------------i:"<<_m<<endl;
       SequenceString test_seq=all_Sequences.at(_m);
       cout<<"\ttesting sequence 0:"<<endl;
       cout<<test_seq.toString()<<endl;
   
-      bool seq_v_ok=match_V(test_seq, genV, totalNumV, AlignmentSettings::V_minimum_alignment_length, AlignmentSettings::V_maximum_deletion, AlignmentSettings::negative_excess_deletions_max, AlignmentSettings::V_allowed_errors, error_cost, V_obj);
+      bool seq_v_ok=match_V
+	(test_seq, genV, totalNumV, 
+	 AlignmentSettings::V_minimum_alignment_length, 
+	 AlignmentSettings::V_maximum_deletion, 
+	 AlignmentSettings::negative_excess_deletions_max, 
+	 AlignmentSettings::V_allowed_errors, error_cost, V_obj);
       //now we check the output
       if(V_obj.numOfAligned>0)
 	{
@@ -402,6 +416,34 @@ int main(int argc, char* argv[])
 	{
 	  cout<<"failed alignment"<<endl;
 	}
+    }
+
+  //=============================================
+  //************now calling Match D function
+  //
+  cout<<"=======>doing match D"<<endl;
+  //for NOW, STOP DOING D alignment
+  unsigned max_align=100;
+  for(unsigned _m=0;_m<N_read-N_read+1;_m++)
+    {
+      cout<<"---------------------------i:"<<_m<<endl;
+      SequenceString test_seq=all_Sequences.at(_m);
+      cout<<"\ttesting sequence 0:"<<endl;
+      cout<<test_seq.toString()<<endl;
+  
+      bool seq_d_ok=match_D
+	(test_seq, genD,  totalNumD, 
+	 19, 69, AlignmentSettings::flank_length, sm, 
+	 AlignmentSettings::D_maximum_deletion, 
+	 AlignmentSettings::negative_excess_deletions_max,
+	 max_align,
+	  D_obj);
+      
+      if(seq_d_ok)
+	cout<<D_obj.toString();
+      else
+	cout<<"failed alignment"<<endl;
+      cout<<endl;
     }
 
   /*

@@ -27,7 +27,10 @@ public:
    *n_D_alleles level;
    */
   bool initialize(const unsigned& _n_D_alleles);
-  static unsigned n_D_alleles;//total number of D alleles
+
+  //======>start to define members
+  unsigned n_D_alleles;//total number of D alleles
+  unsigned D_max_errors;
   unsigned* numOfAligned;//of length n_D_alleles, indicating the length of align
                          //for each D alleles
     
@@ -80,13 +83,43 @@ public:
 // _D, the Alignment_obj pointer V holding the alignment details. The caller need to allocate the memory
 //bool, indicating whether the alignment is successful.
 bool match_D(const SequenceString& _seq,
-	      const GenomicV* _genDs, const unsigned& _numOfDSegs,
+	      const GenomicD* _genDs, const unsigned& _numOfDSegs,
 	      const unsigned& _V_end, const unsigned& _J_start,
-	      const ScoreMatrix* _ScoreMatrix, const unsigned& _D_maximum_deletion, 
-	     const unsigned& _negative_excess_deletion_max, const unsigned& _max_align,
-	     /*output*/ Alignment_D* _D
+	     const unsigned& _flank_length,
+	      const ScoreMatrix* _ScoreMatrix, 
+	     const unsigned& _D_maximum_deletion, 
+	     const unsigned& _negative_excess_deletion_max, 
+	     const unsigned& _max_align,
+	     /*output*/ Alignment_D& _D
  );
 
 
+/*find the error positions for two sequence aligned.
+ * the output array has to be allocated by the caller outside
+ *output:
+ *    return number of errors
+ *    error_positions: are the relative error position index,
+ *           relative to the beginning of the start of the array
+ */
+unsigned findErrors(const string& _seq1, const string& _seq2,
+	   const unsigned& pos_start1, const unsigned& pos_end1,
+		    const unsigned& pos_start2, const unsigned& pos_end2,
+		    const unsigned& max_n_errors,
+		    /*output*/unsigned* error_position
+		    );
 
+void DeterminePalindromAndExcessError_D
+( const SequenceString& _seq, const GenomicD* _genDs,
+  /*const unsigned* _ok_order,*/ unsigned** _deletions_left,
+  unsigned** _deletions_right,
+  const unsigned& _negative_excess_deletions_max, 
+  const unsigned& _D_maximum_deletion,
+  const unsigned* const * _align_length, const unsigned& _numOfDSegs,
+  const unsigned* _numOfAligned, 
+  const unsigned* const* _align_position_left, const unsigned* const* _align_position_right,
+  /*output*/ unsigned*** _p_region_max_length_left, 
+  unsigned*** _p_region_max_length_right,
+  unsigned*** _excess_error_positions_left,
+  unsigned*** _excess_error_positions_right
+  );
 #endif

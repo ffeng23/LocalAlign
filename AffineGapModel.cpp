@@ -6,7 +6,10 @@ using namespace std;
 AffineGapModel::AffineGapModel(const double& _gopen, const double& _gextension):
   c_gopen(_gopen), c_gextension(_gextension)
 {
-
+  if(c_gopen>0)
+    c_gopen=-1*c_gopen;
+  if(c_gextension>0)
+    c_gextension=-1*c_gextension;
   //empty
 }
 
@@ -74,10 +77,14 @@ double AffineGapModel::GetGapExtensionValue() const
 void AffineGapModel::SetGapOpenValue(const double& _gopen)
 {
   c_gopen=_gopen;
+  if(c_gopen>0)
+    c_gopen=-1*c_gopen;
 }
 void AffineGapModel::SetGapExtensionValue(const double& _gextension)
 {
   c_gextension=_gextension;
+  if(c_gextension>0)
+    c_gextension=-1*c_gextension;
 }
 
 

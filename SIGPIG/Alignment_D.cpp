@@ -18,8 +18,8 @@
 					  31,32,33
 					  };
 */
-unsigned Alignment_D:n_D_alleles=AlignmentSettings::n_D_alleles;
-
+//unsigned Alignment_D::n_D_alleles=AlignmentSettings::n_D_alleles;
+//unsigned Alignnment_D::D_max_errors=
 
 Alignment_D::Alignment_D(): numOfAligned(NULL), align_length(NULL), score(NULL),
 			    n_errors(NULL), error_positions(NULL),
@@ -108,7 +108,7 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
 	  if(_aod.error_positions[i]!=NULL)
 	    {
 	      error_positions[i]=new unsigned*[numOfAligned[i]];
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  error_positions[i][j]=NULL;
 		  
@@ -132,8 +132,8 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
 	  excess_error_positions_left[i]=NULL;
 	  if(_aod.excess_error_positions_left[i]!=NULL)
 	    {
-	      excess_error_positions_left[i]=new unsigned* [numberOfAligned];
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      excess_error_positions_left[i]=new unsigned* [numOfAligned[i]];
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  excess_error_positions_left[i][j]=NULL;
 		  if(_aod.excess_error_positions_left[i][j]!=NULL)
@@ -156,8 +156,8 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
 	  excess_error_positions_right[i]=NULL;
 	  if(_aod.excess_error_positions_right[i]!=NULL)
 	    {
-	      excess_error_positions_right[i]=new unsigned* [numberOfAligned];
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      excess_error_positions_right[i]=new unsigned* [numOfAligned[i]];
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  excess_error_positions_right[i][j]=NULL;
 		  if(_aod.excess_error_positions_right[i][j]!=NULL)
@@ -180,8 +180,8 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
 	  align_position_left[i]=NULL;
 	  if(_aod.align_position_left[i]!=NULL);
 	  {
-	    align_position_left[i]=nw unsigned [numOfAligned];
-	    memcpy(align_position_left[i], _aod.align_position_left[i], numOfAligned*sizeOfUnsigned);
+	    align_position_left[i]=new unsigned [numOfAligned[i]];
+	    memcpy(align_position_left[i], _aod.align_position_left[i], numOfAligned[i]*sizeOfUnsigned);
 	  }
 	}
     }//end of align_length_left**
@@ -195,8 +195,8 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
 	  align_position_right[i]=NULL;
 	  if(_aod.align_position_right[i]!=NULL);
 	  {
-	    align_length_right[i]=nw unsigned [numOfAligned];
-	    memcpy(align_position_right[i], _aod.align_position_right[i], numOfAligned*sizeOfUnsigned);
+	    align_position_right[i]=new unsigned [numOfAligned[i]];
+	    memcpy(align_position_right[i], _aod.align_position_right[i], numOfAligned[i]*sizeOfUnsigned);
 	  }
 	}
     }//end of align_length_left**
@@ -210,8 +210,8 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
 	  deletions_left[i]=NULL;
 	  if(_aod.deletions_left[i]!=NULL);
 	  {
-	    deletions_left[i]=nw unsigned [numOfAligned];
-	    memcpy(deletions_left[i], _aod.deletions_left[i], numOfAligned*sizeOfUnsigned);
+	    deletions_left[i]=new unsigned [numOfAligned[i]];
+	    memcpy(deletions_left[i], _aod.deletions_left[i], numOfAligned[i]*sizeOfUnsigned);
 	  }
 	}
     }//end of deletions_left**
@@ -225,8 +225,8 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
 	  deletions_right[i]=NULL;
 	  if(_aod.deletions_right[i]!=NULL);
 	  {
-	    deletions_right[i]=nw unsigned [numOfAligned];
-	    memcpy(deletions_right[i], _aod.deletions_right[i], numOfAligned*sizeOfUnsigned);
+	    deletions_right[i]=new unsigned [numOfAligned[i]];
+	    memcpy(deletions_right[i], _aod.deletions_right[i], numOfAligned[i]*sizeOfUnsigned);
 	  }
 	}
     }//end of deletions_right**
@@ -240,14 +240,14 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
 	  p_region_max_length_left[i]=NULL;
 	  if(_aod.p_region_max_length_left[i]!=NULL)
 	    {
-	      p_region_max_length_left[i]=new unsigned* [numOfAligned];
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      p_region_max_length_left[i]=new unsigned* [numOfAligned[i]];
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  p_region_max_length_left[i][j]=NULL;
 		  if(_aod.p_region_max_length_left[i][j]!=NULL)
 		    {
-		      p_region_max_length_left[i][j]=new unsigned[1+AlignmentSettings::D_maximum_deletions];
-		      memcpy(p_region_max_length_left[i][j], _aod.p_region_max_length_left[i][j], (1+AlignmentSettings::D_maximum_deletions)*sizeOfUnsigned);
+		      p_region_max_length_left[i][j]=new unsigned[1+AlignmentSettings::D_maximum_deletion];
+		      memcpy(p_region_max_length_left[i][j], _aod.p_region_max_length_left[i][j], (1+AlignmentSettings::D_maximum_deletion)*sizeOfUnsigned);
 		    }
 		}
 	    }
@@ -263,14 +263,14 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
 	  p_region_max_length_right[i]=NULL;
 	  if(_aod.p_region_max_length_right[i]!=NULL)
 	    {
-	      p_region_max_length_right[i]=new unsigned* [numOfAligned];
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      p_region_max_length_right[i]=new unsigned* [numOfAligned[i]];
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  p_region_max_length_right[i][j]=NULL;
 		  if(_aod.p_region_max_length_right[i][j]!=NULL)
 		    {
-		      p_region_max_length_right[i][j]=new unsigned[1+AlignmentSettings::D_maximum_deletions];
-		      memcpy(p_region_max_length_right[i][j], _aod.p_region_max_length_right[i][j], (1+AlignmentSettings::D_maximum_deletions)*sizeOfUnsigned);
+		      p_region_max_length_right[i][j]=new unsigned[1+AlignmentSettings::D_maximum_deletion];
+		      memcpy(p_region_max_length_right[i][j], _aod.p_region_max_length_right[i][j], (1+AlignmentSettings::D_maximum_deletion)*sizeOfUnsigned);
 		    }
 		}
 	    }
@@ -278,13 +278,13 @@ Alignment_D::Alignment_D(const Alignment_D& _aod):
     }//end of p_region_max_length_right
   if(_aod.allele_order!=NULL)
     {
-      allele.order=new unsigned[n_D_alleles];
+      allele_order=new unsigned[n_D_alleles];
       memcpy(allele_order, _aod.allele_order, n_D_alleles*sizeOfUnsigned);
     }
   //Gosh finally done.
 }
 
-Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
+Alignment_D& Alignment_D::operator = (const Alignment_D& _aod)/*:
   numOfAligned(NULL), align_length(NULL), score(NULL),
 			    n_errors(NULL), error_positions(NULL),
 			    excess_error_positions_left(NULL),
@@ -292,7 +292,7 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 			    align_position_left(NULL), align_position_right(NULL),
 			    deletions_left(NULL), deletions_right(NULL),
 			    p_region_max_length_left(NULL),
-  p_region_max_length_right(NULL),allele_order(NUL)
+			    p_region_max_length_right(NULL),allele_order(NULL)*/
 {
   if(this==&_aod)
     {
@@ -362,7 +362,7 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 	  if(_aod.error_positions[i]!=NULL)
 	    {
 	      error_positions[i]=new unsigned*[numOfAligned[i]];
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  error_positions[i][j]=NULL;
 		  
@@ -386,8 +386,8 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 	  excess_error_positions_left[i]=NULL;
 	  if(_aod.excess_error_positions_left[i]!=NULL)
 	    {
-	      excess_error_positions_left[i]=new unsigned* [numberOfAligned];
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      excess_error_positions_left[i]=new unsigned* [numOfAligned[i]];
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  excess_error_positions_left[i][j]=NULL;
 		  if(_aod.excess_error_positions_left[i][j]!=NULL)
@@ -410,8 +410,8 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 	  excess_error_positions_right[i]=NULL;
 	  if(_aod.excess_error_positions_right[i]!=NULL)
 	    {
-	      excess_error_positions_right[i]=new unsigned* [numberOfAligned];
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      excess_error_positions_right[i]=new unsigned* [numOfAligned[i]];
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  excess_error_positions_right[i][j]=NULL;
 		  if(_aod.excess_error_positions_right[i][j]!=NULL)
@@ -434,8 +434,8 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 	  align_position_left[i]=NULL;
 	  if(_aod.align_position_left[i]!=NULL);
 	  {
-	    align_position_left[i]=nw unsigned [numOfAligned];
-	    memcpy(align_position_left[i], _aod.align_position_left[i], numOfAligned*sizeOfUnsigned);
+	    align_position_left[i]=new unsigned [numOfAligned[i]];
+	    memcpy(align_position_left[i], _aod.align_position_left[i], numOfAligned[i]*sizeOfUnsigned);
 	  }
 	}
     }//end of align_length_left**
@@ -449,8 +449,8 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 	  align_position_right[i]=NULL;
 	  if(_aod.align_position_right[i]!=NULL);
 	  {
-	    align_position_right[i]=new unsigned [numOfAligned];
-	    memcpy(align_position_right[i], _aod.align_position_right[i], numOfAligned*sizeOfUnsigned);
+	    align_position_right[i]=new unsigned [numOfAligned[i]];
+	    memcpy(align_position_right[i], _aod.align_position_right[i], numOfAligned[i]*sizeOfUnsigned);
 	  }
 	}
     }//end of align_length_left**
@@ -464,8 +464,8 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 	  deletions_left[i]=NULL;
 	  if(_aod.deletions_left[i]!=NULL);
 	  {
-	    deletions_left[i]=new unsigned [numOfAligned];
-	    memcpy(deletions_left[i], _aod.deletions_left[i], numOfAligned*sizeOfUnsigned);
+	    deletions_left[i]=new unsigned [numOfAligned[i]];
+	    memcpy(deletions_left[i], _aod.deletions_left[i], numOfAligned[i]*sizeOfUnsigned);
 	  }
 	}
     }//end of deletions_left**
@@ -479,8 +479,8 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 	  deletions_right[i]=NULL;
 	  if(_aod.deletions_right[i]!=NULL);
 	  {
-	    deletions_right[i]=new unsigned [numOfAligned];
-	    memcpy(deletions_right[i], _aod.deletions_right[i], numOfAligned*sizeOfUnsigned);
+	    deletions_right[i]=new unsigned [numOfAligned[i]];
+	    memcpy(deletions_right[i], _aod.deletions_right[i], numOfAligned[i]*sizeOfUnsigned);
 	  }
 	}
     }//end of deletions_right**
@@ -494,14 +494,14 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 	  p_region_max_length_left[i]=NULL;
 	  if(_aod.p_region_max_length_left[i]!=NULL)
 	    {
-	      p_region_max_length_left[i]=new unsigned* [numOfAligned];
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      p_region_max_length_left[i]=new unsigned* [numOfAligned[i]];
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  p_region_max_length_left[i][j]=NULL;
 		  if(_aod.p_region_max_length_left[i][j]!=NULL)
 		    {
-		      p_region_max_length_left[i][j]=new unsigned[1+AlignmentSettings::D_maximum_deletions];
-		      memcpy(p_region_max_length_left[i][j], _aod.p_region_max_length_left[i][j], (1+AlignmentSettings::D_maximum_deletions)*sizeOfUnsigned);
+		      p_region_max_length_left[i][j]=new unsigned[1+AlignmentSettings::D_maximum_deletion];
+		      memcpy(p_region_max_length_left[i][j], _aod.p_region_max_length_left[i][j], (1+AlignmentSettings::D_maximum_deletion)*sizeOfUnsigned);
 		    }
 		}
 	    }
@@ -517,14 +517,14 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
 	  p_region_max_length_right[i]=NULL;
 	  if(_aod.p_region_max_length_right[i]!=NULL)
 	    {
-	      p_region_max_length_right[i]=new unsigned* [numOfAligned];
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      p_region_max_length_right[i]=new unsigned* [numOfAligned[i]];
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  p_region_max_length_right[i][j]=NULL;
 		  if(_aod.p_region_max_length_right[i][j]!=NULL)
 		    {
-		      p_region_max_length_right[i][j]=new unsigned[1+AlignmentSettings::D_maximum_deletions];
-		      memcpy(p_region_max_length_right[i][j], _aod.p_region_max_length_right[i][j], (1+AlignmentSettings::D_maximum_deletions)*sizeOfUnsigned);
+		      p_region_max_length_right[i][j]=new unsigned[1+AlignmentSettings::D_maximum_deletion];
+		      memcpy(p_region_max_length_right[i][j], _aod.p_region_max_length_right[i][j], (1+AlignmentSettings::D_maximum_deletion)*sizeOfUnsigned);
 		    }
 		}
 	    }
@@ -533,7 +533,7 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod):
   //allele_order
   if(_aod.allele_order!=NULL)
     {
-      allele.order=new unsigned[n_D_alleles];
+      allele_order=new unsigned[n_D_alleles];
       memcpy(allele_order, _aod.allele_order, n_D_alleles*sizeOfUnsigned);
     }
   //Gosh finally done.
@@ -597,7 +597,7 @@ Alignment_D::~Alignment_D()
 	  if(error_positions[i]!=NULL)
 	    {
 	      
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  		  
 		  if(error_positions[i][j]!=NULL)
@@ -605,7 +605,7 @@ Alignment_D::~Alignment_D()
 		      delete [] error_positions[i][j];
 		    }
 		}
-	      delete [] error_positions[i]
+	      delete [] error_positions[i];
 	    }
 	}
       delete[] error_positions;
@@ -618,7 +618,7 @@ Alignment_D::~Alignment_D()
 	{	  
 	  if(excess_error_positions_left[i]!=NULL)
 	    {	      
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  if(excess_error_positions_left[i][j]!=NULL)
 		    {
@@ -639,7 +639,7 @@ Alignment_D::~Alignment_D()
 	{
 	  if(excess_error_positions_right[i]!=NULL)
 	    {
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  if(excess_error_positions_right[i][j]!=NULL)
 		    {
@@ -670,7 +670,7 @@ Alignment_D::~Alignment_D()
     {
       for(unsigned i=0;i<n_D_alleles;i++)
 	{
-	  if(_aod.align_position_right[i]!=NULL);
+	  if(align_position_right[i]!=NULL);
 	  {
 	    delete [] align_position_right[i];
 	  }
@@ -711,7 +711,7 @@ Alignment_D::~Alignment_D()
 	{
 	  if(p_region_max_length_left[i]!=NULL)
 	    {
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  if(p_region_max_length_left[i][j]!=NULL)
 		    {
@@ -731,7 +731,7 @@ Alignment_D::~Alignment_D()
 	{
 	  if(p_region_max_length_right[i]!=NULL)
 	    {
-	      for(unsigned j=0;j<numOfAligned;j++)
+	      for(unsigned j=0;j<numOfAligned[i];j++)
 		{
 		  if(p_region_max_length_right[i][j]!=NULL)
 		    {
@@ -749,14 +749,317 @@ Alignment_D::~Alignment_D()
     delete[] allele_order;
   //Gosh finally done.
 }
-
+//for printing/debugging purpose
 string Alignment_D::toString()
 {
-  //to be implemented 
+  stringstream ss;
+  //unsigned sizeOfUnsigned=sizeof(unsigned)/sizeof(char);
+  ss<<"Alignment D objects:\n";
+  ss<<"\tNumber of Aligned:";
+  if(numOfAligned!=NULL)
+    {
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<numOfAligned[i]<<",";
+	}
+    }
+  ss<<"\n";
+  ss<<"\tAligned Length by allele:\n";
+  if(align_length!=NULL)
+    {      
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tallele["<<i<<"]:";
+	  if(align_length[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  ss<<align_length[i][j]<<",";
+		}
+	      ss<<"\n";
+	    }
+	}
+    }//end of align_length
+  ss<<"\n";
+
+  //score **
+  ss<<"\tScore by Allele:\n";
+  if(score!=NULL)
+    {
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tallele ["<<i<<"]:";
+	  if(score[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  ss<<score[i][j]<<",";
+		}
+	      ss<<"\n";
+	    }
+	}
+    }//end of socre
+  ss<<"\n";
+
+  //n_errors **
+  ss<<"\tnumber of error by allele:\n";
+  if(n_errors!=NULL)
+    {
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tallele["<<i<<"]:";
+	  if(n_errors[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  ss<<n_errors[i][j]<<",";
+		}
+	      ss<<"\n";
+	    }
+	}
+    }//end of n_errors
+  ss<<"\n";
+
+  //error_positions ***
+  ss<<"\tError Position(# of aligned followed by {error position}):\n";
+  if(error_positions!=NULL)
+    {
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tAllele["<<i<<"]:";
+	  if(error_positions[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  if(n_errors[i][j]==0)
+		    continue;
+		  
+		  ss<<j;
+		  if(error_positions[i][j]!=NULL)
+		    {
+		      ss<<"{";
+		      for(unsigned k=0;k<n_errors[i][j];k++)
+			{
+			  ss<<error_positions[i][j][k]<<",";
+			}
+		      ss<<"};";
+		    }
+		  //ss<<"\n";
+		}
+	    }
+	  ss<<"\n";
+	}
+    }//end of error_positions
+  ss<<"\n";
+
+  //excess_error_postions_left **
+  ss<<"\tExcess Error Position Left(# of aligned followed by {excess error position}):\n";
+  if(excess_error_positions_left!=NULL)
+    {
+      for(unsigned int i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tAllele["<<i<<"]:";
+	  if(excess_error_positions_left[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  ss<<j;
+		  if(excess_error_positions_left[i][j]!=NULL)
+		    {
+		      ss<<"{";
+		      for(unsigned k=0;k<AlignmentSettings::negative_excess_deletions_max;k++)
+			{
+			  ss<<excess_error_positions_left[i][j][k]<<",";
+			}
+		      ss<<"},";
+		    }
+		  //ss<<"\n";
+		}
+	    }
+	  ss<<"\n";
+	}
+    }//excess_error_positions_left
+  ss<<"\n";
+  
+  //excess_error_postions_right **
+  ss<<"\tExcess Error Position Right (# of aligned followed by {excess error position}):\n";
+  if(excess_error_positions_right!=NULL)
+    {      
+      for(unsigned int i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tD Allele["<<i<<"]:";
+	  if(excess_error_positions_right[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  ss<<j;
+		  if(excess_error_positions_right[i][j]!=NULL)
+		    {
+		      ss<<"{";
+		      for(unsigned k=0;k<AlignmentSettings::negative_excess_deletions_max;k++)
+			{
+			  ss<<excess_error_positions_right[i][j][k]<<",";
+			}
+		      ss<<"},";
+		    }
+		  //ss<<"\n";
+		}
+	    }
+	  ss<<"\n";
+	}
+    }//excess_error_positions_right
+  ss<<"\n";
+
+  //align_position_left **
+  ss<<"\tAlign Position left:\n";
+  if(align_position_left!=NULL)
+    {     
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tD allele["<<i<<"]:";
+	  if(align_position_left[i]!=NULL);
+	  {
+	    for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  ss<<align_position_left[i][j]<<",";		  
+		}
+	  }
+	  ss<<"\n";	  
+	}
+    }//end of align_length_left**
+  ss<<"\n";
+  
+  //align_position_right **
+  ss<<"\tAlign Position right:\n";
+  if(align_position_right!=NULL)
+    {
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tD allele["<<i<<"]:";
+	  if(align_position_right[i]!=NULL);
+	  {
+	    for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  ss<<align_position_right[i][j]<<",";		  
+		}
+	  }
+	  ss<<"\n";
+	}
+    }//end of align_length_right**
+  ss<<"\n";
+
+  //deletion_left **
+  ss<<"\tAlign Deletion Left:\n";
+  if(deletions_left!=NULL)
+    {      
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tD allele["<<i<<"]:";
+	  if(deletions_left[i]!=NULL);
+	  {
+	    for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  ss<<deletions_left[i][j]<<",";		  
+		}
+	  }
+	  ss<<"\n";
+	}
+    }//end of deletions_left**
+  ss<<"\n";
+
+  //deletion_right **
+  ss<<"\tAlign Deletion Left:\n";
+  if(deletions_right!=NULL)
+    {
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tD allele["<<i<<"]:";
+	  if(deletions_right[i]!=NULL);
+	  {
+	    for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  ss<<deletions_right[i][j]<<",";		  
+		}
+	  }
+	  ss<<"\n";
+	}
+    }//end of deletions_right**
+  ss<<"\n";
+
+  //p_region_max_length_left
+  ss<<"\tp_region_max_length_left(# of aligned followed by {p_reg max length}):\n";
+  if(p_region_max_length_left!=NULL)
+    {
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tD allele["<<i<<"]:\n";
+	  if(p_region_max_length_left[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  ss<<j;
+		  if(p_region_max_length_left[i][j]!=NULL)
+		    {
+		      ss<<"{";
+		      for(unsigned k=0;k<1+AlignmentSettings::D_maximum_deletion;k++)
+			{
+			  ss<<p_region_max_length_left[i][j][k]<<",";
+			}
+		      ss<<"};";
+		    }
+		  //ss<<"\n";
+		}
+	    }
+	  ss<<"\n";
+	}
+    }//end of p_region_max_length_left
+  ss<<"\n";
+
+  //p_region_max_length_right
+  ss<<"\tp_region_max_length_right(# of aligned followed by {p_reg max length}):\n";
+  if(p_region_max_length_right!=NULL)
+    {
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<"\t\tD allele["<<i<<"]:\n";
+	  if(p_region_max_length_right[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  ss<<j;
+		  if(p_region_max_length_right[i][j]!=NULL)
+		    {
+		      ss<<"{";
+		      for(unsigned k=0;k<1+AlignmentSettings::D_maximum_deletion;k++)
+			{
+			  ss<<p_region_max_length_right[i][j][k]<<",";
+			}
+		      ss<<"};";
+		    }
+		  //ss<<"\n";
+		}
+	    }
+	  ss<<"\n";
+	}
+    }//end of p_region_max_length_right
+  ss<<"\n";
+  
+  ss<<"\tAllele order:";
+  if(allele_order!=NULL)
+    {
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  ss<<allele_order[i]<<",";
+	}
+      ss<<"\n";
+    }
+
+  //Gosh finally done.
+  return ss.str();
 }
 
 //need to implement the error catch system
-bool initialize(const unsigned& _n_D_alleles)
+bool Alignment_D::initialize(const unsigned& _n_D_alleles)
 {
   n_D_alleles=_n_D_alleles;
   
@@ -817,100 +1120,216 @@ bool match_D(const SequenceString& _seq,
 	     const unsigned& _max_aligns,
 	     /*output*/ Alignment_D& _D)
 {
+  cout<<"*&***&&&&&&&:inside matchD"<<endl;
   unsigned l_seq=_seq.GetLength();
+  unsigned l_target;
+
   unsigned start_index=_V_end+1-_flank_length; //plus one because, we started from one past where the V aligned ends;
+  cout<<"_V_end:"<<_V_end<<";flank_length:"<<_flank_length
+      <<";start_index:"<<start_index<<endl;
+  
   if(start_index<0)
     {
       start_index=0;
     }
-  unsigned end_index=J_start-1+_flank_length;
+  unsigned end_index=_J_start-1+_flank_length;
   if(end_index>=l_seq)
     {
       end_index=l_seq-1;
     }
+  cout<<"_J_start:"<<_J_start<<";flank_length:"<<_flank_length
+      <<";end_index:"<<end_index<<endl;
+  
   string seqNDN=_seq.GetSequence().substr(start_index, end_index-start_index+1);
-  unsigned flank_offset=start_index-1;
-  unsigned D_max_errors=(int)(AlignmentSettings::max_length_D_genes*_sm(1,1)/(_sm(1,1)-_sm(1,2)));  
+  int flank_offset=start_index-1;
+  _D.D_max_errors=(int)(AlignmentSettings::max_length_D_genes*_sm->GetScore('A','A')/(_sm->GetScore('A','A')-_sm->GetScore('A','C')));  
+  cout<<"-->D_max_errors:"<<_D.D_max_errors<<endl;
   //start doing the alignment by calling the localAlign function
   if(seqNDN.size()==0)
     {
-      std::memset(_D.numOfAligned, 0, _numOfDSegs,sizeof(unsigned)/sizeof(char));
+      std::memset(_D.numOfAligned, 0, _numOfDSegs*sizeof(unsigned)/sizeof(char));
       return false;
     }
   
   //good, let's do the alignment
   SequenceString ss_seqNDN("temp", seqNDN);
   unsigned curr_numOfAligned;
+  cout<<"\t===>before initialize "<<endl;
   _D.initialize(_numOfDSegs);
   AlignmentString* las;
-  for(unsigned d=0;d<n_D_alleles;d++)
+  SequenceString ss_target;
+  cout<<"\t====>bfore running the main for loop"<<endl;
+  for(unsigned d=0;d<_numOfDSegs;d++)
     {
-      LocalAlignment la(&ss_seqNDN, _genDs+d, _nuc44,
-			100000/*gapopen*/ ,100000 /*gapextension*/,
-			1/*scale*/, _max_aligns);
+      cout<<"\t****looping d:"<<d<<endl;
+      ss_target=_genDs[d].Get_Seq();
+      l_target=ss_target.GetLength();
+      cout<<"\t===>before calling local align"<<endl;
+      cout<<ss_seqNDN.toString()<<endl;
+      cout<<ss_target.toString()<<endl;
+      LocalAlignment la(&ss_seqNDN, &ss_target, _sm,
+			-100.0/*gapopen*/ ,-100.0 /*gapextension*/,
+			1.0/*scale*/, _max_aligns, 0/*this is the gap model, 0 for affine model*/);
       //first determine the number of aligned for this current one
+      cout<<"\t****done with local alignment"<<endl;
       curr_numOfAligned=la.GetNumberOfAlignments();
       las=la.GetAlignmentArr();
 
       _D.numOfAligned[d]=curr_numOfAligned;
       _D.align_length[d]=new unsigned[curr_numOfAligned];
       _D.score[d]=new double[curr_numOfAligned];
-      _D.n_errors[d]=new unsigned[curr_numOfaligned];
+      _D.n_errors[d]=new unsigned[curr_numOfAligned];
       _D.error_positions[d]=new unsigned*[curr_numOfAligned];
       unsigned* temp_error_positions;
       
-      _D.aligned_positions_left[d]=new unsigned*[curr_numOfAligned];
-      _D.aligned_positions_right[d]=new unsigned*[curr_numOfAligned];
+      _D.align_position_left[d]=new unsigned [curr_numOfAligned];
+      _D.align_position_right[d]=new unsigned [curr_numOfAligned];
       
-      _D.deletions_left[d]=new unsigned* [curr_numOfAligned];
-      _D.deletions_right[d]=new unsigned* [curr_numOfAligned];
-
+      _D.deletions_left[d]=new unsigned [curr_numOfAligned];
+      _D.deletions_right[d]=new unsigned [curr_numOfAligned];
+      cout<<"\t%%%%%before parsing the parms, aligned:"<<curr_numOfAligned<<endl;
       for(unsigned i=0;i<curr_numOfAligned;i++)
 	{
+	  cout<<"\t\t@@@@@@@--->looping through aligned i:"<<i<<endl;
+	  cout<<"alignment #"<<i<<":"<<endl;
+	  cout<<las[i].toString();
 	  _D.align_length[d][i]=las[i].GetPatternIndexEnd()-las[i].GetPatternIndexStart()+1;
 	  _D.score[d][i]=las[i].GetScore();
-	  _D.aligned_positions_left[d][i]=las[i].GetPatternIndexStart()+flank_offset+1;
-	  _D.aligned_positions_right[d][i]=las[i].GetPatternIndexEnd()+flank_offset+1;
+	  if(flank_offset>=0)
+	    {
+	      _D.align_position_left[d][i]=las[i].GetPatternIndexStart()+flank_offset+1;
+	      _D.align_position_right[d][i]=las[i].GetPatternIndexEnd()+flank_offset+1;
+	    }
+	  else
+	    {
+	      _D.align_position_left[d][i]=las[i].GetPatternIndexStart();
+	      _D.align_position_right[d][i]=las[i].GetPatternIndexEnd();
+	    }
 	  _D.deletions_left[d][i]=las[i].GetSubjectIndexStart();
-	  _D.deletion_right[d][i]=genDs[d].Get_Seq().GetLength()-las[i].GetSubjectIndexEnd()-1;
+	  _D.deletions_right[d][i]=_genDs[d].Get_Seq().GetLength()-las[i].GetSubjectIndexEnd()-1;
 
-	  temp_error_positions=new unsigned[max_n_errors];
+	  cout<<"\t\talign_length:"<<_D.align_length[d][i]<<endl;
+	  cout<<"\t\tscore:"<<_D.score[d][i]<<endl;
+	  cout<<"\t\talign_position_left:"<<_D.align_position_left[d][i]<<endl;
+	  cout<<"\t\talign_position_right:"<<_D.align_position_right[d][i]<<endl;
+	  cout<<"\t\tdeletions_left:"<<_D.deletions_left[d][i]<<endl;
+	  cout<<"\t\tdeletions_right:"<<_D.deletions_right[d][i]<<endl;
+
+	  temp_error_positions=new unsigned[_D.D_max_errors];
+	  cout<<"\t\t****beofre finding error fucntions"<<endl;
+	  unsigned pos_start1=_D.align_position_left[d][i]-flank_offset-1;
+	  unsigned pos_end1=_D.align_position_right[d][i]-flank_offset-1;
+	  if(flank_offset<0)
+	    {
+	      pos_start1=_D.align_position_left[d][i];
+	    }
 	  _D.n_errors[d][i]=findErrors
-	    (seqNDN, _genDs+d, _D.aligned_positions_left[d][i],
-	     _D.aligned_position_right[d][i],
-	     _D.deletions_left[d][i], _D.deletions_right[d][i],
-	     max_n_errors, temp_error_positions);
+	    (seqNDN, _genDs[d].Get_Sequence(), 
+	     pos_start1, pos_end1,
+	     _D.deletions_left[d][i],l_target-_D.deletions_right[d][i]-1,
+	     _D.D_max_errors, temp_error_positions);
+	  cout<<"\t\tafter finding the errors"<<endl;
 	  //now copy over the elements
 	  _D.error_positions[d][i]=new unsigned[_D.n_errors[d][i]];
 	  memcpy(_D.error_positions[d][i], temp_error_positions,
 		 _D.n_errors[d][i]*sizeof(unsigned)/sizeof(char));
-	  
+	  cout<<"\t\tcleaning up mem"<<endl;
 	  //clean up the memory
 	  delete [] temp_error_positions;
+	  cout<<"\t\tdone!!!"<<endl;
 	}
     }//end of num of D gene segs for loop
   
   //now we are ready with alignment, first sort in order to figure
   //out the D.allele_order, prepare the index array first
-  unsigned highestScore=new unsigned[n_D_alleles];
-  for(unsigned i=0;i<n_D_alleles;i++)
+  cout<<"\n===>sort to get the allele_order "<<endl;
+  double* highestScore=new double[_numOfDSegs];
+  cout<<"before sorting score array:"<<endl;
+  for(unsigned i=0;i<_numOfDSegs;i++)
     {
       _D.allele_order[i]=i;
       highestScore[i]=_D.score[i][0];
+      cout<<highestScore[i]<<",";
     }
-  
-  QuickSort(highestScore, 0, _n_D_alleles-1, _D.allele_order,NULL);
-  
+  cout<<endl;
+  QuickSort(highestScore, 0, _numOfDSegs-1, _D.allele_order,NULL);
+  cout<<"after sorting score array:"<<endl;
+  for(unsigned i=0;i<_numOfDSegs;i++)
+    {
+      //_D.allele_order[i]=i;
+      //highestScore[i]=_D.score[i][0];
+      cout<<highestScore[i]<<",";
+    }
+  cout<<endl;
+  cout<<"after sorting index array:"<<endl;
+  for(unsigned i=0;i<_numOfDSegs;i++)
+    {
+      //_D.allele_order[i]=i;
+      //highestScore[i]=_D.score[i][0];
+      cout<<_D.allele_order[i]<<",";
+    }
+  cout<<endl;
+  cout<<"\t****done with sorting"<<endl;
+
   //now we are ready to take care of p_nucleotides and negative excess error
   //first need to initialize the p_region array to all zeros
-    
-}
+  cout<<"\n----->>>>>Ready to figure out p_region and excess error"<<endl;
+  _D.p_region_max_length_left=new unsigned**[_numOfDSegs];
+  _D.p_region_max_length_right=new unsigned**[_numOfDSegs];
+  _D.excess_error_positions_left=new unsigned**[_numOfDSegs];
+  _D.excess_error_positions_right=new unsigned**[_numOfDSegs];
+
+  cout<<"\tbefore looping......_D_maximum_deletion:"<<_D_maximum_deletion<<endl;
+  for(unsigned i=0;i<_numOfDSegs;i++)
+    {
+      cout<<"\t====>looping....i:"<<i<<endl;
+      _D.p_region_max_length_left[i]=new unsigned*[_D.numOfAligned[i]];
+      _D.p_region_max_length_right[i]=new unsigned*[_D.numOfAligned[i]];
+      _D.excess_error_positions_left[i]=new unsigned*[_D.numOfAligned[i]];
+      _D.excess_error_positions_right[i]=new unsigned*[_D.numOfAligned[i]];
+
+      for(unsigned j=0;j<_D.numOfAligned[i];j++)
+	{
+	  _D.p_region_max_length_left[i][j]=
+	    new unsigned[1+_D_maximum_deletion];
+	  std::memset(_D.p_region_max_length_left[i][j],0,
+		      (1+_D_maximum_deletion)*sizeof(unsigned)/sizeof(char));
+	  _D.p_region_max_length_right[i][j]=
+	    new unsigned[1+_D_maximum_deletion];
+	  std::memset(_D.p_region_max_length_right[i][j],0,
+		      (1+_D_maximum_deletion)*sizeof(unsigned)/sizeof(char));
+	  _D.excess_error_positions_left[i][j]=
+	    new unsigned[_negative_excess_deletion_max];
+	  std::memset(_D.excess_error_positions_left[i][j],0,
+		      _negative_excess_deletion_max*sizeof(unsigned)/sizeof(char));
+	  _D.excess_error_positions_right[i][j]=
+	    new unsigned[_negative_excess_deletion_max];
+	  std::memset(_D.excess_error_positions_right[i][j],0,
+		      _negative_excess_deletion_max*sizeof(unsigned)/sizeof(char));
+	}
+    }
+  cout<<"\t\t*****done initializing the arrays"<<endl;
+  //now ready to call to find p-nucleotide and excess error
+  DeterminePalindromAndExcessError_D
+    (_seq, _genDs, _D.deletions_left, _D.deletions_right, 
+     _negative_excess_deletion_max, _D_maximum_deletion,
+     _D.align_length, _numOfDSegs, _D.numOfAligned,
+     _D.align_position_left, _D.align_position_right,
+     _D.p_region_max_length_left, _D.p_region_max_length_right,
+     _D.excess_error_positions_left, 
+     _D.excess_error_positions_right
+     );
+  cout<<"@@@@@@@@finally done!!!!"<<endl;
+  //done!!!
+  return true;
+}//end of function MatchD
+
 /*find the error positions for two sequence aligned.
  * the output array has to be allocated by the caller outside 
  */
 unsigned findErrors(const string& _seq1, const string& _seq2,
 	   const unsigned& pos_start1, const unsigned& pos_end1,
-		    const unsigned& post_start2, const unsigned& pos_end2,
+		    const unsigned& pos_start2, const unsigned& pos_end2,
 		    const unsigned& max_n_errors,
 		    /*output*/unsigned* error_position
 		    )
@@ -922,7 +1341,7 @@ unsigned findErrors(const string& _seq1, const string& _seq2,
     }
   
   unsigned n_error=0;
-  for(unsigned i=0;i<pos_end2-pos_start1+1;i++)
+  for(unsigned i=0;i<pos_end2-pos_start2+1;i++)
     {
       if(_seq1.at(pos_start1+i)!=_seq2.at(pos_start2+i))
 	{	  
@@ -939,40 +1358,47 @@ unsigned findErrors(const string& _seq1, const string& _seq2,
  *correctly in the caller outside.
  */
 void DeterminePalindromAndExcessError_D
-( const SequenceString& _seq, const GenomicJ* _genJs,
+( const SequenceString& _seq, const GenomicD* _genDs,
   /*const unsigned* _ok_order,*/ unsigned** _deletions_left,
   unsigned** _deletions_right,
   const unsigned& _negative_excess_deletions_max, 
   const unsigned& _D_maximum_deletion,
-  const unsigned** _align_length, const unsigned& _numOfDSegs,
+  const unsigned* const* _align_length, const unsigned& _numOfDSegs,
   const unsigned* _numOfAligned, 
-  unsigned** _align_positions_left, unsigned** _align_position_right,
+  const unsigned* const* _align_position_left, const unsigned* const* _align_position_right,
   /*output*/ unsigned*** _p_region_max_length_left, 
   unsigned*** _p_region_max_length_right,
-  unsigned*** _excess_error_position_left,
-  unsigned*** _excess_error_position_right
+  unsigned*** _excess_error_positions_left,
+  unsigned*** _excess_error_positions_right
   )
 {
+  cout<<"++++>inside determine palindrom function"<<endl;
   bool still_palindrome=true;
   unsigned p=0;
+  unsigned l_seq=_seq.GetLength();
+  unsigned l_target;
   //now go through to find palindromic nucleotides for each alignment
   for(unsigned d=0;d<_numOfDSegs;d++)
     {
-      string target=_genD[d].Get_Sequence();
+      cout<<"\tmain loop:"<<d<<endl;
+      string target=_genDs[d].Get_Sequence();
+      l_target=target.size();
       //for each aligned in this D seg
       for(unsigned na=0;na<_numOfAligned[d];na++)
 	{
+	  cout<<"\t\tsubmain loop:"<<na<<"/"<<_numOfAligned[d]<<endl;
 	  //getting the left p-nucleotides first
 	  //for each possible deletions
 	  int nd=_deletions_left[d][na]-_negative_excess_deletions_max;
 	  if(nd<0)
 	    nd=0;
 	  int max_nd=_D_maximum_deletion;
-	  if(max_nd>_align_lenth[d][na]+_deletions_left[d][na])
+	  if(max_nd>_align_length[d][na]+_deletions_left[d][na])
 	    max_nd=_align_length[d][na]+_deletions_left[d][na];
-	  un
+	  cout<<"\t\t==???max_nd:"<<max_nd<<endl;
 	  for(;nd<=max_nd;nd++)
 	    {
+	      cout<<"\t\t\tloop nd:"<<nd<<endl;
 	      //for each value of deletions, find longest half-p from the implied end of the gene sequence
 	      p=0;
 	      still_palindrome=true;
@@ -980,23 +1406,24 @@ void DeterminePalindromAndExcessError_D
 	      int max_p_length=_align_length[d][na]-(nd-_deletions_left[d][na]);
 	      if(max_p_length<0)
 		max_p_length=0;
-	      if(max_p_length<_align_positions_left[d][na]+(nd-_deletions_left[d][na]))
+	      if(max_p_length>_align_position_left[d][na]+(nd-_deletions_left[d][na]))
 		{
-		  max_p_length=_align_positions_left[d][na]+(nd-_deletions_left[d][na]);
+		  max_p_length=_align_position_left[d][na]+(nd-_deletions_left[d][na]);
 		}
-	      while(still_pa&&((signed)p<(signed)max_p_length))
+	      while(still_palindrome&&((signed)p<(signed)max_p_length))
 		{
-		  still_palindrome=target.at(nd+p)==DnaComplement(_seq.GetSequence().at(_align_positions_left[d][na]-p+nd-_deletions_left[d][na]-1));
+		  still_palindrome=target.at(nd+p)==DnaComplement(_seq.GetSequence().at(_align_position_left[d][na]-p+nd-_deletions_left[d][na]-1));
 		  if(still_palindrome)
 		    {
 		      p++;
 		    }
 		}
-		
-	      _p_region_max_length_left[d][na][1+nd]=p;
+	      cout<<"\t\t\tset the value nd:"<<nd<<endl;
+	      _p_region_max_length_left[d][na][nd]=p;
 	    }//end of for nd<max_nd
+	  cout<<"\t\t==*****>end of left palindrom"<<endl;
 	  //start doing excess error 
-	  unsigned tempArray[]={_negative_excess_deletions_max, _deletions_left[d][na], align_positions_left[d][na]};
+	  unsigned tempArray[]={_negative_excess_deletions_max, _deletions_left[d][na], _align_position_left[d][na]};
 	  unsigned n_excess=min_mf(tempArray,3);
 	  unsigned k;
 	  unsigned runningIndex_excessError=0;
@@ -1004,10 +1431,10 @@ void DeterminePalindromAndExcessError_D
 	  for(k=0;k<n_excess;k++)
 	    {
 	      if(target.at(_deletions_left[d][na]-n_excess+k)!=
-		 _seq.GetSequence(_align_position_left[d][na]-n_excess+k))
+		 _seq.GetSequence().at(_align_position_left[d][na]-n_excess+k))
 		{
 		  _excess_error_positions_left[d][na][runningIndex_excessError]=
-		    _align_positions_left[d][na]-n_excess+k;
+		    _align_position_left[d][na]-n_excess+k;
 		  runningIndex_excessError++;
 		}
 	    }//end n_excess
@@ -1015,9 +1442,70 @@ void DeterminePalindromAndExcessError_D
 	    {
 	      _excess_error_positions_left[d][na][runningIndex_excessError]=0;
 	    }
-
+	  cout<<"\t\tend of left excess error"<<endl;
+	  
 	  //===>>>>doing right side things
+	  nd=_deletions_right[d][na]-_negative_excess_deletions_max;
+	  if(nd<0)
+	    nd=0;
+	  max_nd=_D_maximum_deletion;
+	  if(max_nd>_align_length[d][na]+_deletions_right[d][na])
+	    max_nd=_align_length[d][na]+_deletions_right[d][na];
+	  	  
+	  for(;nd<=max_nd;nd++)
+	    {
+	      //for each value of deletions, find longest half-p from the implied end of the gene sequence
+	      p=0;
+	      still_palindrome=true;
+	      //upper bound on p is the length of the match seq or seq to the left of the aligned ones
+	      int max_p_length=_align_length[d][na]-(nd-_deletions_right[d][na]);
+	      if(max_p_length<0)
+		max_p_length=0;
+	      if(max_p_length>l_seq-_align_position_right[d][na]+(nd-_deletions_right[d][na]))
+		{
+		  max_p_length=l_seq-_align_position_right[d][na]+(nd-_deletions_right[d][na]);
+		}
+
+	      while(still_palindrome&&((signed)p<(signed)max_p_length))
+		{
+		  still_palindrome=target.at(l_target-nd-p-1)==DnaComplement(_seq.GetSequence().at(_align_position_right[d][na]+1+p-(nd-_deletions_right[d][na])));
+		  if(still_palindrome)
+		    {
+		      p++;
+		    }
+		}		
+	      _p_region_max_length_right[d][na][nd]=p;
+	    }//end of for nd<max_nd
+	  cout<<"\t\tend of right palindrom"<<endl;
+	  
+	  //start doing the excess error for right side.
+	  //tempArray[0]=_negative_excess_deletions_max;
+	  tempArray[1]=_deletions_right[d][na]; 
+	  tempArray[2]=l_seq-_align_position_right[d][na]-1;
+      
+	  n_excess=min_mf(tempArray,3);
+	  //unsigned k;
+	  
+	  runningIndex_excessError=0;
+	  //find the mismatchs
+	  for(k=0;k<n_excess;k++)
+	    {
+	      if(target.at(l_target-_deletions_right[d][na]+k)!=
+		 _seq.GetSequence().at(_align_position_right[d][na]+1+k))
+		{
+		  _excess_error_positions_right[d][na][runningIndex_excessError]=
+		    _align_position_right[d][na]+1+k;
+		  runningIndex_excessError++;
+		}
+	    }//end n_excess
+	  for(;runningIndex_excessError<_negative_excess_deletions_max;runningIndex_excessError++)
+	    {
+	      _excess_error_positions_right[d][na][runningIndex_excessError]=0;
+	    }
+	  //done!!!
+	  cout<<"\t\tend of right excess error"<<endl;
 
 	}//end of _numOfAligned
     }//end of outer for loop d : numOfDSegs
-}//end of functio find p-nucleotides
+}//end of function find p-nucleotides
+
