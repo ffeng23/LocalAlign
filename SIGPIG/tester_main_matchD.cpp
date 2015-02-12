@@ -33,7 +33,9 @@ int main()
   unsigned* error_positions=new unsigned [maximum_errors];
 
   cout<<"########start testing find errors"<<endl;
+
   unsigned n_errors=findErrors(seq1, seq2, 2,4, 0,2, 10,1, error_positions);
+
   
   cout<<"\tnumber of errors found is "<<n_errors<<endl;
   cout<<"\terror positions:"<<endl;

@@ -1141,6 +1141,7 @@ bool match_D(const SequenceString& _seq,
     {
       start_index=0;
       }*/
+
   unsigned end_index=_J_start-1+_flank_length;
   if(end_index>=l_seq)
     {
@@ -1150,7 +1151,9 @@ bool match_D(const SequenceString& _seq,
       <<";end_index:"<<end_index<<endl;
   
   string seqNDN=_seq.GetSequence().substr(start_index, end_index-start_index+1);
+
   int flank_offset=start_index-1;//this one is one less than the start_index.
+
   _D.D_max_errors=(int)(AlignmentSettings::max_length_D_genes*_sm->GetScore('A','A')/(_sm->GetScore('A','A')-_sm->GetScore('A','C')));  
   cout<<"-->D_max_errors:"<<_D.D_max_errors<<endl;
   //start doing the alignment by calling the localAlign function
@@ -1206,6 +1209,7 @@ bool match_D(const SequenceString& _seq,
 	  _D.score[d][i]=las[i].GetScore();
 	  if(flank_offset>=0)
 	    {
+
 	      _D.align_position_left[d][i]=las[i].GetPatternIndexStart()+flank_offset+1; //plus one, because flank_offset+1 is where the sequence started.
 	      _D.align_position_right[d][i]=las[i].GetPatternIndexEnd()+flank_offset+1;
 	    }
@@ -1224,6 +1228,7 @@ bool match_D(const SequenceString& _seq,
 	  cout<<"\t\tdeletions_left:"<<_D.deletions_left[d][i]<<endl;
 	  cout<<"\t\tdeletions_right:"<<_D.deletions_right[d][i]<<endl;
 
+
 	  temp_error_positions=new unsigned[_D.D_max_errors];
 	  cout<<"\t\t****beofre finding error fucntions"<<endl;
 	  unsigned pos_start1=_D.align_position_left[d][i]-flank_offset-1;
@@ -1237,6 +1242,7 @@ bool match_D(const SequenceString& _seq,
 	     pos_start1, pos_end1,
 	     _D.deletions_left[d][i],l_target-_D.deletions_right[d][i]-1,
 	     _D.D_max_errors,flank_offset, temp_error_positions);
+
 	  cout<<"\t\tafter finding the errors"<<endl;
 	  //now copy over the elements
 	  _D.error_positions[d][i]=new unsigned[_D.n_errors[d][i]];
@@ -1270,6 +1276,7 @@ bool match_D(const SequenceString& _seq,
       cout<<highestScore[i]<<",";
     }
   cout<<endl;
+
   Reverse(_D.allele_order, _numOfDSegs);
 
   cout<<"after sorting index array:"<<endl;
