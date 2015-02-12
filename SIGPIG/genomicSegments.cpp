@@ -300,7 +300,7 @@ unsigned ReadGenomicV(const string& _fastaFileName, GenomicV** _gseg)
   //unique_gene_vec.push_back(gene_vec.at(0));
 
   unsigned running_gene_index=0;
-  unsigned running_allele=1; //this is the number of this current allele, it is starting from 1, not zero
+  unsigned running_allele=0; //this is the number of this current allele, it is starting from 1, not zero
 
   unsigned running_total_n_allele=1;
   
@@ -322,7 +322,7 @@ unsigned ReadGenomicV(const string& _fastaFileName, GenomicV** _gseg)
 	{
 	  //found a unique gene
 	  running_gene_index++;
-	  running_allele=1;
+	  running_allele=0;
 	  //unique_gene_vec.push_back(gene_vec.at(i));
 	  n_allele_vec.push_back(running_total_n_allele);
 	  running_total_n_allele--;
@@ -337,6 +337,11 @@ unsigned ReadGenomicV(const string& _fastaFileName, GenomicV** _gseg)
       p_arr[i].Set_GeneIndex(running_gene_index);
       p_arr[i].Set_Allele(running_allele);
       last_gene_name=curr_gene_name;
+    }
+  //take care of the last run of run n_alleles
+  for(unsigned j=startingIndexOfCurrentRun;j<=totalNumber-1;j++)
+    {
+      p_arr[j].Set_n_alleles(running_total_n_allele);
     }
 
   return totalNumber; 
@@ -397,15 +402,8 @@ bool GenomicJCompare_bySequenceName(const GenomicJ& ss1,const GenomicJ& ss2)
 
 bool GenomicDCompare_bySequenceName(const GenomicD& ss1,const GenomicD& ss2)
 {
-  int ret=ss1.Get_Name().compare(ss2.Get_Name());
+  return CompareDSequenceNameByString(ss1.Get_Name(),ss2.Get_Name());
   
-
-  if(ret<=0)
-    {
-      return true;
-    }
-  else
-    return false;
 }
 
 
@@ -467,7 +465,7 @@ unsigned ReadGenomicJ(const string& _fastaFileName, GenomicJ** _gseg)
   
   //now we want to figure out gene_index
   //get unique gene vector first
-  vector< string> unique_gene_vec;
+  //vector< string> unique_gene_vec;
   vector<unsigned> n_allele_vec;
   sort(gene_vec.begin(),gene_vec.end(), stringCompare_ext);
   
@@ -478,40 +476,138 @@ unsigned ReadGenomicJ(const string& _fastaFileName, GenomicJ** _gseg)
 
   //now with sorted gene name vector
   //we need to get the unique genes
-  unique_gene_vec.push_back(gene_vec.at(0));
+  //unique_gene_vec.push_back(gene_vec.at(0));
 
   unsigned running_gene_index=0;
-  unsigned running_allele=1; //this is the number of this current allele, it is starting from 1, not zero
+  unsigned running_allele=0; //this is the number of this current allele, it is starting from 1, not zero
 
   unsigned running_total_n_allele=1;
   
   p_arr[0].Set_GeneIndex(running_gene_index);
   p_arr[0].Set_Allele(running_allele);
+  string curr_gene_name, last_gene_name;
+  last_gene_name=ParseGeneName(p_arr[0].Get_Gene());
+  unsigned startingIndexOfCurrentRun=0;
   for(unsigned i=1;i<totalNumber;i++)
     {
       //now we need first get the unique genes
       //for each identifical one, we go next
       running_allele++;
       running_total_n_allele++;
-      if(gene_vec.at(i).compare(gene_vec.at(i-1))!=0)
+      curr_gene_name=ParseGeneName(p_arr[i].Get_Gene());
+      if(curr_gene_name.compare(last_gene_name)!=0)
 	{
 	  //found a unique gene
 	  running_gene_index++;
-	  running_allele=1;
-	  unique_gene_vec.push_back(gene_vec.at(i));
+	  running_allele=0;
+	  //unique_gene_vec.push_back(gene_vec.at(i));
 	  n_allele_vec.push_back(running_total_n_allele);
+	  running_total_n_allele--;
+	  //now we need to update the n_allele for current run
+	  for(unsigned j=startingIndexOfCurrentRun;j<=i-1;j++)
+	    {
+	      p_arr[j].Set_n_alleles(running_total_n_allele);
+	    }
 	  running_total_n_allele=1;
+	  startingIndexOfCurrentRun=i;
 	}
       p_arr[i].Set_GeneIndex(running_gene_index);
-      p_arr[0].Set_Allele(running_allele);
+      p_arr[i].Set_Allele(running_allele);
+      last_gene_name=curr_gene_name;
     }
 
-  //now we have unique gene vector, we can go ahead to figure what is the total number of alleles for each gene
-
+  //take care of the last run of run n_alleles
+  for(unsigned j=startingIndexOfCurrentRun;j<=totalNumber-1;j++)
+    {
+      p_arr[j].Set_n_alleles(running_total_n_allele);
+    }
 
   return totalNumber;
 }
 
+bool CompareDGeneNameByString(const string& ss1, const string& ss2)
+{  
+  //first we need to parse the name and then compare by fields
+  string buffer1[10];
+  string buffer2[10];
+  unsigned num1 =split_ext(ss1,buffer1, '-');
+  unsigned num2 =split_ext(ss2, buffer2, '-');
+  
+  if(num1!=2||num2!=2)
+    {//something wrong 
+      throw "bad format of the sequence name";
+    }
+
+  //now check the first thing as strings
+  int ret=buffer1[0].compare(buffer2[0]);
+  if(ret!=0) 
+    {      
+      if(ret<0)
+	{
+	  return true;
+	}
+      else
+	return false;
+    }
+  
+
+  //we are means we are in the same family group, we need to check gene number
+  string gene1(buffer1[1]);//gene is the number# within the family, eg. IGHV1-2, 2 is the gene number
+  string gene2(buffer2[1]);//at this point, this one is with gene allele
+  
+  int num_gene1=atoi(gene1.c_str());
+  int num_gene2=atoi(gene2.c_str());
+ 
+  return num_gene1-num_gene2<0;
+}
+bool CompareDSequenceNameByString(const string& ss1, const string& ss2)
+{
+  //first we need to parse the name and then compare by fields
+  string buffer1[10];
+  string buffer2[10];
+  unsigned num1 =split_ext(ss1,buffer1, '-');
+  unsigned num2 =split_ext(ss2, buffer2, '-');
+  
+  if(num1!=2||num2!=2)
+    {//something wrong 
+      throw "bad format of the sequence name";
+    }
+
+  //now check the first thing as strings
+  int ret=buffer1[0].compare(buffer2[0]);
+  if(ret!=0) 
+    {      
+      if(ret<0)
+	{
+	  return true;
+	}
+      else
+	return false;
+    }
+
+  //we are means we are in the same family group, we need to check gene number
+  string gene1(buffer1[1]);//gene is the number# within the family, eg. IGHV1-2, 2 is the gene number
+  string gene2(buffer2[1]);//at this point, this one is with gene allele
+  //first split to get gene and allele number
+  num1=split_ext(gene1, buffer1, '*');
+  num2=split_ext(gene2, buffer2, '*');
+  
+  if(num1!=2 ||num2 !=2)
+    {//something wrong 
+      throw "bad format of the sequence name";
+    }
+
+  int num_gene1=atoi(buffer1[0].c_str());
+  int num_gene2=atoi(buffer2[0].c_str());
+  if(num_gene1-num_gene2!=0)
+    {
+      return num_gene1-num_gene2<0;
+    }
+  //here it means the gene number is the same. now compare the allele #
+  ret=buffer1[1].compare(buffer2[1]);
+  
+  return ret<0;
+}
 
 unsigned ReadGenomicD(const string& _fastaFileName, GenomicD** _gseg)
 {
@@ -572,7 +668,7 @@ unsigned ReadGenomicD(const string& _fastaFileName, GenomicD** _gseg)
   //get unique gene vector first
   vector< string> unique_gene_vec;
   vector<unsigned> n_allele_vec;
-  sort(gene_vec.begin(),gene_vec.end(), stringCompare_ext);
+  sort(gene_vec.begin(),gene_vec.end(), CompareDGeneNameByString);
   
   //now we need to have the array sorted in order to later on check
   //total number of allele and allele number
@@ -583,33 +679,49 @@ unsigned ReadGenomicD(const string& _fastaFileName, GenomicD** _gseg)
   unique_gene_vec.push_back(gene_vec.at(0));
 
   unsigned running_gene_index=0;
-  unsigned running_allele=1; //this is the number of this current allele, it is starting from 1, not zero
+  unsigned running_allele=0; //this is the number of this current allele, it is starting from 1, not zero
 
   unsigned running_total_n_allele=1;
   
   p_arr[0].Set_GeneIndex(running_gene_index);
   p_arr[0].Set_Allele(running_allele);
+  string curr_gene_name, last_gene_name;
+  last_gene_name=ParseGeneName(p_arr[0].Get_Gene());
+  unsigned startingIndexOfCurrentRun=0;
+
   for(unsigned i=1;i<totalNumber;i++)
     {
       //now we need first get the unique genes
       //for each identifical one, we go next
       running_allele++;
       running_total_n_allele++;
-      if(gene_vec.at(i).compare(gene_vec.at(i-1))!=0)
+      curr_gene_name=ParseGeneName(p_arr[i].Get_Gene());
+
+      if(curr_gene_name.compare(last_gene_name)!=0)
 	{
 	  //found a unique gene
 	  running_gene_index++;
-	  running_allele=1;
-	  unique_gene_vec.push_back(gene_vec.at(i));
+	  running_allele=0;
+	  //unique_gene_vec.push_back(gene_vec.at(i));
 	  n_allele_vec.push_back(running_total_n_allele);
+	  running_total_n_allele--;
+	  //now we need to update the n_allele for current run
+	  for(unsigned j=startingIndexOfCurrentRun;j<=i-1;j++)
+	    {
+	      p_arr[j].Set_n_alleles(running_total_n_allele);
+	    }
 	  running_total_n_allele=1;
+	  startingIndexOfCurrentRun=i;
 	}
       p_arr[i].Set_GeneIndex(running_gene_index);
-      p_arr[0].Set_Allele(running_allele);
+      p_arr[i].Set_Allele(running_allele);
+      last_gene_name=curr_gene_name;
     }
-
-  //now we have unique gene vector, we can go ahead to figure what is the total number of alleles for each gene
-
+  //take care of the last run of run n_alleles
+  for(unsigned j=startingIndexOfCurrentRun;j<=totalNumber-1;j++)
+    {
+      p_arr[j].Set_n_alleles(running_total_n_allele);
+    }
 
   return totalNumber; 
 }

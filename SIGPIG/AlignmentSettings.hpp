@@ -47,9 +47,9 @@ namespace AlignmentSettings
   //to define the length of the flank sequences used to run D match
   extern unsigned flank_length;
 
-  extern unsigned n_D_alleles;
+  //extern unsigned n_D_alleles; we don't set it in advance, we get its value by reading the file of D seg
 
-  extern unsinged max_length_D_genes;//used by match D to determine the max number of errors 
+  extern unsigned max_length_D_genes;//used by match D to determine the max number of errors 
 }
 
 

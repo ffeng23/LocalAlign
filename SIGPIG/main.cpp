@@ -29,16 +29,17 @@
 #include "AlignmentSettings.hpp"
 #include "Alignment.hpp"
 #include "Alignment_V.hpp"
+#include "Alignment_D.hpp"
 //#include 
 
 using namespace std;
 
 static string scoreMatrixName="nuc44"; //name as an input for specifing the name of the score matrix. for example nuc44
 
-static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1", "tsm2", "nuc44HP"};
+static string supportedScoreMatrixNameArr[]={"nuc44_v","blosum50", "tsm1", "tsm2", "nuc44HP"};
 //tsm2: score matrix from Geoffrey Barton reference.
 
-static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1, &tsm2, &nuc44HP};
+static ScoreMatrix* ScoreMatrixArr[]={&nuc44_v, &blosum50, &tsm1, &tsm2, &nuc44HP};
 double gapopen=-8;
 double gapextension=-8;
 //static double scale=1; //this is the one on top of matrix, the programe will run score and use the 
@@ -46,7 +47,7 @@ double gapextension=-8;
 
 double errorCost=4;
 string seqFileName;
-string vSegmentFileName("genomicVs_alleles.fasta");;
+string vSegmentFileName("genomicVs_alleles.fasta");
 string dSegmentFileName("genomicDs.fasta");
 string jSegmentFileName("genomicJs_all_curated.fasta");
 
@@ -201,14 +202,28 @@ int main(int argc, char* argv[])
   
   cout<<totalNumJ<<" J genomic segments are read in."<<endl; 
   cout<<"\tshowing the J seq 1:"<<genJ[1].Get_Sequence()<<endl;
-  
-  unsigned totalNumD=  ReadGenomicD("genomicDs.fasta",&genD);
-  
-  cout<<totalNumD<<" D genomic segments are read in."<<endl; 
-  
+  cout<<totalNumJ<<" J genomic segments are read in."<<endl; 
+  for(unsigned i=0;i<totalNumJ;i++)
+    {
+      cout<<i<<":"<<genJ[i].Get_Seq().toString()<<endl;
+      cout<<"\t==>geneIndex:"<<genJ[i].Get_GeneIndex()<<endl;
+      cout<<"\t==>n_allele:"<<genJ[i].Get_n_alleles()<<endl;
+      cout<<"\t==>allele:"<<genJ[i].Get_Allele()<<endl;
+    }
 
+  unsigned totalNumD=  ReadGenomicD("genomicDs.fasta",&genD);
+  /*
+  cout<<totalNumD<<" D genomic segments are read in."<<endl; 
+  for(unsigned i=0;i<totalNumD;i++)
+    {
+      cout<<i<<":"<<genD[i].Get_Seq().toString()<<endl;
+      cout<<"\t==>geneIndex:"<<genD[i].Get_GeneIndex()<<endl;
+      cout<<"\t==>n_allele:"<<genD[i].Get_n_alleles()<<endl;
+      cout<<"\t==>allele:"<<genD[i].Get_Allele()<<endl;
+    }
+  */
   unsigned totalNumV=  ReadGenomicV("genomicVs_alleles.fasta",&genV);
-  
+  /*
   cout<<totalNumV<<" V genomic segments are read in."<<endl; 
   for(unsigned i=0;i<totalNumV;i++)
     {
@@ -216,7 +231,8 @@ int main(int argc, char* argv[])
       cout<<"\t==>geneIndex:"<<genV[i].Get_GeneIndex()<<endl;
       cout<<"\t==>n_allele:"<<genV[i].Get_n_alleles()<<endl;
       cout<<"\t==>allele:"<<genV[i].Get_Allele()<<endl;
-    }
+      }*/
+
   /*  cout<<100<<":"<<genV[100].Get_Seq().toString()<<endl;
   cout<<216<<":"<<genV[216].Get_Seq().toString()<<endl;
   cout<<217<<":"<<genV[217].Get_Seq().toString()<<endl;
@@ -289,6 +305,7 @@ int main(int argc, char* argv[])
   double error_cost=errorCost;
   Alignment_Object J_obj[N_read];
   Alignment_Object V_obj;
+  Alignment_D D_obj;
   //now calling it, FOR NOW, STOP DOING J alignment
   for(unsigned _m=0;_m<N_read-N_read+0;_m++)
     {
@@ -297,7 +314,13 @@ int main(int argc, char* argv[])
       cout<<"\ttesting sequence 0:"<<endl;
       cout<<test_seq.toString()<<endl;
   
-      bool seq_j_ok=match_J(test_seq, genJ, totalNumJ, AlignmentSettings::J_minimum_alignment_length, AlignmentSettings::J_maximum_deletion, AlignmentSettings::negative_excess_deletions_max, AlignmentSettings::J_allowed_errors, error_cost, J_obj[_m]);
+      bool seq_j_ok=match_J
+	(test_seq, genJ, totalNumJ, 
+	 AlignmentSettings::J_minimum_alignment_length, 
+	 AlignmentSettings::J_maximum_deletion, 
+	 AlignmentSettings::negative_excess_deletions_max, 
+	 AlignmentSettings::J_allowed_errors, error_cost, 
+	 J_obj[_m]);
 
       //now we check the output
       if(J_obj[_m].numOfAligned>0)
@@ -315,14 +338,20 @@ int main(int argc, char* argv[])
 //now calling Match V function
 
   cout<<"=======>doing match V"<<endl;
-  for(unsigned _m=0;_m<N_read-N_read+1;_m++)
+  //for NOW, STOP DOING V alignment
+  for(unsigned _m=0;_m<N_read-N_read+0;_m++)
     {
       cout<<"---------------------------i:"<<_m<<endl;
       SequenceString test_seq=all_Sequences.at(_m);
       cout<<"\ttesting sequence 0:"<<endl;
       cout<<test_seq.toString()<<endl;
   
-      bool seq_v_ok=match_V(test_seq, genV, totalNumV, AlignmentSettings::V_minimum_alignment_length, AlignmentSettings::V_maximum_deletion, AlignmentSettings::negative_excess_deletions_max, AlignmentSettings::V_allowed_errors, error_cost, V_obj);
+      bool seq_v_ok=match_V
+	(test_seq, genV, totalNumV, 
+	 AlignmentSettings::V_minimum_alignment_length, 
+	 AlignmentSettings::V_maximum_deletion, 
+	 AlignmentSettings::negative_excess_deletions_max, 
+	 AlignmentSettings::V_allowed_errors, error_cost, V_obj);
       //now we check the output
       if(V_obj.numOfAligned>0)
 	{
@@ -402,6 +431,34 @@ int main(int argc, char* argv[])
 	{
 	  cout<<"failed alignment"<<endl;
 	}
+    }
+
+  //=============================================
+  //************now calling Match D function
+  //
+  cout<<"=======>doing match D"<<endl;
+  //for NOW, STOP DOING D alignment
+  unsigned max_align=100;
+  for(unsigned _m=0;_m<N_read-N_read+1;_m++)
+    {
+      cout<<"---------------------------i:"<<_m<<endl;
+      SequenceString test_seq=all_Sequences.at(_m);
+      cout<<"\ttesting sequence 0:"<<endl;
+      cout<<test_seq.toString()<<endl;
+  
+      bool seq_d_ok=match_D
+	(test_seq, genD,  totalNumD, 
+	 19, 69, AlignmentSettings::flank_length, sm, 
+	 AlignmentSettings::D_maximum_deletion, 
+	 AlignmentSettings::negative_excess_deletions_max,
+	 max_align,
+	  D_obj);
+      
+      if(seq_d_ok)
+	cout<<D_obj.toString();
+      else
+	cout<<"failed alignment"<<endl;
+      cout<<endl;
     }
 
   /*

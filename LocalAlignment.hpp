@@ -28,7 +28,7 @@ class LocalAlignment: public PairwiseAlignment
 {
 public:
   LocalAlignment(SequenceString* _pattern, SequenceString* _subject, 
-		 ScoreMatrix* _m=&nuc44, const double& _gopen=-8, 
+		 const ScoreMatrix* _m=&nuc44, const double& _gopen=-8, 
 		 const double& _gextension=-5, const double& _scale=1,const int& _numOfAlignments=1, const short& _typeOfGapModel=1);//here we default to 1 454 markov chain model,
   
   virtual ~LocalAlignment();

@@ -40,6 +40,34 @@ const char ScoreMatrix::NucAlphabet[]={ 'A' ,  'T' ,  'G'  ,'C',   'S',   'W',  
 ScoreMatrix nuc44(nuc44Int,0.277316, ScoreMatrix::NucAlphabet,15);//again not sure where this scale come from by Matlab.
 //****************************************
 
+//***************************************
+/*nuc44_variant matrix, set up this in order for the D alignment according to Matlab code. make the highly similar sequence aligned
+ *set up the mismatch to be higher cost. -14 everywhere.
+ */
+//order is A   T   G   C   S   W   R   Y   K   M   B   V   H   D   N
+static int nuc44Int_1d_v[] ={ 5,  -14,  -14,  -14,  -14,   1,   1,  -14,  -14,   1,  -14,  -5,  -5,  -5,  -8,
+			    -14,  5,  -14,  -14,  -14,   1,  -14,   1,   1,  -14,  -5,  -14,  -5,  -5,  -8,
+			    -14, -14,   5,  -14,   1,  -14,   1,  -14,   1,  -14,  -5,  -5,  -14,  -5,  -8,
+			    -14, -14,  -14,   5,   1,  -14,  -14,   1,  -14,   1,  -5,  -5,  -5,  -14,  -8,
+			    -14, -14,   1,   1,  -5,  -14,  -8,  -8,  -8,  -8,  -5,  -5,  -12,  -12,  -5,
+			    1,   1,  -14,  -14,  -14,  -5,  -8,  -8,  -8,  -8,  -12,  -12,  -5,  -5,  -5,
+			    1,  -14,   1,  -14,  -8,  -8,  -5,  -14,  -8,  -8,  -12,  -5,  -12,  -5,  -5,
+			    -14,   1,  -14,   1,  -8,  -8,  -14,  -5,  -8,  -8,  -5,  -12,  -5,  -12,  -5,
+			    -14,   1,   1,  -14,  -8,  -8,  -8,  -8,  -5,  -14,  -5,  -12,  -12,  -5,  -5,
+			    1,  -14,  -14,   1,  -8,  -8,  -8,  -8,  -14,  -5,  -12,  -5,  -5,  -12,  -5,
+			    -14,  -5,  -5,  -5,  -5,  -12,  -12,  -5,  -5,  -12,  -5,  -8,  -8,  -8,  -5,
+			    -5,  -14,  -5,  -5,  -5,  -12,  -5,  -12,  -12,  -5,  -8,  -5,  -8,  -8,  -5,
+			    -5,  -5,  -14,  -5,  -12,  -5,  -12,  -5,  -12,  -5,  -8,  -8,  -5,  -8,  -1 , 
+			    -5,  -5,  -5,  -14,  -12,  -5,  -5,  -12,  -5,  -12,  -8,  -8,  -8,  -5,  -5,
+			    -8,  -8,  -8,  -8,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5
+		            };
+static const int* nuc44Int_v[] ={nuc44Int_1d_v,nuc44Int_1d_v+15,nuc44Int_1d_v+30,nuc44Int_1d_v+45,nuc44Int_1d_v+60,nuc44Int_1d_v+75,
+			 nuc44Int_1d_v+90,nuc44Int_1d_v+105, nuc44Int_1d_v+120, nuc44Int_1d_v+135,nuc44Int_1d_v+150, 
+			 nuc44Int_1d_v+165, nuc44Int_1d_v+15*12,nuc44Int_1d_v+15*13, nuc44Int_1d_v+15*14 
+                };
+ScoreMatrix nuc44_v(nuc44Int_v,0.277316, ScoreMatrix::NucAlphabet,15);//again not sure where this scale come from by Matlab.
+//****************************************
+
 //*********************************************
 //BLOSUM50, aa
 //the scale information is from ncbi. not sure where this is coming from, but
@@ -96,12 +124,12 @@ const int ScoreMatrix::GetAlphabetLength()
 {
   return this->c_alphabet_array_size;
 }
-const int** ScoreMatrix::GetScoreMatrix()
+const int** ScoreMatrix::GetScoreMatrix() const
 {
   return this->_matrix;
 }
   
-double ScoreMatrix::GetScale()
+double ScoreMatrix::GetScale() const
 {
   return this->_scale;
 }
@@ -110,12 +138,12 @@ ScoreMatrix::~ScoreMatrix()
 {
   this->_matrix=NULL;
 }
-const char* ScoreMatrix::GetAlphabet()
+const char* ScoreMatrix::GetAlphabet() const
 {
   return this->_alphabet;
 }
   
-double ScoreMatrix::GetScore(const char& first, const char& second)
+double ScoreMatrix::GetScore(const char& first, const char& second) const
 {
   //look through
   

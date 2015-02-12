@@ -19,12 +19,12 @@ public :
   ~ScoreMatrix();
 
   //getter
-  const int** GetScoreMatrix();  
-  double GetScale();
-  const char* GetAlphabet();
+  const int** GetScoreMatrix() const;  
+  double GetScale() const ;
+  const char* GetAlphabet() const;
   void SetScaledScoreFlag(const bool& Flag);
   
-  double GetScore(const char& first, const char& second);
+  double GetScore(const char& first, const char& second) const;
   const int GetAlphabetLength();
   //static members
   //this is the defualt static alphabet array for usering to use
@@ -42,7 +42,7 @@ private:
 };
 
 extern ScoreMatrix nuc44 ;
-
+extern ScoreMatrix nuc44_v;//define as a variant of nuc44 for specific usage of D alignment with large cost for mismatch
 extern ScoreMatrix blosum50;
 
 extern ScoreMatrix tsm1;

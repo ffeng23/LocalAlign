@@ -47,8 +47,8 @@ namespace AlignmentSettings
   //% you go:
    unsigned negative_excess_deletions_max= 3;
   
-  unsigned flank_length=3;
-  unsigned n_D_alleles=34;
+  unsigned flank_length=10;
+  //unsigned n_D_alleles=34;
   
   unsigned max_length_D_genes=37;
 }

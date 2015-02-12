@@ -21,7 +21,7 @@ class PairwiseAlignment
 public:
   //pairwiseAlignment();
   PairwiseAlignment(SequenceString* _pattern, SequenceString* _subject, 
-		    ScoreMatrix* _m=&nuc44, const double& _gopen=-8, 
+		    const ScoreMatrix* _m=&nuc44, const double& _gopen=-8, 
 		    const double& _gextension=-5, const double& _scale=1,const short& _typeOfGapModel=1);
   
   virtual ~PairwiseAlignment()=0;
@@ -35,7 +35,7 @@ protected:
 
   SequenceString* c_pattern;//this is follwing R style pairwiseAlignment
   SequenceString* c_subject;//this is following R style pairwiseAlignment
-  ScoreMatrix* c_sm;
+  const ScoreMatrix* c_sm;
   double c_gapOpen;
   double c_gapExtension;
   double c_scale;
