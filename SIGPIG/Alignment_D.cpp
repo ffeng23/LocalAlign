@@ -1236,6 +1236,7 @@ bool match_D(const SequenceString& _seq,
 	  if(flank_offset<0)
 	    {
 	      pos_start1=_D.align_position_left[d][i];
+	      pos_end1=_D.align_position_right[d][i];
 	    }
 	  _D.n_errors[d][i]=findErrors
 	    (seqNDN, _genDs[d].Get_Sequence(), 
@@ -1435,10 +1436,12 @@ void DeterminePalindromAndExcessError_D
 	      int max_p_length=_align_length[d][na]-(nd-_deletions_left[d][na]);
 	      if(max_p_length<0)
 		max_p_length=0;
-	      if(max_p_length>_align_position_left[d][na]+(nd-_deletions_left[d][na]))
+	      int tempV=_align_position_left[d][na]+(nd-_deletions_left[d][na]);
+	      if(max_p_length>tempV)
 		{
-		  max_p_length=_align_position_left[d][na]+(nd-_deletions_left[d][na]);
+		  max_p_length=tempV;
 		}
+	      cout<<"max_p_length :"<<max_p_length<<endl;
 	      while(still_palindrome&&((signed)p<(signed)max_p_length))
 		{
 		  still_palindrome=target.at(nd+p)==DnaComplement(_seq.GetSequence().at(_align_position_left[d][na]-p+nd-_deletions_left[d][na]-1));

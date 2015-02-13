@@ -448,7 +448,7 @@ int main(int argc, char* argv[])
   
       bool seq_d_ok=match_D
 	(test_seq, genD,  totalNumD, 
-	 19, 69, AlignmentSettings::flank_length, sm, 
+	 230, 280, AlignmentSettings::flank_length, sm, 
 	 AlignmentSettings::D_maximum_deletion, 
 	 AlignmentSettings::negative_excess_deletions_max,
 	 max_align,
