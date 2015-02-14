@@ -1486,6 +1486,7 @@ void DeterminePalindromAndExcessError_D
 	  	  
 	  for(;nd<=max_nd;nd++)
 	    {
+	      cout<<"\t\tloop nd:"<<nd<<endl;
 	      //for each value of deletions, find longest half-p from the implied end of the gene sequence
 	      p=0;
 	      still_palindrome=true;
@@ -1493,19 +1494,23 @@ void DeterminePalindromAndExcessError_D
 	      int max_p_length=_align_length[d][na]-(nd-_deletions_right[d][na]);
 	      if(max_p_length<0)
 		max_p_length=0;
-	      if(max_p_length>l_seq-_align_position_right[d][na]+(nd-_deletions_right[d][na]))
+	      cout<<"right bound:"<<l_seq-_align_position_right[d][na]+(nd-_deletions_right[d][na])<<endl;
+	      int tempV=l_seq-1-_align_position_right[d][na]+(nd-_deletions_right[d][na]);
+	      if(max_p_length>tempV)
 		{
-		  max_p_length=l_seq-_align_position_right[d][na]+(nd-_deletions_right[d][na]);
+		  max_p_length=tempV;
 		}
 
 	      while(still_palindrome&&((signed)p<(signed)max_p_length))
 		{
+		  cout<<"while loop "<<p<<endl;
 		  still_palindrome=target.at(l_target-nd-p-1)==DnaComplement(_seq.GetSequence().at(_align_position_right[d][na]+1+p-(nd-_deletions_right[d][na])));
 		  if(still_palindrome)
 		    {
 		      p++;
 		    }
-		}		
+		}
+	      cout<<"set p value:"<<p<<endl;
 	      _p_region_max_length_right[d][na][nd]=p;
 	    }//end of for nd<max_nd
 	  cout<<"\t\tend of right palindrom"<<endl;
