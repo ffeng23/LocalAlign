@@ -299,6 +299,7 @@ int main(int argc, char* argv[])
   vector<string> outFileNames;
   outFileNames=DetermineOutputFileNames(outputFileNameBase, AlignmentSettings::N_per_file, N_read);
 
+  //==============================================================
   //start testing the alignment, first mathJ
   cout<<"%%%%%%%%%%%testing matchJ()>>>>>>cost:"<<errorCost<<endl;
   
@@ -307,7 +308,7 @@ int main(int argc, char* argv[])
   Alignment_Object V_obj;
   Alignment_D D_obj;
   //now calling it, FOR NOW, STOP DOING J alignment
-  for(unsigned _m=0;_m<N_read-N_read+0;_m++)
+  for(unsigned _m=0;_m<N_read-N_read+1;_m++)
     {
       cout<<"---------------------------i:"<<_m<<endl;
       SequenceString test_seq=all_Sequences.at(_m);
@@ -327,6 +328,7 @@ int main(int argc, char* argv[])
 	{
 	  
 	  //now print it.
+	  cout<<"=========printing the match DJ object"<<endl;
 	  cout<<J_obj[_m].toString()<<endl;
 	}
       else
@@ -339,7 +341,7 @@ int main(int argc, char* argv[])
 
   cout<<"=======>doing match V"<<endl;
   //for NOW, STOP DOING V alignment
-  for(unsigned _m=0;_m<N_read-N_read+0;_m++)
+  for(unsigned _m=0;_m<N_read-N_read+1;_m++)
     {
       cout<<"---------------------------i:"<<_m<<endl;
       SequenceString test_seq=all_Sequences.at(_m);
@@ -355,77 +357,8 @@ int main(int argc, char* argv[])
       //now we check the output
       if(V_obj.numOfAligned>0)
 	{
-	  cout<<"\tthe number of aligned:"<<V_obj.numOfAligned<<endl;
-	  
-	  cout<<"\tthe aligned length:";
-	  for(unsigned i=0;i<V_obj.numOfAligned;i++)
-	    {
-	      cout<<V_obj.align_length[i]<<",";
-	    }
-	  cout<<endl;
-	  
-	  cout<<"\tthe min_deletions:";
-	  for(unsigned i=0;i<V_obj.numOfAligned;i++)
-	    {
-	      cout<<V_obj.min_deletions[i]<<",";
-	    }
-	  cout<<endl;
-
-	  cout<<"\tthe n_errors:";
-	  for(unsigned i=0;i<V_obj.numOfAligned;i++)
-	    {
-	      cout<<V_obj.n_errors[i]<<",";
-	    }
-	  cout<<endl;
-
-	  cout<<"\t1error positions:"<<endl;
-	  for(unsigned i=0;i<V_obj.numOfAligned;i++)
-	    {
-	      for(unsigned j=0;j<V_obj.n_errors[i];j++)
-		{
-		  cout<<V_obj.error_positions[i][j]<<",";
-		}
-	      cout<<endl;
-	    }
-	  cout<<endl;
-
-	  cout<<"\talleles_all:";
-	  for(unsigned i=0;i<V_obj.numOfAligned;i++)
-	    {
-	      cout<<V_obj.alleles_all[i]<<",";
-	    }
-	  cout<<endl;
-	  
-	  cout<<"\tp_reg_max_length:";
-	  for(unsigned j=0;j<V_obj.numOfAligned;j++)
-	    {
-	      
-	      for(unsigned i=0;i<AlignmentSettings::V_maximum_deletion+1;i++)
-		{
-		  cout<<V_obj.p_region_max_length[j][i]<<",";
-		}
-	      cout<<endl;
-	    }
-	  cout<<endl;
-	  cout<<"\texcess_error_position:";
-	  for(unsigned j=0;j<V_obj.numOfAligned;j++)
-	    {
-	      for(unsigned i=0;i<AlignmentSettings::negative_excess_deletions_max;i++)
-		{
-		  cout<<V_obj.excess_error_positions[j][i]<<",";
-		}
-	      cout<<endl;
-	    }
-	  cout<<endl;
-	  cout<<"\talleles from distinct gene:";
-	  for(unsigned j=0;j<V_obj.numOfAligned;j++)
-	    {
-	  cout<<V_obj.alleles_from_distinct_genes[j]<<",";
-	    }
-	  cout<<endl;
-      
 	  //now print it.
-	  //cout<<J_obj[_m].toString()<<endl;
+	  cout<<V_obj.toString()<<endl;
 	}
       else
 	{

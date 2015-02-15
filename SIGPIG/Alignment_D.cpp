@@ -1120,7 +1120,7 @@ bool match_D(const SequenceString& _seq,
 	     const unsigned& _max_aligns,
 	     /*output*/ Alignment_D& _D)
 {
-  cout<<"*&***&&&&&&&:inside matchD"<<endl;
+  //cout<<"*&***&&&&&&&:inside matchD"<<endl;
   unsigned l_seq=_seq.GetLength();
   unsigned l_target;
 
@@ -1133,29 +1133,21 @@ bool match_D(const SequenceString& _seq,
     {
       start_index=_V_end+1-_flank_length;
     }
-      
-  cout<<"_V_end:"<<_V_end<<";flank_length:"<<_flank_length
-      <<";start_index:"<<start_index<<endl;
-  /*
-  if(start_index<0)
-    {
-      start_index=0;
-      }*/
-
+    
   unsigned end_index=_J_start-1+_flank_length;
   if(end_index>=l_seq)
     {
       end_index=l_seq-1;
     }
-  cout<<"_J_start:"<<_J_start<<";flank_length:"<<_flank_length
-      <<";end_index:"<<end_index<<endl;
+  //cout<<"_J_start:"<<_J_start<<";flank_length:"<<_flank_length
+  //    <<";end_index:"<<end_index<<endl;
   
   string seqNDN=_seq.GetSequence().substr(start_index, end_index-start_index+1);
 
   int flank_offset=start_index-1;//this one is one less than the start_index.
 
   _D.D_max_errors=(int)(AlignmentSettings::max_length_D_genes*_sm->GetScore('A','A')/(_sm->GetScore('A','A')-_sm->GetScore('A','C')));  
-  cout<<"-->D_max_errors:"<<_D.D_max_errors<<endl;
+  //cout<<"-->D_max_errors:"<<_D.D_max_errors<<endl;
   //start doing the alignment by calling the localAlign function
   if(seqNDN.size()==0)
     {
@@ -1166,24 +1158,24 @@ bool match_D(const SequenceString& _seq,
   //good, let's do the alignment
   SequenceString ss_seqNDN("temp", seqNDN);
   unsigned curr_numOfAligned;
-  cout<<"\t===>before initialize "<<endl;
+  //cout<<"\t===>before initialize "<<endl;
   _D.initialize(_numOfDSegs);
   AlignmentString* las;
   SequenceString ss_target;
-  cout<<"\t====>bfore running the main for loop"<<endl;
+  //cout<<"\t====>bfore running the main for loop"<<endl;
   for(unsigned d=0;d<_numOfDSegs;d++)
     {
-      cout<<"\t****looping d:"<<d<<endl;
+      //cout<<"\t****looping d:"<<d<<endl;
       ss_target=_genDs[d].Get_Seq();
       l_target=ss_target.GetLength();
-      cout<<"\t===>before calling local align"<<endl;
+      //cout<<"\t===>before calling local align"<<endl;
       cout<<ss_seqNDN.toString()<<endl;
       cout<<ss_target.toString()<<endl;
       LocalAlignment la(&ss_seqNDN, &ss_target, _sm,
 			-100.0/*gapopen*/ ,-100.0 /*gapextension*/,
 			1.0/*scale*/, _max_aligns, 0/*this is the gap model, 0 for affine model*/);
       //first determine the number of aligned for this current one
-      cout<<"\t****done with local alignment"<<endl;
+      //cout<<"\t****done with local alignment"<<endl;
       curr_numOfAligned=la.GetNumberOfAlignments();
       las=la.GetAlignmentArr();
 
@@ -1199,11 +1191,11 @@ bool match_D(const SequenceString& _seq,
       
       _D.deletions_left[d]=new unsigned [curr_numOfAligned];
       _D.deletions_right[d]=new unsigned [curr_numOfAligned];
-      cout<<"\t%%%%%before parsing the parms, aligned:"<<curr_numOfAligned<<endl;
+      //cout<<"\t%%%%%before parsing the parms, aligned:"<<curr_numOfAligned<<endl;
       for(unsigned i=0;i<curr_numOfAligned;i++)
 	{
-	  cout<<"\t\t@@@@@@@--->looping through aligned i:"<<i<<endl;
-	  cout<<"alignment #"<<i<<":"<<endl;
+	  //cout<<"\t\t@@@@@@@--->looping through aligned i:"<<i<<endl;
+	  //cout<<"alignment #"<<i<<":"<<endl;
 	  cout<<las[i].toString();
 	  _D.align_length[d][i]=las[i].GetPatternIndexEnd()-las[i].GetPatternIndexStart()+1;
 	  _D.score[d][i]=las[i].GetScore();
@@ -1230,7 +1222,7 @@ bool match_D(const SequenceString& _seq,
 
 
 	  temp_error_positions=new unsigned[_D.D_max_errors];
-	  cout<<"\t\t****beofre finding error fucntions"<<endl;
+	  //cout<<"\t\t****beofre finding error fucntions"<<endl;
 	  unsigned pos_start1=_D.align_position_left[d][i]-flank_offset-1;
 	  unsigned pos_end1=_D.align_position_right[d][i]-flank_offset-1;
 	  if(flank_offset<0)
@@ -1244,23 +1236,23 @@ bool match_D(const SequenceString& _seq,
 	     _D.deletions_left[d][i],l_target-_D.deletions_right[d][i]-1,
 	     _D.D_max_errors,flank_offset, temp_error_positions);
 
-	  cout<<"\t\tafter finding the errors"<<endl;
+	  //cout<<"\t\tafter finding the errors"<<endl;
 	  //now copy over the elements
 	  _D.error_positions[d][i]=new unsigned[_D.n_errors[d][i]];
 	  memcpy(_D.error_positions[d][i], temp_error_positions,
 		 _D.n_errors[d][i]*sizeof(unsigned)/sizeof(char));
-	  cout<<"\t\tcleaning up mem"<<endl;
+	  //cout<<"\t\tcleaning up mem"<<endl;
 	  //clean up the memory
 	  delete [] temp_error_positions;
-	  cout<<"\t\tdone!!!"<<endl;
+	  //cout<<"\t\tdone!!!"<<endl;
 	}
     }//end of num of D gene segs for loop
   
   //now we are ready with alignment, first sort in order to figure
   //out the D.allele_order, prepare the index array first
-  cout<<"\n===>sort to get the allele_order "<<endl;
+  //cout<<"\n===>sort to get the allele_order "<<endl;
   double* highestScore=new double[_numOfDSegs];
-  cout<<"before sorting score array:"<<endl;
+  //cout<<"before sorting score array:"<<endl;
   for(unsigned i=0;i<_numOfDSegs;i++)
     {
       _D.allele_order[i]=i;
@@ -1269,7 +1261,7 @@ bool match_D(const SequenceString& _seq,
     }
   cout<<endl;
   QuickSort(highestScore, 0, _numOfDSegs-1, _D.allele_order,NULL);
-  cout<<"after sorting score array:"<<endl;
+  //cout<<"after sorting score array:"<<endl;
   for(unsigned i=0;i<_numOfDSegs;i++)
     {
       //_D.allele_order[i]=i;
@@ -1280,7 +1272,7 @@ bool match_D(const SequenceString& _seq,
 
   Reverse(_D.allele_order, _numOfDSegs);
 
-  cout<<"after sorting index array:"<<endl;
+  //cout<<"after sorting index array:"<<endl;
   for(unsigned i=0;i<_numOfDSegs;i++)
     {
       //_D.allele_order[i]=i;
@@ -1288,20 +1280,20 @@ bool match_D(const SequenceString& _seq,
       cout<<_D.allele_order[i]<<",";
     }
   cout<<endl;
-  cout<<"\t****done with sorting"<<endl;
+  //cout<<"\t****done with sorting"<<endl;
 
   //now we are ready to take care of p_nucleotides and negative excess error
   //first need to initialize the p_region array to all zeros
-  cout<<"\n----->>>>>Ready to figure out p_region and excess error"<<endl;
+  //cout<<"\n----->>>>>Ready to figure out p_region and excess error"<<endl;
   _D.p_region_max_length_left=new unsigned**[_numOfDSegs];
   _D.p_region_max_length_right=new unsigned**[_numOfDSegs];
   _D.excess_error_positions_left=new unsigned**[_numOfDSegs];
   _D.excess_error_positions_right=new unsigned**[_numOfDSegs];
 
-  cout<<"\tbefore looping......_D_maximum_deletion:"<<_D_maximum_deletion<<endl;
+  //cout<<"\tbefore looping......_D_maximum_deletion:"<<_D_maximum_deletion<<endl;
   for(unsigned i=0;i<_numOfDSegs;i++)
     {
-      cout<<"\t====>looping....i:"<<i<<endl;
+      //cout<<"\t====>looping....i:"<<i<<endl;
       _D.p_region_max_length_left[i]=new unsigned*[_D.numOfAligned[i]];
       _D.p_region_max_length_right[i]=new unsigned*[_D.numOfAligned[i]];
       _D.excess_error_positions_left[i]=new unsigned*[_D.numOfAligned[i]];
@@ -1327,7 +1319,7 @@ bool match_D(const SequenceString& _seq,
 		      _negative_excess_deletion_max*sizeof(unsigned)/sizeof(char));
 	}
     }
-  cout<<"\t\t*****done initializing the arrays"<<endl;
+  //cout<<"\t\t*****done initializing the arrays"<<endl;
   //now ready to call to find p-nucleotide and excess error
   DeterminePalindromAndExcessError_D
     (_seq, _genDs, _D.deletions_left, _D.deletions_right, 
@@ -1402,7 +1394,7 @@ void DeterminePalindromAndExcessError_D
   unsigned*** _excess_error_positions_right
   )
 {
-  cout<<"++++>inside determine palindrom function"<<endl;
+  //cout<<"++++>inside determine palindrom function"<<endl;
   bool still_palindrome=true;
   unsigned p=0;
   unsigned l_seq=_seq.GetLength();
@@ -1410,13 +1402,13 @@ void DeterminePalindromAndExcessError_D
   //now go through to find palindromic nucleotides for each alignment
   for(unsigned d=0;d<_numOfDSegs;d++)
     {
-      cout<<"\tmain loop:"<<d<<endl;
+      //cout<<"\tmain loop:"<<d<<endl;
       string target=_genDs[d].Get_Sequence();
       l_target=target.size();
       //for each aligned in this D seg
       for(unsigned na=0;na<_numOfAligned[d];na++)
 	{
-	  cout<<"\t\tsubmain loop:"<<na<<"/"<<_numOfAligned[d]<<endl;
+	  //cout<<"\t\tsubmain loop:"<<na<<"/"<<_numOfAligned[d]<<endl;
 	  //getting the left p-nucleotides first
 	  //for each possible deletions
 	  int nd=_deletions_left[d][na]-_negative_excess_deletions_max;
@@ -1425,10 +1417,10 @@ void DeterminePalindromAndExcessError_D
 	  int max_nd=_D_maximum_deletion;
 	  if(max_nd>_align_length[d][na]+_deletions_left[d][na])
 	    max_nd=_align_length[d][na]+_deletions_left[d][na];
-	  cout<<"\t\t==???max_nd:"<<max_nd<<endl;
+	  //cout<<"\t\t==???max_nd:"<<max_nd<<endl;
 	  for(;nd<=max_nd;nd++)
 	    {
-	      cout<<"\t\t\tloop nd:"<<nd<<endl;
+	      //cout<<"\t\t\tloop nd:"<<nd<<endl;
 	      //for each value of deletions, find longest half-p from the implied end of the gene sequence
 	      p=0;
 	      still_palindrome=true;
@@ -1441,7 +1433,7 @@ void DeterminePalindromAndExcessError_D
 		{
 		  max_p_length=tempV;
 		}
-	      cout<<"max_p_length :"<<max_p_length<<endl;
+	      //cout<<"max_p_length :"<<max_p_length<<endl;
 	      while(still_palindrome&&((signed)p<(signed)max_p_length))
 		{
 		  still_palindrome=target.at(nd+p)==DnaComplement(_seq.GetSequence().at(_align_position_left[d][na]-p+nd-_deletions_left[d][na]-1));
@@ -1450,10 +1442,10 @@ void DeterminePalindromAndExcessError_D
 		      p++;
 		    }
 		}
-	      cout<<"\t\t\tset the value nd:"<<nd<<endl;
+	      //cout<<"\t\t\tset the value nd:"<<nd<<endl;
 	      _p_region_max_length_left[d][na][nd]=p;
 	    }//end of for nd<max_nd
-	  cout<<"\t\t==*****>end of left palindrom"<<endl;
+	  //cout<<"\t\t==*****>end of left palindrom"<<endl;
 	  //start doing excess error 
 	  unsigned tempArray[]={_negative_excess_deletions_max, _deletions_left[d][na], _align_position_left[d][na]};
 	  unsigned n_excess=min_mf(tempArray,3);
@@ -1474,7 +1466,7 @@ void DeterminePalindromAndExcessError_D
 	    {
 	      _excess_error_positions_left[d][na][runningIndex_excessError]=0;
 	    }
-	  cout<<"\t\tend of left excess error"<<endl;
+	  //cout<<"\t\tend of left excess error"<<endl;
 	  
 	  //===>>>>doing right side things
 	  nd=_deletions_right[d][na]-_negative_excess_deletions_max;
@@ -1486,7 +1478,7 @@ void DeterminePalindromAndExcessError_D
 	  	  
 	  for(;nd<=max_nd;nd++)
 	    {
-	      cout<<"\t\tloop nd:"<<nd<<endl;
+	      //cout<<"\t\tloop nd:"<<nd<<endl;
 	      //for each value of deletions, find longest half-p from the implied end of the gene sequence
 	      p=0;
 	      still_palindrome=true;
@@ -1494,7 +1486,7 @@ void DeterminePalindromAndExcessError_D
 	      int max_p_length=_align_length[d][na]-(nd-_deletions_right[d][na]);
 	      if(max_p_length<0)
 		max_p_length=0;
-	      cout<<"right bound:"<<l_seq-_align_position_right[d][na]+(nd-_deletions_right[d][na])<<endl;
+	      //cout<<"right bound:"<<l_seq-_align_position_right[d][na]+(nd-_deletions_right[d][na])<<endl;
 	      int tempV=l_seq-1-_align_position_right[d][na]+(nd-_deletions_right[d][na]);
 	      if(max_p_length>tempV)
 		{
@@ -1503,17 +1495,17 @@ void DeterminePalindromAndExcessError_D
 
 	      while(still_palindrome&&((signed)p<(signed)max_p_length))
 		{
-		  cout<<"while loop "<<p<<endl;
+		  //cout<<"while loop "<<p<<endl;
 		  still_palindrome=target.at(l_target-nd-p-1)==DnaComplement(_seq.GetSequence().at(_align_position_right[d][na]+1+p-(nd-_deletions_right[d][na])));
 		  if(still_palindrome)
 		    {
 		      p++;
 		    }
 		}
-	      cout<<"set p value:"<<p<<endl;
+	      //cout<<"set p value:"<<p<<endl;
 	      _p_region_max_length_right[d][na][nd]=p;
 	    }//end of for nd<max_nd
-	  cout<<"\t\tend of right palindrom"<<endl;
+	  //cout<<"\t\tend of right palindrom"<<endl;
 	  
 	  //start doing the excess error for right side.
 	  //tempArray[0]=_negative_excess_deletions_max;
@@ -1540,7 +1532,7 @@ void DeterminePalindromAndExcessError_D
 	      _excess_error_positions_right[d][na][runningIndex_excessError]=0;
 	    }
 	  //done!!!
-	  cout<<"\t\tend of right excess error"<<endl;
+	  //cout<<"\t\tend of right excess error"<<endl;
 
 	}//end of _numOfAligned
     }//end of outer for loop d : numOfDSegs
