@@ -42,6 +42,8 @@ class Alignment_Object
   //virtual destructor, not necessary 
   virtual ~Alignment_Object();
   
+  void ResetData();
+  
   /*
   //for initializing
   bool Initialize();

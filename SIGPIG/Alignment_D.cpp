@@ -540,15 +540,9 @@ Alignment_D& Alignment_D::operator = (const Alignment_D& _aod)/*:
   return *this;
 }
 
-Alignment_D::~Alignment_D()
-{
-  //start deleting
-  
-  if(numOfAligned!=NULL)
-    {
-      delete[] numOfAligned;
-    }
-
+void Alignment_D::ResetData()
+{  
+  //cout<<"\t****align_length"<<endl;
   if(align_length!=NULL)
     {      
       for(unsigned i=0;i<n_D_alleles;i++)
@@ -562,6 +556,7 @@ Alignment_D::~Alignment_D()
     }//end of align_length
 
   //score **
+  //cout<<"\t***score"<<endl;
   if(score!=NULL)
     {      
       for(unsigned i=0;i<n_D_alleles;i++)
@@ -573,8 +568,35 @@ Alignment_D::~Alignment_D()
 	}
       delete [] score;
     }//end of socre
+  
+  //error_positions ***
+  //cout<<"\t****error_positions"<<endl;
+  if(error_positions!=NULL)
+    {
+      cout<<"\t\t===>not null"<<endl;
+      for(unsigned i=0;i<n_D_alleles;i++)
+	{
+	  
+	  if(error_positions[i]!=NULL)
+	    {
+	      //cout<<"\t\t\t==>not null"<<endl;
+	      for(unsigned j=0;j<numOfAligned[i];j++)
+		{
+		  //cout<<"\t\t\t\tn_error["<<i<<"]["<<j<<"]"<<n_errors[i][j]<<endl;	    
+		  if(error_positions[i][j]!=NULL)
+		    {
+		      //		      cout<<"\t\t\t\t%%%%%%%delete it"<<endl;
+		      delete [] error_positions[i][j];
+		    }
+		}
+	      delete [] error_positions[i];
+	    }
+	}
+      delete[] error_positions;
+    }//end of error_positions
 
-  //n_errors **
+//n_errors **
+  //cout<<"\t****n_errors"<<endl;
   if(n_errors!=NULL)
     {      
       for(unsigned i=0;i<n_D_alleles;i++)
@@ -587,31 +609,8 @@ Alignment_D::~Alignment_D()
       delete [] n_errors;
     }//end of n_errors
 
-  //error_positions ***
-  if(error_positions!=NULL)
-    {
-     
-      for(unsigned i=0;i<n_D_alleles;i++)
-	{
-	  
-	  if(error_positions[i]!=NULL)
-	    {
-	      
-	      for(unsigned j=0;j<numOfAligned[i];j++)
-		{
-		  		  
-		  if(error_positions[i][j]!=NULL)
-		    {
-		      delete [] error_positions[i][j];
-		    }
-		}
-	      delete [] error_positions[i];
-	    }
-	}
-      delete[] error_positions;
-    }//end of error_positions
-
   //excess_error_postions_left **
+  //cout<<"\t****excess_error_positions_left"<<endl;
   if(excess_error_positions_left!=NULL)
     {      
       for(unsigned int i=0;i<n_D_alleles;i++)
@@ -633,6 +632,7 @@ Alignment_D::~Alignment_D()
     }//excess_error_positions_left
 
   //excess_error_postions_right **
+  //cout<<"\t****excess_error_positions_right"<<endl;
   if(excess_error_positions_right!=NULL)
     {
       for(unsigned int i=0;i<n_D_alleles;i++)
@@ -653,6 +653,7 @@ Alignment_D::~Alignment_D()
     }//excess_error_positions_right
 
   //align_position_left **
+  //cout<<"\t****align_position_left"<<endl;
   if(align_position_left!=NULL)
     {
       for(unsigned i=0;i<n_D_alleles;i++)
@@ -666,6 +667,7 @@ Alignment_D::~Alignment_D()
     }//end of align_length_left**
 
   //align_position_right **
+  //cout<<"\t****align_position_right"<<endl;
   if(align_position_right!=NULL)
     {
       for(unsigned i=0;i<n_D_alleles;i++)
@@ -679,6 +681,7 @@ Alignment_D::~Alignment_D()
     }//end of align_length_left**
 
   //deletion_left **
+  //cout<<"\t****deletions_left"<<endl;
   if(deletions_left!=NULL)
     {      
       for(unsigned i=0;i<n_D_alleles;i++)
@@ -692,6 +695,7 @@ Alignment_D::~Alignment_D()
     }//end of deletions_left**
 
   //deletion_left **
+  //cout<<"\t****deletion_right"<<endl;
   if(deletions_right!=NULL)
     {      
       for(unsigned i=0;i<n_D_alleles;i++)
@@ -705,6 +709,7 @@ Alignment_D::~Alignment_D()
     }//end of deletions_right**
 
   //p_region_max_length_left
+  //cout<<"\t****p_left"<<endl;
   if(p_region_max_length_left!=NULL)
     {      
       for(unsigned i=0;i<n_D_alleles;i++)
@@ -725,6 +730,7 @@ Alignment_D::~Alignment_D()
     }//end of p_region_max_length_left
 
   //p_region_max_length_left
+  //cout<<"\t****p_right"<<endl;
   if(p_region_max_length_right!=NULL)
     {
       for(unsigned i=0;i<n_D_alleles;i++)
@@ -745,9 +751,26 @@ Alignment_D::~Alignment_D()
     }//end of p_region_max_length_right
   
   //allele_order
+  //cout<<"\t****allele_order"<<endl;
   if(allele_order!=NULL)
     delete[] allele_order;
+
+  //start deleting
+  //cout<<"\t***numOfAligned"<<endl;
+  if(numOfAligned!=NULL)
+    {
+      delete[] numOfAligned;
+    }
+  n_D_alleles=0;
+
   //Gosh finally done.
+}
+
+Alignment_D::~Alignment_D()
+{
+  //cout<<"destructing the d alignment object"<<endl;
+  ResetData();
+  //cout<<"done!!!"<<endl;
 }
 //for printing/debugging purpose
 string Alignment_D::toString()

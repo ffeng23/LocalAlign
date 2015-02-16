@@ -114,9 +114,8 @@ Alignment_Object& Alignment_Object::operator = (const Alignment_Object& _ao)
   
   return *this;
 }
-  
-  
-Alignment_Object::~Alignment_Object()
+
+void Alignment_Object::ResetData()
 {
   //now we need to delete the data if there are 
   //we better do this in a reverse order than it is constructed
@@ -191,6 +190,13 @@ Alignment_Object::~Alignment_Object()
       delete[] align_length;
     }
   
+}  
+  
+Alignment_Object::~Alignment_Object()
+{
+  //calling to 
+  //cout<<"***calling to destruct alignment"<<endl;
+  ResetData();
 }
 /*define the text output of the alignment object
  */

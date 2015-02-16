@@ -30,6 +30,7 @@
 #include "Alignment.hpp"
 #include "Alignment_V.hpp"
 #include "Alignment_D.hpp"
+#include "do_VDJ_alignment.hpp"
 //#include 
 
 using namespace std;
@@ -299,6 +300,18 @@ int main(int argc, char* argv[])
   vector<string> outFileNames;
   outFileNames=DetermineOutputFileNames(outputFileNameBase, AlignmentSettings::N_per_file, N_read);
 
+  //calling VDJ alignment
+  unsigned max_align=100;
+  Alignment_Object J_align[1];
+  Alignment_Object V_align[1];
+  Alignment_D D_align[1];
+  unsigned numOfGoodAlignments=do_VDJ_alignment(all_Sequences.begin(), 1, genV, totalNumV,
+						genD, totalNumD, genJ, totalNumJ,
+						errorCost, sm, max_align, 
+						/*output*/ V_align, D_align, J_align);
+  cout<<"successfully aligned "<<numOfGoodAlignments<<" sequences."<<endl;
+
+  /*
   //==============================================================
   //start testing the alignment, first mathJ
   cout<<"%%%%%%%%%%%testing matchJ()>>>>>>cost:"<<errorCost<<endl;
@@ -371,7 +384,7 @@ int main(int argc, char* argv[])
   //
   cout<<"=======>doing match D"<<endl;
   //for NOW, STOP DOING D alignment
-  unsigned max_align=100;
+  
   for(unsigned _m=0;_m<N_read-N_read+1;_m++)
     {
       cout<<"---------------------------i:"<<_m<<endl;
@@ -393,7 +406,7 @@ int main(int argc, char* argv[])
 	cout<<"failed alignment"<<endl;
       cout<<endl;
     }
-
+*/
   /*
   //now we are ready to do the alignment??
   //first need to figure out number of output files
@@ -442,7 +455,7 @@ int main(int argc, char* argv[])
     }
   */
   //********clean up
-  cout<<"Clean up the memories....."<<endl;
+  cout<<"in main::Clean up the memories....."<<endl;
   if(genV!=NULL)
     delete [] genV;
   if(genD!=NULL)
@@ -450,7 +463,7 @@ int main(int argc, char* argv[])
   if(genJ!=NULL)
     delete [] genJ;
 
-  cout<<"Done!!!"<<endl;
+  cout<<"in main::Done!!!"<<endl;
 
   return 0;
 }

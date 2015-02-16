@@ -18,6 +18,7 @@ public:
 
   //virtual destructor, not necessary???
   virtual ~Alignment_D();
+  void ResetData();
 
   string toString();
   
