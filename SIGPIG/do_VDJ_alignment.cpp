@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include "do_VDJ_alignment.hpp"
 
 //to determine v_end, we need to get right most position on the seq
@@ -135,3 +136,54 @@ unsigned do_VDJ_alignment
 
   return numOfAligned;
 }
+
+//p_thread function wrapper.
+void * do_VDJ_align_pthread(void * param_thread)
+{
+  //now decoding the param input
+  param_alignment_pthread* p_a_p=(param_alignment_pthread*) param_thread;
+  
+  //now calling it
+  
+  *p_a_p->p_numOfAligned =do_VDJ_alignment(p_a_p->p_it, p_a_p->p_numOfSeq, 
+		   p_a_p->p_genVs, p_a_p->p_numOfVs,
+		   p_a_p->p_genDs, p_a_p->p_numOfDs,
+		   p_a_p->p_genJs, p_a_p->p_numOfJs,
+		   p_a_p->p_error_cost, p_a_p->p_sm,
+		   p_a_p->p_max_D_align, p_a_p->p_v_align,
+		   p_a_p->p_d_align, p_a_p->p_j_align);
+
+  pthread_exit(NULL);//return numOfAligned as a pointer
+}
+
+void PackUpAlignmentParameterForThread
+  (
+   /*params for do_VDJ_alignment function*/ 
+   vector<SequenceString>::const_iterator _it, 
+   const unsigned& _numOfSeq, 
+   const GenomicV* _genVs, const unsigned& _numOfVs,
+   const GenomicD* _genDs, const unsigned& _numOfDs,
+   const GenomicJ* _genJs, const unsigned& _numOfJs, 
+   const double& _error_cost, const ScoreMatrix* _sm,
+   const unsigned& _max_D_align,
+   Alignment_Object* _v_align, Alignment_D* _d_align, 
+   Alignment_Object* _j_align,
+   unsigned* _numOfAligned,
+   /*pointer to param to use*/
+   param_alignment_pthread* p_a_p
+   )
+{
+  p_a_p->p_it=_it;
+  p_a_p->p_numOfSeq=_numOfSeq;
+  p_a_p->p_genVs=_genVs; p_a_p->p_numOfVs=_numOfVs;
+  p_a_p->p_genDs=_genDs; p_a_p->p_numOfDs=_numOfDs;
+  p_a_p->p_genJs=_genJs; p_a_p->p_numOfJs=_numOfJs;
+  p_a_p->p_error_cost=_error_cost; p_a_p->p_sm=_sm;
+  p_a_p->p_max_D_align=_max_D_align; 
+  p_a_p->p_v_align=_v_align;
+  p_a_p->p_d_align=_d_align; 
+  p_a_p->p_j_align=_j_align;
+  p_a_p->p_numOfAligned= _numOfAligned;
+  //done;
+}
+

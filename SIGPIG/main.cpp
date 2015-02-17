@@ -407,7 +407,7 @@ int main(int argc, char* argv[])
       cout<<endl;
     }
 */
-  /*
+  
   //now we are ready to do the alignment??
   //first need to figure out number of output files
   unsigned numOfOutFiles=outFileNames.size();
@@ -426,25 +426,83 @@ int main(int argc, char* argv[])
     {
       //determine the number of sequences
       unsigned numOfThisFile=(N_read-i*AlignmentSettings::N_per_file);
+      if(i!=numOfOutFiles-1&&numOfThisFile>AlignmentSettings::N_per_file)
+	{
+	  numOfThisFile=AlignmentSettings::N_per_file;
+	}
       
       //allocate the threads
       workThreads=new pthread_t[numberOfThread];
       
-      //prepare the output
-      for(int j=0;j<numberOfThread;j++)
+      //start figure out the seqs for each thread
+      vector<SequenceString>::const_iterator * it_arrays
+	=new vector<SequenceString>::const_iterator[numberOfThread];
+      Alignment_Object** v_align_arrays=new Alignment_Object*[numberOfThread];
+      Alignment_Object** j_align_arrays=new Alignment_Object*[numberOfThread];
+      Alignment_D** d_align_arrays=new Alignment_D* [numberOfThread];
+      unsigned* numOfAlignedSequenceForThread=new unsigned[numberOfThread];
+
+      int numOfSeqForCurrentThread;
+      unsigned numOfSeqPerThread=numOfThisFile/numberOfThread;
+      if(numOfSeqPerThread=0)
 	{
-	  ret =  pthread_create(workThreads[j], NULL, thread_func, NULL);
+	  numOfSeqPerThread=1;
+	}
+      //prepare the output
+      for( int j=0;j<numberOfThread;j++)
+	{
+	  v_align_arrays[j]=NULL;d_align_arrays[j]=NULL;j_align_arrays[j]=NULL;
+
+	  if(numOfThisFile-j*numOfSeqPerThread>0)//still have some to do???
+	    {
+	      if(j==numberOfThread-1)
+		numOfSeqForCurrentThread=numOfThisFile-j*(numOfSeqPerThread);
+	      else
+		numOfSeqForCurrentThread=numOfSeqPerThread;
+	    }
+	  else //nothing left for this current thread, forget about it.
+	    {
+	      numOfSeqForCurrentThread=0;
+	      break;
+	    }
+	  //we are here means we have some seqs to do. do it using the thread
+	  //first thing is to pack up parameters
+	  it_arrays[j]=all_Sequences.begin();
+	  
+	  advance(it_arrays[j], j*numOfSeqPerThread);//move the iterator to the start of current chunk
+	  v_align_arrays[j]=new Alignment_Object[numOfSeqForCurrentThread];
+	  d_align_arrays[j]=new Alignment_D[numOfSeqForCurrentThread];
+	  j_align_arrays[j]=new Alignment_Object[numOfSeqForCurrentThread];
+	  param_alignment_pthread p_a_p;
+	  PackUpAlignmentParameterForThread(it_arrays[j], numOfSeqForCurrentThread,
+					    genV, totalNumV, genD, totalNumD, 
+					    genJ, totalNumJ, errorCost, sm,
+					    max_align, v_align_arrays[j], 
+					    d_align_arrays[j], j_align_arrays[j],
+					    numOfAlignedSequenceForThread+j,
+					    &p_a_p);
+	  
+	  ret =  pthread_create(workThreads+j, NULL, do_VDJ_align_pthread, (void*)(&p_a_p));
 	  if(ret != 0) {
 	    perror("pthread_create failed\n");
 	    exit(EXIT_FAILURE);
 	  }
+	  
+	  void* numOfAligned;
+	  //now join the thread to make the main thread to wait for output
+	  ret=pthread_join(workThreads[j],NULL);
+	  if(ret!=0)
+	    {
+	      perror("pthread_joint failed\n");
+	      exit(EXIT_FAILURE);
+	    }
+	  
 	}
       
+      //now we should have complete every thread and do the output by
+      //serialization
       
-      if(numOfThisFile>AlignmentSettings::N_per_file)
-	{
-	  numOfThisFile=AlignmentSettings::N_per_file;
-	}
+      
       //now determine the sequences to be used in this files
       unsigned startIndexOfSequence=i*AlignmentSettings::N_per_file;
       startIndexOfSequence=startIndexOfSequence+0;
@@ -453,7 +511,7 @@ int main(int argc, char* argv[])
       // *******cleaning up the threads
       delete[] workThreads;
     }
-  */
+  
   //********clean up
   cout<<"in main::Clean up the memories....."<<endl;
   if(genV!=NULL)

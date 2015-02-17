@@ -43,6 +43,8 @@ class Alignment_Object
   virtual ~Alignment_Object();
   
   void ResetData();
+
+  //void Serialize();
   
   /*
   //for initializing
