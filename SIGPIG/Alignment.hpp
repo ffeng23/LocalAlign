@@ -2,6 +2,8 @@
 #define ALIGNMENT_HPP
 
 #include <vector>
+#include <fstream>
+#include <cstring>
 #include "../SequenceString.hpp"
 #include "../score.hpp"
 #include "GenomicV.hpp"
@@ -44,8 +46,9 @@ class Alignment_Object
   
   void ResetData();
 
-  //void Serialize();
-  
+  //output file stream need to be opened and ready to be write to
+  void Serialize(ofstream& _ofs);
+  void Deserialize(ifstream& _ifs);
   /*
   //for initializing
   bool Initialize();
@@ -56,7 +59,8 @@ class Alignment_Object
 
 		private:*/
   unsigned numOfAligned;
-  
+  unsigned maximum_deletion;
+
   unsigned* align_length;//length of numOfAligned
   unsigned** align_position;//2D array(numOfAligend x 2), aligned position is a vector of 2 positions each alignment. 
                      //first one for the seq, and second one for the genomic sequence 

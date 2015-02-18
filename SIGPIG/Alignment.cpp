@@ -1101,5 +1101,226 @@ for(unsigned i=0;i<_numOfAligned;i++)
   //return true;
 }
 
+void Alignment_Object::Serialize(ofstream& _ofs)
+{
+  //do necessary checking
+  if(!_ofs.is_open())
+    {
+      cout<<"**ERROR**: closed file buffer. quit..."<<endl;
+      exit(-1);
+    }
+  //serializing......
+  char* p_char; //pointer used to direct the writing to the file stream
+  //save numOfAligned 
+  p_char=(char*)&numOfAligned;
+  _ofs.write(p_char, sizeof(unsigned));
 
+  if(numOfAligned==0) //nothing to save, only save one this field
+    {
+      return ;
+    }
+  
+  //save numOfAligned 
+  p_char=(char*)&maximum_deletion;
+  _ofs.write(p_char, sizeof(unsigned));
+
+  //align_length, array
+  p_char=(char*)align_length;
+  _ofs.write(p_char, sizeof(unsigned)*numOfAligned);
+
+  //align_position, 2D array
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      //write each elements
+      p_char=(char*)align_position[i];
+      _ofs.write(p_char, sizeof(unsigned)*2);
+    }
+
+  //min_deletion, array
+  p_char=(char*)min_deletions;
+  _ofs.write(p_char, sizeof(unsigned)*numOfAligned);
+  
+  //n_errors
+  p_char=(char*)n_errors;
+  _ofs.write(p_char, sizeof(unsigned)*numOfAligned);
+
+  //error_positions
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      //write each elements
+      p_char=(char*)error_positions[i];
+      _ofs.write(p_char, sizeof(unsigned)*n_errors[i]);
+    }
+  
+  //p_region_max_length
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      //write each elements
+      p_char=(char*)p_region_max_length[i];
+      _ofs.write(p_char, sizeof(unsigned)*maximum_deletion);
+    }
+
+  //excess_error_positions
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      //write each elements
+      p_char=(char*)excess_error_positions[i];
+      _ofs.write(p_char, sizeof(unsigned)*AlignmentSettings::negative_excess_deletions_max);
+    }
+
+  //alleles_all
+  p_char=(char*)alleles_all;
+  _ofs.write(p_char, sizeof(unsigned)*numOfAligned);
+  
+  //n_errors
+  p_char=(char*)alleles_from_distinct_genes;
+  _ofs.write(p_char, sizeof(unsigned)*numOfAligned);
+
+  //done!!
+}
+
+void Alignment_Object::Deserialize(ifstream& _ifs)
+{//the order of reading is important!!!
+  unsigned original_numOfAligned=numOfAligned;
+  //first read numOfAligned
+  char* p_char=(char*)&numOfAligned;
+  _ifs.read(p_char, sizeof(unsigned));
+  if(numOfAligned==0)//nothing to read for this current object,
+    {
+      return ;
+    }
+
+  //we are here, means we need to read more
+  p_char=(char*)&maximum_deletion;
+  _ifs.read(p_char, sizeof(unsigned));
+
+  //align_length
+  if(align_length!=NULL)
+    {
+      delete[] align_length;
+    }
+  align_length=new unsigned[numOfAligned];
+  p_char=(char*)align_length;
+  _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+  
+  //align_position
+  if(align_position!=NULL)
+    {
+      for(unsigned i=0;i<original_numOfAligned;i++)
+	{
+	  if(align_position[i]!=NULL)
+	    {
+	      delete [] align_position[i];
+	    }
+	}
+      delete [] align_position;
+    }
+  
+  align_position=new unsigned*[numOfAligned];
+
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      align_position[i]=new unsigned[2];
+      p_char=(char*)align_position[i];
+      _ifs.read(p_char, sizeof(unsigned)*2);
+    }
+  
+  //min_deletions
+  if(min_deletions)
+    delete [] min_deletions;
+  min_deletions=new unsigned[numOfAligned];
+  p_char=(char*)min_deletions;
+  _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+  
+  //
+  if(n_errors!=NULL)
+    delete[] n_errors;
+  n_errors=new unsigned[numOfAligned];
+  p_char=(char*)n_errors;
+  _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+
+  //
+  if(error_positions!=NULL)
+    {
+      for(unsigned i=0;i<original_numOfAligned;i++)
+	{
+	  if(error_positions[i]!=NULL)
+	    {
+	      delete [] error_positions[i];
+	    }
+	}
+      delete [] error_positions;
+    }
+  
+  error_positions=new unsigned*[numOfAligned];
+
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      error_positions[i]=new unsigned[n_errors[i]];
+      p_char=(char*)error_positions[i];
+      _ifs.read(p_char, sizeof(unsigned)*n_errors[i]);
+    }
+  
+  //
+  if(p_region_max_length!=NULL)
+    {
+      for(unsigned i=0;i<original_numOfAligned;i++)
+	{
+	  if(p_region_max_length[i]!=NULL)
+	    {
+	      delete [] p_region_max_length[i];
+	    }
+	}
+      delete [] p_region_max_length;
+    }
+  
+  p_region_max_length=new unsigned*[numOfAligned];
+
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      p_region_max_length[i]=new unsigned[1+maximum_deletion];
+      p_char=(char*)p_region_max_length[i];
+      _ifs.read(p_char, sizeof(unsigned)*(1+maximum_deletion));
+    }
+
+  //excess error
+  if(excess_error_positions!=NULL)
+    {
+      for(unsigned i=0;i<original_numOfAligned;i++)
+	{
+	  if( excess_error_positions[i]!=NULL)
+	    {
+	      delete [] excess_error_positions[i];
+	    }
+	}
+      delete [] excess_error_positions;
+    }
+  excess_error_positions=new unsigned*[numOfAligned];
+  for(unsigned i=0;i<numOfAligned;i++)
+    {
+      excess_error_positions[i]=new unsigned[AlignmentSettings::negative_excess_deletions_max];
+      p_char=(char*)excess_error_positions[i];
+      _ifs.read(p_char, sizeof(unsigned)*AlignmentSettings::negative_excess_deletions_max);
+    }
+
+  //alleles_all
+  if(alleles_all!=NULL)
+    {
+      delete[] alleles_all;
+    }
+  alleles_all=new unsigned[numOfAligned];
+  p_char=(char*)alleles_all;
+  _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+
+  
+  //
+  if(alleles_from_distinct_genes!=NULL)
+    {
+      delete[] alleles_from_distinct_genes;
+    }
+  alleles_from_distinct_genes=new unsigned[numOfAligned];
+  p_char=(char*)alleles_from_distinct_genes;
+  _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+  
+}
 

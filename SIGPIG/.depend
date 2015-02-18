@@ -58,3 +58,4 @@ tester_main_matchV.o: tester_main_matchV.cpp MatrixFunctions.hpp \
  Alignment.hpp ../SequenceString.hpp ../score.hpp GenomicV.hpp \
  genomicSegment.hpp GenomicD.hpp GenomicJ.hpp Alignment_V.hpp \
  AlignmentSettings.hpp
+tester_serialization.o: tester_serialization.cpp

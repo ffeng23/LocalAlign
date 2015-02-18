@@ -1,6 +1,7 @@
 #ifndef ALIGNMENT_D_HPP
 #define ALIGNMENT_D_HPP
-
+#include <fstream>
+#include <cstring>
 #include "AlignmentSettings.hpp"
 
 //defining the alignment object for D gene segment
@@ -29,6 +30,9 @@ public:
    */
   bool initialize(const unsigned& _n_D_alleles);
 
+  void Serialize(ofstream& _ofs);
+  void Deserialize(ifstream& _ifs);
+
   //======>start to define members
   unsigned n_D_alleles;//total number of D alleles
   unsigned D_max_errors;
@@ -43,10 +47,6 @@ public:
   unsigned*** error_positions;//3D,
   //1D,fixed, numOf alleles; 2D:numOfAligned;
   //3D,having a size of n_errors[i][j];
-  unsigned*** excess_error_positions_left;//3D,
-                    //alleles x numOfAligned x max_negative_excess_errors
-
-  unsigned*** excess_error_positions_right;//same as above
   
   unsigned** align_position_left;//alleles by numOfAligned
   //only record in here the starting index of Seq. the 
@@ -59,13 +59,13 @@ public:
 
   unsigned*** p_region_max_length_left;//allele x numOfAligned x  max_number of deletions
   unsigned*** p_region_max_length_right; //above
-
-  unsigned* allele_order;//={ 0,
-  //1, 2, 3, 4, 5, 6, 7, 8, 9,10,
-  //			   11,12,13,14,15,16,17,18,19,20,
-  //			    21,22,23,24,25,26,27,28,29,30,
-  //			    31,32,33};
   
+  unsigned*** excess_error_positions_left;//3D,
+                    //alleles x numOfAligned x max_negative_excess_errors
+
+  unsigned*** excess_error_positions_right;//same as above
+  
+  unsigned* allele_order;
 };
 
 

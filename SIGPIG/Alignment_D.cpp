@@ -1,5 +1,6 @@
 #include <cstring>
 #include <sstream>
+#include <fstream>
 #include "../SequenceString.hpp"
 #include "genomicSegments.hpp"
 #include "Alignment.hpp"
@@ -1560,4 +1561,133 @@ void DeterminePalindromAndExcessError_D
 	}//end of _numOfAligned
     }//end of outer for loop d : numOfDSegs
 }//end of function find p-nucleotides
+
+void Alignment_D::Serialize(ofstream& _ofs)
+{
+  //do necessary checking
+  if(!_ofs.is_open())
+    {
+      cout<<"**ERROR**: closed file buffer. quit..."<<endl;
+      exit(-1);
+    }
+  //serializing......
+  char* p_char; //pointer used to direct the writing to the file stream
+  //save n_D_alleles 
+  p_char=(char*)&n_D_alleles;
+  _ofs.write(p_char, sizeof(unsigned));
+  
+  //D_max_errors
+  p_char=(char*)&D_max_errors;
+  _ofs.write(p_char, sizeof(unsigned));
+  
+  //numOfAligned --- in here, we don't check for successful alignment, 
+  //because align d is usually sucessful.
+  p_char=(char*)numOfAligned;
+  _ofs.write(p_char, sizeof(unsigned)*n_D_alleles);
+
+  //align_length  
+  if(unsigned i=0;i<n_D_alleles;i++)
+    {
+      p_char=(char*)align_length;
+      _ofs.write(p_char, sizeof(unsigned)*numOfAligned[i]);
+    }
+
+  //score
+  if(unsigned i=0;i<n_D_alleles;i++)
+    {
+      p_char=(char*)score;
+      _ofs.write(p_char, sizeof(double)*numOfAligned[i]);
+    }
+
+  //n_errors
+  if(unsigned i=0;i<n_D_alleles;i++)
+    {
+      p_char=(char*)n_errors;
+      _ofs.write(p_char, sizeof(double)*numOfAligned[i]);
+    }
+
+  //error_positions
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      for(unsigned j=0;j<numOfAligned[i];j++)
+	{	  
+	  p_char=(char*)error_positions[i][j];
+	  _ofs.write(p_char, sizeof(double)*n_errors[i][j]);
+	}
+    }
+  
+  //align_position_left
+  if(unsigned i=0;i<n_D_alleles;i++)
+    {
+      p_char=(char*)align_position_left;
+      _ofs.write(p_char, sizeof(unsigned)*numOfAligned[i]);
+    }
+
+  //align_position_right
+  if(unsigned i=0;i<n_D_alleles;i++)
+    {
+      p_char=(char*)align_position_right;
+      _ofs.write(p_char, sizeof(unsigned)*numOfAligned[i]);
+    }
+
+  //deletion_left
+  if(unsigned i=0;i<n_D_alleles;i++)
+    {
+      p_char=(char*)deletions_left;
+      _ofs.write(p_char, sizeof(unsigned)*numOfAligned[i]);
+    }
+
+  //deletion_right
+  if(unsigned i=0;i<n_D_alleles;i++)
+    {
+      p_char=(char*)deletions_right;
+      _ofs.write(p_char, sizeof(unsigned)*numOfAligned[i]);
+    }
+
+  //p_region_max_length_left
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      for(unsigned j=0;j<numOfAligned[i];j++)
+	{	  
+	  p_char=(char*)p_region_max_length_left[i][j];
+	  _ofs.write(p_char, sizeof(unsigned)*(1+AlignmentSettings::D_maximum_deletion));
+	}
+    }
+  
+  //p_region_max_length_right
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      for(unsigned j=0;j<numOfAligned[i];j++)
+	{	  
+	  p_char=(char*)p_region_max_length_right[i][j];
+	  _ofs.write(p_char, sizeof(unsigned)*(1+AlignmentSettings::D_maximum_deletion));
+	}
+    }
+  
+  //excess_error_position
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      for(unsigned j=0;j<numOfAligned[i];j++)
+	{	  
+	  p_char=(char*)excess_error_positions_left[i][j];
+	  _ofs.write(p_char, sizeof(unsigned)*(AlignmentSettings::negative_excess_deletions_max));
+	}
+    }
+  
+  //excess_error_position
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      for(unsigned j=0;j<numOfAligned[i];j++)
+	{	  
+	  p_char=(char*)excess_error_positions_right[i][j];
+	  _ofs.write(p_char, sizeof(unsigned)*(AlignmentSettings::negative_excess_deletions_max));
+	}
+    }
+    
+  //allele_order
+  p_char=(char*)allele_order;
+  _ofs.write(p_char, sizeof(unsigned)*n_D_alleles);
+
+  //done  
+}
 
