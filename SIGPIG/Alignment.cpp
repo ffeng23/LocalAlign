@@ -1184,6 +1184,11 @@ void Alignment_Object::Deserialize(ifstream& _ifs)
   unsigned original_numOfAligned=numOfAligned;
   //first read numOfAligned
   char* p_char=(char*)&numOfAligned;
+  if(_ifs.eof())
+    {
+      cout<<"****ERROR: the file end reached before reading the first field of the object"<<endl;
+      exit(-1);
+    }
   _ifs.read(p_char, sizeof(unsigned));
   if(numOfAligned==0)//nothing to read for this current object,
     {

@@ -1586,23 +1586,23 @@ void Alignment_D::Serialize(ofstream& _ofs)
   _ofs.write(p_char, sizeof(unsigned)*n_D_alleles);
 
   //align_length  
-  if(unsigned i=0;i<n_D_alleles;i++)
+  for(unsigned i=0;i<n_D_alleles;i++)
     {
-      p_char=(char*)align_length;
+      p_char=(char*)align_length[i];
       _ofs.write(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
 
   //score
-  if(unsigned i=0;i<n_D_alleles;i++)
+  for(unsigned i=0;i<n_D_alleles;i++)
     {
-      p_char=(char*)score;
+      p_char=(char*)score[i];
       _ofs.write(p_char, sizeof(double)*numOfAligned[i]);
     }
 
   //n_errors
-  if(unsigned i=0;i<n_D_alleles;i++)
+  for(unsigned i=0;i<n_D_alleles;i++)
     {
-      p_char=(char*)n_errors;
+      p_char=(char*)n_errors[i];
       _ofs.write(p_char, sizeof(double)*numOfAligned[i]);
     }
 
@@ -1617,30 +1617,30 @@ void Alignment_D::Serialize(ofstream& _ofs)
     }
   
   //align_position_left
-  if(unsigned i=0;i<n_D_alleles;i++)
+  for(unsigned i=0;i<n_D_alleles;i++)
     {
-      p_char=(char*)align_position_left;
+      p_char=(char*)align_position_left[i];
       _ofs.write(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
 
   //align_position_right
-  if(unsigned i=0;i<n_D_alleles;i++)
+  for(unsigned i=0;i<n_D_alleles;i++)
     {
-      p_char=(char*)align_position_right;
+      p_char=(char*)align_position_right[i];
       _ofs.write(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
 
   //deletion_left
-  if(unsigned i=0;i<n_D_alleles;i++)
+  for(unsigned i=0;i<n_D_alleles;i++)
     {
-      p_char=(char*)deletions_left;
+      p_char=(char*)deletions_left[i];
       _ofs.write(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
 
   //deletion_right
-  if(unsigned i=0;i<n_D_alleles;i++)
+  for(unsigned i=0;i<n_D_alleles;i++)
     {
-      p_char=(char*)deletions_right;
+      p_char=(char*)deletions_right[i];
       _ofs.write(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
 
@@ -1689,5 +1689,343 @@ void Alignment_D::Serialize(ofstream& _ofs)
   _ofs.write(p_char, sizeof(unsigned)*n_D_alleles);
 
   //done  
+}
+
+//NOTE: here in side this function, we assume all fields are the default,
+//zero or NULL.
+void Alignment_D::Deserialize(ifstream& _ifs)
+{
+  //first we need to check for there is fields to read
+  if(_ifs.eof())
+    {
+      cout<<"*****ERROR: can not read fields, end of the file"<<endl;
+      exit(-1);
+    }
+
+  //now do the reading.
+  unsigned original_n_D_alleles=n_D_alleles;
+  unsigned original_max_errors=max_errors;
+  unsigned * original_numOfAligned=new unsigned[n_D_alleles];
+  //read n_D_alleles
+  char* p_char=(char*)&n_D_alleles;
+  _ifs.read(p_char, sizeof(unsigned));
+
+  //max_error
+  p_char =(char*)&max_errors;
+  _ifs_read(p_char, sizeof(unsigned));
+  
+  //numOfaligned
+
+  if(numOfAligned!=NULL)
+    {
+      memcpy(original_numOfAligned, numOfAligned, sizeof(unsigned)*original_n_D_alleles);
+      delete[] align_length;
+    }
+
+  numOfAligned=new unsigned [n_D_alleles];
+  p_char=(char*)numOfAligned;
+  _ifs.read(p_char, sizeof(unsigned)*n_D_alleles);
+
+  //align_length
+  if(align_length!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(align_length[i]!=NULL)
+	    delete [] align_length[i];
+	}
+      delete [] align_length;
+    }
+  align_length=new unsigned* [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      align_length[i]=new unsigned[numOfAligned];
+      p_char=(char*)align_length[i];
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+    }
+
+  //score
+  if(score!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(score[i]!=NULL)
+	    delete [] score[i];
+	}
+      delete [] score;
+    }
+  score=new double* [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      score[i]=new double[numOfAligned];
+      p_char=(char*)score[i];
+      _ifs.read(p_char, sizeof(double)*numOfAligned);
+    }
+
+  //n_errors
+  if(n_errors!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(n_errors[i]!=NULL)
+	    delete [] n_errors[i];
+	}
+      delete [] n_errors;
+    }
+  n_errors=new unsigned* [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      n_errors[i]=new unsigned[numOfAligned];
+      p_char=(char*)n_errors[i];
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+    }
+
+  //error_positions
+  if(error_positions!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(error_positions[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<original_numOfAligned[i];j++)
+		{
+		  if(error_positions[i][j]!=NULL)
+		    {
+		      delete [] error_positions[i][j];
+		    }
+		}
+	      delete [] error_position[i];
+	    }
+	}
+      delete [] n_errors;
+    }
+  
+  error_positions=new unsigned** [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      error_positions[i]=new unsigned*[numOfAligned];
+      for(unsigned j=0;j<numOfAligned;j++)
+	{
+	  error_positions[i][j]=new unsigned[n_error[i][j]];
+	  p_char=(char*)error_positions[i][j];
+	  _ifs.read(p_char, sizeof(unsigned)*n_error[i][j]);
+	}
+    }
+
+  //align_position_left
+  if(align_position_left!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(align_position_left[i]!=NULL)
+	    delete [] align_position_left[i];
+	}
+      delete [] align_position_left;
+    }
+  align_position_left=new unsigned* [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      align_position_left[i]=new unsigned[numOfAligned];
+      p_char=(char*)align_position_left[i];
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+    }
+  //align_position_right
+  if(align_position_right!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(align_position_right[i]!=NULL)
+	    delete [] align_position_right[i];
+	}
+      delete [] align_position_right;
+    }
+  align_position_right=new unsigned* [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      align_position_right[i]=new unsigned[numOfAligned];
+      p_char=(char*)align_position_right[i];
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+    }
+  //deletion_left
+  if(deletions_left!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(deletions_left[i]!=NULL)
+	    delete [] deletions_left[i];
+	}
+      delete [] deletions_left;
+    }
+  deletions_left=new unsigned* [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      deletions_left[i]=new unsigned[numOfAligned];
+      p_char=(char*)deletions_left[i];
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+    }
+  //deletion_right
+  if(deletions_right!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(deletions_right[i]!=NULL)
+	    delete [] deletions_right[i];
+	}
+      delete [] deletions_right;
+    }
+  deletions_right=new unsigned* [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      deletions_right[i]=new unsigned[numOfAligned];
+      p_char=(char*)deletions_right[i];
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+    }
+  
+  //p_region_max_length_left
+  if(p_region_max_length_left!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(p_region_max_length_left[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<original_numOfAligned[i];j++)
+		{
+		  if(p_region_max_length_left[i][j]!=NULL)
+		    {
+		      delete [] p_region_max_length_left[i][j];
+		    }
+		}
+	      delete [] p_region_max_length_left[i];
+	    }
+	}
+      delete [] p_region_max_length_left;
+    }
+  
+  p_region_max_length_left=new unsigned** [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      p_region_max_length_left[i]=new unsigned*[numOfAligned];
+      for(unsigned j=0;j<numOfAligned;j++)
+	{
+	  p_region_max_length_left[i][j]
+	    =new unsigned[AlignmentSettings::D_maximum_deletion+1];
+	  p_char=(char*)p_region_max_length_left[i][j];
+	  _ifs.read(p_char, sizeof(unsigned)*(1+AlignmentSettings::D_maximum_deletion));
+	}
+    }
+
+  //p_region_max_length_right
+  if(p_region_max_length_right!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(p_region_max_length_right[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<original_numOfAligned[i];j++)
+		{
+		  if(p_region_max_length_right[i][j]!=NULL)
+		    {
+		      delete [] p_region_max_length_right[i][j];
+		    }
+		}
+	      delete [] p_region_max_length_right[i];
+	    }
+	}
+      delete [] p_region_max_length_right;
+    }
+  
+  p_region_max_length_right=new unsigned** [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      p_region_max_length_right[i]=new unsigned*[numOfAligned];
+      for(unsigned j=0;j<numOfAligned;j++)
+	{
+	  p_region_max_length_right[i][j]
+	    =new unsigned[AlignmentSettings::D_maximum_deletion+1];
+	  p_char=(char*)p_region_max_length_right[i][j];
+	  _ifs.read(p_char, sizeof(unsigned)*(1+AlignmentSettings::D_maximum_deletion));
+	}
+    }
+  //excess_error_position_left
+  if(excess_error_positions_left!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(excess_error_positions_left[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<original_numOfAligned[i];j++)
+		{
+		  if(excess_error_positions_left[i][j]!=NULL)
+		    {
+		      delete [] excess_error_positions_left[i][j];
+		    }
+		}
+	      delete [] excess_error_positions_left[i];
+	    }
+	}
+      delete [] excess_error_positions_left;
+    }
+  
+  excess_error_positions_left=new unsigned** [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      excess_error_positions_left[i]=new unsigned*[numOfAligned];
+      for(unsigned j=0;j<numOfAligned;j++)
+	{
+	  excess_error_positions_left[i][j]
+	    =new unsigned[AlignmentSettings::negative_excess_deletions_max];
+	  p_char=(char*)excess_error_positions_left[i][j];
+	  _ifs.read(p_char, sizeof(unsigned)*(AlignmentSettings::negative_excess_deletions_max));
+	}
+    }  
+  
+  //excess_error_position_right
+  if(excess_error_positions_right!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(excess_error_positions_right[i]!=NULL)
+	    {
+	      for(unsigned j=0;j<original_numOfAligned[i];j++)
+		{
+		  if(excess_error_positions_right[i][j]!=NULL)
+		    {
+		      delete [] excess_error_positions_right[i][j];
+		    }
+		}
+	      delete [] excess_error_positions_right[i];
+	    }
+	}
+      delete [] excess_error_positions_right;
+    }
+  
+  excess_error_positions_right=new unsigned** [n_D_alleles];
+  for(unsigned i=0;i<n_D_alleles;i++)
+    {
+      excess_error_positions_right[i]=new unsigned*[numOfAligned];
+      for(unsigned j=0;j<numOfAligned;j++)
+	{
+	  excess_error_positions_right[i][j]
+	    =new unsigned[AlignmentSettings::negative_excess_deletions_max];
+	  p_char=(char*)excess_error_positions_right[i][j];
+	  _ifs.read(p_char, sizeof(unsigned)*(AlignmentSettings::negative_excess_deletions_max));
+	}
+    }
+  //allele_order
+  if(allele_order!=NULL)
+    {
+      for(unsigned i=0;i<original_n_D_alleles;i++)
+	{
+	  if(allele_order[i]!=NULL)
+	    delete [] allele_order[i];
+	}
+      delete [] allele_order;
+    }
+  allele_order=new unsigned* [n_D_alleles];
+  p_char=(char*)allele_order[i];
+  _ifs.read(p_char, sizeof(unsigned)*n_D_alleles);
+    
+  //clean up memory
+  delete [] original_numOfAligned;
 }
 

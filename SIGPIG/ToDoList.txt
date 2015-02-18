@@ -2,4 +2,5 @@
 2) main.cpp, need to take care of delete allocated variables and arrays
 3) in alignment_object, add new field member maximum_deletion, need to check the code to make sure it is work!!!
 
-4)deserialize, need to check for the error flag, in case of reach the end of file buffer. or other errors
+4)DONE====>deserialize, need to check for the error flag, in case of reach the end of file buffer. or other errors
+5)delete allocated variables in alignment.cpp alignment_D.cpp deserialize
