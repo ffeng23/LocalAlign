@@ -27,7 +27,7 @@ void DeterminePalindromAndExcessError_V
   bool still_palindrome=true;
   //go through and find palindromic nucleotides for various number of deletions,
   //    %as well as error positions for 'negative' deletions.
-  cout<<"\tinside palindro.....before loop. _numOfAligned:"<<_numOfAligned<<endl;
+  //cout<<"\tinside palindro.....before loop. _numOfAligned:"<<_numOfAligned<<endl;
   for(unsigned  j=0;j<_numOfAligned;j++)
     {
       cout<<"\t*^^^^^^loop "<<j<<endl;
@@ -48,10 +48,10 @@ void DeterminePalindromAndExcessError_V
       int max_nd=_V_maximum_deletion;
       if(max_nd>_align_length[j]+_min_deletions[j])
 	max_nd=_align_length[j]+_min_deletions[j];
-      cout<<"\t\t^^^^^second loop before, nd:"<<nd<<endl;
+      //cout<<"\t\t^^^^^second loop before, nd:"<<nd<<endl;
       for(;nd<=max_nd;nd++)
 	{
-	  cout<<"\t\t\tsub loop:"<<nd<<endl;
+	  //cout<<"\t\t\tsub loop:"<<nd<<endl;
 	  //% For each value of deletions, find longest half-palindrome
           //  % from the implied end of the gene sequence
 	  p=0;
@@ -61,22 +61,21 @@ void DeterminePalindromAndExcessError_V
 	  if(max_p_length>_seq.GetLength()-(_align_positions[j][0])-_align_length[j]+nd-_min_deletions[j])
 	    max_p_length=_seq.GetLength()-(_align_positions[j][0])-_align_length[j]+nd-_min_deletions[j];
 
-	  cout<<"\t\t\tchecking while loop"<<endl;
+	  //cout<<"\t\t\tchecking while loop"<<endl;
 	  while( still_palindrome && p < max_p_length)
-	    {
-	      
+	    {	      
 	      still_palindrome = target.at(_align_positions[j][1] +_align_length[j] -1 - p - (nd - _min_deletions[j] )-0) == DnaComplement(_seq.GetSequence().at(_align_positions[j][0]+ _align_length[j]-1 -(nd - _min_deletions[j])+p +1) );
 	      if (still_palindrome)
 		{
 		  p ++;
 		}
 	    }
-	  cout<<"\t\t\tdone!!!"<<endl;
+	  //cout<<"\t\t\tdone!!!"<<endl;
 	  //% Store length of longest half-palindrome for each value of
 	  //% deletions.
 	  _p_region_max_length[j][ nd] = p;
 	}
-      cout<<"\t\tend of second loop"<<endl;
+      //cout<<"\t\tend of second loop"<<endl;
       //        % Now for the 'negative' deletions, store where the mismatches are.
       // % This is so we can count number of errors for these possibilities.
       
@@ -86,7 +85,7 @@ void DeterminePalindromAndExcessError_V
       //cout<<"n_excess :"<<n_excess<<endl;
       unsigned k;    
       unsigned runningIndex_excessError=0;
-      cout<<"\tready to do the excess error"<<endl;
+      //cout<<"\tready to do the excess error"<<endl;
       // % Find mismatches between sequence and genomic J at those positions.
       for( k=0;k<n_excess;k++)
 	{
@@ -108,7 +107,7 @@ void DeterminePalindromAndExcessError_V
 	}
       //cout <<"\t end of first for loop"<<endl;         
     }//end of outer for loop for all the aligned strings
-  cout<<"Done for the function"<<endl;
+  //cout<<"Done for the function"<<endl;
   //return true;
 }
 
@@ -277,7 +276,7 @@ bool match_V(const SequenceString& _seq,
      
      // % Calculate deletions implied by alignment
      temp_min_deletions[i]=l_target-(temp_align_position[i][1]+temp_align_length[i]-1) - 1;
-     cout<<"\tmin_deletion:"<<temp_min_deletions[i]<<endl;
+     //cout<<"\tmin_deletion:"<<temp_min_deletions[i]<<endl;
      //    % Flag if number of deletions is too many
      v_large_deletion_flag[i]=false;
      if( temp_min_deletions[i] > _V_maximum_deletion)
@@ -298,29 +297,29 @@ bool match_V(const SequenceString& _seq,
  double* scores=new double[_numOfVSegs];
  //prepare the sorted index of the array.
  unsigned* sorted_index=new unsigned[_numOfVSegs];
- cout<<"=========>before sorting:";
+ //cout<<"=========>before sorting:";
  for(unsigned k=0;k<_numOfVSegs;k++)
    {
      sorted_index[k]=k;
      scores[k]=CalculateScore(temp_align_length[k], temp_error_positions[k], temp_n_errors[k], _error_cost);//temp_align_length[k]-_error_cost*temp_n_errors[k];
-     cout<<scores[k]<<"-"<<sorted_index[k]<<"-"<<temp_min_deletions[k]<<"-"<<temp_align_length[k]<<",";
+     //cout<<scores[k]<<"-"<<sorted_index[k]<<"-"<<temp_min_deletions[k]<<"-"<<temp_align_length[k]<<",";
      
    }
- cout<<endl;
+ //cout<<endl;
  // cout<<"\n***first****3aa"<<endl;
  //sorted index also holding the gene allele index
  QuickSort<double>(scores, 0, _numOfVSegs-1, sorted_index, temp_min_deletions);
  //	      scores  = align_length - error_cost*n_errors;
  //S = [-scores, min_deletions];
  //	  [~,order]=sortrows(S);
- cout<<"=========>after sorting:";
- for(unsigned k=0;k<_numOfVSegs;k++)
+ //cout<<"=========>after sorting:";
+ /*for(unsigned k=0;k<_numOfVSegs;k++)
    {
      //sorted_index[k]=k;
      //scores[k]=temp_align_length[k]-_error_cost*temp_n_errors[k];
      cout<<k<<":"<<scores[k]<<"-"<<sorted_index[k]<<"-"<<temp_min_deletions[k]<<"-"<<temp_align_length[sorted_index[k]]<<",";
    }
- cout<<endl;
+   cout<<endl;*/
  //cout<<"\n***first****3bb"<<endl;
  //now we need to reverse the order, since the QuickSort is ascending, but for our purpose we need to descending.
  Reverse(sorted_index, _numOfVSegs);
@@ -339,7 +338,7 @@ bool match_V(const SequenceString& _seq,
  //we want to get the best ones, but limited numbers 
  double min_score=max_mf(scores,_numOfVSegs)-3*_V_minimum_alignment_length;
  unsigned max_error=temp_n_errors[sorted_index[0]]+3;//another arbitrary threshold
- cout<<"min_score:"<<min_score<<endl;
+ //cout<<"min_score:"<<min_score<<endl;
  //% Subset of alleles that have high enough score, long enough alignment, and
  //	      % not too many deletions.
  unsigned* ok_order = new unsigned[_numOfVSegs]; //this will directly used by J.alleles_all, so do NOT delete/clean later
@@ -348,7 +347,7 @@ bool match_V(const SequenceString& _seq,
  for(unsigned i=0;i<_numOfVSegs;i++)
    { 
 
-     cout<<"index i:"<<i<<"----****"<<ok_count<<endl;
+     //cout<<"index i:"<<i<<"----****"<<ok_count<<endl;
      
      //find( scores(order) >= min_score & align_length(order) >= J_minimum_alignment_length & v_large_deletion_flag(order)==0);
      if(scores[i]>=min_score&&temp_align_length[sorted_index[i]]>=_V_minimum_alignment_length&&!v_large_deletion_flag[sorted_index[i]]
@@ -360,19 +359,20 @@ bool match_V(const SequenceString& _seq,
        }
 
    }
- cout<<"---------->showing the ok_order array:"<<ok_count<<endl;
- for(unsigned i=0;i<ok_count;i++)
+ //cout<<"---------->showing the ok_order array:"<<ok_count<<endl;
+ /*for(unsigned i=0;i<ok_count;i++)
    {
    cout<<i<<"-"<<ok_order[i]<<",";
    }
  cout<<endl;
- 
+ */
  //bool seq_j_ok=true;
  //cout<<"*******first 4a check for status"<<endl;
  if(ok_count<=0)//empty
    {
      //cout<<"*****inside false condition"<<endl;
      _V.numOfAligned=0;
+     _V.maximum_deletion=0;
      //do we want to clean up the memory, not necessary???
      //we have to clean up the memory, by now some of the arrays have been allocated
      //<--------
@@ -414,6 +414,7 @@ bool match_V(const SequenceString& _seq,
  //time of false, we will not clean up memeory, since it will never 
  //happen
  _V.numOfAligned=ok_count;
+ _V.maximum_deletion=_V_maximum_deletion;
  //cout<<"***first****4aaa"<<endl;
  _V.align_length = new unsigned [ok_count];
  //cout<<"****ok_count***:"<<ok_count<<endl;
@@ -492,7 +493,7 @@ for(unsigned i=0;i<ok_count;i++)
  unsigned* genV_ok_index = new unsigned[ok_count];
  //go through the genJ to figure out the distinct genes for the each allele, and then reture a array of indices to them
  
- cout<<"\t^^^^^showing the gene index of the alleles:";
+ //cout<<"\t^^^^^showing the gene index of the alleles:";
  for(unsigned i=0;i<ok_count;i++)
    {
      genV_ok_index[i]=_genVs[_V.alleles_all[i]].Get_GeneIndex();
@@ -505,12 +506,12 @@ for(unsigned i=0;i<ok_count;i++)
  unsigned* sorted_genV_ok_index_temp_index=new unsigned[ok_count];
  unsigned numOfUnique;
  Unique(genV_ok_index, ok_count, sorted_genV_ok_index_temp, sorted_genV_ok_index_temp_index,numOfUnique);
- cout<<"after unique:numOfUnique:"<<numOfUnique<<endl;
+ //cout<<"after unique:numOfUnique:"<<numOfUnique<<endl;
  //now we got the distinct gene index index, just need to sort it, to make it in order
  //because when we do the unique, we first sort it and the gene index might not in order
  //so the index of the gene index is not in order either
  QuickSort(sorted_genV_ok_index_temp_index,0, numOfUnique-1);
- cout<<"after sorting...."<<endl;
+ //cout<<"after sorting...."<<endl;
  //cout<<"the index index:"<< sorted_genV_ok_index_temp_index[0]<<endl;
 
  //cout<<"***first****6"<<endl;
@@ -585,8 +586,7 @@ unsigned align_with_constraints_fast_no_fix
       unsigned* _error_positions)
 {
   unsigned align_length=0;
-  
-  
+    
   unsigned l_seq=_seq.size();
   unsigned l_target=_target.size();
   int best_match_index=0;

@@ -1,6 +1,9 @@
-1) main.cpp, need to take care of unsigned, int for numOfSeq etc
-2) main.cpp, need to take care of delete allocated variables and arrays
-3) in alignment_object, add new field member maximum_deletion, need to check the code to make sure it is work!!!
+1) DONE===>main.cpp, need to take care of unsigned, int for numOfSeq etc
+2) DONE===>main.cpp, need to take care of delete allocated variables and arrays
+3) DONE===>in alignment_object, add new field member maximum_deletion, need to check the code to make sure it is work!!!
 
 4)DONE====>deserialize, need to check for the error flag, in case of reach the end of file buffer. or other errors
-5)delete allocated variables in alignment.cpp alignment_D.cpp deserialize
+5)DONE===>delete allocated variables in alignment.cpp alignment_D.cpp deserialize
+
+6) need to rewrite the deserialize function, we should have call to reset the data before read the data into it.
+

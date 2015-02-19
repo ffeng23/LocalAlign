@@ -12,7 +12,7 @@ using namespace std;
 
 
 Alignment_Object::Alignment_Object(const unsigned& numOfGenTemplates):
-  numOfAligned(numOfGenTemplates), align_length(NULL),
+  numOfAligned(numOfGenTemplates), maximum_deletion(0), align_length(NULL),
   align_position(NULL), min_deletions(NULL), n_errors(NULL), error_positions(NULL),
   p_region_max_length(NULL), excess_error_positions(NULL), alleles_all(NULL),
   alleles_from_distinct_genes(NULL)
@@ -22,7 +22,7 @@ Alignment_Object::Alignment_Object(const unsigned& numOfGenTemplates):
 
 //copy constructor, we need a deep copy
 Alignment_Object::Alignment_Object(const Alignment_Object& _ao) :
-  numOfAligned(_ao.numOfAligned)
+  numOfAligned(_ao.numOfAligned), maximum_deletion(_ao.maximum_deletion)
 {
   //first determine the size of unsigned in term of char
   unsigned sizeOfUnsigned=sizeof(unsigned)/sizeof(char);
@@ -46,8 +46,8 @@ Alignment_Object::Alignment_Object(const Alignment_Object& _ao) :
   p_region_max_length=new unsigned*[numOfAligned];
   for(unsigned i=0;i<numOfAligned;i++)
     {
-      p_region_max_length[i]=new unsigned[AlignmentSettings::J_allowed_errors+1];
-      memcpy(p_region_max_length[i], _ao.p_region_max_length[i], (AlignmentSettings::J_allowed_errors+1)*sizeOfUnsigned);
+      p_region_max_length[i]=new unsigned[maximum_deletion+1];
+      memcpy(p_region_max_length[i], _ao.p_region_max_length[i], (maximum_deletion+1)*sizeOfUnsigned);
     }
 
   excess_error_positions=new unsigned*[numOfAligned];
@@ -74,6 +74,7 @@ Alignment_Object& Alignment_Object::operator = (const Alignment_Object& _ao)
   unsigned sizeOfUnsigned=sizeof(unsigned)/sizeof(char);
   
   numOfAligned=_ao.numOfAligned;
+  maximum_deletion=_ao.maximum_deletion;
   
   align_length=new unsigned [numOfAligned];
   memcpy(align_length, _ao.align_length, numOfAligned*sizeOfUnsigned);
@@ -94,8 +95,8 @@ Alignment_Object& Alignment_Object::operator = (const Alignment_Object& _ao)
   p_region_max_length=new unsigned*[numOfAligned];
   for(unsigned i=0;i<numOfAligned;i++)
     {
-      p_region_max_length[i]=new unsigned[AlignmentSettings::J_allowed_errors+1];
-      memcpy(p_region_max_length[i], _ao.p_region_max_length[i], (AlignmentSettings::J_allowed_errors+1)*sizeOfUnsigned);
+      p_region_max_length[i]=new unsigned[maximum_deletion+1];
+      memcpy(p_region_max_length[i], _ao.p_region_max_length[i], (maximum_deletion+1)*sizeOfUnsigned);
     }
 
   excess_error_positions=new unsigned*[numOfAligned];
@@ -189,6 +190,8 @@ void Alignment_Object::ResetData()
     {
       delete[] align_length;
     }
+  numOfAligned=0;
+  maximum_deletion=0;
   
 }  
   
@@ -265,10 +268,10 @@ string Alignment_Object::toString()
   for(unsigned i=0;i<numOfAligned;i++)
     {
       ss<<"\t";
-      for(unsigned j=0;j<AlignmentSettings::J_maximum_deletion+1;j++)
+      for(unsigned j=0;j<maximum_deletion+1;j++)
 	{
 	  ss<<p_region_max_length[i][j];
-	  if(j!=AlignmentSettings::J_maximum_deletion+1-1)
+	  if(j!=maximum_deletion+1-1)
 	    ss<<"\t";
 	  else
 	    ss<<"\n";
@@ -626,7 +629,7 @@ bool match_J(const SequenceString& _seq,
   //unsigned* temp_alleles_all; unsigned* alleles_from_distinct_gene;
   //temp_alleles_all=NULL; alleles_from_distinct_gene=NULL;
 
-  cout<<"***f2irst****"<<endl;
+  //cout<<"***f2irst****"<<endl;
   
   //the following are only for setting up the output for the 
   //unsigned align_length_func;
@@ -705,8 +708,7 @@ bool match_J(const SequenceString& _seq,
 	  j_large_deletion_flag[i] = true;
 	  //%continue;
         }//  end
-      //    end
-
+    
    }//end of for loop to go through the J segs alleles for alignment.
     //% Check!  No need to check in c++ code.
  //	    assert(all(min_deletions>=0));
@@ -718,7 +720,7 @@ bool match_J(const SequenceString& _seq,
   double* scores=new double[_numOfJSegs];
  //prepare the sorted index of the array.
   unsigned* sorted_index=new unsigned[_numOfJSegs];
- cout<<"=========>before sorting:";
+  //cout<<"=========>before sorting:";
  for(unsigned k=0;k<_numOfJSegs;k++)
    {
      sorted_index[k]=k;
@@ -732,7 +734,7 @@ bool match_J(const SequenceString& _seq,
  //	      scores  = align_length - error_cost*n_errors;
  //S = [-scores, min_deletions];
  //	  [~,order]=sortrows(S);
- cout<<"=========>after sorting:";
+ //cout<<"=========>after sorting:";
  for(unsigned k=0;k<_numOfJSegs;k++)
    {
      //sorted_index[k]=k;
@@ -746,7 +748,7 @@ bool match_J(const SequenceString& _seq,
  Reverse(scores, _numOfJSegs);
  Reverse(temp_min_deletions, _numOfJSegs);
 
- cout<<"=========>after sorting:";
+ //cout<<"=========>after sorting:";
  for(unsigned k=0;k<_numOfJSegs;k++)
    {
      //sorted_index[k]=k;
@@ -766,7 +768,6 @@ bool match_J(const SequenceString& _seq,
  //cout<<"***first****4"<<endl;
  for(unsigned i=0;i<_numOfJSegs;i++)
    { 
-     
      //find( scores(order) >= min_score & align_length(order) >= J_minimum_alignment_length & j_large_deletion_flag(order)==0);
      if(scores[i]>=min_score&&temp_align_length[sorted_index[i]]>=_J_minimum_alignment_length&&!j_large_deletion_flag[sorted_index[i]])
        {
@@ -829,6 +830,7 @@ bool match_J(const SequenceString& _seq,
  //time of false, we will not clean up memeory, since it will never 
  //happen
  _J.numOfAligned=ok_count;
+ _J.maximum_deletion=_J_maximum_deletion;
  //cout<<"***first****4aaa"<<endl;
  _J.align_length = new unsigned [ok_count];
  //cout<<"****ok_count***:"<<ok_count<<endl;
@@ -1011,10 +1013,10 @@ void DeterminePalindromAndExcessError_J
   )
 {
   unsigned p=0;
-  cout<<"in the beginning p_Region_max_length:"<<endl;
+  //cout<<"in the beginning p_Region_max_length:"<<endl;
 for(unsigned i=0;i<_numOfAligned;i++)
    {
-     cout<<"\t"<<endl;
+     //cout<<"\t"<<endl;
      for(unsigned j=0;j<_J_maximum_deletion+1;j++)
        {
 	 cout<<_p_region_max_length[i][j]<<",";
@@ -1024,10 +1026,10 @@ for(unsigned i=0;i<_numOfAligned;i++)
   bool still_palindrome=true;
   //go through and find palindromic nucleotides for various number of deletions,
   //    %as well as error positions for 'negative' deletions.
-  cout<<"\tinside palindro.....before loop"<<endl;
+  //cout<<"\tinside palindro.....before loop"<<endl;
   for(unsigned  j=0;j<_numOfAligned;j++)
     {
-      cout<<"\t*^^^^^^loop "<<j<<endl;
+      //cout<<"\t*^^^^^^loop "<<j<<endl;
       string target=_genJs[_ok_order[j]].Get_Sequence();
       //% Loop over number of deletions (nd is actual number of genomic deletions).
       //  % Lower bound is maximum of 0 and min_deletions - negative_excess_deletions_max (usually 3).
@@ -1038,7 +1040,7 @@ for(unsigned i=0;i<_numOfAligned;i++)
       int max_nd=_J_maximum_deletion;
       if(max_nd>_align_length[j]+_min_deletions[j])
 	max_nd=_align_length[j]+_min_deletions[j];
-      cout<<"\t\t^^^^^second loop before, nd:"<<nd<<endl;
+      //cout<<"\t\t^^^^^second loop before, nd:"<<nd<<endl;
       for(;nd<=max_nd;nd++)
 	{
 	  //% For each value of deletions, find longest half-palindrome
@@ -1063,41 +1065,41 @@ for(unsigned i=0;i<_numOfAligned;i++)
 	  //% deletions.
 	  _p_region_max_length[j][ nd] = p;
 	}
-      cout<<"\t\tend of second loop"<<endl;
+      //cout<<"\t\tend of second loop"<<endl;
       //        % Now for the 'negative' deletions, store where the mismatches are.
       // % This is so we can count number of errors for these possibilities.
       
       //        % Number of 'negative' deletions to consider:
       unsigned tempArry[]={_negative_excess_deletions_max, _min_deletions[j], _align_positions[j][0]-1 };
       unsigned n_excess = min_mf(tempArry,3);
-      cout<<"n_excess :"<<n_excess<<endl;
+      //cout<<"n_excess :"<<n_excess<<endl;
       unsigned k;    
       unsigned runningIndex_excessError=0;
-      cout<<"\tready to do the excess error"<<endl;
+      //cout<<"\tready to do the excess error"<<endl;
       // % Find mismatches between sequence and genomic J at those positions.
       for( k=0;k<n_excess;k++)
 	{
-	  cout<<"\t\tthird for loop:"<<k<<endl;
-	  cout<<"\t\tposition:"<<_align_positions[j][0]<<endl;
+	  //cout<<"\t\tthird for loop:"<<k<<endl;
+	  //cout<<"\t\tposition:"<<_align_positions[j][0]<<endl;
 	  if(target.at(_align_positions[j][1]-n_excess+k)!=_seq.GetSequence().at(_align_positions[j][0]-n_excess+k))
 	    {
-	      cout<<"\t\tfound one!!pos:"<<_align_positions[j][0]-n_excess+k<<endl;
+	      //cout<<"\t\tfound one!!pos:"<<_align_positions[j][0]-n_excess+k<<endl;
 	      _excess_error_position[j][runningIndex_excessError]=_align_positions[j][0]-n_excess+k;
 	      runningIndex_excessError++;
 	    }
-	  cout<<"\t\t$$$$end of third for loop"<<endl;
+	  //cout<<"\t\t$$$$end of third for loop"<<endl;
 	}
-      cout<<"runningIndex_excessError:"<<runningIndex_excessError<<endl;
+      //cout<<"runningIndex_excessError:"<<runningIndex_excessError<<endl;
       for(;runningIndex_excessError<_negative_excess_deletions_max;runningIndex_excessError++)
 	{
-	  cout<<"\t\tfor loop"<<endl;
+	  //cout<<"\t\tfor loop"<<endl;
 	  _excess_error_position[j][runningIndex_excessError]=0;
 	}
-      cout <<"\t end of first for loop"<<endl;     
+      //cout <<"\t end of first for loop"<<endl;     
       //excess_err_pos = J.align_position(1,j) - ( n_excess + 1 - find((genJ(ok_order(j)).seq((J.align_position(2,j)-n_excess): (J.align_position(2,j)-1) )~=seq((J.align_position(1,j) -n_excess): (J.align_position(1,j)-1) ))) );
       //  J.excess_error_positions(j, 1:length(excess_err_pos)) = excess_err_pos;
     }//end of outer for loop for all the aligned strings
-  cout<<"Done for the function"<<endl;
+  //cout<<"Done for the function"<<endl;
   //return true;
 }
 
@@ -1157,7 +1159,7 @@ void Alignment_Object::Serialize(ofstream& _ofs)
     {
       //write each elements
       p_char=(char*)p_region_max_length[i];
-      _ofs.write(p_char, sizeof(unsigned)*maximum_deletion);
+      _ofs.write(p_char, sizeof(unsigned)*(1+maximum_deletion));
     }
 
   //excess_error_positions
@@ -1327,5 +1329,6 @@ void Alignment_Object::Deserialize(ifstream& _ifs)
   p_char=(char*)alleles_from_distinct_genes;
   _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
   
+  //done!!!
 }
 

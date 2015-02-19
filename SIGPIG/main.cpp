@@ -300,6 +300,7 @@ int main(int argc, char* argv[])
   vector<string> outFileNames;
   outFileNames=DetermineOutputFileNames(outputFileNameBase, AlignmentSettings::N_per_file, N_read);
 
+  
   //calling VDJ alignment
   unsigned max_align=100;
   Alignment_Object J_align[1];
@@ -311,6 +312,29 @@ int main(int argc, char* argv[])
 						/*output*/ V_align, D_align, J_align);
   cout<<"successfully aligned "<<numOfGoodAlignments<<" sequences."<<endl;
 
+  cout<<"===>Testing serialization"<<endl;
+  //open up a file first
+  ofstream ofs("alignment.aln", std::ios::binary);
+  if(!ofs.is_open())
+    {
+      cout<<"******ERROR: can not open file, quit..."<<endl;
+    }
+  cout<<D_align[0].toString()<<endl;
+  D_align[0].Serialize(ofs);
+  ofs.close();
+  cout<<"Done."<<endl;
+
+  cout<<"===>Testing deserialization";
+  ifstream ifs("alignment.aln", std::ios::binary);
+  if(!ifs.is_open())
+    {
+      cout<<"******ERROR: can not open file, quit..."<<endl;
+    }
+  Alignment_D D_align_read;
+  D_align_read.Deserialize(ifs);
+  cout<<"Printing out the object......."<<endl;
+  cout<<D_align_read.toString()<<endl;
+  ifs.close();
   /*
   //==============================================================
   //start testing the alignment, first mathJ
@@ -407,7 +431,7 @@ int main(int argc, char* argv[])
       cout<<endl;
     }
 */
-  
+  /*
   //now we are ready to do the alignment??
   //first need to figure out number of output files
   unsigned numOfOutFiles=outFileNames.size();
@@ -416,17 +440,24 @@ int main(int argc, char* argv[])
   pthread_t* workThreads;
   int ret;
   ret = pthread_mutex_init(&progressMutex, NULL);
-      if(ret != 0) {
-	perror("mutex init failed\n");
-	exit(EXIT_FAILURE);
-      }
+  if(ret != 0) {
+    perror("mutex init failed\n");
+    exit(EXIT_FAILURE);
+  }
 
+  //prepare the input/out for the working thread
+  vector<SequenceString>::const_iterator * it_arrays
+    =new vector<SequenceString>::const_iterator[numberOfThread];
+  Alignment_Object** v_align_arrays=new Alignment_Object*[numberOfThread];
+  Alignment_Object** j_align_arrays=new Alignment_Object*[numberOfThread];
+  Alignment_D** d_align_arrays=new Alignment_D* [numberOfThread];
+  unsigned* numOfAlignedSequenceForThread=new unsigned[numberOfThread];
 
   for(unsigned i=0;i<numOfOutFiles;i++) //outer for loops for the alignment
     {
       //determine the number of sequences
       unsigned numOfThisFile=(N_read-i*AlignmentSettings::N_per_file);
-      if(i!=numOfOutFiles-1&&numOfThisFile>AlignmentSettings::N_per_file)
+      if(i!=numOfOutFiles-1 && numOfThisFile>AlignmentSettings::N_per_file)
 	{
 	  numOfThisFile=AlignmentSettings::N_per_file;
 	}
@@ -435,14 +466,8 @@ int main(int argc, char* argv[])
       workThreads=new pthread_t[numberOfThread];
       
       //start figure out the seqs for each thread
-      vector<SequenceString>::const_iterator * it_arrays
-	=new vector<SequenceString>::const_iterator[numberOfThread];
-      Alignment_Object** v_align_arrays=new Alignment_Object*[numberOfThread];
-      Alignment_Object** j_align_arrays=new Alignment_Object*[numberOfThread];
-      Alignment_D** d_align_arrays=new Alignment_D* [numberOfThread];
-      unsigned* numOfAlignedSequenceForThread=new unsigned[numberOfThread];
 
-      int numOfSeqForCurrentThread;
+      unsigned numOfSeqForCurrentThread;
       unsigned numOfSeqPerThread=numOfThisFile/numberOfThread;
       if(numOfSeqPerThread=0)
 	{
@@ -499,19 +524,15 @@ int main(int argc, char* argv[])
 	  
 	}
       
-      //now we should have complete every thread and do the output by
-      //serialization
-      
-      
-      //now determine the sequences to be used in this files
-      unsigned startIndexOfSequence=i*AlignmentSettings::N_per_file;
-      startIndexOfSequence=startIndexOfSequence+0;
-      //now here is where we need to figure out the thread thing
-
       // *******cleaning up the threads
       delete[] workThreads;
     }
+  //*/
+  //by the time we are here, all the thread has finished the job and the output 
+  //has been written to the arrays, we need to figure out ways to deal
+  //with it.
   
+
   //********clean up
   cout<<"in main::Clean up the memories....."<<endl;
   if(genV!=NULL)
@@ -520,7 +541,21 @@ int main(int argc, char* argv[])
     delete [] genD;
   if(genJ!=NULL)
     delete [] genJ;
-
+  /*
+  //take care the alignment output arrays
+  for(unsigned i=0;i<numberOfThread;i++)
+    {
+      if(v_align_arrays[i]!=NULL)
+	delete[] v_align_arrays;
+      if(d_align_arrays[i]!=NULL)
+	delete[] d_align_arrays;
+      if(j_align_arrays[i]!=NULL)
+	delete[] j_align_arrays;
+    }
+  delete[] v_align_arrays;
+  delete[] d_align_arrays;
+  delete[] j_align_arrays;
+  //*/
   cout<<"in main::Done!!!"<<endl;
 
   return 0;

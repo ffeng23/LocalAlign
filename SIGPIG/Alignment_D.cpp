@@ -1562,6 +1562,7 @@ void DeterminePalindromAndExcessError_D
     }//end of outer for loop d : numOfDSegs
 }//end of function find p-nucleotides
 
+//usually, D alignment is successful anyway.
 void Alignment_D::Serialize(ofstream& _ofs)
 {
   //do necessary checking
@@ -1603,7 +1604,7 @@ void Alignment_D::Serialize(ofstream& _ofs)
   for(unsigned i=0;i<n_D_alleles;i++)
     {
       p_char=(char*)n_errors[i];
-      _ofs.write(p_char, sizeof(double)*numOfAligned[i]);
+      _ofs.write(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
 
   //error_positions
@@ -1612,7 +1613,7 @@ void Alignment_D::Serialize(ofstream& _ofs)
       for(unsigned j=0;j<numOfAligned[i];j++)
 	{	  
 	  p_char=(char*)error_positions[i][j];
-	  _ofs.write(p_char, sizeof(double)*n_errors[i][j]);
+	  _ofs.write(p_char, sizeof(unsigned)*n_errors[i][j]);
 	}
     }
   
@@ -1691,10 +1692,12 @@ void Alignment_D::Serialize(ofstream& _ofs)
   //done  
 }
 
+//usually, D alignment is anyway sucessfully
 //NOTE: here in side this function, we assume all fields are the default,
 //zero or NULL.
 void Alignment_D::Deserialize(ifstream& _ifs)
 {
+  //cout<<"inside the deserialize function"<<endl;
   //first we need to check for there is fields to read
   if(_ifs.eof())
     {
@@ -1704,20 +1707,21 @@ void Alignment_D::Deserialize(ifstream& _ifs)
 
   //now do the reading.
   unsigned original_n_D_alleles=n_D_alleles;
-  unsigned original_max_errors=max_errors;
-  unsigned * original_numOfAligned=new unsigned[n_D_alleles];
+  unsigned original_max_errors=D_max_errors;
+  unsigned * original_numOfAligned=new unsigned[original_n_D_alleles];
   //read n_D_alleles
   char* p_char=(char*)&n_D_alleles;
   _ifs.read(p_char, sizeof(unsigned));
 
   //max_error
-  p_char =(char*)&max_errors;
-  _ifs_read(p_char, sizeof(unsigned));
+  p_char =(char*)&D_max_errors;
+  _ifs.read(p_char, sizeof(unsigned));
   
   //numOfaligned
-
+  
   if(numOfAligned!=NULL)
     {
+      //cout<<"\tcopy over the non-null numOfAligned"<<endl;
       memcpy(original_numOfAligned, numOfAligned, sizeof(unsigned)*original_n_D_alleles);
       delete[] align_length;
     }
@@ -1727,6 +1731,7 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   _ifs.read(p_char, sizeof(unsigned)*n_D_alleles);
 
   //align_length
+  //cout<<"align_length"<<endl;
   if(align_length!=NULL)
     {
       for(unsigned i=0;i<original_n_D_alleles;i++)
@@ -1739,12 +1744,13 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   align_length=new unsigned* [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      align_length[i]=new unsigned[numOfAligned];
+      align_length[i]=new unsigned[numOfAligned[i]];
       p_char=(char*)align_length[i];
-      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
 
   //score
+  //cout<<"score"<<endl;
   if(score!=NULL)
     {
       for(unsigned i=0;i<original_n_D_alleles;i++)
@@ -1757,9 +1763,9 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   score=new double* [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      score[i]=new double[numOfAligned];
+      score[i]=new double[numOfAligned[i]];
       p_char=(char*)score[i];
-      _ifs.read(p_char, sizeof(double)*numOfAligned);
+      _ifs.read(p_char, sizeof(double)*numOfAligned[i]);
     }
 
   //n_errors
@@ -1775,14 +1781,16 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   n_errors=new unsigned* [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      n_errors[i]=new unsigned[numOfAligned];
+      n_errors[i]=new unsigned[numOfAligned[i]];
       p_char=(char*)n_errors[i];
-      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
 
   //error_positions
+  //cout<<"error_positions"<<endl;
   if(error_positions!=NULL)
     {
+      //cout<<"non-null value"<<endl;
       for(unsigned i=0;i<original_n_D_alleles;i++)
 	{
 	  if(error_positions[i]!=NULL)
@@ -1794,25 +1802,28 @@ void Alignment_D::Deserialize(ifstream& _ifs)
 		      delete [] error_positions[i][j];
 		    }
 		}
-	      delete [] error_position[i];
+	      delete [] error_positions[i];
 	    }
 	}
-      delete [] n_errors;
+      delete [] error_positions;
     }
-  
+  //cout<<"alloc **pointer"<<endl;
   error_positions=new unsigned** [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      error_positions[i]=new unsigned*[numOfAligned];
-      for(unsigned j=0;j<numOfAligned;j++)
+      //cout<<"\t==>alloc *pointer, numOfAligned[i]:"<<numOfAligned[i]<<endl;
+      error_positions[i]=new unsigned*[numOfAligned[i]];
+      for(unsigned j=0;j<numOfAligned[i];j++)
 	{
-	  error_positions[i][j]=new unsigned[n_error[i][j]];
+	  //cout<<"\t\talloc pointer, n_errors[i][j]:"<<n_errors[i][j]<<endl;
+	  error_positions[i][j]=new unsigned[n_errors[i][j]];
 	  p_char=(char*)error_positions[i][j];
-	  _ifs.read(p_char, sizeof(unsigned)*n_error[i][j]);
+	  _ifs.read(p_char, sizeof(unsigned)*n_errors[i][j]);
 	}
     }
 
   //align_position_left
+  //cout<<"aign_position left"<<endl;
   if(align_position_left!=NULL)
     {
       for(unsigned i=0;i<original_n_D_alleles;i++)
@@ -1825,9 +1836,9 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   align_position_left=new unsigned* [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      align_position_left[i]=new unsigned[numOfAligned];
+      align_position_left[i]=new unsigned[numOfAligned[i]];
       p_char=(char*)align_position_left[i];
-      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
   //align_position_right
   if(align_position_right!=NULL)
@@ -1842,11 +1853,12 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   align_position_right=new unsigned* [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      align_position_right[i]=new unsigned[numOfAligned];
+      align_position_right[i]=new unsigned[numOfAligned[i]];
       p_char=(char*)align_position_right[i];
-      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
   //deletion_left
+  //cout<<"deletion left"<<endl;
   if(deletions_left!=NULL)
     {
       for(unsigned i=0;i<original_n_D_alleles;i++)
@@ -1859,9 +1871,9 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   deletions_left=new unsigned* [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      deletions_left[i]=new unsigned[numOfAligned];
+      deletions_left[i]=new unsigned[numOfAligned[i]];
       p_char=(char*)deletions_left[i];
-      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
   //deletion_right
   if(deletions_right!=NULL)
@@ -1876,9 +1888,9 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   deletions_right=new unsigned* [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      deletions_right[i]=new unsigned[numOfAligned];
+      deletions_right[i]=new unsigned[numOfAligned[i]];
       p_char=(char*)deletions_right[i];
-      _ifs.read(p_char, sizeof(unsigned)*numOfAligned);
+      _ifs.read(p_char, sizeof(unsigned)*numOfAligned[i]);
     }
   
   //p_region_max_length_left
@@ -1904,8 +1916,8 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   p_region_max_length_left=new unsigned** [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      p_region_max_length_left[i]=new unsigned*[numOfAligned];
-      for(unsigned j=0;j<numOfAligned;j++)
+      p_region_max_length_left[i]=new unsigned*[numOfAligned[i]];
+      for(unsigned j=0;j<numOfAligned[i];j++)
 	{
 	  p_region_max_length_left[i][j]
 	    =new unsigned[AlignmentSettings::D_maximum_deletion+1];
@@ -1937,8 +1949,8 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   p_region_max_length_right=new unsigned** [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      p_region_max_length_right[i]=new unsigned*[numOfAligned];
-      for(unsigned j=0;j<numOfAligned;j++)
+      p_region_max_length_right[i]=new unsigned*[numOfAligned[i]];
+      for(unsigned j=0;j<numOfAligned[i];j++)
 	{
 	  p_region_max_length_right[i][j]
 	    =new unsigned[AlignmentSettings::D_maximum_deletion+1];
@@ -1969,8 +1981,8 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   excess_error_positions_left=new unsigned** [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      excess_error_positions_left[i]=new unsigned*[numOfAligned];
-      for(unsigned j=0;j<numOfAligned;j++)
+      excess_error_positions_left[i]=new unsigned*[numOfAligned[i]];
+      for(unsigned j=0;j<numOfAligned[i];j++)
 	{
 	  excess_error_positions_left[i][j]
 	    =new unsigned[AlignmentSettings::negative_excess_deletions_max];
@@ -2002,8 +2014,8 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   excess_error_positions_right=new unsigned** [n_D_alleles];
   for(unsigned i=0;i<n_D_alleles;i++)
     {
-      excess_error_positions_right[i]=new unsigned*[numOfAligned];
-      for(unsigned j=0;j<numOfAligned;j++)
+      excess_error_positions_right[i]=new unsigned*[numOfAligned[i]];
+      for(unsigned j=0;j<numOfAligned[i];j++)
 	{
 	  excess_error_positions_right[i][j]
 	    =new unsigned[AlignmentSettings::negative_excess_deletions_max];
@@ -2014,15 +2026,10 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   //allele_order
   if(allele_order!=NULL)
     {
-      for(unsigned i=0;i<original_n_D_alleles;i++)
-	{
-	  if(allele_order[i]!=NULL)
-	    delete [] allele_order[i];
-	}
       delete [] allele_order;
     }
-  allele_order=new unsigned* [n_D_alleles];
-  p_char=(char*)allele_order[i];
+  allele_order=new unsigned [n_D_alleles];
+  p_char=(char*)allele_order;
   _ifs.read(p_char, sizeof(unsigned)*n_D_alleles);
     
   //clean up memory
