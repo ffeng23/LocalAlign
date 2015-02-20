@@ -49,6 +49,7 @@ static bool do_VDJ_alignment_single
        //we use the end of the sequence.
   
 //do match J first
+  cout<<"------------>start j alignment"<<endl;
   bool seq_j_ok=match_J
 	(_seq, _genJs, _numOfJs, 
 	 AlignmentSettings::J_minimum_alignment_length, 
@@ -64,7 +65,7 @@ static bool do_VDJ_alignment_single
     {
       j_start=determine_j_start(_j_align);
     }
-
+  cout<<"------------>start v alignment"<<endl;
   //do match V second
   bool seq_v_ok=match_V
 	(_seq, _genVs, _numOfVs, 
@@ -80,7 +81,7 @@ static bool do_VDJ_alignment_single
     {
       v_end=determine_v_end(_v_align);
     }
-  
+  cout<<"---------->start d alignment"<<endl;
   //do match d last
   bool seq_d_ok=match_D
 	(_seq, _genDs,  _numOfDs, 
@@ -112,22 +113,26 @@ unsigned do_VDJ_alignment
 {
   unsigned numOfAligned=0;
   bool align_ok;
+  pthread_mutex_lock(&progressMutex);
   cout<<"<<)))))))_numOfSeq:"<<_numOfSeq<<endl;
+pthread_mutex_unlock(&progressMutex);
   for(unsigned i=0;i<_numOfSeq;i++)
     {
       //do we need to check for end????
       //calling
+pthread_mutex_lock(&progressMutex);
       cout<<"numOfAligned:"<<numOfAligned<<endl;
       cout<<"before doing the alignment:"<<endl;
-      cout<<"\t_j_align[]"<<_j_align[numOfAligned].align_length<<endl;
+      cout<<"\t_j_align[]:"<<_j_align[numOfAligned].align_length<<endl;
+pthread_mutex_unlock(&progressMutex);
       align_ok=do_VDJ_alignment_single(*_it_seq, _genVs, _numOfVs, _genDs, _numOfDs,
 				       _genJs, _numOfJs,
 			     _error_cost, _sm, _max_D_align, _v_align[numOfAligned],
 			     _d_align[numOfAligned], _j_align[numOfAligned]);
-      
+      pthread_mutex_lock(&progressMutex);
       cout<<"after doing the alignment:"<<endl;
       cout<<"\t_j_align[]"<<_j_align[numOfAligned].align_length<<endl;
-      pthread_mutex_lock(&progressMutex);
+      
       cout<<"====doing work i:"<<i<<"/"<<_numOfSeq<<"!!!"<<endl;
       cout<<"\talign_ok:"<<align_ok<<endl;
       pthread_mutex_unlock(&progressMutex);
@@ -176,7 +181,10 @@ void * do_VDJ_align_pthread(void * param_thread)
   param_alignment_pthread* p_a_p=(param_alignment_pthread*) param_thread;
   
   //now calling it
+  pthread_mutex_lock(&progressMutex);
   cout<<"==>thread::["<<p_a_p->thread_id<<"]:"<<endl;
+   pthread_mutex_unlock(&progressMutex);
+
   *p_a_p->p_numOfAligned =do_VDJ_alignment(p_a_p->p_it, p_a_p->p_numOfSeq, 
 		   p_a_p->p_genVs, p_a_p->p_numOfVs,
 		   p_a_p->p_genDs, p_a_p->p_numOfDs,

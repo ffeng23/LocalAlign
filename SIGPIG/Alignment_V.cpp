@@ -173,14 +173,15 @@ bool match_V(const SequenceString& _seq,
 
   //***8)alleles_all, 1D numOfAligned
   //***9)alleles_from_distinct_gene, 1D numOfAligned
-
+  /*
   cout<<"***first****:sequence:"<<_seq.GetSequence()<<endl;
   cout<<"\t_numOfVSegs:"<<_numOfVSegs
       <<"\n\t_V_minmum_alignment_length:"<<_V_minimum_alignment_length
       <<"\n\t_V_maximum_deletion:"<<_V_maximum_deletion
       <<"\n\t_negative_excess_deletion_max:"<<_negative_excess_deletion_max
       <<"\n\t_V_allowed_errors"<<_V_allowed_errors
-      <<"\n\t_error_cost"<<_error_cost<<endl;
+      <<"\n\t_error_cost"<<_error_cost<<endl;*/
+
   bool* v_large_deletion_flag=new bool [_numOfVSegs]; //=zeros(length(genJ),1); % Flag if deletions is too large
   unsigned l_seq = _seq.GetLength(); //length of the input sequence
   //cout<<"l_seq:"<<l_seq<<endl;
@@ -216,7 +217,7 @@ bool match_V(const SequenceString& _seq,
   //cout<<"***first****3"<<endl;
   for(unsigned int i=0;i<_numOfVSegs;i++) //for j=1:length(genJ)
     {
-      cout<<"\t***loop****"<<i<<endl;
+      //cout<<"\t***loop****"<<i<<endl;
      //%j=1
      //%disp(['loop: ' num2str(j)])
      //% Get highest scoring alignment for this allele, with acceptable number of errors
@@ -232,12 +233,12 @@ bool match_V(const SequenceString& _seq,
      unsigned l_target =target.GetLength();
      //cout<<"\t&&&doing alignment :"<<endl;
      //cout<<"\t_seq:"<<_seq.toString()<<endl;
-     cout<<"\ttarget:"<<target.toString()<<endl;
+     //cout<<"\ttarget:"<<target.toString()<<endl;
      //now calling to do the alignment
      temp_align_length[i]= align_with_constraints_fast_no_fix(_seq.GetSequence(), target.GetSequence(), _V_allowed_errors, _V_minimum_alignment_length,_error_cost,
 					temp_align_position[i], temp_n_errors[i], temp_error_positions[i]);
 					  
-     cout<<"\ttemp_align_length["<<i<<"]:"<<temp_align_length[i]<<endl;
+     //cout<<"\ttemp_align_length["<<i<<"]:"<<temp_align_length[i]<<endl;
      //cout<<"\ttemp_n_errors[i]"<<i<<"]:"<<temp_n_errors[i]<<endl;
      //cout<<"\talign_position_func"<<temp_align_position[i][0]<<","<<temp_align_position[i][1]<<endl;
      //cout<<"\tscore"<<CalculateScore(temp_align_length[i], temp_error_positions[i], temp_n_errors[i], _error_cost);
@@ -276,7 +277,7 @@ bool match_V(const SequenceString& _seq,
      
      // % Calculate deletions implied by alignment
      temp_min_deletions[i]=l_target-(temp_align_position[i][1]+temp_align_length[i]-1) - 1;
-     cout<<"\tmin_deletion:"<<temp_min_deletions[i]<<endl;
+     //cout<<"\tmin_deletion:"<<temp_min_deletions[i]<<endl;
      //    % Flag if number of deletions is too many
      v_large_deletion_flag[i]=false;
      if( temp_min_deletions[i] > _V_maximum_deletion)

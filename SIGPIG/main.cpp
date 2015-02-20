@@ -55,7 +55,7 @@ string jSegmentFileName("genomicJs_all_curated.fasta");
 string outputFileNameBase;
 unsigned numberOfSeqProcessedEach;
 
-int numberOfThread=2;//the number of working thread, doesn't included 
+int numberOfThread=12;//the number of working thread, doesn't included 
 pthread_mutex_t progressMutex;
 
 bool flip_flag=false;
@@ -326,7 +326,7 @@ int main(int argc, char* argv[])
       cout<<"******ERROR: can not open file, quit..."<<endl;
     }
   Alignment_D D_align_read;
-  D_align_read.Deserialize(ifs);
+  //D_align_read.Deserialize(ifs);
   cout<<"Printing out the object......."<<endl;
   cout<<D_align_read.toString()<<endl;
   ifs.close();
@@ -458,6 +458,7 @@ int main(int argc, char* argv[])
     {
       //determine the number of sequences
       unsigned numOfThisFile=(N_read-i*AlignmentSettings::N_per_file);
+      param_alignment_pthread* p_a_p=new param_alignment_pthread[numberOfThread];
       if(i!=numOfOutFiles-1 && numOfThisFile>AlignmentSettings::N_per_file)
 	{
 	  numOfThisFile=AlignmentSettings::N_per_file;
@@ -475,8 +476,9 @@ int main(int argc, char* argv[])
 	}
       cout<<"numOfSeqPerThread:"<<numOfSeqPerThread<<endl;
       //prepare the output
-      for( int j=0;j<numberOfThread;j++)
+      for( unsigned int j=0;j<numberOfThread;j++)
 	{
+	   pthread_mutex_lock(&progressMutex);
 	  cout<<"Thread loop:"<<j<<endl;
 	  v_align_arrays[j]=NULL;d_align_arrays[j]=NULL;j_align_arrays[j]=NULL;
 
@@ -501,27 +503,33 @@ int main(int argc, char* argv[])
 	  v_align_arrays[j]=new Alignment_Object[numOfSeqForCurrentThread];
 	  d_align_arrays[j]=new Alignment_D[numOfSeqForCurrentThread];
 	  j_align_arrays[j]=new Alignment_Object[numOfSeqForCurrentThread];
-	  param_alignment_pthread p_a_p;
+	  
 	  cout<<"\tit_arrays seq:"<<((*(it_arrays[j]))).toString()<<endl;
+	  cout<<"\tj :"<<j<<endl;
 	  PackUpAlignmentParameterForThread(it_arrays[j], numOfSeqForCurrentThread,
 					    genV, totalNumV, genD, totalNumD, 
 					    genJ, totalNumJ, errorCost, sm,
 					    max_align, v_align_arrays[j], 
 					    d_align_arrays[j], j_align_arrays[j],
 					    numOfAlignedSequenceForThread+j,
-					    &p_a_p, j);
+					    &p_a_p[j], j);
 	  
 
 	  
-	  ret =  pthread_create(workThreads+j, NULL, do_VDJ_align_pthread, (void*)(&p_a_p));
+	  ret =  pthread_create(workThreads+j, NULL, do_VDJ_align_pthread, (void*)(p_a_p+j));
 	  if(ret != 0) {
 	    perror("pthread_create failed\n");
 	    exit(EXIT_FAILURE);
 	  }
-	  
+	  pthread_mutex_unlock(&progressMutex);
+	}
+      
+      //join the threads and make the main threads to 
+      for(unsigned k=0;k<numberOfThread;k++)
+	{
 	  //void* numOfAligned;
 	  //now join the thread to make the main thread to wait for output
-	  ret=pthread_join(workThreads[j],NULL);
+	  ret=pthread_join(workThreads[k],NULL);
 	  if(ret!=0)
 	    {
 	      perror("pthread_joint failed\n");

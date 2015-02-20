@@ -630,14 +630,14 @@ bool match_J(const SequenceString& _seq,
 
   //***8)alleles_all, 1D numOfAligned
   //***9)alleles_from_distinct_gene, 1D numOfAligned
-
+  /*
   cout<<"***first****:sequence:"<<_seq.GetSequence()<<endl;
   cout<<"\t_numOfJSegs:"<<_numOfJSegs
       <<"\n\t_J_minmum_alignment_length:"<<_J_minimum_alignment_length
       <<"\n\t_J_maximum_deletion:"<<_J_maximum_deletion
       <<"\n\t_negative_excess_deletion_max:"<<_negative_excess_deletion_max
       <<"\n\t_J_allowed_errors"<<_J_allowed_errors
-      <<"\n\t_error_cost"<<_error_cost<<endl;
+      <<"\n\t_error_cost"<<_error_cost<<endl;*/
   bool* j_large_deletion_flag=new bool [_numOfJSegs]; //=zeros(length(genJ),1); % Flag if deletions is too large
   unsigned l_seq = _seq.GetLength(); //length of the input sequence
   //cout<<"l_seq:"<<l_seq<<endl;
