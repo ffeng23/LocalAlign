@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
   cout<<"Printing out the object......."<<endl;
   cout<<D_align_read.toString()<<endl;
   ifs.close();
-  /*
+   /*
   //==============================================================
   //start testing the alignment, first mathJ
   cout<<"%%%%%%%%%%%testing matchJ()>>>>>>cost:"<<errorCost<<endl;
@@ -527,7 +527,7 @@ int main(int argc, char* argv[])
 	      perror("pthread_joint failed\n");
 	      exit(EXIT_FAILURE);
 	    }
-	  //*/
+	  // /
 	}
       
       // *******cleaning up the threads
@@ -535,7 +535,7 @@ int main(int argc, char* argv[])
       delete[] workThreads;
       cout<<"done with deleting thread"<<endl;
     }
-  //*/
+//*/
   //by the time we are here, all the thread has finished the job and the output 
   //has been written to the arrays, we need to figure out ways to deal
   //with it.
