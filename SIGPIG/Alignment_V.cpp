@@ -30,14 +30,14 @@ void DeterminePalindromAndExcessError_V
   //cout<<"\tinside palindro.....before loop. _numOfAligned:"<<_numOfAligned<<endl;
   for(unsigned  j=0;j<_numOfAligned;j++)
     {
-      cout<<"\t*^^^^^^loop "<<j<<endl;
-      cout<<"\t*^^^^^^seq:  "<<_seq.toString()<<endl;
+      //cout<<"\t*^^^^^^loop "<<j<<endl;
+      //cout<<"\t*^^^^^^seq:  "<<_seq.toString()<<endl;
       
       string target=_genVs[_ok_order[j]].Get_Sequence();
-      cout<<"\t*^^^^^^target:  "<<target<<endl;
-      cout<<"\tlength:"<<_align_length[j]<<endl;
-      cout<<"\talign_position:"<<_align_positions[j][0]<<","<<_align_positions[j][1]<<endl;
-      cout<<"\t_min_deletion:"<<_min_deletions[j]<<endl;
+      //cout<<"\t*^^^^^^target:  "<<target<<endl;
+      //cout<<"\tlength:"<<_align_length[j]<<endl;
+      //cout<<"\talign_position:"<<_align_positions[j][0]<<","<<_align_positions[j][1]<<endl;
+      //cout<<"\t_min_deletion:"<<_min_deletions[j]<<endl;
 
       //% Loop over number of deletions (nd is actual number of genomic deletions).
       //  % Lower bound is maximum of 0 and min_deletions - negative_excess_deletions_max (usually 3).
@@ -213,10 +213,10 @@ bool match_V(const SequenceString& _seq,
   //SequenceString rev_seq=FlipSequanceString(_seq);
   //unsigned n_errors_func;
   //% Loop through template alleles for alignment
-  cout<<"***first****3"<<endl;
+  //cout<<"***first****3"<<endl;
   for(unsigned int i=0;i<_numOfVSegs;i++) //for j=1:length(genJ)
     {
-     cout<<"\t***loop****"<<i<<endl;
+      //cout<<"\t***loop****"<<i<<endl;
      //%j=1
      //%disp(['loop: ' num2str(j)])
      //% Get highest scoring alignment for this allele, with acceptable number of errors
@@ -237,10 +237,10 @@ bool match_V(const SequenceString& _seq,
      temp_align_length[i]= align_with_constraints_fast_no_fix(_seq.GetSequence(), target.GetSequence(), _V_allowed_errors, _V_minimum_alignment_length,_error_cost,
 					temp_align_position[i], temp_n_errors[i], temp_error_positions[i]);
 					  
-     cout<<"\ttemp_align_length["<<i<<"]:"<<temp_align_length[i]<<endl;
-     cout<<"\ttemp_n_errors[i]"<<i<<"]:"<<temp_n_errors[i]<<endl;
-     cout<<"\talign_position_func"<<temp_align_position[i][0]<<","<<temp_align_position[i][1]<<endl;
-     cout<<"\tscore"<<CalculateScore(temp_align_length[i], temp_error_positions[i], temp_n_errors[i], _error_cost);
+     //cout<<"\ttemp_align_length["<<i<<"]:"<<temp_align_length[i]<<endl;
+     //cout<<"\ttemp_n_errors[i]"<<i<<"]:"<<temp_n_errors[i]<<endl;
+     //cout<<"\talign_position_func"<<temp_align_position[i][0]<<","<<temp_align_position[i][1]<<endl;
+     //cout<<"\tscore"<<CalculateScore(temp_align_length[i], temp_error_positions[i], temp_n_errors[i], _error_cost);
      
      //_J->align_length.push_back(temp_align_length);
      
@@ -379,13 +379,17 @@ bool match_V(const SequenceString& _seq,
      //clean up
      //cout<<"\t555delete 1"<<endl;
      delete [] v_large_deletion_flag;
+     v_large_deletion_flag=NULL;
      //cout<<"\t555delete 2"<<endl;
      delete [] temp_align_length;
+     temp_align_length=NULL;
      //cout<<"\t555delete 3"<<endl;
      CleanUpMemory(temp_align_position, _numOfVSegs);
      //cout<<"\t555delete 4"<<endl;
      delete [] temp_min_deletions;
+     temp_min_deletions=NULL;
      delete [] temp_n_errors;
+     temp_n_errors=NULL;
      CleanUpMemory(temp_error_positions, _numOfVSegs);
  //CleanUpMemory(temp_p_region_max_length, _numOfVSegs);
  //CleanUpMemory(temp_excess_error_positions, _numOfVsegs);
@@ -395,10 +399,13 @@ bool match_V(const SequenceString& _seq,
      //delete [] error_position_func;
      //cout<<"\t555delete 6"<<endl;
      delete [] scores;
+     scores=NULL;
      //cout<<"\t555delete 7"<<endl;
      delete [] sorted_index;
+     sorted_index=NULL;
      //cout<<"\t555delete 8"<<endl;
      delete [] ok_order; //ok order has not been referenced directly by J.alleles_all
+     ok_order=NULL;
      //and in this case, it will not. so we delete it.
  
      //delete [] genJ_ok_index;
@@ -497,9 +504,9 @@ for(unsigned i=0;i<ok_count;i++)
  for(unsigned i=0;i<ok_count;i++)
    {
      genV_ok_index[i]=_genVs[_V.alleles_all[i]].Get_GeneIndex();
-     cout<<genV_ok_index[i]<<",";
+     //cout<<genV_ok_index[i]<<",";
    }
- cout<<endl;
+ //cout<<endl;
  //genJ_ok_gene_inds = zeros(1,numel(ok_order));
 //first we need to sort the J.alleles_all array 
  unsigned* sorted_genV_ok_index_temp=new unsigned [ok_count];

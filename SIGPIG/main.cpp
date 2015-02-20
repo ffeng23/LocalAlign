@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 
   cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore('A','T')<<endl;
   
-  //LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 5);
+  LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 5);
   //LocalAlignment la(&Seq1,&tempSStr,sm, gapopen, gapextension,1, 100);
   /*cout<<"\tdone and the score is "<<la.GetScore()<<endl;
   cout<<"\t"<<la.GetAlignment().toString()<<endl;
@@ -295,18 +295,13 @@ int main(int argc, char* argv[])
       cout<<"\tread length:"<<-1<<endl;
     }
   cout<<"\tnumber of read:"<<N_read<<endl;
-
-  //determine the output file names.
-  vector<string> outFileNames;
-  outFileNames=DetermineOutputFileNames(outputFileNameBase, AlignmentSettings::N_per_file, N_read);
-
   
   //calling VDJ alignment
   unsigned max_align=100;
   Alignment_Object J_align[1];
   Alignment_Object V_align[1];
   Alignment_D D_align[1];
-  unsigned numOfGoodAlignments=do_VDJ_alignment(all_Sequences.begin(), 1, genV, totalNumV,
+  unsigned numOfGoodAlignments=do_VDJ_alignment(all_Sequences.begin()+9, 1, genV, totalNumV,
 						genD, totalNumD, genJ, totalNumJ,
 						errorCost, sm, max_align, 
 						/*output*/ V_align, D_align, J_align);
@@ -324,7 +319,7 @@ int main(int argc, char* argv[])
   ofs.close();
   cout<<"Done."<<endl;
 
-  cout<<"===>Testing deserialization";
+  cout<<"===>Testing deserialization"<<endl;
   ifstream ifs("alignment.aln", std::ios::binary);
   if(!ifs.is_open())
     {
@@ -431,11 +426,17 @@ int main(int argc, char* argv[])
       cout<<endl;
     }
 */
-  /*
-  //now we are ready to do the alignment??
+  // /*
+  //now we are ready to do the alignment with threading??
   //first need to figure out number of output files
+  //determine the output file names.
+  vector<string> outFileNames;
+  outFileNames=DetermineOutputFileNames(outputFileNameBase, AlignmentSettings::N_per_file, N_read);
   unsigned numOfOutFiles=outFileNames.size();
 
+  cout<<"numOfOutFiles:"<<numOfOutFiles<<endl;
+
+  
   //declare/initialize the working threads
   pthread_t* workThreads;
   int ret;
@@ -461,21 +462,22 @@ int main(int argc, char* argv[])
 	{
 	  numOfThisFile=AlignmentSettings::N_per_file;
 	}
-      
+      cout<<"numOfThisFile:"<<numOfThisFile<<endl;
       //allocate the threads
       workThreads=new pthread_t[numberOfThread];
-      
+      cout<<"numberOfThread:"<<numberOfThread<<endl;
       //start figure out the seqs for each thread
-
       unsigned numOfSeqForCurrentThread;
       unsigned numOfSeqPerThread=numOfThisFile/numberOfThread;
-      if(numOfSeqPerThread=0)
+      if(numOfSeqPerThread==0)
 	{
 	  numOfSeqPerThread=1;
 	}
+      cout<<"numOfSeqPerThread:"<<numOfSeqPerThread<<endl;
       //prepare the output
       for( int j=0;j<numberOfThread;j++)
 	{
+	  cout<<"Thread loop:"<<j<<endl;
 	  v_align_arrays[j]=NULL;d_align_arrays[j]=NULL;j_align_arrays[j]=NULL;
 
 	  if(numOfThisFile-j*numOfSeqPerThread>0)//still have some to do???
@@ -490,6 +492,7 @@ int main(int argc, char* argv[])
 	      numOfSeqForCurrentThread=0;
 	      break;
 	    }
+	  cout<<"numOfSeqForCurrentThread:"<<numOfSeqForCurrentThread<<endl;
 	  //we are here means we have some seqs to do. do it using the thread
 	  //first thing is to pack up parameters
 	  it_arrays[j]=all_Sequences.begin();
@@ -499,13 +502,16 @@ int main(int argc, char* argv[])
 	  d_align_arrays[j]=new Alignment_D[numOfSeqForCurrentThread];
 	  j_align_arrays[j]=new Alignment_Object[numOfSeqForCurrentThread];
 	  param_alignment_pthread p_a_p;
+	  cout<<"\tit_arrays seq:"<<((*(it_arrays[j]))).toString()<<endl;
 	  PackUpAlignmentParameterForThread(it_arrays[j], numOfSeqForCurrentThread,
 					    genV, totalNumV, genD, totalNumD, 
 					    genJ, totalNumJ, errorCost, sm,
 					    max_align, v_align_arrays[j], 
 					    d_align_arrays[j], j_align_arrays[j],
 					    numOfAlignedSequenceForThread+j,
-					    &p_a_p);
+					    &p_a_p, j);
+	  
+
 	  
 	  ret =  pthread_create(workThreads+j, NULL, do_VDJ_align_pthread, (void*)(&p_a_p));
 	  if(ret != 0) {
@@ -513,7 +519,7 @@ int main(int argc, char* argv[])
 	    exit(EXIT_FAILURE);
 	  }
 	  
-	  void* numOfAligned;
+	  //void* numOfAligned;
 	  //now join the thread to make the main thread to wait for output
 	  ret=pthread_join(workThreads[j],NULL);
 	  if(ret!=0)
@@ -521,11 +527,13 @@ int main(int argc, char* argv[])
 	      perror("pthread_joint failed\n");
 	      exit(EXIT_FAILURE);
 	    }
-	  
+	  //*/
 	}
       
       // *******cleaning up the threads
+      cout<<"deleting work thread"<<endl;
       delete[] workThreads;
+      cout<<"done with deleting thread"<<endl;
     }
   //*/
   //by the time we are here, all the thread has finished the job and the output 
@@ -541,24 +549,31 @@ int main(int argc, char* argv[])
     delete [] genD;
   if(genJ!=NULL)
     delete [] genJ;
-  /*
+  // /*
   //take care the alignment output arrays
   for(unsigned i=0;i<numberOfThread;i++)
     {
+      cout<<")))))deleting loep:"<<i<<endl;
+      cout<<"vvvvvvvvvvvvdeleting v align......."<<endl;
       if(v_align_arrays[i]!=NULL)
-	delete[] v_align_arrays;
+	delete[] v_align_arrays[i];
+      cout<<"dddddddddddddddeleting d align....."<<endl;
       if(d_align_arrays[i]!=NULL)
-	delete[] d_align_arrays;
+	delete[] d_align_arrays[i];
+      cout<<"jjjjjjjjjjjjjjdeleting j align......."<<endl;
       if(j_align_arrays[i]!=NULL)
-	delete[] j_align_arrays;
+	delete[] j_align_arrays[i];
+      cout<<"done.........."<<endl;
     }
+  cout<<"in main::done with individual deletion"<<endl;
   delete[] v_align_arrays;
   delete[] d_align_arrays;
   delete[] j_align_arrays;
+  delete[] it_arrays;
   //*/
   cout<<"in main::Done!!!"<<endl;
 
-  return 0;
+  pthread_exit(NULL);
 }
 
 

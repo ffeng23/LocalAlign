@@ -554,6 +554,7 @@ void Alignment_D::ResetData()
 	    }
 	}
       delete [] align_length;
+      align_length=NULL;
     }//end of align_length
 
   //score **
@@ -568,13 +569,14 @@ void Alignment_D::ResetData()
 	    }
 	}
       delete [] score;
+      score=NULL;
     }//end of socre
   
   //error_positions ***
   //cout<<"\t****error_positions"<<endl;
   if(error_positions!=NULL)
     {
-      cout<<"\t\t===>not null"<<endl;
+      //cout<<"\t\t===>not null"<<endl;
       for(unsigned i=0;i<n_D_alleles;i++)
 	{
 	  
@@ -594,9 +596,10 @@ void Alignment_D::ResetData()
 	    }
 	}
       delete[] error_positions;
+      error_positions=NULL;
     }//end of error_positions
 
-//n_errors **
+  //n_errors **
   //cout<<"\t****n_errors"<<endl;
   if(n_errors!=NULL)
     {      
@@ -608,6 +611,7 @@ void Alignment_D::ResetData()
 	    }
 	}
       delete [] n_errors;
+      n_errors=NULL;
     }//end of n_errors
 
   //excess_error_postions_left **
@@ -630,6 +634,7 @@ void Alignment_D::ResetData()
 	    }
 	}
       delete[] excess_error_positions_left;
+      excess_error_positions_left=NULL;
     }//excess_error_positions_left
 
   //excess_error_postions_right **
@@ -651,6 +656,7 @@ void Alignment_D::ResetData()
 	    }
 	}
       delete [] excess_error_positions_right;
+      excess_error_positions_right=NULL;
     }//excess_error_positions_right
 
   //align_position_left **
@@ -665,6 +671,7 @@ void Alignment_D::ResetData()
 	  }
 	}
       delete[] align_position_left;
+      align_position_left=NULL;
     }//end of align_length_left**
 
   //align_position_right **
@@ -679,6 +686,7 @@ void Alignment_D::ResetData()
 	  }
 	}
       delete [] align_position_right;
+      align_position_right=NULL;
     }//end of align_length_left**
 
   //deletion_left **
@@ -693,6 +701,7 @@ void Alignment_D::ResetData()
 	  }
 	}
       delete [] deletions_left;
+      deletions_left=NULL;
     }//end of deletions_left**
 
   //deletion_left **
@@ -707,6 +716,7 @@ void Alignment_D::ResetData()
 	  }
 	}
       delete [] deletions_right;
+      deletions_right=NULL;
     }//end of deletions_right**
 
   //p_region_max_length_left
@@ -728,6 +738,7 @@ void Alignment_D::ResetData()
 	    }
 	}
       delete [] p_region_max_length_left;
+      p_region_max_length_left=NULL;
     }//end of p_region_max_length_left
 
   //p_region_max_length_left
@@ -749,21 +760,25 @@ void Alignment_D::ResetData()
 	    }
 	}
       delete [] p_region_max_length_right;
+      p_region_max_length_right=NULL;
     }//end of p_region_max_length_right
   
   //allele_order
   //cout<<"\t****allele_order"<<endl;
   if(allele_order!=NULL)
-    delete[] allele_order;
-
+    {
+      delete[] allele_order;
+      allele_order=NULL;
+    }
   //start deleting
   //cout<<"\t***numOfAligned"<<endl;
   if(numOfAligned!=NULL)
     {
       delete[] numOfAligned;
+      numOfAligned=NULL;
     }
   n_D_alleles=0;
-
+  D_max_errors=0;
   //Gosh finally done.
 }
 
@@ -1193,8 +1208,8 @@ bool match_D(const SequenceString& _seq,
       ss_target=_genDs[d].Get_Seq();
       l_target=ss_target.GetLength();
       //cout<<"\t===>before calling local align"<<endl;
-      cout<<ss_seqNDN.toString()<<endl;
-      cout<<ss_target.toString()<<endl;
+      //cout<<ss_seqNDN.toString()<<endl;
+      //cout<<ss_target.toString()<<endl;
       LocalAlignment la(&ss_seqNDN, &ss_target, _sm,
 			-100.0/*gapopen*/ ,-100.0 /*gapextension*/,
 			1.0/*scale*/, _max_aligns, 0/*this is the gap model, 0 for affine model*/);
@@ -1220,7 +1235,7 @@ bool match_D(const SequenceString& _seq,
 	{
 	  //cout<<"\t\t@@@@@@@--->looping through aligned i:"<<i<<endl;
 	  //cout<<"alignment #"<<i<<":"<<endl;
-	  cout<<las[i].toString();
+	  //cout<<las[i].toString();
 	  _D.align_length[d][i]=las[i].GetPatternIndexEnd()-las[i].GetPatternIndexStart()+1;
 	  _D.score[d][i]=las[i].GetScore();
 	  if(flank_offset>=0)
@@ -1237,13 +1252,13 @@ bool match_D(const SequenceString& _seq,
 	  _D.deletions_left[d][i]=las[i].GetSubjectIndexStart();
 	  _D.deletions_right[d][i]=_genDs[d].Get_Seq().GetLength()-las[i].GetSubjectIndexEnd()-1;
 
-	  cout<<"\t\talign_length:"<<_D.align_length[d][i]<<endl;
+	  /*cout<<"\t\talign_length:"<<_D.align_length[d][i]<<endl;
 	  cout<<"\t\tscore:"<<_D.score[d][i]<<endl;
 	  cout<<"\t\talign_position_left:"<<_D.align_position_left[d][i]<<endl;
 	  cout<<"\t\talign_position_right:"<<_D.align_position_right[d][i]<<endl;
 	  cout<<"\t\tdeletions_left:"<<_D.deletions_left[d][i]<<endl;
 	  cout<<"\t\tdeletions_right:"<<_D.deletions_right[d][i]<<endl;
-
+	  */
 
 	  temp_error_positions=new unsigned[_D.D_max_errors];
 	  //cout<<"\t\t****beofre finding error fucntions"<<endl;
@@ -1697,7 +1712,7 @@ void Alignment_D::Serialize(ofstream& _ofs)
 //zero or NULL.
 void Alignment_D::Deserialize(ifstream& _ifs)
 {
-  //cout<<"inside the deserialize function"<<endl;
+  cout<<"inside the deserialize function"<<endl;
   //first we need to check for there is fields to read
   if(_ifs.eof())
     {
@@ -1718,7 +1733,6 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   _ifs.read(p_char, sizeof(unsigned));
   
   //numOfaligned
-  
   if(numOfAligned!=NULL)
     {
       //cout<<"\tcopy over the non-null numOfAligned"<<endl;
@@ -1787,7 +1801,7 @@ void Alignment_D::Deserialize(ifstream& _ifs)
     }
 
   //error_positions
-  //cout<<"error_positions"<<endl;
+  cout<<"error_positions"<<endl;
   if(error_positions!=NULL)
     {
       //cout<<"non-null value"<<endl;

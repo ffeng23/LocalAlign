@@ -1,0 +1,156 @@
+//#include <boost/archive/text_oarchive.hpp> 
+//#include <boost/archive/text_iarchive.hpp>
+//#include <boost/serialization/vector.hpp> 
+#include <iostream> 
+#include <sstream> 
+#include <vector>
+#include <string>
+#include <fstream>
+
+#include <cstring>
+
+//std::string fname("text.txt"); 
+
+/*class person 
+{ 
+public: 
+  person() 
+  { 
+  } 
+
+  person(int age, int age2) 
+  // : age_(age) 
+  { 
+    age_.push_back(age);
+    age_.push_back(age2);
+  } 
+
+  std::vector<int> age() const 
+  { 
+    return age_; 
+  } 
+  
+private: 
+  friend class boost::serialization::access; 
+
+  template <typename Archive> 
+  void serialize(Archive &ar, const unsigned int version) 
+  { 
+    ar & age_; 
+  } 
+
+  std::vector<int> age_; 
+}; 
+
+void save() 
+{ 
+  std::ofstream ss(fname.c_str());
+  boost::archive::text_oarchive oa(ss); 
+  std::vector<std::vector<person> > vvp;
+
+  std::vector<person> vp1;  
+
+  person p(11,21) ;
+  vp1.push_back( p);
+  
+  person p2(12,22) ;
+  vp1.push_back(p2);
+  //person p(31);
+
+  std::vector<person> vp2;  
+
+  person p21(110,210) ;
+  vp2.push_back( p2);
+  
+  person p22(120,220) ;
+  vp2.push_back(p22);
+  //person p(31);
+
+  vvp.push_back(vp1);
+  vvp.push_back(vp2);
+
+  oa << vvp; 
+  std::cout<<"in save()"<<std::endl;
+  //std::cout << p << std::endl; 
+  std::cout<<vvp[1][1].age()[0]<<std::endl;
+  std::cout<<vvp[1][1].age()[1]<<std::endl;
+  //delete[] p; 
+  ss.close();
+} 
+
+
+
+void load() 
+{ 
+  std::cout<<"in load()"<<std::endl;
+  std::ifstream ss(fname.c_str());
+  boost::archive::text_iarchive ia(ss); 
+  std::vector<std::vector<person> > p;
+  std::cout<<"ready to deserialize"<<std::endl;
+  //person p;
+  ia >> p; 
+  
+  //std::cout << p << std::endl; 
+  std::cout << p[1][1].age()[0] << std::endl; 
+  std::cout<<p[1][1].age()[1]<<std::endl;
+  //delete[] p;
+  ss.close();
+} 
+*/
+int main() 
+{ 
+  //  save(); 
+  //load();
+
+  double first[]={1.8,2.9,3.1};
+  double s1,s2,s3;
+  //double s2=0;
+ 
+  std::cout<<"first is "<<first<<std::endl;
+  char* p_first=(char*)first;
+  //int* p_s1=&second;
+
+  std::memcpy(&s1,p_first , sizeof(double));
+  std::memcpy(&s2,p_first+sizeof(double), sizeof(double));
+  std::memcpy(&s3,p_first+2*sizeof(double), sizeof(double));
+  
+  std::cout<<" 1) "<<s1<<std::endl;
+  std::cout<<" 2) "<<s2<<std::endl;
+  std::cout<<" 3) "<<s3<<std::endl;
+  
+  std::ofstream ofs("fifthgrade.ros", std::ios::binary);
+  ofs.write(p_first, sizeof(double)*3);
+  ofs.close();
+
+  //now read it in
+  std::ifstream ifs("fifthgrade.ros", std::ios::binary);
+  unsigned begin=ifs.tellg();
+  unsigned end;
+  ifs.seekg(0,std::ios::end);
+  end=ifs.tellg();
+  std::cout<<"file size:"<<end-begin<<std::endl;
+
+  char* p_second=new char[(end-begin)];
+  //now put it int variables
+  s1=s2=s3=0;
+  ifs.seekg(0, std::ios::beg);
+  ifs.read(p_second, (end-begin));
+  
+  std::cout<<((double*)p_second)[0]<<std::endl;
+  
+  std::memcpy((char*)&s1,p_second , sizeof(double));
+  std::memcpy((char*)&s2,p_second+sizeof(double), sizeof(double));
+  std::memcpy((char*)&s3,p_second+2*sizeof(double), sizeof(double));
+
+  
+  ifs.close();
+
+  std::cout<<"read from file:"<<std::endl;
+  std::cout<<" 1) "<<s1<<std::endl;
+  std::cout<<" 2) "<<s2<<std::endl;
+  std::cout<<" 3) "<<s3<<std::endl;
+  
+  
+  std::cout<<"good"<<std::endl;
+  return 0; 
+} 

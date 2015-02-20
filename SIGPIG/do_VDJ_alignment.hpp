@@ -44,6 +44,8 @@ struct param_alignment_pthread
   Alignment_Object* p_j_align;
   //aboved are the parameters to do_vdj_alignment function
   unsigned* p_numOfAligned;/*return parameter from vdj alignment function*/
+  
+  unsigned thread_id;
 };
 
 void * do_VDJ_align_pthread(void * param_thread);
@@ -62,7 +64,8 @@ void PackUpAlignmentParameterForThread
    Alignment_Object* _j_align,
    unsigned* _numOfAligned,
    /*pointer to param to use*/
-   param_alignment_pthread* p_a_p
+   param_alignment_pthread* p_a_p,
+   const unsigned _thread_id
    );
 
 

@@ -121,17 +121,24 @@ void Alignment_Object::ResetData()
   //now we need to delete the data if there are 
   //we better do this in a reverse order than it is constructed
   
+  //cout<<"reset data:"<<endl;
   //
+  //cout<<"alleles_from_distinc_gene"<<endl;
   if(alleles_from_distinct_genes!=NULL)
     {
+      //cout<<"alleles_from_distinc_gene"<<endl;
       delete[] alleles_from_distinct_genes;
+      alleles_from_distinct_genes=NULL;
     }
   //
+  //cout<<"alleles_all"<<endl;
   if(alleles_all!=NULL)
     {
       delete[] alleles_all;
+      alleles_all=NULL;
     }
   //
+  //cout<<"excess error"<<endl;
   if(excess_error_positions!=NULL)
     {
       for(unsigned i=0;i<numOfAligned;i++)
@@ -142,8 +149,10 @@ void Alignment_Object::ResetData()
 	    }
 	}
       delete [] excess_error_positions;
+      excess_error_positions=NULL;
     }
   //
+  //cout<<"p_region"<<endl;
   if(p_region_max_length!=NULL)
     {
       for(unsigned i=0;i<numOfAligned;i++)
@@ -154,8 +163,10 @@ void Alignment_Object::ResetData()
 	    }
 	}
       delete [] p_region_max_length;
+      p_region_max_length=NULL;
     }
   //
+  //cout<<"error position"<<endl;
   if(error_positions!=NULL)
     {
       for(unsigned i=0;i<numOfAligned;i++)
@@ -166,14 +177,24 @@ void Alignment_Object::ResetData()
 	    }
 	}
       delete [] error_positions;
+      error_positions=NULL;
     }
   //
+  //cout<<"n_errors"<<endl;
   if(n_errors!=NULL)
-    delete[] n_errors;
+    {
+      delete[] n_errors;
+      n_errors=NULL;
+    }
   //
+  //cout<<"min_deletions"<<endl;
   if(min_deletions)
-    delete [] min_deletions;
+    {
+      delete [] min_deletions;
+      min_deletions=NULL;
+    }
   //
+  //cout<<"align_position"<<endl;
   if(align_position!=NULL)
     {
       for(unsigned i=0;i<numOfAligned;i++)
@@ -184,12 +205,17 @@ void Alignment_Object::ResetData()
 	    }
 	}
       delete [] align_position;
+      align_position=NULL;
     }
-  // 
+  //
+  //cout<<"align length"<<endl;
   if(align_length!=NULL)
     {
+      //cout<<"***align_length"<<endl;
       delete[] align_length;
+      align_length=NULL;
     }
+  //cout<<"endl"<<endl;
   numOfAligned=0;
   maximum_deletion=0;
   
@@ -206,7 +232,7 @@ Alignment_Object::~Alignment_Object()
 string Alignment_Object::toString()
 {
   stringstream ss;
-  ss<<">>Alignment object J:\n";
+  ss<<">>Alignment object:\n";
   //starting putting everything in order
   ss<<"align_length:";
   for(unsigned i=0;i<numOfAligned;i++)
@@ -337,6 +363,9 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
   unsigned l_seq2=_seq2.size();
   unsigned align_length=0;
 
+  //cout<<"\t\tl_seq1:"<<l_seq1<<endl;
+  //cout<<"\t\tl_seq2:"<<l_seq2<<endl;
+
   unsigned max_match_length=l_seq1;
   if(l_seq2<l_seq1)
     {
@@ -375,7 +404,7 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
 	  *_n_errors=*_n_errors+1;
 	}
 
-      //check to see whether we have 
+      //check to see whether we have too many errors
       if(*_n_errors>_maximum_errors)
 	{
 	  //we are reaching the maximum errors, now it is _maximum_errors+1, done!
@@ -392,14 +421,14 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
 	  align_length=i+1;
 	}
     }
-  /*cout<<_seq1<<endl;
-  cout<<_seq2<<endl;
-  cout<<"\tafter match the align_length:"<<align_length<<endl;
-  cout<<"after the first round, alength:"<<align_length<<";n_error:"<<*_n_errors<<endl;
-  */
+  //cout<<_seq1<<endl;
+  //cout<<_seq2<<endl;
+  //cout<<"\tafter match the align_length:"<<align_length<<endl;
+  //cout<<"after the first round, alength:"<<align_length<<";n_error:"<<*_n_errors<<endl;
+  
   //so far we know the longest alignment based on either it is not long <maximum_length
   //or because we have too many errors
-  //now we need to recalculate the n_errors, then we are doing
+  //now we need to recalculate the n_errors
   /*
   if(i>max_match_length)
     align_length=i; //because i starts at zero, so it is i-1+1
@@ -409,13 +438,16 @@ unsigned align_with_constraints_fixed_left_remove_right_errors
   */
   //check to make sure the n_errors is not larger than maximum_errors
   //and we did not end at errors
-  for(unsigned j=*_n_errors-1;j>0;j--)
+  if(*_n_errors>0)
     {
-      //from back to front
-      if(_error_positions[j]<align_length)
+      for(unsigned j=*_n_errors-1;j>0;j--)
 	{
-	  *_n_errors=j+1;
-	  break;//we are done. the one error right before the last aligned one was found
+	  //from back to front
+	  if(_error_positions[j]<align_length)
+	    {
+	      *_n_errors=j+1;
+	      break;//we are done. the one error right before the last aligned one was found
+	    }
 	}
     }
   //cout<<"second round"<<endl;
@@ -608,7 +640,7 @@ bool match_J(const SequenceString& _seq,
       <<"\n\t_error_cost"<<_error_cost<<endl;
   bool* j_large_deletion_flag=new bool [_numOfJSegs]; //=zeros(length(genJ),1); % Flag if deletions is too large
   unsigned l_seq = _seq.GetLength(); //length of the input sequence
-  cout<<"l_seq:"<<l_seq<<endl;
+  //cout<<"l_seq:"<<l_seq<<endl;
   unsigned* temp_align_length=new unsigned[_numOfJSegs];
   unsigned** temp_align_position=new unsigned*[_numOfJSegs];
   for(unsigned i=0;i<_numOfJSegs;i++)
@@ -655,6 +687,7 @@ bool match_J(const SequenceString& _seq,
      
      SequenceString rev_target=FlipSequenceString(_genJs[i].Get_Seq());
      unsigned l_target =rev_target.GetLength();
+     //cout<<"l_target:"<<l_target<<endl;
      //cout<<"\t&&&doing alignment :"<<endl;
      //cout<<"\trev_seq:"<<rev_seq.toString()<<endl;
      //cout<<"\trev_target:"<<rev_target.toString()<<endl;
@@ -708,7 +741,7 @@ bool match_J(const SequenceString& _seq,
 	  j_large_deletion_flag[i] = true;
 	  //%continue;
         }//  end
-    
+     //cout<<"\tdone loop"<<endl;
    }//end of for loop to go through the J segs alleles for alignment.
     //% Check!  No need to check in c++ code.
  //	    assert(all(min_deletions>=0));
@@ -716,16 +749,17 @@ bool match_J(const SequenceString& _seq,
  //	  % sort the genomic Js in descending order of 'score' and ascending order of min_deletions
 
  //calculate the score first
-  //cout<<"***first****3"<<endl;
+  //cout<<"***first****3:_numOfJSegs:"<<_numOfJSegs<<endl;
   double* scores=new double[_numOfJSegs];
  //prepare the sorted index of the array.
   unsigned* sorted_index=new unsigned[_numOfJSegs];
-  //cout<<"=========>before sorting:";
+  
+  //cout<<"=========>before sorting:"<<endl;
  for(unsigned k=0;k<_numOfJSegs;k++)
    {
      sorted_index[k]=k;
      scores[k]=temp_align_length[k]-_error_cost*temp_n_errors[k];
-     cout<<scores[k]<<"-"<<sorted_index[k]<<"-"<<temp_min_deletions[k]<<",";
+     //cout<<scores[k]<<"-"<<sorted_index[k]<<"-"<<temp_min_deletions[k]<<",";
      
    }
  //cout<<"\n***first****3aa"<<endl;
@@ -735,13 +769,13 @@ bool match_J(const SequenceString& _seq,
  //S = [-scores, min_deletions];
  //	  [~,order]=sortrows(S);
  //cout<<"=========>after sorting:";
- for(unsigned k=0;k<_numOfJSegs;k++)
+ /*for(unsigned k=0;k<_numOfJSegs;k++)
    {
      //sorted_index[k]=k;
      //scores[k]=temp_align_length[k]-_error_cost*temp_n_errors[k];
      cout<<scores[k]<<"-"<<sorted_index[k]<<",";
    }
- 
+ */
  //cout<<"\n***first****3bb"<<endl;
  //now we need to reverse the order, since the QuickSort is ascending, but for our purpose we need to descending.
  Reverse(sorted_index, _numOfJSegs);
@@ -749,12 +783,12 @@ bool match_J(const SequenceString& _seq,
  Reverse(temp_min_deletions, _numOfJSegs);
 
  //cout<<"=========>after sorting:";
- for(unsigned k=0;k<_numOfJSegs;k++)
+ /*for(unsigned k=0;k<_numOfJSegs;k++)
    {
      //sorted_index[k]=k;
      //scores[k]=temp_align_length[k]-_error_cost*temp_n_errors[k];
      cout<<scores[k]<<"-"<<sorted_index[k]<<",";
-   }
+     }*/
  //cout<<"\n***first****3ccc"<<endl;
  //  % Set a score threshold for alleles. well, this is kind of arbitrary
  //we want to get the best ones, but limited numbers 
@@ -818,6 +852,7 @@ bool match_J(const SequenceString& _seq,
      //and in this case, it will not. so we delete it.
  
      //delete [] genJ_ok_index;
+     //cout<<">>>>>>>>>>>>failed from here1"<<endl;
      return false;
    }
  //cout<<"************first 4 bb keep going....."<<endl;
@@ -835,7 +870,10 @@ bool match_J(const SequenceString& _seq,
  _J.align_length = new unsigned [ok_count];
  //cout<<"****ok_count***:"<<ok_count<<endl;
  if(!CopyElements(temp_align_length, _numOfJSegs,  _J.align_length, ok_count, ok_order, ok_count))
-   return false;
+   {
+     //cout<<">>>>>>>>>>>>failed from here2"<<endl;
+     return false;
+   }
  //cout<<"***first****4bbbb"<<endl;
  _J.align_position =new unsigned* [ok_count];
  for(unsigned m=0;m<ok_count;m++)
@@ -933,7 +971,7 @@ for(unsigned i=0;i<ok_count;i++)
  //cout<<"after sorting...."<<endl;
  //cout<<"the index index:"<< sorted_genJ_ok_index_temp_index[0]<<endl;
 
-cout<<"***first****6"<<endl;
+ //cout<<"***first****6"<<endl;
  //compare and then get it copied to the alignment object
  _J.alleles_from_distinct_genes=new unsigned[ok_count];
 
@@ -1013,7 +1051,7 @@ void DeterminePalindromAndExcessError_J
   )
 {
   unsigned p=0;
-  //cout<<"in the beginning p_Region_max_length:"<<endl;
+  /*  //cout<<"in the beginning p_Region_max_length:"<<endl;
 for(unsigned i=0;i<_numOfAligned;i++)
    {
      //cout<<"\t"<<endl;
@@ -1023,6 +1061,7 @@ for(unsigned i=0;i<_numOfAligned;i++)
        }
      cout<<endl;
    }
+  */
   bool still_palindrome=true;
   //go through and find palindromic nucleotides for various number of deletions,
   //    %as well as error positions for 'negative' deletions.

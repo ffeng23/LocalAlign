@@ -8,6 +8,8 @@
 #include "AffineGapModel.hpp"
 #include "MarkovChainGapModel_454.hpp"
 
+#define DEBUG_D
+
 using namespace std;
 bool comparePathElement(Path* p1, Path* p2)
 {
