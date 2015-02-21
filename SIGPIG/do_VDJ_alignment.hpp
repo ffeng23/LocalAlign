@@ -23,7 +23,7 @@ unsigned do_VDJ_alignment
   const double& _error_cost, const ScoreMatrix* _sm,
   const unsigned& _max_D_align,
   /*output*/ Alignment_Object* _v_align, Alignment_D* _d_align, 
-  Alignment_Object* _j_align
+  Alignment_Object* _j_align, bool* _vdj_align_ok
   );
 
 
@@ -45,7 +45,8 @@ struct param_alignment_pthread
   //aboved are the parameters to do_vdj_alignment function
   unsigned* p_numOfAligned;/*return parameter from vdj alignment function*/
   
-  unsigned thread_id;
+  unsigned p_thread_id;
+  bool* p_vdj_align_ok;
 };
 
 void * do_VDJ_align_pthread(void * param_thread);
@@ -65,7 +66,8 @@ void PackUpAlignmentParameterForThread
    unsigned* _numOfAligned,
    /*pointer to param to use*/
    param_alignment_pthread* p_a_p,
-   const unsigned _thread_id
+   const unsigned _thread_id,
+   bool* _vdj_align_ok
    );
 
 

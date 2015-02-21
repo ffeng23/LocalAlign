@@ -82,6 +82,7 @@ static bool do_VDJ_alignment_single
       v_end=determine_v_end(_v_align);
     }
   cout<<"---------->start d alignment"<<endl;
+  cout<<"j_start:"<<j_start<<";v_end:"<<v_end<<endl;
   //do match d last
   bool seq_d_ok=match_D
 	(_seq, _genDs,  _numOfDs, 
@@ -108,7 +109,7 @@ unsigned do_VDJ_alignment
   const double& _error_cost, const ScoreMatrix* _sm,
   const unsigned& _max_D_align,
   /*output*/Alignment_Object* _v_align, Alignment_D* _d_align, 
-  Alignment_Object* _j_align
+  Alignment_Object* _j_align, bool* _vdj_align_ok
 		       )
 {
   unsigned numOfAligned=0;
@@ -120,18 +121,18 @@ pthread_mutex_unlock(&progressMutex);
     {
       //do we need to check for end????
       //calling
-pthread_mutex_lock(&progressMutex);
+      pthread_mutex_lock(&progressMutex);
       cout<<"numOfAligned:"<<numOfAligned<<endl;
       cout<<"before doing the alignment:"<<endl;
       cout<<"\t_j_align[]:"<<_j_align[numOfAligned].align_length<<endl;
-pthread_mutex_unlock(&progressMutex);
+      pthread_mutex_unlock(&progressMutex);
       align_ok=do_VDJ_alignment_single(*_it_seq, _genVs, _numOfVs, _genDs, _numOfDs,
 				       _genJs, _numOfJs,
-			     _error_cost, _sm, _max_D_align, _v_align[numOfAligned],
-			     _d_align[numOfAligned], _j_align[numOfAligned]);
+			     _error_cost, _sm, _max_D_align, _v_align[i],
+			     _d_align[i], _j_align[i]);
       pthread_mutex_lock(&progressMutex);
       cout<<"after doing the alignment:"<<endl;
-      cout<<"\t_j_align[]"<<_j_align[numOfAligned].align_length<<endl;
+      cout<<"\t_j_align[]"<<_j_align[i].align_length<<endl;
       
       cout<<"====doing work i:"<<i<<"/"<<_numOfSeq<<"!!!"<<endl;
       cout<<"\talign_ok:"<<align_ok<<endl;
@@ -141,9 +142,14 @@ pthread_mutex_unlock(&progressMutex);
 	{
 	  cout<<" A good one with numOfAligned:"<<numOfAligned<<endl;
 	  numOfAligned++;
+	  _vdj_align_ok[i]=align_ok;
 	}
       else
-	{
+	{//in this new version, we want to save everything in case we want to 
+	  //check for debugging, but keep another indicator array whethter this
+	  //one is a good. or not.
+	  _vdj_align_ok[i]=align_ok;
+	  /*
 	  pthread_mutex_lock(&progressMutex);
 	  cout<<"\t*****resetting !!!"<<endl;
 	  pthread_mutex_unlock(&progressMutex);
@@ -161,6 +167,7 @@ pthread_mutex_unlock(&progressMutex);
 	  pthread_mutex_lock(&progressMutex);
 	  cout<<"\t*****resetting DONE !!!"<<endl;
 	  pthread_mutex_unlock(&progressMutex);
+	  */
 	}
       _it_seq++;
       pthread_mutex_lock(&progressMutex);
@@ -182,7 +189,7 @@ void * do_VDJ_align_pthread(void * param_thread)
   
   //now calling it
   pthread_mutex_lock(&progressMutex);
-  cout<<"==>thread::["<<p_a_p->thread_id<<"]:"<<endl;
+  cout<<"==>thread::["<<p_a_p->p_thread_id<<"]:"<<endl;
    pthread_mutex_unlock(&progressMutex);
 
   *p_a_p->p_numOfAligned =do_VDJ_alignment(p_a_p->p_it, p_a_p->p_numOfSeq, 
@@ -191,7 +198,8 @@ void * do_VDJ_align_pthread(void * param_thread)
 		   p_a_p->p_genJs, p_a_p->p_numOfJs,
 		   p_a_p->p_error_cost, p_a_p->p_sm,
 		   p_a_p->p_max_D_align, p_a_p->p_v_align,
-		   p_a_p->p_d_align, p_a_p->p_j_align);
+					   p_a_p->p_d_align, p_a_p->p_j_align, 
+					   p_a_p->p_vdj_align_ok);
   
   pthread_mutex_lock(&progressMutex);
   cout<<"====end of thread!!!"<<endl;
@@ -214,7 +222,8 @@ void PackUpAlignmentParameterForThread
    unsigned* _numOfAligned,
    /*pointer to param to use*/
    param_alignment_pthread* p_a_p,
-   const unsigned _thread_id
+   const unsigned _thread_id,
+   bool* _vdj_align_ok
    )
 {
   p_a_p->p_it=_it;
@@ -228,7 +237,8 @@ void PackUpAlignmentParameterForThread
   p_a_p->p_d_align=_d_align; 
   p_a_p->p_j_align=_j_align;
   p_a_p->p_numOfAligned= _numOfAligned;
-  p_a_p->thread_id=_thread_id;
+  p_a_p->p_thread_id=_thread_id;
+  p_a_p->p_vdj_align_ok=_vdj_align_ok;
   //done;
 
 }

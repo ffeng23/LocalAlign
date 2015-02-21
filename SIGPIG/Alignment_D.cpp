@@ -1296,29 +1296,30 @@ bool match_D(const SequenceString& _seq,
     {
       _D.allele_order[i]=i;
       highestScore[i]=_D.score[i][0];
-      cout<<highestScore[i]<<",";
+      //cout<<highestScore[i]<<",";
     }
-  cout<<endl;
+  //cout<<endl;
   QuickSort(highestScore, 0, _numOfDSegs-1, _D.allele_order,NULL);
   //cout<<"after sorting score array:"<<endl;
-  for(unsigned i=0;i<_numOfDSegs;i++)
+  /*for(unsigned i=0;i<_numOfDSegs;i++)
     {
       //_D.allele_order[i]=i;
       //highestScore[i]=_D.score[i][0];
       cout<<highestScore[i]<<",";
     }
   cout<<endl;
-
+  */
   Reverse(_D.allele_order, _numOfDSegs);
 
   //cout<<"after sorting index array:"<<endl;
-  for(unsigned i=0;i<_numOfDSegs;i++)
+  /*for(unsigned i=0;i<_numOfDSegs;i++)
     {
       //_D.allele_order[i]=i;
       //highestScore[i]=_D.score[i][0];
       cout<<_D.allele_order[i]<<",";
     }
   cout<<endl;
+  */
   //cout<<"\t****done with sorting"<<endl;
 
   //now we are ready to take care of p_nucleotides and negative excess error
@@ -1369,7 +1370,7 @@ bool match_D(const SequenceString& _seq,
      _D.excess_error_positions_left, 
      _D.excess_error_positions_right
      );
-  cout<<"@@@@@@@@finally done!!!!"<<endl;
+  //cout<<"@@@@@@@@finally done!!!!"<<endl;
   //done!!!
   return true;
 }//end of function MatchD

@@ -301,10 +301,12 @@ int main(int argc, char* argv[])
   Alignment_Object J_align[1];
   Alignment_Object V_align[1];
   Alignment_D D_align[1];
+  bool align_ok_array[1];
   unsigned numOfGoodAlignments=do_VDJ_alignment(all_Sequences.begin()+9, 1, genV, totalNumV,
 						genD, totalNumD, genJ, totalNumJ,
 						errorCost, sm, max_align, 
-						/*output*/ V_align, D_align, J_align);
+						/*output*/ V_align, D_align, J_align, 
+						align_ok_array);
   cout<<"successfully aligned "<<numOfGoodAlignments<<" sequences."<<endl;
 
   cout<<"===>Testing serialization"<<endl;
@@ -317,7 +319,7 @@ int main(int argc, char* argv[])
   cout<<D_align[0].toString()<<endl;
   D_align[0].Serialize(ofs);
   ofs.close();
-  cout<<"Done."<<endl;
+  cout<<"Done..........."<<endl;
 
   cout<<"===>Testing deserialization"<<endl;
   ifstream ifs("alignment.aln", std::ios::binary);
@@ -326,7 +328,7 @@ int main(int argc, char* argv[])
       cout<<"******ERROR: can not open file, quit..."<<endl;
     }
   Alignment_D D_align_read;
-  //D_align_read.Deserialize(ifs);
+  D_align_read.Deserialize(ifs);
   cout<<"Printing out the object......."<<endl;
   cout<<D_align_read.toString()<<endl;
   ifs.close();
@@ -426,7 +428,7 @@ int main(int argc, char* argv[])
       cout<<endl;
     }
 */
-  // /*
+   // /*
   //now we are ready to do the alignment with threading??
   //first need to figure out number of output files
   //determine the output file names.
@@ -453,7 +455,8 @@ int main(int argc, char* argv[])
   Alignment_Object** j_align_arrays=new Alignment_Object*[numberOfThread];
   Alignment_D** d_align_arrays=new Alignment_D* [numberOfThread];
   unsigned* numOfAlignedSequenceForThread=new unsigned[numberOfThread];
-
+  bool** vdj_align_ok_arrays=new bool*[numberOfThread];
+  
   for(unsigned i=0;i<numOfOutFiles;i++) //outer for loops for the alignment
     {
       //determine the number of sequences
@@ -503,6 +506,7 @@ int main(int argc, char* argv[])
 	  v_align_arrays[j]=new Alignment_Object[numOfSeqForCurrentThread];
 	  d_align_arrays[j]=new Alignment_D[numOfSeqForCurrentThread];
 	  j_align_arrays[j]=new Alignment_Object[numOfSeqForCurrentThread];
+	  vdj_align_ok_arrays[j]=new bool[numOfSeqForCurrentThread];
 	  
 	  cout<<"\tit_arrays seq:"<<((*(it_arrays[j]))).toString()<<endl;
 	  cout<<"\tj :"<<j<<endl;
@@ -512,7 +516,7 @@ int main(int argc, char* argv[])
 					    max_align, v_align_arrays[j], 
 					    d_align_arrays[j], j_align_arrays[j],
 					    numOfAlignedSequenceForThread+j,
-					    &p_a_p[j], j);
+					    &p_a_p[j], j, vdj_align_ok_arrays[j]);
 	  
 
 	  
@@ -539,9 +543,9 @@ int main(int argc, char* argv[])
 	}
       
       // *******cleaning up the threads
-      cout<<"deleting work thread"<<endl;
+      //cout<<"deleting work thread"<<endl;
       delete[] workThreads;
-      cout<<"done with deleting thread"<<endl;
+      //cout<<"done with deleting thread"<<endl;
     }
 //*/
   //by the time we are here, all the thread has finished the job and the output 
@@ -561,23 +565,27 @@ int main(int argc, char* argv[])
   //take care the alignment output arrays
   for(unsigned i=0;i<numberOfThread;i++)
     {
-      cout<<")))))deleting loep:"<<i<<endl;
-      cout<<"vvvvvvvvvvvvdeleting v align......."<<endl;
+      //cout<<")))))deleting loep:"<<i<<endl;
+      //cout<<"vvvvvvvvvvvvdeleting v align......."<<endl;
       if(v_align_arrays[i]!=NULL)
 	delete[] v_align_arrays[i];
-      cout<<"dddddddddddddddeleting d align....."<<endl;
+      //cout<<"dddddddddddddddeleting d align....."<<endl;
       if(d_align_arrays[i]!=NULL)
 	delete[] d_align_arrays[i];
-      cout<<"jjjjjjjjjjjjjjdeleting j align......."<<endl;
+      //cout<<"jjjjjjjjjjjjjjdeleting j align......."<<endl;
       if(j_align_arrays[i]!=NULL)
 	delete[] j_align_arrays[i];
-      cout<<"done.........."<<endl;
+      //cout<<"done.........."<<endl;
+      if(vdj_align_ok_arrays[i]!=NULL)
+	delete[] vdj_align_ok_arrays[i];
     }
   cout<<"in main::done with individual deletion"<<endl;
   delete[] v_align_arrays;
   delete[] d_align_arrays;
   delete[] j_align_arrays;
+  delete[] vdj_align_ok_arrays;
   delete[] it_arrays;
+  delete[] numOfAlignedSequenceForThread;
   //*/
   cout<<"in main::Done!!!"<<endl;
 
