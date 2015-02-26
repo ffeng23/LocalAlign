@@ -3,6 +3,11 @@
 
 //user defined matrix class for matrix manipulation
 //so far we only support up to 4 Dimensions,
+//NOTE: a dimension of zero, means a scalar !!!
+//    1D is vector
+//
+
+//ToDo: need to do one bulk load of data into the Matrix
 template <class T>
 class Matrix
 {
@@ -14,6 +19,9 @@ public:
   //data input now is one data.
   //we will restructure it
   Matrix(unsigned _dim, unsigned []_dim_size, T[] _data);
+
+  //
+  Matrix(unsigned _dim, unsigned* _dim_size, T* _data=NULL);
 
   //destructor
   ~Matrix();
@@ -55,11 +63,14 @@ public:
   //size 
   unsigned size();
   
-  //
-  unsigned dim();
+  //return a Matrix object
+  Matrix<T> size();
+
+  //return unsigned dim_size of specific dimension
+  unsigned size(unsigned _dim);
 
   //
-  unsigned dim_size(const unsigned& _dim);
+  //unsigned dim_size(const unsigned& _dim);
 
   //get submatrix
   Matrix<T> GetSubMatrix(int d1);
@@ -70,6 +81,8 @@ public:
 
   Matrix<T> GetSubMatrix(int d1, int d2, int d3, int d3);
 
+  template<class T>
+  friend Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim);
   //
 protected:
   unsigned c_dim;
@@ -81,11 +94,14 @@ protected:
 //c++ equivalent to Matlab sum(A), return
 //the sum of the elements of A along the first array 
 //dimension whose size does not equal 1:
+template<class T>
 Matrix<T> sum(const Matrix<T>& _m);
+
 
 //c++ equivalent to Matlab sum(A,dim), return
 //sums the elements of A along dimension dim. 
 //The dim input is a positive integer scalar.
+template<class T>
 Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim);
 
 #endif
