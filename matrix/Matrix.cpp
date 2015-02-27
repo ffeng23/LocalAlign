@@ -14,7 +14,7 @@ Matrix<T>::Matrix():c_dim(-1),c_dim_size(NULL),c_data(NULL)
 //we will restructure it
 //could be zero dimension, which is like a scalar
 template<class T>
-Matrix<T>::Matrix(unsigned _dim, unsigned []_dim_size, T[] _data):
+Matrix<T>::Matrix(unsigned _dim, unsigned _dim_size[], T _data[]):
   c_dim(_dim)
 {
   c_dim_size=new unsigned[c_dim];
@@ -397,8 +397,127 @@ unsigned Matrix<T>::dim()
 //}
 
 //get submatrix
-  Matrix<T> GetSubMatrix(int d1);
+//here we did not pass the _dim_pos[] by reference
+//that means we don't have to be const anyway.
+//if we want to pass by reference, we simply pass by pointer
+//
+//Note: currently don't support resize/reshape, _n (the size of the input array _dim_pos[])
+//		has to be the same as the matrix dim. 
+//		In the future, we will implement reshape and the size of the input array 
+//       can be different from matrix dim.
+//		the dim of the output array is determined by the _dim_pos array
+//      the input position array starting from zero and can be -1, mean all 
+//      elements of this dim are picked, similar to Matlab : notation
+//      eg. {-1,2,-1} ~ (:,2,:)
+//input:
+//
+//output: Note: this will return a Matrix, or a scalar like Matrix
+//		in any case
+template<class T>
+Matrix<T> Matrix<T>::GetSubMatrix(const unsigned& _n, int _dim_pos[])
+{
+	//first we need decide whether the input are valid
+	if((unsigned)(this->c_dim)==-1)
+	{
+		throw new exception("calling the getsubmatrix on a uninitialized matrix.");
+	}
+	if(_n!=this->dim())
+	{
+		thow new exception ("unsupport format, the input array has to be same size as the matrix");
+	}
+	
+	for(unsigned i=0;i<_n;i++)
+	{
+		if(_dim_pos[i]>0&&_dim_pos[i]>=this->size(i))
+			throw new exception("dimension size is out of range");	
+	}
+	
+	//start doing the job
+	//first determine the output matrix dimension
+	unsigned new_dim=0;
+	unsigned* new_dim_size;
+	for(unsigned i=0;i<_n;i++)
+	{
+		if(_dim_pos[i]>0)
+		{
+			new_dim++;
+		}
+	}
+	//determine demension size
+	new_dim_size=new unsigned[new_dim];
+	unsigned counter=0;
+	for(unsigned i=0;i<_n;i++)
+	{
+		if(_dim_pos[i]>0)
+		{
+			new_dim_size[counter]=_dim_pos[i];
+			counter++;
+		}
+	}
+	Matrix<T> temp_m(new_dim, new_dim_size, NULL);
+	
+	//first determine block number and offset and block size
+	unsigned* blockNumbers=new unsigned[new_dim];
+	unsigned* blockSize_index_in_dim_size=new unsigned[new_dim];
+	unsigned* offset=new unsigned[new_dim];
+	unsigned* blockSize=new unsigned [new_dim];
 
+	for(unsigned i=0;i<new_dim;i++)
+	{
+		blockNumber[i]=0;
+		blockSize_index_in_dim_size[i]=1;
+		offset[i]=0;
+		blockSize[i]=1;
+	}
+	unsigned curr_block_index=0;
+	for(unsigned i=0;i<_n;i++)
+	{
+		if(_dim_pos[i]<0) //-1 means all
+		{
+			blockNumber[curr_block_index]=new_dim_size[curr_block_index];
+			blockSize_index_in_dim_size[curr_block_index]=i+1;
+			//curr_block_index++;
+		}
+		else //positive means very specific element in this dimension
+		{
+			offset[curr_block_index]+=_dim_pos[i]*this->c_dim_pos[i];
+		}
+		if(_dim_pos[i]<0)
+		{
+			curr_block_index++;
+		}
+	}
+	//now we need to determine the block size based on the blockSize_index_in_dim_size
+	unsigned* blockSize=new unsigned [new_dim];
+	for(unsigned i=0;i<new_dim;i++)
+	{
+		for(unsigned j=blockSize_index_in_dim_size[i];j<this->c_dim;j++)
+		{
+			blockSize[i]*=this->c_dim_size[j];
+		}
+	}
+	
+	//now we kind of get everything ready and just need to copy over the data
+	unsigned totalNumOfOutputData=1;
+	for(unsigned i=0;i<new_dim;i++)
+	{
+		totalNumOfOutputData*=new_dim_size[i];
+	}
+	unsigned* data_index=new unsigned[totalNumOfOutputData];
+	for(unsigned i=0;i<new_dim;i++)
+	{
+		
+		for(unsigned j=0;j<blockNumber[i];j++)
+		{
+			unsigned sizeOfCurrentBlock=totalNumOfOutputData/new_dim_size[i];
+			for(unsigned k=0;k<sizeOfCurrentBlock;k++)
+			{
+				data_index[k+j*sizeOfCurrentBlock]+=j*blockSize[i]+offset[i];
+			}	
+		}
+	}	
+	return temp_m;
+}
   Matrix<T> GetSubMatrix(int d1, int d2);
 
   Matrix<T> GetSubMatrix(int d1, int d2, int d3);
