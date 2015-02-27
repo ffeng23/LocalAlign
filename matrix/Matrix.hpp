@@ -18,10 +18,10 @@ public:
 
   //data input now is one data.
   //we will restructure it
-  Matrix(unsigned _dim, unsigned []_dim_size, T[] _data);
+  Matrix(const unsigned& _dim, unsigned _dim_size[], T _data[]);
 
   //
-  Matrix(unsigned _dim, unsigned* _dim_size, T* _data=NULL);
+  Matrix(const unsigned& _dim, const unsigned* _dim_size, const T* _data=NULL);
 
   //destructor
   ~Matrix();
@@ -33,17 +33,19 @@ public:
   Matrix<T>& operator = (const Matrix<T>& _m);
 
   //subscript
+  //scalar-like matrix
+  T& operator ()();
   //vector
-  T operator [](const unsigned& _d1);
+  T& operator ()(const unsigned& _d1);
   
   //2d
-  T& operator [](const unsigned& _d1, const unsigned& _d2);
+  T& operator ()(const unsigned& _d1, const unsigned& _d2);
   
   //3d
-  T& operator [](const unsigned& _d1, const unsigned& _d2, const unsigned& _d3);
+  T& operator ()(const unsigned& _d1, const unsigned& _d2, const unsigned& _d3);
   
   //4d
-  T& operator [](const unsigned& _d1, const unsigned& _d2, const unsigned& _d3, const unsigned& _d4);
+  T& operator ()(const unsigned& _d1, const unsigned& _d2, const unsigned& _d3, const unsigned& _d4);
   
   //NOTE: only support 4d or below
 
@@ -61,28 +63,25 @@ public:
   Matrix<T> operator / (const T& _t);
   
   //size 
-  unsigned size();
+  Matrix<unsigned> size();
   
-  //return a Matrix object
-  Matrix<T> size();
-
   //return unsigned dim_size of specific dimension
   unsigned size(unsigned _dim);
 
   //
-  //unsigned dim_size(const unsigned& _dim);
+  unsigned dim();
 
   //get submatrix
-  Matrix<T> GetSubMatrix(int d1);
-
+  Matrix<T> SubMatrix(const unsigned& _n, int _dim_pos[]);
+  /*
   Matrix<T> GetSubMatrix(int d1, int d2);
 
   Matrix<T> GetSubMatrix(int d1, int d2, int d3);
 
   Matrix<T> GetSubMatrix(int d1, int d2, int d3, int d3);
-
-  template<class T>
-  friend Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim);
+  */
+  template<class U>
+  friend Matrix<U> sum(const Matrix<U>& _m, const unsigned& _dim);
   //
 protected:
   unsigned c_dim;

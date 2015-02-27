@@ -1,6 +1,9 @@
 #include <stdexcept>
+#include <exception>
 #include <iostream>
-#include <Matrix.hpp>
+#include "Matrix.hpp"
+
+using namespace std;
 
 //constructor
 template<class T>
@@ -14,7 +17,7 @@ Matrix<T>::Matrix():c_dim(-1),c_dim_size(NULL),c_data(NULL)
 //we will restructure it
 //could be zero dimension, which is like a scalar
 template<class T>
-Matrix<T>::Matrix(unsigned _dim, unsigned _dim_size[], T _data[]):
+Matrix<T>::Matrix(const unsigned& _dim, unsigned _dim_size[], T _data[]):
   c_dim(_dim)
 {
   c_dim_size=new unsigned[c_dim];
@@ -49,7 +52,7 @@ Matrix<T>::Matrix(unsigned _dim, unsigned _dim_size[], T _data[]):
 //we will restructure it
 //could be zero dimension, which is like a scalar
 template<class T>
-Matrix<T>::Matrix(unsigned _dim, unsigned* _dim_size, T* _data):
+Matrix<T>::Matrix(const unsigned& _dim, const unsigned* _dim_size, const T* _data):
   c_dim(_dim)
 {
   c_dim_size=new unsigned[c_dim];
@@ -87,7 +90,7 @@ Matrix<T>::Matrix(unsigned _dim, unsigned* _dim_size, T* _data):
       }*/
   //done
 }
-*/
+
 //destructor
 template<class T>
 Matrix<T>::~Matrix()
@@ -96,12 +99,12 @@ Matrix<T>::~Matrix()
   if(c_dim_size!=NULL)
     {
       delete[] c_dim_size;
-      c_dim_size=NULL:
+      c_dim_size=NULL;
     }
   if(c_data!=NULL)
     {
       delete[] c_data;
-      c_data=NULL:
+      c_data=NULL;
     }
 }
 
@@ -139,7 +142,7 @@ Matrix<T>::Matrix(const Matrix<T>& _m):
 
 //assignment operator
 template<class T>
-Matrix<T>::Matrix<T>& operator = (const Matrix<T>& _m)
+Matrix<T>& Matrix<T>::operator = (const Matrix<T>& _m)
 {
   if(this==&_m)
     return *this;
@@ -179,11 +182,11 @@ Matrix<T>::Matrix<T>& operator = (const Matrix<T>& _m)
 //subscript
 //scalar-like matrix
 template<class T>
-T Matrix<T>::operator []()
+T& Matrix<T>::operator ()()
 {
   if(this->c_dim!=0)
     {
-      throw new exception("unsupported array subscription (dimension not compatible), please check your data! (NOTE:this empty access mehtod only supported on a scalar likematrix)")
+      throw runtime_error("unsupported array subscription (dimension not compatible), please check your data! (NOTE:this empty access mehtod only supported on a scalar likematrix)");
     }
   //check for out bound accessing
   
@@ -193,69 +196,69 @@ T Matrix<T>::operator []()
   
 //vector
 template<class T>
-T Matrix<T>::operator [](const unsigned& _d0)
+T& Matrix<T>::operator ()(const unsigned& _d0)
 {
   if(this->c_dim!=1)
     {
-      throw new exception("unsupported array subscription (dimension not compatible), please check your data!")
+      throw runtime_error("unsupported array subscription (dimension not compatible), please check your data!");
     }
   //check for out bound accessing
-  if(d0>=c_dim_size[0])
+  if(_d0>=c_dim_size[0])
     {
-      throw std::out_range("index out of range"); 
+      throw std::out_of_range("index out of range"); 
     }
   //good return 
-  return this->c_data[d0];
+  return this->c_data[_d0];
 }
   
 //2d
 template<class T>
-T& Matrix<T>::operator [](const unsigned& _d0, const unsigned& _d1)
+T& Matrix<T>::operator ()(const unsigned& _d0, const unsigned& _d1)
 {
   if(this->c_dim!=2)
     {
-      throw new exception("unsupported array subscription (dimension not compatible), please check your data!")
+      throw std::runtime_error("unsupported array subscription (dimension not compatible), please check your data!");
     }
   //check for out range
-  if(d0>=c_dim_size[0]||d1>=c_dim_size[1])
+  if(_d0>=c_dim_size[0]||_d1>=c_dim_size[1])
     {
-      throw std::out_range("index out of range");  
+      throw std::out_of_range("index out of range");  
     }
-  T temp=this->c_data[d0*c_dim_size[1]+d1];
+  T temp=this->c_data[_d0*c_dim_size[1]+_d1];
   return this->temp;
 } 
 
 //3d
 template<class T>
-T& Matrix<T>::operator [](const unsigned& _d0, const unsigned& _d1, const unsigned& _d2)
+T& Matrix<T>::operator ()(const unsigned& _d0, const unsigned& _d1, const unsigned& _d2)
 {
   if(this->c_dim!=3)
     {
-      throw new exception("unsupported array subscription (dimension not compatible), please check your data!")
+      throw runtime_error("unsupported array subscription (dimension not compatible), please check your data!");
     }
   //check for out range
-  if(d0>=c_dim_size[0]||d1>=c_dim_size[1]||d2>=c_dim_size[2])
+  if(_d0>=c_dim_size[0]||_d1>=c_dim_size[1]||_d2>=c_dim_size[2])
     {
-      throw std::out_range("index out of range");  
+      throw std::out_of_range("index out of range");  
     }
-  T temp=this->c_data[d0*(d1*c_dim_size[2])+d2];
+  T temp=this->c_data[_d0*(_d1*c_dim_size[2])+_d2];
   return this->temp;
 }
   
 //4d
 template<class T>
-T& Matrix<T>::operator [](const unsigned& _d0, const unsigned& _d1, const unsigned& _d2, const unsigned& _d3)
+T& Matrix<T>::operator ()(const unsigned& _d0, const unsigned& _d1, const unsigned& _d2, const unsigned& _d3)
 {
   if(this->c_dim!=4)
     {
-      throw new exception("unsupported array subscription (dimension not compatible), please check your data!");
+      throw std::runtime_error("unsupported array subscription (dimension not compatible), please check your data!");
     }
   //check for out range
-  if(d0>=c_dim_size[0]||d1>=c_dim_size[1]||d2>=c_dim_size[2])
+  if(_d0>=c_dim_size[0]||_d1>=c_dim_size[1]||_d2>=c_dim_size[2])
     {
-      throw std::out_range("index out of range");  
+      throw std::out_of_range("index out of range");  
     }
-  T temp=this->c_data[d0*d1*(d2*c_dim_size[3])+d3];
+  T temp=this->c_data[_d0*_d1*(_d2*c_dim_size[3])+_d3];
   return this->temp;
 }
   
@@ -269,7 +272,7 @@ Matrix<T> Matrix<T>::operator + (const T& _t)
 {
   if((signed)(this->c_dim)==-1)
     {
-      threw new exception("unitialized matrix");
+      throw std::runtime_error("unitialized matrix");
     }
   Matrix<T> temp(&this);
   //determine total number of elements
@@ -291,7 +294,7 @@ Matrix<T> Matrix<T>::operator - (const T& _t)
 {
   if((signed)(this->c_dim)==-1)
     {
-      threw new exception("unitialized matrix");
+      throw std::runtime_error("unitialized matrix");
     }
   Matrix<T> temp(&this);
   //determine total number of elements
@@ -313,7 +316,7 @@ Matrix<T>  Matrix<T>::operator * (const T& _t)
 {
   if((signed)(this->c_dim)==-1)
     {
-      threw new exception("unitialized matrix");
+      throw std::runtime_error("unitialized matrix");
     }
   Matrix<T> temp(&this);
   //determine total number of elements
@@ -334,7 +337,7 @@ Matrix<T>  Matrix<T>::operator / (const T& _t)
 {
   if((signed)(this->c_dim)==-1)
     {
-      threw new exception("unitialized matrix");
+      throw std::runtime_error("unitialized matrix");
     }
   Matrix<T> temp(&this);
   //determine total number of elements
@@ -356,11 +359,12 @@ Matrix<unsigned> Matrix<T>::size()
 {
   if((unsigned)(this->c_dim)==-1)
     cerr<<"calling on an unitialized matrix object"<<endl;
-  Matrix<unsigned> temp(1, {this->c_dim});
+  unsigned temp_array[] = {this->c_dim};
+  Matrix<unsigned> temp(1, temp_array, NULL);
   
   for(unsigned i=0;i<this->c_dim;i++)
     {
-      temp[i]=this->c_dim_size[i];
+      temp.c_data[i]=this->c_dim_size[i];
     }
   return temp;
 }
@@ -414,22 +418,22 @@ unsigned Matrix<T>::dim()
 //output: Note: this will return a Matrix, or a scalar like Matrix
 //		in any case
 template<class T>
-Matrix<T> Matrix<T>::GetSubMatrix(const unsigned& _n, int _dim_pos[])
+Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, int _dim_pos[])
 {
 	//first we need decide whether the input are valid
 	if((unsigned)(this->c_dim)==-1)
 	{
-		throw new exception("calling the getsubmatrix on a uninitialized matrix.");
+	  throw std::runtime_error("calling the getsubmatrix on a uninitialized matrix.");
 	}
 	if(_n!=this->dim())
 	{
-		thow new exception ("unsupport format, the input array has to be same size as the matrix");
+	  throw std::runtime_error ("unsupport format, the input array has to be same size as the matrix");
 	}
 	
 	for(unsigned i=0;i<_n;i++)
 	{
 		if(_dim_pos[i]>0&&_dim_pos[i]>=this->size(i))
-			throw new exception("dimension size is out of range");	
+		  throw std::out_of_range("dimension size is out of range");	
 	}
 	
 	//start doing the job
@@ -457,7 +461,7 @@ Matrix<T> Matrix<T>::GetSubMatrix(const unsigned& _n, int _dim_pos[])
 	Matrix<T> temp_m(new_dim, new_dim_size, NULL);
 	
 	//first determine block number and offset and block size
-	unsigned* blockNumbers=new unsigned[new_dim];
+	unsigned* blockNumber=new unsigned[new_dim];
 	unsigned* blockSize_index_in_dim_size=new unsigned[new_dim];
 	unsigned* offset=new unsigned[new_dim];
 	unsigned* blockSize=new unsigned [new_dim];
@@ -488,7 +492,7 @@ Matrix<T> Matrix<T>::GetSubMatrix(const unsigned& _n, int _dim_pos[])
 		}
 	}
 	//now we need to determine the block size based on the blockSize_index_in_dim_size
-	unsigned* blockSize=new unsigned [new_dim];
+	//unsigned* blockSize=new unsigned [new_dim];
 	for(unsigned i=0;i<new_dim;i++)
 	{
 		for(unsigned j=blockSize_index_in_dim_size[i];j<this->c_dim;j++)
@@ -503,27 +507,38 @@ Matrix<T> Matrix<T>::GetSubMatrix(const unsigned& _n, int _dim_pos[])
 	{
 		totalNumOfOutputData*=new_dim_size[i];
 	}
-	unsigned* data_index=new unsigned[totalNumOfOutputData];
+	unsigned* data_index=new unsigned[totalNumOfOutputData];//used to rember where the data will be copied to the data out array
+
+	unsigned sizeOfCurrentBlock_running=totalNumOfOutputData;
+	
 	for(unsigned i=0;i<new_dim;i++)
 	{
 		
 		for(unsigned j=0;j<blockNumber[i];j++)
 		{
-			unsigned sizeOfCurrentBlock=totalNumOfOutputData/new_dim_size[i];
-			for(unsigned k=0;k<sizeOfCurrentBlock;k++)
+			sizeOfCurrentBlock_running=sizeOfCurrentBlock_running/new_dim_size[i];
+			for(unsigned k=0;k<sizeOfCurrentBlock_running;k++)
 			{
-				data_index[k+j*sizeOfCurrentBlock]+=j*blockSize[i]+offset[i];
+				data_index[k+j*sizeOfCurrentBlock_running]+=j*blockSize[i]+offset[i];
 			}	
 		}
-	}	
+	}
+
+	//now based on the indices, copy over the element
+	for(unsigned i=0;i<totalNumOfOutputData;i++)
+	  {
+	    temp_m->c_data[i]=this-c_data[data_index[i]];
+	  }
+
+	//done!!
 	return temp_m;
 }
-  Matrix<T> GetSubMatrix(int d1, int d2);
+/*  Matrix<T> GetSubMatrix(int d1, int d2);
 
   Matrix<T> GetSubMatrix(int d1, int d2, int d3);
 
   Matrix<T> GetSubMatrix(int d1, int d2, int d3, int d3);
-
+*/
 
 //c++ equivalent to Matlab sum(A), return
 //the sum of the elements of A along the first array 
@@ -533,7 +548,7 @@ Matrix<T> sum(const Matrix<T>& _m)
 {
   if((unsigned)(_m.dim())==-1)
     {
-      throw new exception("calling on a uninitialized Matrix object for sum");
+      throw std::runtime_error("calling on a uninitialized Matrix object for sum");
     }
   if(_m.dim()==0)
     {
@@ -561,9 +576,9 @@ template<class T>
 Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
 {
   if((unsigned)(_m->dim())==-1)
-    throw new exception("call on an unitialized Matrix object for sum()");
+    throw runtime_error("call on an unitialized Matrix object for sum()");
 
-  if((this->c_dim)==0)
+  if((_m.dim())==0)
     {
       cerr<<"calling on an scalar like matrix"<<endl;
       //no sum to do
@@ -608,8 +623,8 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
 	}
       else
 	{//we skip this current if this is the flag round, since it will collapsed on this _dim dimension
-	  if(i!==_m.c_dim-1)
-	    sizeOfEachBlock*=_m.size(i+1);
+	  if(i!=_m.c_dim-1)
+	    sizeOfEachBlock *= _m.size(i+1);
 	}
 
       totalNumberOfElements*=_m.size(i);
@@ -629,7 +644,7 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
 	  p_firstElementEachBlock_dst[k]=0;
 	  for(unsigned j=0;j<_m.size(_dim);j++)
 	    {
-	      p_firstElementEachBlock_dst[k]+=p_firstElemtEachBlock_src[k+j*sizeOfEachBlock];
+	      p_firstElementEachBlock_dst[k]+=p_firstElementEachBlock_src[k+j*sizeOfEachBlock];
 	    }
 	}//end k for loop
     }//end of i for loop
