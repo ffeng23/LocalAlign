@@ -63,7 +63,7 @@ public:
   Matrix<T> operator / (const T& _t);
   
   //size 
-  Matrix<unsigned> size();
+  //Matrix<unsigned> size();
   
   //return unsigned dim_size of specific dimension
   unsigned size(unsigned _dim);

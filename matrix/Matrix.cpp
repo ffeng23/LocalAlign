@@ -149,7 +149,7 @@ Matrix<T>& Matrix<T>::operator = (const Matrix<T>& _m)
 
   //deep copy
   //first check to see whether the one is initialized or not
-  if((signed)(_m.c_dim)=-1)
+  if((signed)(_m.c_dim)==-1)
     {
       //a uninitialized one
       this->c_dim=-1;
@@ -224,8 +224,8 @@ T& Matrix<T>::operator ()(const unsigned& _d0, const unsigned& _d1)
     {
       throw std::out_of_range("index out of range");  
     }
-  T temp=this->c_data[_d0*c_dim_size[1]+_d1];
-  return this->temp;
+  return this->c_data[_d0*c_dim_size[1]+_d1];
+  //return temp;
 } 
 
 //3d
@@ -241,8 +241,8 @@ T& Matrix<T>::operator ()(const unsigned& _d0, const unsigned& _d1, const unsign
     {
       throw std::out_of_range("index out of range");  
     }
-  T temp=this->c_data[_d0*(_d1*c_dim_size[2])+_d2];
-  return this->temp;
+  return this->c_data[_d0*(_d1*c_dim_size[2])+_d2];
+  //return this->temp;
 }
   
 //4d
@@ -258,8 +258,8 @@ T& Matrix<T>::operator ()(const unsigned& _d0, const unsigned& _d1, const unsign
     {
       throw std::out_of_range("index out of range");  
     }
-  T temp=this->c_data[_d0*_d1*(_d2*c_dim_size[3])+_d3];
-  return this->temp;
+  return this->c_data[_d0*_d1*(_d2*c_dim_size[3])+_d3];
+  //return this->temp;
 }
   
   //NOTE: only support 4d or below
@@ -274,7 +274,7 @@ Matrix<T> Matrix<T>::operator + (const T& _t)
     {
       throw std::runtime_error("unitialized matrix");
     }
-  Matrix<T> temp(&this);
+  Matrix<T> temp(*this);
   //determine total number of elements
   unsigned totalNumOfData=1;
   for(unsigned i=0;i<this->c_dim;i++)
@@ -296,7 +296,7 @@ Matrix<T> Matrix<T>::operator - (const T& _t)
     {
       throw std::runtime_error("unitialized matrix");
     }
-  Matrix<T> temp(&this);
+  Matrix<T> temp(*this);
   //determine total number of elements
   unsigned totalNumOfData=1;
   for(unsigned i=0;i<this->c_dim;i++)
@@ -318,7 +318,7 @@ Matrix<T>  Matrix<T>::operator * (const T& _t)
     {
       throw std::runtime_error("unitialized matrix");
     }
-  Matrix<T> temp(&this);
+  Matrix<T> temp(*this);
   //determine total number of elements
   unsigned totalNumOfData=1;
   for(unsigned i=0;i<this->c_dim;i++)
@@ -339,7 +339,7 @@ Matrix<T>  Matrix<T>::operator / (const T& _t)
     {
       throw std::runtime_error("unitialized matrix");
     }
-  Matrix<T> temp(&this);
+  Matrix<T> temp(*this);
   //determine total number of elements
   unsigned totalNumOfData=1;
   for(unsigned i=0;i<this->c_dim;i++)
@@ -352,7 +352,7 @@ Matrix<T>  Matrix<T>::operator / (const T& _t)
     }
   return temp;
 }
-  
+/*  
 //size
 template<class T>
 Matrix<unsigned> Matrix<T>::size()
@@ -368,13 +368,13 @@ Matrix<unsigned> Matrix<T>::size()
     }
   return temp;
 }
-
+*/
 //size
 //_dim starting at index
 template<class T>
 unsigned Matrix<T>::size(unsigned _dim)
 {
-  if((unsigned)(this->c_dim)==-1)
+  if((signed)(this->c_dim)==-1)
     cerr<<"calling on an unitialized matrix object"<<endl;
  
   if(_dim>=this->c_dim)
@@ -390,7 +390,7 @@ unsigned Matrix<T>::size(unsigned _dim)
 template<class T>
 unsigned Matrix<T>::dim()
 {
-  if((unsigned)(this->c_dim)==-1)
+  if((signed)(this->c_dim)==-1)
     cerr<<"calling on an unitialized matrix object"<<endl;
   return this->c_dim;
 }
@@ -421,7 +421,7 @@ template<class T>
 Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, int _dim_pos[])
 {
 	//first we need decide whether the input are valid
-	if((unsigned)(this->c_dim)==-1)
+	if((signed)(this->c_dim)==-1)
 	{
 	  throw std::runtime_error("calling the getsubmatrix on a uninitialized matrix.");
 	}
@@ -432,7 +432,7 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, int _dim_pos[])
 	
 	for(unsigned i=0;i<_n;i++)
 	{
-		if(_dim_pos[i]>0&&_dim_pos[i]>=this->size(i))
+	  if(_dim_pos[i]>0&&((unsigned)_dim_pos[i])>=this->size(i))
 		  throw std::out_of_range("dimension size is out of range");	
 	}
 	
@@ -484,7 +484,7 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, int _dim_pos[])
 		}
 		else //positive means very specific element in this dimension
 		{
-			offset[curr_block_index]+=_dim_pos[i]*this->c_dim_pos[i];
+			offset[curr_block_index]+=_dim_pos[i]*this->c_dim_size[i];
 		}
 		if(_dim_pos[i]<0)
 		{
@@ -527,7 +527,7 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, int _dim_pos[])
 	//now based on the indices, copy over the element
 	for(unsigned i=0;i<totalNumOfOutputData;i++)
 	  {
-	    temp_m->c_data[i]=this-c_data[data_index[i]];
+	    temp_m.c_data[i]=this->c_data[data_index[i]];
 	  }
 
 	//done!!
@@ -546,7 +546,7 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, int _dim_pos[])
 template<class T>
 Matrix<T> sum(const Matrix<T>& _m)
 {
-  if((unsigned)(_m.dim())==-1)
+  if((signed)(_m.dim())==-1)
     {
       throw std::runtime_error("calling on a uninitialized Matrix object for sum");
     }
@@ -575,10 +575,10 @@ Matrix<T> sum(const Matrix<T>& _m)
 template<class T>
 Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
 {
-  if((unsigned)(_m->dim())==-1)
+  if((signed)(_m.dim())==-1)
     throw runtime_error("call on an unitialized Matrix object for sum()");
 
-  if((_m.dim())==0)
+  if(_m.dim()==0)
     {
       cerr<<"calling on an scalar like matrix"<<endl;
       //no sum to do
@@ -633,7 +633,7 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
   //temp
   //now we need to determine the sizeOfEachBlock
   p_firstElementEachBlock_dst=temp_m.c_data; //starting point destination
-  p_firstElementEachBlock_src=_m->c.data;//starting point source
+  p_firstElementEachBlock_src=_m->c_data;//starting point source
   for(unsigned i=0;i<numberOfBlocks;i++)
     {
       p_firstElementEachBlock_dst += i*sizeOfEachBlock;
@@ -652,3 +652,26 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
   return temp_m;
   //done here
 }
+
+//======template instantiation
+//class
+template class Matrix<int>;
+template class Matrix<unsigned>;
+//template class Matrix<bool>;
+template class Matrix<double>;
+template class Matrix<float>;
+//template class Matrix<byte>;
+
+//function
+template Matrix<int> sum(const Matrix<int>& _m);
+template Matrix<unsigned> sum(const Matrix<unsigned>& _m);
+template Matrix<float> sum(const Matrix<float>& _m);
+template Matrix<double> sum(const Matrix<double>& _m);
+/*
+
+//function
+template Matrix<int> sum(const Matrix<int>& _m, const unsigned& _dim);
+template Matrix<unsigned> sum(const Matrix<unsigned>& _m, const unsigned& _dim);
+template Matrix<float> sum(const Matrix<float>& _m, const unsigned& _dim);
+template Matrix<double> sum(const Matrix<double>& _m, const unsigned& _dim);
+*/
