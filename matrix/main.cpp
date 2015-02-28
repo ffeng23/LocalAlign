@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
     cout<<"\tSequency Type:Nucleotides\n";
   */
   
-  cout<<"writing output........."<<endl;
+  cout<<"start testin........."<<endl;
 
   cout<<"Done!!!"<<endl;
   //ofs.close();

@@ -63,16 +63,16 @@ public:
   Matrix<T> operator / (const T& _t);
   
   //size 
-  //Matrix<unsigned> size();
+  Matrix<unsigned> size() const;
   
   //return unsigned dim_size of specific dimension
-  unsigned size(unsigned _dim);
+  unsigned size(const unsigned& _dim) const;
 
   //
-  unsigned dim();
+  unsigned dim() const ;
 
   //get submatrix
-  Matrix<T> SubMatrix(const unsigned& _n, int _dim_pos[]);
+  Matrix<T> SubMatrix(const unsigned& _n, const int _dim_pos[]) const;
   /*
   Matrix<T> GetSubMatrix(int d1, int d2);
 

@@ -352,27 +352,27 @@ Matrix<T>  Matrix<T>::operator / (const T& _t)
     }
   return temp;
 }
-/*  
+  
 //size
 template<class T>
-Matrix<unsigned> Matrix<T>::size()
+Matrix<unsigned> Matrix<T>::size() const
 {
-  if((unsigned)(this->c_dim)==-1)
+  if((signed)(this->c_dim)==-1)
     cerr<<"calling on an unitialized matrix object"<<endl;
   unsigned temp_array[] = {this->c_dim};
   Matrix<unsigned> temp(1, temp_array, NULL);
   
   for(unsigned i=0;i<this->c_dim;i++)
     {
-      temp.c_data[i]=this->c_dim_size[i];
+      temp(i)=this->c_dim_size[i];
     }
   return temp;
 }
-*/
+//*/
 //size
 //_dim starting at index
 template<class T>
-unsigned Matrix<T>::size(unsigned _dim)
+unsigned Matrix<T>::size(const unsigned& _dim) const
 {
   if((signed)(this->c_dim)==-1)
     cerr<<"calling on an unitialized matrix object"<<endl;
@@ -388,17 +388,12 @@ unsigned Matrix<T>::size(unsigned _dim)
   
 //
 template<class T>
-unsigned Matrix<T>::dim()
+unsigned Matrix<T>::dim() const
 {
   if((signed)(this->c_dim)==-1)
     cerr<<"calling on an unitialized matrix object"<<endl;
   return this->c_dim;
 }
-  //
-//template<class T>
-//unsigned Matrix<T>::dim_size(const unsigned& _dim)
-//{
-//}
 
 //get submatrix
 //here we did not pass the _dim_pos[] by reference
@@ -418,7 +413,7 @@ unsigned Matrix<T>::dim()
 //output: Note: this will return a Matrix, or a scalar like Matrix
 //		in any case
 template<class T>
-Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, int _dim_pos[])
+Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 {
 	//first we need decide whether the input are valid
 	if((signed)(this->c_dim)==-1)
@@ -540,6 +535,7 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, int _dim_pos[])
   Matrix<T> GetSubMatrix(int d1, int d2, int d3, int d3);
 */
 
+
 //c++ equivalent to Matlab sum(A), return
 //the sum of the elements of A along the first array 
 //dimension whose size does not equal 1:
@@ -633,7 +629,7 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
   //temp
   //now we need to determine the sizeOfEachBlock
   p_firstElementEachBlock_dst=temp_m.c_data; //starting point destination
-  p_firstElementEachBlock_src=_m->c_data;//starting point source
+  p_firstElementEachBlock_src=_m.c_data;//starting point source
   for(unsigned i=0;i<numberOfBlocks;i++)
     {
       p_firstElementEachBlock_dst += i*sizeOfEachBlock;
@@ -667,11 +663,11 @@ template Matrix<int> sum(const Matrix<int>& _m);
 template Matrix<unsigned> sum(const Matrix<unsigned>& _m);
 template Matrix<float> sum(const Matrix<float>& _m);
 template Matrix<double> sum(const Matrix<double>& _m);
-/*
+
 
 //function
 template Matrix<int> sum(const Matrix<int>& _m, const unsigned& _dim);
 template Matrix<unsigned> sum(const Matrix<unsigned>& _m, const unsigned& _dim);
 template Matrix<float> sum(const Matrix<float>& _m, const unsigned& _dim);
 template Matrix<double> sum(const Matrix<double>& _m, const unsigned& _dim);
-*/
+//*/
