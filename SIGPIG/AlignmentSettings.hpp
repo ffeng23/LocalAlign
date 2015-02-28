@@ -50,6 +50,20 @@ namespace AlignmentSettings
   //extern unsigned n_D_alleles; we don't set it in advance, we get its value by reading the file of D seg
 
   extern unsigned max_length_D_genes;//used by match D to determine the max number of errors 
+
+  //this is the class used to define and pass over
+  //some settings from alignment.
+  //it seems that this is not used in the alignment much,
+  //but instead was used to pass/carry over to model fitting
+  class AlignmentSettings
+  {
+  public:
+    AlignmentSettings();
+    //please specify the public numbers
+    virtual ~AlignmentSettings();
+  protected:
+    //please specify the members 
+  };
 }
 
 

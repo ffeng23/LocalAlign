@@ -51,6 +51,15 @@ namespace AlignmentSettings
   //unsigned n_D_alleles=34;
   
   unsigned max_length_D_genes=37;
+
+  AlignmentSettings::AlignmentSettings()
+  {
+    //default one
+  }
+  AlignmentSettings::~AlignmentSettings()
+  {
+    //empty one
+  }
 }
 
 
