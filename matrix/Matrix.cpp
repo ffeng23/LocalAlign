@@ -1,6 +1,8 @@
 #include <stdexcept>
 #include <exception>
 #include <iostream>
+#include <string>
+#include <sstream>
 #include "Matrix.hpp"
 
 using namespace std;
@@ -20,6 +22,12 @@ template<class T>
 Matrix<T>::Matrix(const unsigned& _dim, unsigned _dim_size[], T _data[]):
   c_dim(_dim)
 {
+  //for now only support 
+  if(c_dim>4)
+    {
+      cerr<<"ERROR: so far, matrix larger than 4 dimensions is not support, quit...."<<endl;
+      exit(-1);
+    }
   c_dim_size=new unsigned[c_dim];
   unsigned totalNumData=1;
   //need to copy over the data and size
@@ -40,9 +48,13 @@ Matrix<T>::Matrix(const unsigned& _dim, unsigned _dim_size[], T _data[]):
   //now we need to figure out the data structure later,
   //for now we say things in 1D
   c_data=new T[totalNumData];
-  for(unsigned i=0;i<totalNumData;i++)
+  if(_data!=NULL)
     {
-      c_data[i]=_data[i];
+      memcpy(c_data, _data, sizeof(T)*totalNumData);
+    }
+  else
+    {//in case of null data input, set the default value to zero
+      std::memset(c_data, 0, sizeof(T)*totalNumData);
     }
   //done
 }
@@ -147,6 +159,23 @@ Matrix<T>& Matrix<T>::operator = (const Matrix<T>& _m)
   if(this==&_m)
     return *this;
 
+  //now we need to check to see whether the current one is empty or not.
+  //we could allow the current to be a filled one, but just need to
+  //delete/clear the data first
+  if((signed)(this->c_dim)!=-1)
+    {
+      if(c_dim_size!=NULL)
+	{
+	  delete[] c_dim_size;
+	  c_dim_size=NULL;
+	}
+      if(c_data!=NULL)
+	{
+	  delete [] c_data;
+	  c_data=NULL;
+	}
+    }
+
   //deep copy
   //first check to see whether the one is initialized or not
   if((signed)(_m.c_dim)==-1)
@@ -171,10 +200,8 @@ Matrix<T>& Matrix<T>::operator = (const Matrix<T>& _m)
   //now we need to figure out the data structure later,
   //for now we say things in 1D
   c_data=new T[totalNumData];
-  for(unsigned i=0;i<totalNumData;i++)
-    {
-      c_data[i]=_m.c_data[i];
-    }
+  memcpy(c_data, _m.c_data, sizeof(T)*totalNumData);
+  
   //done
   return *this;
 }
@@ -430,29 +457,31 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 	  if(_dim_pos[i]>0&&((unsigned)_dim_pos[i])>=this->size(i))
 		  throw std::out_of_range("dimension size is out of range");	
 	}
-	
+	cout<<"do 1"<<endl;	
 	//start doing the job
 	//first determine the output matrix dimension
 	unsigned new_dim=0;
 	unsigned* new_dim_size;
 	for(unsigned i=0;i<_n;i++)
 	{
-		if(_dim_pos[i]>0)
+		if(_dim_pos[i]<0)
 		{
 			new_dim++;
 		}
 	}
+	cout<<"do 2"<<endl;	
 	//determine demension size
 	new_dim_size=new unsigned[new_dim];
 	unsigned counter=0;
 	for(unsigned i=0;i<_n;i++)
 	{
-		if(_dim_pos[i]>0)
+		if(_dim_pos[i]<0)
 		{
-			new_dim_size[counter]=_dim_pos[i];
+			new_dim_size[counter]=c_dim_size[i];
 			counter++;
 		}
 	}
+	cout<<"do 3"<<endl;	
 	Matrix<T> temp_m(new_dim, new_dim_size, NULL);
 	
 	//first determine block number and offset and block size
@@ -468,6 +497,7 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 		offset[i]=0;
 		blockSize[i]=1;
 	}
+		cout<<"do 4"<<endl;	
 	unsigned curr_block_index=0;
 	for(unsigned i=0;i<_n;i++)
 	{
@@ -486,6 +516,7 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 			curr_block_index++;
 		}
 	}
+		cout<<"do 5"<<endl;	
 	//now we need to determine the block size based on the blockSize_index_in_dim_size
 	//unsigned* blockSize=new unsigned [new_dim];
 	for(unsigned i=0;i<new_dim;i++)
@@ -495,7 +526,7 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 			blockSize[i]*=this->c_dim_size[j];
 		}
 	}
-	
+		cout<<"do 6"<<endl;	
 	//now we kind of get everything ready and just need to copy over the data
 	unsigned totalNumOfOutputData=1;
 	for(unsigned i=0;i<new_dim;i++)
@@ -504,8 +535,10 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 	}
 	unsigned* data_index=new unsigned[totalNumOfOutputData];//used to rember where the data will be copied to the data out array
 
+	cout<<"do 7"<<endl;	
 	unsigned sizeOfCurrentBlock_running=totalNumOfOutputData;
-	
+	cout<<"new_dim:"<<new_dim<<";totalNumOfOutputData:"<<totalNumOfOutputData<<";blockNumber:"
+	    <<blockNumber<<";blockSize:"<<blockSize<<";offset:"<<offset<<endl;
 	for(unsigned i=0;i<new_dim;i++)
 	{
 		
@@ -518,22 +551,200 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 			}	
 		}
 	}
-
+	cout<<"do 8"<<endl;	
 	//now based on the indices, copy over the element
 	for(unsigned i=0;i<totalNumOfOutputData;i++)
 	  {
 	    temp_m.c_data[i]=this->c_data[data_index[i]];
 	  }
+		cout<<"do 10"<<endl;	
 
 	//done!!
 	return temp_m;
 }
+
+//this is  a function only used to initialize/fill in data for an empty matrix
+  //
+template<class T>
+void Matrix<T>::initialize(const unsigned& _dim, const unsigned _dim_size[], const T _data[])
+{
+  //first we need to check whether this current one is an empty matrix
+  if((signed)(this->c_dim)!=-1)
+    {
+      throw runtime_error("Run time error:calling to reinitialize on an unempty matrix");
+    }
+  
+  //now do the data filling
+  //for now only support 
+  if(_dim>4)
+    {
+      cerr<<"ERROR: so far, matrix larger than 4 dimensions is not support, quit...."<<endl;
+      exit(-1);
+    }
+  c_dim=_dim;
+  c_dim_size=new unsigned[c_dim];
+  unsigned totalNumData=1;
+  //need to copy over the data and size
+  for(unsigned i=0;i<c_dim;i++)
+    {
+      if(_dim_size[i]==0)
+	{
+	  this->c_dim=-1;
+	  delete[] c_dim_size;
+	  c_dim_size=NULL;
+	  cerr<<"constructing an empty/unintialized matrix"<<endl;
+	  return;
+	}
+      c_dim_size[i]=_dim_size[i];
+      totalNumData*=c_dim_size[i];
+    }
+  
+  c_data=new T[totalNumData];
+  if(_data==NULL)
+    {
+      //intialize it with zeros
+      std::memset(c_data, 0, totalNumData*sizeof(T));
+      return;
+    }
+  
+  //now we need to figure out the data structure later,
+  //for now we say things in 1D
+  
+  for(unsigned i=0;i<totalNumData;i++)
+    {
+      c_data[i]=_data[i];
+    }
+  //done
+}
+
 /*  Matrix<T> GetSubMatrix(int d1, int d2);
 
   Matrix<T> GetSubMatrix(int d1, int d2, int d3);
 
   Matrix<T> GetSubMatrix(int d1, int d2, int d3, int d3);
 */
+
+//used for printing
+template<class T>
+std::string Matrix<T>::toString() const
+{
+  //depending on the dimension, we need to do different output
+  //first check for a valid/initialized matrix
+  stringstream ss;
+  if((signed)(this->c_dim)==-1)
+    {
+      ss<<"empty/uninitialized matrix []\n";
+      return ss.str();
+    }
+  
+  //0D, scalar-like matrix
+  if(this->c_dim==0)
+    {
+      ss<<"\t"<<this->c_data[0]<<"\n";
+      return ss.str();
+    }
+  
+  //1D, vector
+  if(this->c_dim==1)
+    {
+      for(unsigned i=0;i<c_dim_size[0];i++)
+	{
+	  ss<<c_data[i];
+	  if(i!=c_dim_size[0]-1)
+	    {
+	      ss<<" ";
+	    }
+	}
+      ss<<"\n";
+      return ss.str();
+    }
+
+  //2D, matrix
+  if(this->c_dim==2)
+    {
+      for(unsigned i=0;i<c_dim_size[0];i++)
+	{
+	  for(unsigned j=0;j<c_dim_size[1];j++)
+	    {
+	      ss<<c_data[i*c_dim_size[1]+j];
+	      if(j!=c_dim_size[1]-1)
+		{
+		  ss<<" ";
+		}
+	      else
+		{
+		  ss<<"\n";
+		}
+	    }
+	}
+      ss<<"\n";
+      return ss.str();
+    }
+
+
+  //3D, matrix
+  if(this->c_dim==3)
+    {
+      for(unsigned i=0;i<c_dim_size[0];i++)
+	{
+	  //by section here or block
+	  ss<<"("<<i<<",:,:):\n";
+	  for(unsigned j=0;j<c_dim_size[1];j++)
+	    {
+	      for(unsigned k=0;k<c_dim_size[2];k++)
+		{
+		  ss<<c_data[j*c_dim_size[2]+k];
+		  if(k!=c_dim_size[2]-1)
+		    {
+		      ss<<" ";
+		    }
+		  else
+		    {
+		      ss<<"\n";
+		    }
+		}
+	    }
+	}
+      ss<<"\n";
+      return ss.str();
+    }  
+
+  //4D, matrix
+  if(this->c_dim==4)
+    {
+      for(unsigned i=0;i<c_dim_size[0];i++)
+	{
+	  //by section here or block
+	  ss<<"("<<i<<",";
+	  for(unsigned p=0;p<c_dim_size[1];p++)
+	    {
+	      ss<<p<<",:,:):\n";
+	      for(unsigned j=0;j<c_dim_size[2];j++)
+		{
+		  for(unsigned k=0;k<c_dim_size[3];k++)
+		    {
+		      ss<<c_data[j*c_dim_size[3]+k];
+		      if(k!=c_dim_size[3]-1)
+			{
+			  ss<<" ";
+			}
+		      else
+			{
+			  ss<<"\n";
+			}
+		    }
+		}
+	    }
+	}
+      ss<<"\n";
+      return ss.str();
+    }  
+  //done
+  throw runtime_error("Run time error:matrix with more than 4 dimensions is not supported so far");
+
+  return "";
+}
+
 
 
 //c++ equivalent to Matlab sum(A), return
@@ -648,6 +859,7 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
   return temp_m;
   //done here
 }
+
 
 //======template instantiation
 //class

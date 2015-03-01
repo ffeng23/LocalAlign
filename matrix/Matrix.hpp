@@ -1,6 +1,9 @@
 #ifndef MATRIX_HPP
 #define MATRIX_HPP
 
+#include <string>
+
+
 //user defined matrix class for matrix manipulation
 //so far we only support up to 4 Dimensions,
 //NOTE: a dimension of zero, means a scalar !!!
@@ -18,7 +21,7 @@ public:
 
   //data input now is one data.
   //we will restructure it
-  Matrix(const unsigned& _dim, unsigned _dim_size[], T _data[]);
+  Matrix(const unsigned& _dim, unsigned _dim_size[],   T _data[]);
 
   //
   Matrix(const unsigned& _dim, const unsigned* _dim_size, const T* _data=NULL);
@@ -73,6 +76,12 @@ public:
 
   //get submatrix
   Matrix<T> SubMatrix(const unsigned& _n, const int _dim_pos[]) const;
+
+  std::string toString() const;
+
+  //this is  a function only used to initialize/fill in data for an empty matrix
+  //
+  void initialize(const unsigned& _dim, const unsigned _dim_size[], const T _data[]);
   /*
   Matrix<T> GetSubMatrix(int d1, int d2);
 

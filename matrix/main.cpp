@@ -85,7 +85,40 @@ int main(int argc, char* argv[])
     cout<<"\tSequency Type:Nucleotides\n";
   */
   
-  cout<<"start testin........."<<endl;
+  cout<<"start testing matrix function........."<<endl;
+  cout<<"first building the matrix"<<endl;
+  Matrix<unsigned> m1;
+  cout<<"m1:"<<m1.toString()<<endl;
+
+  //now we try to initialize it
+  unsigned dim_size[]={2,3,4};
+  unsigned data[]={1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11,12};
+  m1.initialize(3, dim_size, data);
+  m1=m1-3;
+  cout<<"after initializeation"<<endl;
+  cout<<"m1:\n"<<m1.toString()<<endl;
+
+  //create another one
+  double data1[]={1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11,12};
+  Matrix<double> m2(3, dim_size, data1);
+  m2=m2+2;
+  cout<<"m2:\n"<<m2.toString()<<endl;
+
+
+  Matrix<double> m3=m2-12;
+  cout<<"m3:\n"<<m3.toString()<<endl;
+  
+  //size
+  unsigned s=m3.size(1);
+  cout<<"m3 size of dim 1:"<<s<<endl;
+  cout<<"m3 size :"<<m3.size().toString()<<endl;
+
+  //testing submatrix
+  cout<<"testing submatrix:"<<endl;
+  int sub[]={1,-1,-1};
+  cout<<m3.SubMatrix(3, sub).toString()<<endl;
+  
+  
 
   cout<<"Done!!!"<<endl;
   //ofs.close();
