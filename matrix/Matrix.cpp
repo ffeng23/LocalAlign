@@ -27,6 +27,7 @@ template<class T>
 Matrix<T>::Matrix(const unsigned& _dim, unsigned _dim_size[], T _data[]):
   c_dim(_dim)
 {
+  //cout<<"#####build with array the matrix"<<endl;
   //for now only support 
   if(c_dim>4)
     {
@@ -72,6 +73,7 @@ template<class T>
 Matrix<T>::Matrix(const unsigned& _dim, const unsigned* _dim_size, const T* _data):
   c_dim(_dim)
 {
+  //cout<<"^^^^^^^^building an object"<<endl;
   c_dim_size=new unsigned[c_dim];
   unsigned totalNumData=1;
   //need to copy over the data and size
@@ -112,7 +114,7 @@ Matrix<T>::Matrix(const unsigned& _dim, const unsigned* _dim_size, const T* _dat
 template<class T>
 Matrix<T>::~Matrix()
 {
-  
+  //cout<<"*******calling destructor*********"<<endl;
   if(c_dim_size!=NULL)
     {
       delete[] c_dim_size;
@@ -218,6 +220,7 @@ T& Matrix<T>::operator ()()
 {
   if(this->c_dim!=0)
     {
+      cerr<<"unsupported array subscription (dimension not compatible), please check your data! exception thrown (NOTE:this empty access mehtod only supported on a scalar likematrix)"<<endl;
       throw runtime_error("unsupported array subscription (dimension not compatible), please check your data! (NOTE:this empty access mehtod only supported on a scalar likematrix)");
     }
   //check for out bound accessing
@@ -232,11 +235,13 @@ T& Matrix<T>::operator ()(const unsigned& _d0)
 {
   if(this->c_dim!=1)
     {
+      cerr<<"unsupported array subscription (dimension not compatible), please check your data! exception thrown"<<endl;
       throw runtime_error("unsupported array subscription (dimension not compatible), please check your data!");
     }
   //check for out bound accessing
   if(_d0>=c_dim_size[0])
     {
+      cerr<<"index out of range, exception thrown"<<endl;
       throw std::out_of_range("index out of range"); 
     }
   //good return 
@@ -266,11 +271,13 @@ T& Matrix<T>::operator ()(const unsigned& _d0, const unsigned& _d1, const unsign
 {
   if(this->c_dim!=3)
     {
+      cerr<<"unsupported array subscription (dimension not compatible), please check your data! exception thrown"<<endl;
       throw runtime_error("unsupported array subscription (dimension not compatible), please check your data!");
     }
   //check for out range
   if(_d0>=c_dim_size[0]||_d1>=c_dim_size[1]||_d2>=c_dim_size[2])
     {
+      cerr<<"index out of range, exception thrown"<<endl;
       throw std::out_of_range("index out of range");  
     }
   return this->c_data[_d0*(_d1*c_dim_size[2])+_d2];
@@ -283,11 +290,13 @@ T& Matrix<T>::operator ()(const unsigned& _d0, const unsigned& _d1, const unsign
 {
   if(this->c_dim!=4)
     {
+      cerr<<"unsupported array subscription (dimension not compatible), please check your data!"<<endl;
       throw std::runtime_error("unsupported array subscription (dimension not compatible), please check your data!");
     }
   //check for out range
   if(_d0>=c_dim_size[0]||_d1>=c_dim_size[1]||_d2>=c_dim_size[2])
     {
+      cerr<<"index out of rangen, exception thrown"<<endl;
       throw std::out_of_range("index out of range");  
     }
   return this->c_data[_d0*_d1*(_d2*c_dim_size[3])+_d3];
@@ -304,6 +313,7 @@ Matrix<T> Matrix<T>::operator + (const T& _t)
 {
   if((signed)(this->c_dim)==-1)
     {
+      cerr<<"unitialized matrix, exception thrown"<<endl;
       throw std::runtime_error("unitialized matrix");
     }
   Matrix<T> temp(*this);
@@ -326,6 +336,7 @@ Matrix<T> Matrix<T>::operator - (const T& _t)
 {
   if((signed)(this->c_dim)==-1)
     {
+      cerr<<"unitialized matrix, exception thrown"<<endl;
       throw std::runtime_error("unitialized matrix");
     }
   Matrix<T> temp(*this);
@@ -348,6 +359,7 @@ Matrix<T>  Matrix<T>::operator * (const T& _t)
 {
   if((signed)(this->c_dim)==-1)
     {
+      cerr<<"unitialized matrix, exception thrown"<<endl;
       throw std::runtime_error("unitialized matrix");
     }
   Matrix<T> temp(*this);
@@ -369,6 +381,7 @@ Matrix<T>  Matrix<T>::operator / (const T& _t)
 {
   if((signed)(this->c_dim)==-1)
     {
+      cerr<<"unitialized matrix, exception thrown"<<endl;
       throw std::runtime_error("unitialized matrix");
     }
   Matrix<T> temp(*this);
@@ -411,6 +424,7 @@ unsigned Matrix<T>::size(const unsigned& _dim) const
  
   if(_dim>=this->c_dim)
     {
+      cerr<<"out of range error:dimension is too big, exception thrown"<<endl;
       throw std::out_of_range("out of range error:dimension is too big");
     }
 
@@ -450,19 +464,24 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 	//first we need decide whether the input are valid
 	if((signed)(this->c_dim)==-1)
 	{
+	  cerr<<"calling the getsubmatrix on a uninitialized matrix.exception thrown"<<endl;
 	  throw std::runtime_error("calling the getsubmatrix on a uninitialized matrix.");
 	}
 	if(_n!=this->dim())
 	{
+	  cerr<<"unsupport format, the input array has to be same size as the matrix, exception thrown"<<endl;
 	  throw std::runtime_error ("unsupport format, the input array has to be same size as the matrix");
 	}
 	
 	for(unsigned i=0;i<_n;i++)
 	{
 	  if(_dim_pos[i]>0&&((unsigned)_dim_pos[i])>=this->size(i))
-		  throw std::out_of_range("dimension size is out of range");	
+	    {
+	      cerr<<"the specified index is out of range of the sie of the dimension in submatrix, please check"<<endl;
+	      throw std::out_of_range("dimension size is out of range");
+	    }
 	}
-	cout<<"do 1"<<endl;	
+	//cout<<"do 1"<<endl;	
 	//start doing the job
 	//first determine the output matrix dimension
 	unsigned new_dim=0;
@@ -474,7 +493,7 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 			new_dim++;
 		}
 	}
-	cout<<"do 2"<<endl;	
+	//cout<<"do 2"<<endl;	
 	//determine demension size
 	new_dim_size=new unsigned[new_dim];
 	unsigned counter=0;
@@ -489,13 +508,26 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 			
 		}
 	}
-	cout<<"do 3"<<endl;	
+	//cout<<"do 3"<<endl;	
 	Matrix<T> temp_m(new_dim, new_dim_size, NULL);
 	
 	//first determine block number and offset and block size
 	unsigned* blockNumber=new unsigned[new_dim];
 	unsigned* blockSize_index_in_dim_size=new unsigned[new_dim];
-	unsigned* offset=new unsigned[new_dim];
+	unsigned* offset=new unsigned[new_dim+1];
+	/*NOTE: offset is a array with new_dim+1 elements!!! one more than the others
+	 *the rationale is that the offset[0] is the starting offset, then the dimension i offset
+	 *is offset[i+1]. this is necessary when there are trailing offsets.
+	 *for example, when there are 1D, the offset is of 2elements. offset[0]
+	 *is the starting offset (could be zero). we will add the starting offset to all the elements in
+	 * the begining. then for dim 1 (dim[0]), we will add offset[1] (i+1, where i=0).
+	 * for another example, when 0D, the offset is of 1 element long, which is the 
+	 *the starting offset, will be add to all element in the begining.
+	 *for any offset elements, 0 offset is possible. it depends one what is following
+	 *to the specific dim. if a dimension is followed with a another dimension, specified by -1, 
+	 *then the offset is zero at this level. if followed with a specified one, offset is something
+	 *pointed to the elements within this specified block
+	 */
 	unsigned* blockSize=new unsigned [new_dim];
 
 	for(unsigned i=0;i<new_dim;i++)
@@ -505,40 +537,58 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 		offset[i]=0;
 		blockSize[i]=1;
 	}
-		cout<<"do 4"<<endl;	
+	offset[new_dim]=0;//since offset is 1+new_dim, see above 
+	//cout<<"do 4"<<endl;	
 	unsigned curr_block_index=0;
 	unsigned enclosedInputBlockSize_running=totalNumOfInputData;
-	bool roundFlag=false;//one round means, we see 
+	//bool roundFlag=false;//one round means, we see
+
+		
 	for(unsigned i=0;i<_n;i++)
 	{
-	  cout<<"i:"<<i<<endl;
+	  //cout<<"i:"<<i<<endl;
 	  enclosedInputBlockSize_running/=c_dim_size[i];
-	  cout<<"\tencloseInputblocksize:"<<enclosedInputBlockSize_running<<endl;
+	  //cout<<"\tencloseInputblocksize:"<<enclosedInputBlockSize_running<<endl;
 		if(_dim_pos[i]<0) //-1 means all
 		{
 			blockNumber[curr_block_index]=new_dim_size[curr_block_index];
 			blockSize_index_in_dim_size[curr_block_index]=i+1;
 			//curr_block_index++;
-			cout<<"\tin negative case!!"<<endl;
+			//cout<<"\tin negative case!!"<<endl;
 		}
 		else //positive means very specific element in this dimension
 		{
 		  offset[curr_block_index]+=_dim_pos[i]*enclosedInputBlockSize_running;//_dim_pos[i]*this->c_dim_size[i];
-		  cout<<"\tpositive case:_dim_pos[i]"<<_dim_pos[i]<<endl;
+		  //cout<<"\tpositive case:_dim_pos[i]"<<_dim_pos[i]<<endl;
+		  
 		}
 		if(_dim_pos[i]<0)
 		{
 			curr_block_index++;
 		}
 	}
-	cout<<"do 5"<<endl;	
+	/*
+	//now determine the offset
+	unsigned current_offset_index=0;
+	for(unsigned i=0;i<_n;i++)
+	  {
+	    //the first offset
+	    if(_dim_size[0]<0) //-1 means all, offset is zero
+	      {
+		
+	      }
+	    else  //positive menas very specific element
+	      {
+		offset[curr_block_index]+=_dim_pos[i]*enclosedInputBlockSize_running;//_dim_pos[i]*this->c_dim_size[i];
+		  cout<<"\tpositive case:_dim_pos[i]"<<_dim_pos[i]<<endl;
+	      }
+	  }
+	*/
+	//cout<<"do 5"<<endl;	
 	//now we need to determine the block size based on the blockSize_index_in_dim_size
 	//unsigned* blockSize=new unsigned [new_dim];
 	unsigned totalNumOfOutputData=1;
-	/*for(unsigned i=0;i<new_dim;i++)
-	  {
-		
-		}*/
+	
 	for(unsigned i=0;i<new_dim;i++)
 	{
 	  totalNumOfOutputData*=new_dim_size[i];
@@ -547,18 +597,18 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 			blockSize[i]*=this->c_dim_size[j];
 		}
 	}
-		cout<<"do 6"<<endl;	
+	//cout<<"do 6"<<endl;	
 	//now we kind of get everything ready and just need to copy over the data
 	
 	unsigned* data_index=new unsigned[totalNumOfOutputData];//used to rember where the data will be copied to the data out array
 
-	cout<<"do 7"<<endl;	
+	//cout<<"do 7"<<endl;	
 	unsigned sizeOfCurrentBlock_running=totalNumOfOutputData;
-	cout<<"new_dim:"<<new_dim<<";totalNumOfOutputData:"<<totalNumOfOutputData<<";blockNumber:"
-	    <<blockNumber<<";blockSize:"<<blockSize<<";offset:"<<offset<<endl;
+	//cout<<"new_dim:"<<new_dim<<";totalNumOfOutputData:"<<totalNumOfOutputData<<";blockNumber:"
+	//    <<blockNumber<<";blockSize:"<<blockSize<<";offset:"<<offset<<endl;
 
 	//debugging
-	cout<<"blockNumber:";
+	/*cout<<"blockNumber:";
 	for(unsigned i=0;i<new_dim;i++)
 	  {
 	    cout<<blockNumber[i]<<",";
@@ -573,49 +623,56 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 	cout<<endl;
 
 	cout<<"offset:";
-	for(unsigned i=0;i<new_dim;i++)
+	for(unsigned i=0;i<new_dim+1;i++)
 	  {
 	    cout<<offset[i]<<",";
 	  }
 	cout<<endl;
-
-	cout<<"debugging index determining:"<<endl;
+	*/
+	//cout<<"debugging index determining:"<<endl;
+	//the first step is to add the starting offset (offset[0]) to all the entries
+	for(unsigned i=0;i<totalNumOfOutputData;i++)
+	  {
+	    data_index[i]=offset[0];
+	  }
+	
+	
 	unsigned totalNumOfOutputBlock_running;
 	unsigned totalNumOfOutputBlock_size_running;
 	for(unsigned i=0;i<new_dim;i++)
 	{
-	  cout<<"i-"<<i<<":";
+	  //cout<<"i-"<<i<<":";
 	   sizeOfCurrentBlock_running=sizeOfCurrentBlock_running/new_dim_size[i];
 	   totalNumOfOutputBlock_running=totalNumOfOutputData/sizeOfCurrentBlock_running/new_dim_size[i];
 	   totalNumOfOutputBlock_size_running=totalNumOfOutputData/totalNumOfOutputBlock_running;
-	   cout<<"repeat block number:"<<totalNumOfOutputBlock_running<<endl;
+	   //cout<<"repeat block number:"<<totalNumOfOutputBlock_running<<endl;
 	   for(unsigned p=0;p<totalNumOfOutputBlock_running;p++)
 	     {
-	       cout<<"sizeofcurrentBlock_running:"<<sizeOfCurrentBlock_running<<":"<<endl;
+	       //cout<<"sizeofcurrentBlock_running:"<<sizeOfCurrentBlock_running<<":"<<endl;
 	       for(unsigned j=0;j<blockNumber[i];j++)
 		 {
-		   cout<<"\tj-"<<j<<",";
+		   //cout<<"\tj-"<<j<<",";
 		   
 		   for(unsigned k=0;k<sizeOfCurrentBlock_running;k++)
 		    {
-		      cout<<"\t\tk-"<<k<<",entry:[k+j*sizeOfCurrentBlock_running]"<<k+j*sizeOfCurrentBlock_running+p*totalNumOfOutputBlock_size_running;
-		      data_index[k+j*sizeOfCurrentBlock_running+p*totalNumOfOutputBlock_size_running]+=j*blockSize[i]+offset[i];
-		      cout<<"=>data_index:"<<data_index[k+j*sizeOfCurrentBlock_running+p*totalNumOfOutputBlock_size_running]<<endl;
+		      //cout<<"\t\tk-"<<k<<",entry:[k+j*sizeOfCurrentBlock_running]"<<k+j*sizeOfCurrentBlock_running+p*totalNumOfOutputBlock_size_running;
+		      data_index[k+j*sizeOfCurrentBlock_running+p*totalNumOfOutputBlock_size_running]+=j*blockSize[i]+offset[i+1];
+		      //cout<<"=>data_index:"<<data_index[k+j*sizeOfCurrentBlock_running+p*totalNumOfOutputBlock_size_running]<<endl;
 		      
 		    }	
 		}
 	     }
 	}
-	cout<<"do 8"<<endl;	
+	//cout<<"do 8"<<endl;	
 	//now based on the indices, copy over the element
-	cout<<"data index:"<<endl;
+	//cout<<"data index:"<<endl;
 	for(unsigned i=0;i<totalNumOfOutputData;i++)
 	  {
 	    temp_m.c_data[i]=this->c_data[data_index[i]];
-	    cout<<data_index[i]<<",";
+	    //cout<<data_index[i]<<",";
 	  }
-	cout<<endl;
-		cout<<"do 10"<<endl;	
+	//cout<<endl;
+	//	cout<<"do 10"<<endl;	
 
 	//done!!
 	return temp_m;
@@ -629,6 +686,7 @@ void Matrix<T>::initialize(const unsigned& _dim, const unsigned _dim_size[], con
   //first we need to check whether this current one is an empty matrix
   if((signed)(this->c_dim)!=-1)
     {
+      cerr<<"Run time error:calling to reinitialize on an unempty matrix, exception thrown"<<endl;
       throw runtime_error("Run time error:calling to reinitialize on an unempty matrix");
     }
   
@@ -751,7 +809,7 @@ std::string Matrix<T>::toString() const
 	    {
 	      for(unsigned k=0;k<c_dim_size[2];k++)
 		{
-		  ss<<c_data[j*c_dim_size[2]+k];
+		  ss<<c_data[i*c_dim_size[2]*c_dim_size[1]+j*c_dim_size[2]+k];
 		  if(k!=c_dim_size[2]-1)
 		    {
 		      ss<<" ";
@@ -773,15 +831,17 @@ std::string Matrix<T>::toString() const
       for(unsigned i=0;i<c_dim_size[0];i++)
 	{
 	  //by section here or block
-	  ss<<"("<<i<<",";
+	  
 	  for(unsigned p=0;p<c_dim_size[1];p++)
 	    {
-	      ss<<p<<",:,:):\n";
+	      ss<<"("<<i<<":"<<p<<",:,:):\n";
 	      for(unsigned j=0;j<c_dim_size[2];j++)
 		{
 		  for(unsigned k=0;k<c_dim_size[3];k++)
 		    {
-		      ss<<c_data[j*c_dim_size[3]+k];
+		      ss<<c_data[i*c_dim_size[1]*c_dim_size[2]*c_dim_size[3]+
+				 p*c_dim_size[2]*c_dim_size[3]+
+				 j*c_dim_size[3]+k];
 		      if(k!=c_dim_size[3]-1)
 			{
 			  ss<<" ";
@@ -798,6 +858,7 @@ std::string Matrix<T>::toString() const
       return ss.str();
     }  
   //done
+  cerr<<"Run time error:matrix with more than 4 dimensions is not supported so far, exception thrown"<<endl;
   throw runtime_error("Run time error:matrix with more than 4 dimensions is not supported so far");
 
   return "";
@@ -813,6 +874,7 @@ Matrix<T> sum(const Matrix<T>& _m)
 {
   if((signed)(_m.dim())==-1)
     {
+      cerr<<"call on an unitialized Matrix object for sum(),exception thrown"<<endl;
       throw std::runtime_error("calling on a uninitialized Matrix object for sum");
     }
   if(_m.dim()==0)
@@ -841,8 +903,10 @@ template<class T>
 Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
 {
   if((signed)(_m.dim())==-1)
-    throw runtime_error("call on an unitialized Matrix object for sum()");
-
+    {
+      cerr<<"call on an unitialized Matrix object for sum(), exception thrown"<<endl;
+      throw runtime_error("call on an unitialized Matrix object for sum()");
+    }
   if(_m.dim()==0)
     {
       cerr<<"calling on an scalar like matrix"<<endl;
@@ -852,30 +916,39 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
   //first determine dimension and size of each dim
   if(_dim>=_m.dim())
     {
+      cerr<<"dimension is out of range, exception thrown"<<endl;
       throw std::out_of_range("dimension is out of range");
     }
+  //cout<<"calling sum 1"<<endl;
   unsigned new_dim=_m.dim()-1;
   unsigned* new_dim_size=new unsigned [new_dim];
   unsigned totalNumberOfElements=1;
   unsigned new_index_counter=0;
-  for(unsigned i=0;i<new_dim;i++)
+  for(unsigned i=0;i<_m.c_dim;i++)
     {
       if(i!=_dim)
 	{
 	  new_dim_size[new_index_counter]=_m.size(i);
+	  //cout<<"dim size:"<<new_dim_size[new_index_counter]<<endl;
 	  new_index_counter++;
+	  
 	}
     }
-  Matrix<T> temp_m(new_dim, new_dim_size, NULL);
+  //cout<<"calling sum 2, new_dim:"<<new_dim<<",new_dim_size:"<<new_dim_size[0]<<endl;
 
+  Matrix<T> temp_m(new_dim, new_dim_size, NULL);
+  //cout<<temp_m.toString()<<endl;
   //start getting the sums
   //first need to figuire out how many blocks we need
   T* p_firstElementEachBlock_dst;
   T* p_firstElementEachBlock_src;
   
   unsigned numberOfBlocks=1;
-  unsigned sizeOfEachBlock=1;
+  unsigned sizeOfEachBlock_output=1;
+  unsigned sizeOfEachBlock_input=1;
   bool flag=false;//indicating whether the deterimin the block number action is done
+  //cout<<"calling sum 3"<<endl;
+
   //start to determine the numOfBlocks
   for(unsigned i=0;i<_m.dim();i++)
     {
@@ -889,33 +962,49 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
       else
 	{//we skip this current if this is the flag round, since it will collapsed on this _dim dimension
 	  if(i!=_m.c_dim-1)
-	    sizeOfEachBlock *= _m.size(i+1);
+	    {
+	      sizeOfEachBlock_output *= _m.size(i+1);
+	    }
+	  sizeOfEachBlock_input*=_m.size(i);
 	}
 
       totalNumberOfElements*=_m.size(i);
     }
-  
+  /*
+  cout<<"totalNumberOfElements:"<<totalNumberOfElements
+      <<"number of blocks:"<<numberOfBlocks
+      <<";sizeOfEachBlock_output:"<<sizeOfEachBlock_output
+      <<";sizeOfEachBlack_input:"<<sizeOfEachBlock_input<<endl;
+  */
+  //cout<<temp_m.toString()<<endl;
   //temp
   //now we need to determine the sizeOfEachBlock
   p_firstElementEachBlock_dst=temp_m.c_data; //starting point destination
   p_firstElementEachBlock_src=_m.c_data;//starting point source
+  //cout<<"p_first dst:"<<p_firstElementEachBlock_dst<<";p_first src:"<<p_firstElementEachBlock_src<<endl;
   for(unsigned i=0;i<numberOfBlocks;i++)
     {
-      p_firstElementEachBlock_dst += i*sizeOfEachBlock;
-      p_firstElementEachBlock_src += i*(sizeOfEachBlock*_m.size(_dim));
-      
-      for(unsigned k=0;k<sizeOfEachBlock;k++)
+      //cout<<"==>loop i:"<<i<<endl;
+      p_firstElementEachBlock_dst =temp_m.c_data+i* sizeOfEachBlock_output;
+      p_firstElementEachBlock_src = _m.c_data+i*sizeOfEachBlock_input;
+      //cout<<"\ti*sizeOfEachBlock_output:"<<i*sizeOfEachBlock_output<<endl;
+      //cout<<"\ti*sizeOfEachBlock_input:"<<i*sizeOfEachBlock_input<<endl;
+      for(unsigned k=0;k<sizeOfEachBlock_output;k++)
 	{
+	  //cout<<"\tk:"<<k<<endl;
 	  p_firstElementEachBlock_dst[k]=0;
+	  //cout<<"\t_m.size(_dim):"<<_m.size(_dim)<<endl;
 	  for(unsigned j=0;j<_m.size(_dim);j++)
 	    {
-	      p_firstElementEachBlock_dst[k]+=p_firstElementEachBlock_src[k+j*sizeOfEachBlock];
+	      //cout<<"\t\tj:"<<j<<";k+j*sizeOfEachBlock_output:"<<k+j*sizeOfEachBlock_output<<endl;
+	      //cout<<"\t\telement:"<<p_firstElementEachBlock_src[k+j*sizeOfEachBlock_output]<<endl;
+	      p_firstElementEachBlock_dst[k]+=p_firstElementEachBlock_src[k+j*sizeOfEachBlock_output];
 	    }
 	}//end k for loop
     }//end of i for loop
-
+  
   return temp_m;
-  //done here
+  
 }
 
 

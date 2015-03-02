@@ -118,11 +118,48 @@ int main(int argc, char* argv[])
   int sub[]={1,-1,-1};
   cout<<m3.SubMatrix(3, sub).toString()<<endl;
   
-  int sub2[]={-1,1,1};
+  int sub2[]={-1,-1,0};
   cout<<m3.SubMatrix(3,sub2).toString()<<endl;
-  
 
+  cout<<"===>testing a 4D matrix:"<<endl;
+  //start a new test with 4D
+  double data2[]={ 1, 2, 3, 4,
+		   5, 6, 7, 8,
+		   9,10,11,12,
+		  
+		  -1,-2,-3,-4,
+		  -5,-6,-7,-8,
+		   -9,-10,-11,-12,
+		   /*4D-0*/
+		   1.1, 2.1, 3.1, 4.1,
+		   5.1, 6.1, 7.1, 8.1,
+		   9.1,10.1,11.1,12.1,
+		  
+		  -1.1,-2.1,-3.1,-4.1,
+		  -5.1,-6.1,-7.1,-8.1,
+		   -9.1,-10.1,-11.1,-12.1,
+		   /*4D-1*/
+		   1.2, 2.2, 3.2, 4.2,
+		   5.2, 6.2, 7.2, 8.2,
+		   9.2,10.2,11.2,12.2,
+		  
+		  -1.2,-2.2,-3.2,-4.2,
+		  -5.2,-6.2,-7.2,-8.2,
+		   -9.2,-10.2,-11.2,-12.2
+		   /*4D-2*/
+		     };
+  unsigned dim_size4[]={3,2,3,4};
+  Matrix<double> m4(4, dim_size4, data2);
+  cout<<m4.toString()<<endl;
+
+  //start testing the submatrix on 4d matrix
+  int sub4[]={1,-1,-1,3};
+  cout<<m4.SubMatrix(4,sub4).toString()<<endl;
   cout<<"Done!!!"<<endl;
+
+  cout<<m4.toString()<<endl;
+  //start doing the su
+  cout<<sum(m4).toString()<<endl;
   //ofs.close();
 
   //cout<<"Total "<<gene_info.size()<<" genes are processed"<<endl;

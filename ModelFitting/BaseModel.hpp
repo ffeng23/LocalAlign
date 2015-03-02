@@ -13,7 +13,7 @@ public:
   BaseModel();
   virtual ~BaseModel()=0;
   
-  void ReadSettings(const AlignmentSettings& _asettings);
+  void ReadSettings(const AlignmentSettings::AlignmentSettings & _asettings);
 
   virtual bool ValidateModel()=0;//done know what to validate.
   //check for some "important" model parameters and make sure they are set!!!
@@ -28,7 +28,7 @@ public:
   //the outer caller need to make the couter available as well as
   //the counter is base class and will be determine by the 
   //inherited call to decide which one to use
-  virtual bool InitializeCounter(Counter& _c)=0 const;
+  virtual bool InitializeCounter(Counter& _c) const =0;
   
   //the user will supply the model to be populated
   //polymorphism here!! 
@@ -38,13 +38,13 @@ public:
   //the caller needs to make the assigns available
   //inherited class will decide which one to work on
   //polymorphism
-  virtual void InitializeAssign(Assigns& _a)=0 const;
+  virtual void InitializeAssign(Assigns& _a) const =0;
   
   //_c is output
-  virtual void UpdateCounter(const Assigns& _a, Counter& _c)=0 const;
+  virtual void UpdateCounter(const Assigns& _a, Counter& _c) const = 0;
 
   //sum counter
-  virtual Counter SumCounter(const Counter& _c1, const Counter& _c2)=0 const;
+  virtual void SumCounter(const Counter& _c1, const Counter& _c2, Counter& _retC) const =0 ;
   
   
 };

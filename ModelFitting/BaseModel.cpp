@@ -11,6 +11,7 @@ BaseModel::~BaseModel()
   //empty so far
 }
 
-void BaseModel::ReadSettings(const alignmentSettings& _asettings)
+void BaseModel::ReadSettings(const AlignmentSettings::AlignmentSettings& _asettings)
 {
+  
 }
