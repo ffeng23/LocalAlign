@@ -5,9 +5,9 @@
 //#include "read_gene_info_func.hpp"
 
 //from on you need to specify the c libraries explicitly, 11/
-//#include <unistd.h>
-//#include <stdlib.h>
-//#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 //#include "score.hpp"
 //#include "SequenceString.hpp"
@@ -118,6 +118,8 @@ int main(int argc, char* argv[])
   int sub[]={1,-1,-1};
   cout<<m3.SubMatrix(3, sub).toString()<<endl;
   
+  int sub2[]={-1,1,1};
+  cout<<m3.SubMatrix(3,sub2).toString()<<endl;
   
 
   cout<<"Done!!!"<<endl;

@@ -3,7 +3,12 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+//#include <stdio.h>
+#include <cstring>
+#include <stdlib.h>
+
 #include "Matrix.hpp"
+
 
 using namespace std;
 
@@ -473,12 +478,15 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 	//determine demension size
 	new_dim_size=new unsigned[new_dim];
 	unsigned counter=0;
+	unsigned totalNumOfInputData=1;
 	for(unsigned i=0;i<_n;i++)
 	{
+	  totalNumOfInputData*=c_dim_size[i];
 		if(_dim_pos[i]<0)
 		{
 			new_dim_size[counter]=c_dim_size[i];
 			counter++;
+			
 		}
 	}
 	cout<<"do 3"<<endl;	
@@ -499,28 +507,41 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 	}
 		cout<<"do 4"<<endl;	
 	unsigned curr_block_index=0;
+	unsigned enclosedInputBlockSize_running=totalNumOfInputData;
+	bool roundFlag=false;//one round means, we see 
 	for(unsigned i=0;i<_n;i++)
 	{
+	  cout<<"i:"<<i<<endl;
+	  enclosedInputBlockSize_running/=c_dim_size[i];
+	  cout<<"\tencloseInputblocksize:"<<enclosedInputBlockSize_running<<endl;
 		if(_dim_pos[i]<0) //-1 means all
 		{
 			blockNumber[curr_block_index]=new_dim_size[curr_block_index];
 			blockSize_index_in_dim_size[curr_block_index]=i+1;
 			//curr_block_index++;
+			cout<<"\tin negative case!!"<<endl;
 		}
 		else //positive means very specific element in this dimension
 		{
-			offset[curr_block_index]+=_dim_pos[i]*this->c_dim_size[i];
+		  offset[curr_block_index]+=_dim_pos[i]*enclosedInputBlockSize_running;//_dim_pos[i]*this->c_dim_size[i];
+		  cout<<"\tpositive case:_dim_pos[i]"<<_dim_pos[i]<<endl;
 		}
 		if(_dim_pos[i]<0)
 		{
 			curr_block_index++;
 		}
 	}
-		cout<<"do 5"<<endl;	
+	cout<<"do 5"<<endl;	
 	//now we need to determine the block size based on the blockSize_index_in_dim_size
 	//unsigned* blockSize=new unsigned [new_dim];
+	unsigned totalNumOfOutputData=1;
+	/*for(unsigned i=0;i<new_dim;i++)
+	  {
+		
+		}*/
 	for(unsigned i=0;i<new_dim;i++)
 	{
+	  totalNumOfOutputData*=new_dim_size[i];
 		for(unsigned j=blockSize_index_in_dim_size[i];j<this->c_dim;j++)
 		{
 			blockSize[i]*=this->c_dim_size[j];
@@ -528,35 +549,72 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 	}
 		cout<<"do 6"<<endl;	
 	//now we kind of get everything ready and just need to copy over the data
-	unsigned totalNumOfOutputData=1;
-	for(unsigned i=0;i<new_dim;i++)
-	{
-		totalNumOfOutputData*=new_dim_size[i];
-	}
+	
 	unsigned* data_index=new unsigned[totalNumOfOutputData];//used to rember where the data will be copied to the data out array
 
 	cout<<"do 7"<<endl;	
 	unsigned sizeOfCurrentBlock_running=totalNumOfOutputData;
 	cout<<"new_dim:"<<new_dim<<";totalNumOfOutputData:"<<totalNumOfOutputData<<";blockNumber:"
 	    <<blockNumber<<";blockSize:"<<blockSize<<";offset:"<<offset<<endl;
+
+	//debugging
+	cout<<"blockNumber:";
+	for(unsigned i=0;i<new_dim;i++)
+	  {
+	    cout<<blockNumber[i]<<",";
+	  }
+	cout<<endl;
+	
+	cout<<"blockSize:";
+	for(unsigned i=0;i<new_dim;i++)
+	  {
+	    cout<<blockSize[i]<<",";
+	  }
+	cout<<endl;
+
+	cout<<"offset:";
+	for(unsigned i=0;i<new_dim;i++)
+	  {
+	    cout<<offset[i]<<",";
+	  }
+	cout<<endl;
+
+	cout<<"debugging index determining:"<<endl;
+	unsigned totalNumOfOutputBlock_running;
+	unsigned totalNumOfOutputBlock_size_running;
 	for(unsigned i=0;i<new_dim;i++)
 	{
-		
-		for(unsigned j=0;j<blockNumber[i];j++)
-		{
-			sizeOfCurrentBlock_running=sizeOfCurrentBlock_running/new_dim_size[i];
-			for(unsigned k=0;k<sizeOfCurrentBlock_running;k++)
-			{
-				data_index[k+j*sizeOfCurrentBlock_running]+=j*blockSize[i]+offset[i];
-			}	
+	  cout<<"i-"<<i<<":";
+	   sizeOfCurrentBlock_running=sizeOfCurrentBlock_running/new_dim_size[i];
+	   totalNumOfOutputBlock_running=totalNumOfOutputData/sizeOfCurrentBlock_running/new_dim_size[i];
+	   totalNumOfOutputBlock_size_running=totalNumOfOutputData/totalNumOfOutputBlock_running;
+	   cout<<"repeat block number:"<<totalNumOfOutputBlock_running<<endl;
+	   for(unsigned p=0;p<totalNumOfOutputBlock_running;p++)
+	     {
+	       cout<<"sizeofcurrentBlock_running:"<<sizeOfCurrentBlock_running<<":"<<endl;
+	       for(unsigned j=0;j<blockNumber[i];j++)
+		 {
+		   cout<<"\tj-"<<j<<",";
+		   
+		   for(unsigned k=0;k<sizeOfCurrentBlock_running;k++)
+		    {
+		      cout<<"\t\tk-"<<k<<",entry:[k+j*sizeOfCurrentBlock_running]"<<k+j*sizeOfCurrentBlock_running+p*totalNumOfOutputBlock_size_running;
+		      data_index[k+j*sizeOfCurrentBlock_running+p*totalNumOfOutputBlock_size_running]+=j*blockSize[i]+offset[i];
+		      cout<<"=>data_index:"<<data_index[k+j*sizeOfCurrentBlock_running+p*totalNumOfOutputBlock_size_running]<<endl;
+		      
+		    }	
 		}
+	     }
 	}
 	cout<<"do 8"<<endl;	
 	//now based on the indices, copy over the element
+	cout<<"data index:"<<endl;
 	for(unsigned i=0;i<totalNumOfOutputData;i++)
 	  {
 	    temp_m.c_data[i]=this->c_data[data_index[i]];
+	    cout<<data_index[i]<<",";
 	  }
+	cout<<endl;
 		cout<<"do 10"<<endl;	
 
 	//done!!
