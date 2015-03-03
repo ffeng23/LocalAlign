@@ -79,4 +79,6 @@ vector<string> DetermineOutputFileNames(const string& _outFileNameBase, const un
 bool GenomicVCompare_bySequenceName(const GenomicV& ss1,const GenomicV& ss2);
 bool CompareDSequenceNameByString(const string& ss1, const string& ss2);
 bool CompareDGeneNameByString(const string& ss1, const string& ss2);
+
+unsigned max_gene_index(const Genomic_Segment* _gs, const unsigned& _num);
 #endif

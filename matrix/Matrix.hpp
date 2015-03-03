@@ -21,7 +21,7 @@ public:
 
   //data input now is one data.
   //we will restructure it
-  Matrix(const unsigned& _dim, unsigned _dim_size[],  T _data[]);
+  Matrix(const unsigned& _dim, const unsigned _dim_size[],  const T& _data);
 
   //
   Matrix(const unsigned& _dim, const unsigned* _dim_size, const T* _data=NULL);
@@ -85,13 +85,9 @@ public:
   //this is  a function only used to initialize/fill in data for an empty matrix
   //
   void initialize(const unsigned& _dim, const unsigned _dim_size[], const T _data[]);
-  /*
-  Matrix<T> GetSubMatrix(int d1, int d2);
-
-  Matrix<T> GetSubMatrix(int d1, int d2, int d3);
-
-  Matrix<T> GetSubMatrix(int d1, int d2, int d3, int d3);
-  */
+  //initialize the object with identical elements
+  void initialize(const unsigned& _dim, const unsigned _dim_size[], const T& _data);
+  
   template<class U>
   friend Matrix<U> sum(const Matrix<U>& _m, const unsigned& _dim);
   //

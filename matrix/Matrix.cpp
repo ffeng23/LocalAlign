@@ -24,7 +24,7 @@ Matrix<T>::Matrix():c_dim(-1),c_dim_size(NULL),c_data(NULL)
 //we will restructure it
 //could be zero dimension, which is like a scalar
 template<class T>
-Matrix<T>::Matrix(const unsigned& _dim, unsigned _dim_size[], T _data[]):
+Matrix<T>::Matrix(const unsigned& _dim, const unsigned _dim_size[], const T& _data):
   c_dim(_dim)
 {
   //cout<<"#####build with array the matrix"<<endl;
@@ -54,13 +54,9 @@ Matrix<T>::Matrix(const unsigned& _dim, unsigned _dim_size[], T _data[]):
   //now we need to figure out the data structure later,
   //for now we say things in 1D
   c_data=new T[totalNumData];
-  if(_data!=NULL)
+  for(unsigned int i=0;i<totalNumData;i++)
     {
-      memcpy(c_data, _data, sizeof(T)*totalNumData);
-    }
-  else
-    {//in case of null data input, set the default value to zero
-      std::memset(c_data, 0, sizeof(T)*totalNumData);
+      c_data[i]=_data;
     }
   //done
 }
@@ -405,7 +401,7 @@ Matrix<unsigned> Matrix<T>::size() const
   if((signed)(this->c_dim)==-1)
     cerr<<"calling on an unitialized matrix object"<<endl;
   unsigned temp_array[] = {this->c_dim};
-  Matrix<unsigned> temp(1, temp_array, NULL);
+  Matrix<unsigned> temp(1, temp_array, (unsigned*)NULL);
   
   for(unsigned i=0;i<this->c_dim;i++)
     {
@@ -509,7 +505,7 @@ Matrix<T> Matrix<T>::SubMatrix(const unsigned& _n, const int _dim_pos[]) const
 		}
 	}
 	//cout<<"do 3"<<endl;	
-	Matrix<T> temp_m(new_dim, new_dim_size, NULL);
+	Matrix<T> temp_m(new_dim, new_dim_size,(T*) NULL);
 	
 	//first determine block number and offset and block size
 	unsigned* blockNumber=new unsigned[new_dim];
@@ -733,6 +729,56 @@ void Matrix<T>::initialize(const unsigned& _dim, const unsigned _dim_size[], con
   //done
 }
 
+//this is  a function only used to initialize/fill in data for an empty matrix
+  //
+template<class T>
+void Matrix<T>::initialize(const unsigned& _dim, const unsigned _dim_size[], const T& _data)
+{
+  //first we need to check whether this current one is an empty matrix
+  if((signed)(this->c_dim)!=-1)
+    {
+      cerr<<"Run time error:calling to reinitialize on an unempty matrix, exception thrown"<<endl;
+      throw runtime_error("Run time error:calling to reinitialize on an unempty matrix");
+    }
+  
+  //now do the data filling
+  //for now only support 
+  if(_dim>4)
+    {
+      cerr<<"ERROR: so far, matrix larger than 4 dimensions is not support, quit...."<<endl;
+      exit(-1);
+    }
+  c_dim=_dim;
+  c_dim_size=new unsigned[c_dim];
+  unsigned totalNumData=1;
+  //need to copy over the data and size
+  for(unsigned i=0;i<c_dim;i++)
+    {
+      if(_dim_size[i]==0)
+	{
+	  this->c_dim=-1;
+	  delete[] c_dim_size;
+	  c_dim_size=NULL;
+	  cerr<<"constructing an empty/unintialized matrix"<<endl;
+	  return;
+	}
+      c_dim_size[i]=_dim_size[i];
+      totalNumData*=c_dim_size[i];
+    }
+  
+  c_data=new T[totalNumData];
+  
+  //now we need to figure out the data structure later,
+  //for now we say things in 1D
+  
+  for(unsigned i=0;i<totalNumData;i++)
+    {
+      c_data[i]=_data;
+    }
+  //done
+}
+
+
 /*  Matrix<T> GetSubMatrix(int d1, int d2);
 
   Matrix<T> GetSubMatrix(int d1, int d2, int d3);
@@ -936,7 +982,7 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
     }
   //cout<<"calling sum 2, new_dim:"<<new_dim<<",new_dim_size:"<<new_dim_size[0]<<endl;
 
-  Matrix<T> temp_m(new_dim, new_dim_size, NULL);
+  Matrix<T> temp_m(new_dim, new_dim_size, (T*)NULL);
   //cout<<temp_m.toString()<<endl;
   //start getting the sums
   //first need to figuire out how many blocks we need

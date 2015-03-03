@@ -5,7 +5,7 @@
 VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
 (const GenomicV* _genV, const unsigned& _numV, 
  const GenomicD* _genD, const unsigned& _numD,
- const GenomicJ* _genJ, const unsigned& _numJ)
+ const GenomicJ* _genJ, const unsigned& _numJ):
   /*initilization list*/
   max_assignments(6000), max_insertions(30),
   max_V_deletions(16), max_D_deletions(16), max_J_deletions(18),
@@ -27,13 +27,13 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   read_length(101)/*the minmum read length has to be 101nts, is this good*/,
 
 /*model parameters*/
-  PinsVD(Matrix<double>(1, max_insertions+1, NULL)), PinsDJ(Maxtrix<double>(1, max_insertion+1, NULL)),
-  RnucleotideVD_per_nucleotideVD_5prime(NULL), RnucleotideDJ_per_nucleotideDJ_3prime(NULL),
+  PinsVD(), PinsDJ(),
+  RnucleotideVD_per_nucleotideVD_5prime(), RnucleotideDJ_per_nucleotideDJ_3prime(),
 
-  PcutV_given_v(NULL), PcutJ_give_J(NULL), PcutDlcutDr_give_D(NULL),
-  PV(NULL), PDJ(NULL), PVallele_given_gen(NULL), PDallele_given_gen(NULL),
+  PcutV_given_v(), PcutJ_give_J(), PcutDlcutDr_give_D(),
+  PV(), PDJ(), PVallele_given_gen(), PDallele_given_gen(),
 
-  Rerror_per_sequenced_nucleotde(NULL)
+  Rerror_per_sequenced_nucleotde()
 {
   //need to do things to initialize the parameters and arrays
   min_V_cut=-1*max_palindrome;
@@ -44,7 +44,54 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   max_D_cut=max_D_deletions;
   max_J_cut=max_J_deletions;
 
-  PinsVD=new double (1)[max_insertions+1];
+  //start intialize the various matrix
+  unsigned dim_size[1]={max_insertions+1};
+  
+  PinsVD.initialize(1, dim_size, 1);
+  PinsDJ.initialize(1, dim_size, 1);
+
+  PV.initialize(1, max_gene_index(genV, _numV), 1);
+  unsigned dim_size2[2]={max_gene_index(genD, _numD), max_gene_index(genJ, _numJ)};
+  PDJ.initialize(2, dim_size2, 1);
+
+  unsigned dim_size3[2]={max_V_cut-min_V_cut+1, max_gene_index(genV, _numV)};
+  PcutV_given_V.initialize(2, dim_size3,1);
 }
 
+VDJ_cuts_insertion_dinuc_ntbias_model::~VDJ_cuts_insertion_dinuc_ntbias_model
+()
+{
+  //empty so far
+}
 
+bool VDJ_cuts_insertion_dinuc_ntbias_model::ValidateModel()
+{
+  return true;
+}
+
+bool VDJ_cuts_insertion_dinuc_ntbias_model::Normalize()//normalize the model
+{
+
+  return true;
+}
+
+bool VDJ_cuts_insertion_dinuc_ntbias_model::InitializeCounter(Counter& _c) const
+{
+  return true;
+}
+
+void VDJ_cuts_insertion_dinuc_ntbias_model::GetModelFromCounter(const Counter& _c) 
+{
+}
+
+void VDJ_cuts_insertion_dinuc_ntbias_model::InitializeAssign(Assigns& _a) const
+{
+}
+
+void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(const Assigns& _a, Counter& _c) const
+{
+}
+
+void VDJ_cuts_insertion_dinuc_ntbias_model::SumCounter(const Counter& _c1, const Counter& _c2, Counter& _retC) const
+{
+}

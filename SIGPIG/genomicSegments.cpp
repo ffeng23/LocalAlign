@@ -764,6 +764,26 @@ vector<string> DetermineOutputFileNames(const string& _outFileNameBase, const un
   return vecFileNames;
 }
 
+unsigned max_gene_index(const Genomic_Segment* _gs, const unsigned& _num)
+{
+  
+  unsigned max_gi;
+  if(_num==0||_gs==NULL)
+    {
+      cout<<"ERROR in max_gene_index: zero-length array or null array passed in as input, return zero"<<endl;
+      exit(-1);
+    }
+  max_gi=_gs[0].Get_GeneIndex();
 
+  for(unsigned i=1;i<_num;i++)
+    {
+      if(max_gi<_gs[i].Get_GeneIndex())
+	{
+	  max_gi=_gs[i].Get_GeneIndex();
+	}
+    }
+
+  return max_gi;
+}
 
 

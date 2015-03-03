@@ -2,10 +2,13 @@
 #define VDJ_CUTS_INSERTION_DINUC_NTBIAS_MODEL_HPP
 
 #include "BaseModel.hpp"
+#include "../SIGPIG/genomicSegments.hpp"
 #include "../SIGPIG/genomicSegment.hpp"
 #include "../SIGPIG/GenomicV.hpp"
 #include "../SIGPIG/GenomicD.hpp"
 #include "../SIGPIG/GenomicJ.hpp"
+#include "../matrix/Matrix.hpp"
+
 
 //inherited class
 class VDJ_cuts_insertion_dinuc_ntbias_model:public BaseModel
