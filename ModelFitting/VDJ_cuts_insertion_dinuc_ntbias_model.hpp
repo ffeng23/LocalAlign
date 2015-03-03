@@ -2,12 +2,19 @@
 #define VDJ_CUTS_INSERTION_DINUC_NTBIAS_MODEL_HPP
 
 #include "BaseModel.hpp"
+#include "../SIGPIG/genomicSegment.hpp"
+#include "../SIGPIG/GenomicV.hpp"
+#include "../SIGPIG/GenomicD.hpp"
+#include "../SIGPIG/GenomicJ.hpp"
 
 //inherited class
 class VDJ_cuts_insertion_dinuc_ntbias_model:public BaseModel
 {
 public:
-  VDJ_cuts_insertion_dinuc_ntbias_model();
+  VDJ_cuts_insertion_dinuc_ntbias_model
+  (const GenomicV* _genV, const unsigned& _numV, 
+   const GenomicD* _genD, const unsigned& _numD,
+   const GenomicJ* _genJ, const unsigned& _numJ);
 
   virtual ~VDJ_cuts_insertion_dinuc_ntbias_model();
 
@@ -55,14 +62,14 @@ public:
   unsigned max_excess_D_deletions;
   unsigned max_excess_J_deletions;
 
-  unsigned max_plindrome; //maximum half-palindrome length
+  unsigned max_palindrome; //maximum half-palindrome length
 
-  unsigned min_V_cut; //cut is the observed deletion==real deletion+insertion+excess error etc.
-  unsigned min_D_cut;
-  unsigned min_J_cut;
-  unsigned max_V_cut;
-  unsigned max_D_cut;
-  unsigned max_J_cut;
+  int min_V_cut; //cut is the observed deletion==real deletion+insertion+excess error etc.
+  int min_D_cut;
+  int  min_J_cut;
+  int max_V_cut;
+  int max_D_cut;
+  int max_J_cut;
 
   //various entropies of the features from the model
   double S_total;
@@ -95,7 +102,7 @@ public:
   unsigned high_error_region; //we PROBABLY will NOT use this one.
 
   //where sequences with too short D alignments are even considered
-  unsigned use_no_D_match_seqs;
+  bool use_no_D_match_seqs;
 
   //Read length in data set, usually set by main model fitting script
   //we don't use this as a fixed param, but instead, we MIGHT use
@@ -103,22 +110,22 @@ public:
   unsigned read_length;
 
   //model parameters
-  double PinsVD; //P(insertion)
-  double PinsDJ;
+  Matrix<double> PinsVD; //P(insertion)
+  Matrix<double> PinsDJ;
 
-  double RnucleotideVD_per_nucleotideVD_5prime;//nucleotide distr's
-  double RnucleotideDJ_per_nucleotideDJ_3prime;
+  Matrix<double> RnucleotideVD_per_nucleotideVD_5prime;//nucleotide distr's
+  Matrix<double> RnucleotideDJ_per_nucleotideDJ_3prime;
 
-  double PcutV_given_v;
-  double PcutJ_give_J;
-  double PcutDlcutDr_give_D;
+  Matrix<double> PcutV_given_v;
+  Matrix<double> PcutJ_give_J;
+  Matrix<double> PcutDlcutDr_give_D;
 
-  double PV;
-  double PDJ; //Joint P(V, D, J gene choices)
-  double PVallele_given_gen; //Probabilities of alleles given gene for each gene
-  double PDallele_given_gen;
+  Matrix<double> PV;
+  Matrix<double> PDJ; //Joint P(V, D, J gene choices)
+  Matrix<double> PVallele_given_gen; //Probabilities of alleles given gene for each gene
+  Matrix<double> PDallele_given_gen;
 
-  double Rerror_per_sequenced_nucleotde ;//error rate
+  Matrix<double> Rerror_per_sequenced_nucleotde ;//error rate
   
 };
 

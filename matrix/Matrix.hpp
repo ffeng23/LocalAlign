@@ -21,7 +21,7 @@ public:
 
   //data input now is one data.
   //we will restructure it
-  Matrix(const unsigned& _dim, unsigned _dim_size[],   T _data[]);
+  Matrix(const unsigned& _dim, unsigned _dim_size[],  T _data[]);
 
   //
   Matrix(const unsigned& _dim, const unsigned* _dim_size, const T* _data=NULL);
@@ -76,6 +76,9 @@ public:
 
   //get submatrix
   Matrix<T> SubMatrix(const unsigned& _n, const int _dim_pos[]) const;
+
+  //get submatrix
+  //Matrix<T> SubMatrix(const unsigned& _n, const int (&_dim_pos)[]) const;
 
   std::string toString() const;
 
