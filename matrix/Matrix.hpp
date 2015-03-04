@@ -64,6 +64,8 @@ public:
 
   //division
   Matrix<T> operator / (const T& _t);
+
+  //Matrix<T> operator /(const Matrix<T>& _m);
   
   //size 
   Matrix<unsigned> size() const;
@@ -87,6 +89,17 @@ public:
   void initialize(const unsigned& _dim, const unsigned _dim_size[], const T _data[]);
   //initialize the object with identical elements
   void initialize(const unsigned& _dim, const unsigned _dim_size[], const T& _data);
+
+  //normalize by dimension, in situ
+  //carry out the division along the specified dimension
+  //input matrix: _m (*this), must be larger or equal dimensions than _dim_vector
+  //              _dim_vector must be a vector
+  //             the size of _dim_vector must be identical to the size of _m at _dim dimension
+  //return a bool indicating whether everything is all right.
+  
+  bool divide_by_dimension(const Matrix<T>& _dim_vector, const unsigned& _dim); 
+
+  //dot divide
   
   template<class U>
   friend Matrix<U> sum(const Matrix<U>& _m, const unsigned& _dim);

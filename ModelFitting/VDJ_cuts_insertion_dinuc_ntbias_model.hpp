@@ -11,7 +11,7 @@
 
 
 //inherited class
-class VDJ_cuts_insertion_dinuc_ntbias_model:public BaseModel
+class VDJ_cuts_insertion_dinuc_ntbias_model: public BaseModel
 {
 public:
   VDJ_cuts_insertion_dinuc_ntbias_model
@@ -53,6 +53,7 @@ public:
   virtual void SumCounter(const Counter& _c1, const Counter& _c2, Counter& _retC) const;
 
   virtual void CalculateAssignmentEntropies();
+  
   //==================================
   //define the members
   unsigned max_assignments; //max no. of assignments to explore during Expectation step of EM algorithm
@@ -129,7 +130,7 @@ public:
   Matrix<double> PVallele_given_gene; //Probabilities of alleles given gene for each gene
   Matrix<double> PDallele_given_gene;
 
-  double Rerror_per_sequenced_nucleotde ;//error rate
+  double Rerror_per_sequenced_nucleotide ;//error rate
   
 };
 

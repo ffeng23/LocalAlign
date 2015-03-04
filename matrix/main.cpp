@@ -163,6 +163,18 @@ int main(int argc, char* argv[])
   //ofs.close();
 
   //cout<<"Total "<<gene_info.size()<<" genes are processed"<<endl;
+
+  //start testing the divide by dimension
+  unsigned dim_size_vec[]={2};
+  Matrix<double> vec(1, dim_size_vec, 10);
+  vec(1)=100;
+  //vec(2)=1000;
+  //vec(3)=1;
+  cout<<vec.toString()<<endl;
+  cout<<m2.toString()<<endl;
+  m2.divide_by_dimension(vec, 0);
+  cout<<m2.toString()<<endl;
+  
   cout<<"Thanks for using our program and have a nice day!!"<<endl;
   return 0;
 }

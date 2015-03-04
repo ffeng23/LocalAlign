@@ -46,7 +46,7 @@ public:
   //sum counter
   virtual void SumCounter(const Counter& _c1, const Counter& _c2, Counter& _retC) const =0 ;
 
-  virtual void CalculateAssignmentEntropies();
+  virtual void CalculateAssignmentEntropies()=0;
   
 };
 

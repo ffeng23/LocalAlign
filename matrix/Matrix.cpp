@@ -162,37 +162,74 @@ Matrix<T>& Matrix<T>::operator = (const Matrix<T>& _m)
   if(this==&_m)
     return *this;
 
-  //now we need to check to see whether the current one is empty or not.
-  //we could allow the current to be a filled one, but just need to
-  //delete/clear the data first
-  if((signed)(this->c_dim)!=-1)
-    {
-      if(c_dim_size!=NULL)
-	{
-	  delete[] c_dim_size;
-	  c_dim_size=NULL;
-	}
-      if(c_data!=NULL)
-	{
-	  delete [] c_data;
-	  c_data=NULL;
-	}
-    }
-
-  //deep copy
   //first check to see whether the one is initialized or not
   if((signed)(_m.c_dim)==-1)
     {
       //a uninitialized one
       this->c_dim=-1;
+      if(this->c_dim_size!=NULL)
+	{
+	  delete[] c_dim_size;
+	}
       this->c_dim_size=NULL;
+      if(this->c_data!=NULL)
+	{
+	  delete[] c_data;
+	}
       this->c_data=NULL;
       return *this;
     }
+
+  //we are here, means input object is not empty
+
+  //now we need to check to see whether the current one is empty or not.
+  //we could allow the current to be a filled one, but just need to
+  //delete/clear the data first
+  bool reshape_flag=false;
+  unsigned totalNumData=1;
+  if((signed)(this->c_dim)!=-1)//the current one is not empty/has been initialized with data
+    {
+      
+      if(this->c_dim!=_m.dim())
+	{
+	  delete[] c_dim_size;
+	  c_dim_size=NULL;
+
+	  if(c_data!=NULL)
+	    {
+	      delete [] c_data;
+	      c_data=NULL;
+	    }
+	}
+      else //this current one having identical dimension, check data elements
+	{
+	  //check data elements
+	  for(unsigned i=0;i<this->c_dim;i++)
+	    {
+	      if(this->c_dim_size[i]!=_m.c_dim_size[i])
+		{
+		  reshape_flag=true;
+		  //c_dim_size[
+		  break;
+		}
+	      //totalNumData*=_m.c_dim_size[i];
+	    }
+	  if(reshape_flag)//do reshape, otherwise keep it
+	    {
+	      delete[] c_data;
+	      c_data=NULL;
+	    }
+	}
+      
+    }
+  
+  //deep copy
+  
   //a good one with data, could be zero dim'ed (means a scalar like matrix);
   c_dim=_m.c_dim;
-  c_dim_size=new unsigned[c_dim];
-  unsigned totalNumData=1;
+  if(c_dim_size==NULL)
+    c_dim_size=new unsigned[c_dim];
+  
   //need to copy over the data and size
   for(unsigned i=0;i<c_dim;i++)
     {
@@ -202,7 +239,9 @@ Matrix<T>& Matrix<T>::operator = (const Matrix<T>& _m)
   
   //now we need to figure out the data structure later,
   //for now we say things in 1D
-  c_data=new T[totalNumData];
+  if(c_data==NULL)
+    c_data=new T[totalNumData];
+  
   memcpy(c_data, _m.c_data, sizeof(T)*totalNumData);
   
   //done
@@ -393,7 +432,7 @@ Matrix<T>  Matrix<T>::operator / (const T& _t)
     }
   return temp;
 }
-  
+
 //size
 template<class T>
 Matrix<unsigned> Matrix<T>::size() const
@@ -785,6 +824,65 @@ void Matrix<T>::initialize(const unsigned& _dim, const unsigned _dim_size[], con
 
   Matrix<T> GetSubMatrix(int d1, int d2, int d3, int d3);
 */
+//this is in situ operation
+template<class T>
+bool Matrix<T>::divide_by_dimension(const Matrix<T>& _dim_vector, const unsigned& _dim)
+{
+  bool ret_bol=true;
+  //check for this current matrix
+  if(this->c_dim<1)
+    {
+      cout<<"Error: requesting divide_by_dimension function on zero-dimmension matrix (scalar), please check"<<endl;
+      return false;
+    }
+  if(_dim_vector.dim()!=1)
+    {
+      cout<<"Error: divide_by_dimension can only request a vector to divide"<<endl;
+      return false;
+    }
+
+  if(_dim>=this->c_dim)
+    {
+      cout<<"Error: divide_by_dimension function is rquesting a out of range dimension"<<endl;
+      return false;
+    }
+
+  //check for the dimension equality
+  if(this->c_dim_size[_dim]!=_dim_vector.size(0))
+    {
+      
+    }
+  //figure out the starting point and block
+  T* p_starting=this->c_data;
+  unsigned numberOfBlock=1;
+  unsigned sizeOfBlock=1;
+  for(unsigned i=0;i<this->c_dim;i++)
+    {
+      if(i<_dim)
+	{
+	  numberOfBlock*=c_dim_size[i];
+	}
+      if(i>_dim)
+	{
+	  sizeOfBlock*=c_dim_size[i];
+	}
+    }
+
+  //cout<<"divide by dimension:numberOfBlock:"<<numberOfBlock
+  //    <<"sizeOfBlock:"<<sizeOfBlock<<endl;
+  for(unsigned i=0;i<numberOfBlock;i++)
+    {
+      p_starting=this->c_data+i*(c_dim_size[_dim]*sizeOfBlock);
+      for(unsigned j=0;j<c_dim_size[_dim];j++)
+	{
+	  for(unsigned k=0;k<sizeOfBlock;k++)
+	    {
+	      p_starting[k+j*sizeOfBlock]=p_starting[k+j*sizeOfBlock]/_dim_vector.c_data[j];
+	    }
+	}
+    }
+  return ret_bol;
+}
 
 //used for printing
 template<class T>

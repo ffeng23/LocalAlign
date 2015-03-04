@@ -18,7 +18,7 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   S_total(0), S_gene(0), S_V(0), S_DJ(0), S_D(0), S_J(0), S_insVD(0), S_insDJ(0),
   S_insVD_length(0), S_insDJ_length(0), S_insVD_nt(0), S_insDJ_nt(0), S_delV(0),
   S_delD(0), S_delJ(0), S_delDJ(0),
-
+  
   negative_excess_deletions_max (0), /*not sure why we set it up as 0 in here*/
   min_J_align_length(2), min_J_assign_length(1), 
   min_V_length(20)/*originally in matlab code is 15*/,
@@ -30,11 +30,12 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   PinsVD(), PinsDJ(),
   RnucleotideVD_per_nucleotideVD_5prime(), RnucleotideDJ_per_nucleotideDJ_3prime(),
 
-  PcutV_given_V(), PcutJ_give_J(), PcutDlcutDr_give_D(),
-  PV(), PDJ(), PVallele_given_gen(), PDallele_given_gen(),
+  PcutV_given_V(), PcutJ_given_J(), PcutDlcutDr_given_D(),
+  PV(), PDJ(), PVallele_given_gene(), PDallele_given_gene(),
 
-  Rerror_per_sequenced_nucleotde(0)
+  Rerror_per_sequenced_nucleotide(0)
 {
+  
   //need to do things to initialize the parameters and arrays
   min_V_cut=-1*max_palindrome;
   min_D_cut=-1*max_palindrome;
@@ -66,20 +67,20 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   PcutJ_given_J.initialize(2,dim_size2, 1);
   
   unsigned dim_size3[3]={maxGeneIndex_D, (unsigned)(max_D_cut-min_D_cut+1), (unsigned)(max_D_cut-min_D_cut+1) };
-  PcutDlcutDr_give_D.initialize(3, dim_size3, 1);
+  PcutDlcutDr_given_D.initialize(3, dim_size3, 1);
 
   //also go through to set some impossible cases impossible
   //case where cut on both side together is longer than sequence
   unsigned lseq;
-  for(unsigned d=0;d<maxGeneIndexD;d++)
+  for(unsigned d=0;d<maxGeneIndex_D;d++)
     {
-      lseq = length(_genD[d].Get_Seq().GetLength());
+      lseq = _genD[d].Get_Seq().GetLength();
       for(int  cutDl=0;cutDl<=max_D_cut;cutDl++)
 	{
 	  for(int  cutDr=0;cutDr<=max_D_cut;cutDr++)
 	    {
-	      if (cutDl + cutDr > lseq)
-		PcutDlcutDr_given_D(d, (unsigned)(cutDl-  min_D_cut) ,(unsigned)( cutDr - model.min_D_cut)) = 0;
+	      if (((unsigned)(cutDl + cutDr)) > lseq)
+		PcutDlcutDr_given_D(d, (unsigned)(cutDl-  min_D_cut) ,(unsigned)( cutDr - min_D_cut)) = 0;
 	      //end
 	    }// end
 	}//       end
@@ -97,7 +98,7 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   unsigned max_V_alleles = max_n_alleles(_genV, _numV);
   dim_size2[0]=maxGeneIndex_V;
   dim_size2[1]=max_V_alleles;
-  PVallele_given_gene.initialize(2, dim_size2, 0);
+  PVallele_given_gene.initialize(2, dim_size2, 0.0);
   for(unsigned a=0;a<_numV;a++)
     {
       PVallele_given_gene(_genV[a].Get_GeneIndex(), _genV[a].Get_Allele()) = 
@@ -108,13 +109,13 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   unsigned max_D_alleles = max_n_alleles(_genD, _numD);//...n_alleles]);
   dim_size2[0]=maxGeneIndex_D;
   dim_size2[1]=max_D_alleles;
-  PDallele_given_gene.initialize(2, dim_size2,0);// zeros(max_D_alleles , D_genes);
+  PDallele_given_gene.initialize(2, dim_size2,0.0);// zeros(max_D_alleles , D_genes);
   for(unsigned a=0;a<_numD;a++)
     {
       PDallele_given_gene(_genD[a].Get_GeneIndex(), _genD[a].Get_Allele()) = 1.0/_genD[a].Get_n_alleles();
     }
   
-  Rerror_per_sequenced_nucleotide = 1E(-7); //% error rate
+  Rerror_per_sequenced_nucleotide = 1.0E-7; //% error rate
 								 //% Normalizes all distributions
   //doing first round of functions
   Normalize();
@@ -141,7 +142,9 @@ bool VDJ_cuts_insertion_dinuc_ntbias_model::ValidateModel()
 
 bool VDJ_cuts_insertion_dinuc_ntbias_model::Normalize()//normalize the model
 {
+  
   //Normalizes all probability distributions in model.
+  //NOT, the R** fields (rate fields)
   //norm_model = model;
   //          ps = fieldnames(norm_model);
   //          for p=1:length(ps)
@@ -159,12 +162,26 @@ bool VDJ_cuts_insertion_dinuc_ntbias_model::Normalize()//normalize the model
   //                      norm_model.(ps{p}) = norm_model.(ps{p})/sum( reshape(norm_model.(ps{p}),[],1) );
 
   //================
-  //else % If it's a conditional probability, then normalize appropriately
+  // If it's a conditional probability, then normalize appropriately
   //nd = ndims(norm_model.(ps{p}));
   //                      norm_model.(ps{p}) = conditional_distribution(norm_model.(ps{p}), nd);
 
+  //
+  Matrix<double> GeneTotal=sum(PcutV_given_V, 1);//sum the dim 1 (second dimension, since it starts at 0) that pointing to cutV, so to get geneTotal
+  //the return matrix is of dimension _numV x 1 (vector).
+  PcutV_given_V.divide_by_dimension(GeneTotal, 0);//divide along dimension 0 (first) to normalize
+  GeneTotal=sum(PcutJ_given_J, 1);
+  PcutJ_given_J.divide_by_dimension(GeneTotal, 0);
 
+  Matrix<double> GeneTotal_temp=sum(PcutDlcutDr_given_D,2);
+  GeneTotal=sum(GeneTotal_temp,1);
+  PcutDlcutDr_given_D.divide_by_dimension(GeneTotal, 0);
+  
+  GeneTotal=sum(PVallele_given_gene,1);
+  PVallele_given_gene.divide_by_dimension(GeneTotal, 0);
 
+  GeneTotal=sum(PDallele_given_gene,1);
+  PDallele_given_gene.divide_by_dimension(GeneTotal, 0);
   return true;
 }
 
@@ -180,6 +197,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::GetModelFromCounter(const Counter& _
 
 void VDJ_cuts_insertion_dinuc_ntbias_model::InitializeAssign(Assigns& _a) const
 {
+  
 }
 
 void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(const Assigns& _a, Counter& _c) const
@@ -192,5 +210,5 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::SumCounter(const Counter& _c1, const
 
 void VDJ_cuts_insertion_dinuc_ntbias_model::CalculateAssignmentEntropies()
 {
-  //=========>to be implemented
+  //=========>to be implemented, for now leave it blank;
 }
