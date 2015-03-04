@@ -90,6 +90,9 @@ public:
   
   template<class U>
   friend Matrix<U> sum(const Matrix<U>& _m, const unsigned& _dim);
+
+  template<class U>
+  friend U sum_all(const Matrix<U> & _m);
   //
 protected:
   unsigned c_dim;
@@ -110,5 +113,11 @@ Matrix<T> sum(const Matrix<T>& _m);
 //The dim input is a positive integer scalar.
 template<class T>
 Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim);
+
+//this is the one linearize the matrix data and sum all the entries together to 
+//get the result
+template<class T>
+T sum_all(const Matrix<T>& _m);
+
 
 #endif

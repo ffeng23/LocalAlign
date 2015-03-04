@@ -1054,6 +1054,31 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim)
 }
 
 
+//this is the one linearize the matrix data and sum all the entries together to 
+//get the result
+template<class T>
+T sum_all(const Matrix<T>& _m)
+{
+  unsigned dim=_m.dim();
+  //unsigned dim
+  if(dim==0)
+    {
+      return _m.c_data[0];
+    }
+  unsigned totalNumOfData=1;
+  for(unsigned i=0;i<dim;i++)
+    {
+      totalNumOfData *=_m.size(i);
+    }
+  T ret=0;
+  for(unsigned i=0;i<totalNumOfData;i++)
+    {
+      ret+=_m.c_data[i];
+    }
+  return ret;
+}
+
+
 //======template instantiation
 //class
 template class Matrix<int>;
@@ -1075,4 +1100,10 @@ template Matrix<int> sum(const Matrix<int>& _m, const unsigned& _dim);
 template Matrix<unsigned> sum(const Matrix<unsigned>& _m, const unsigned& _dim);
 template Matrix<float> sum(const Matrix<float>& _m, const unsigned& _dim);
 template Matrix<double> sum(const Matrix<double>& _m, const unsigned& _dim);
+
+//function
+template int sum_all(const Matrix<int>& _m);
+template unsigned sum_all(const Matrix<unsigned>& _m);
+template float sum_all(const Matrix<float>& _m);
+template double sum_all(const Matrix<double>& _m);
 //*/

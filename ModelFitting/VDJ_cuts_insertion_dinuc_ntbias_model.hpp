@@ -52,6 +52,7 @@ public:
   //sum counter
   virtual void SumCounter(const Counter& _c1, const Counter& _c2, Counter& _retC) const;
 
+  virtual void CalculateAssignmentEntropies();
   //==================================
   //define the members
   unsigned max_assignments; //max no. of assignments to explore during Expectation step of EM algorithm
@@ -119,16 +120,16 @@ public:
   Matrix<double> RnucleotideVD_per_nucleotideVD_5prime;//nucleotide distr's
   Matrix<double> RnucleotideDJ_per_nucleotideDJ_3prime;
 
-  Matrix<double> PcutV_given_v;
-  Matrix<double> PcutJ_give_J;
-  Matrix<double> PcutDlcutDr_give_D;
+  Matrix<double> PcutV_given_V;
+  Matrix<double> PcutJ_given_J;
+  Matrix<double> PcutDlcutDr_given_D;
 
   Matrix<double> PV;
   Matrix<double> PDJ; //Joint P(V, D, J gene choices)
-  Matrix<double> PVallele_given_gen; //Probabilities of alleles given gene for each gene
-  Matrix<double> PDallele_given_gen;
+  Matrix<double> PVallele_given_gene; //Probabilities of alleles given gene for each gene
+  Matrix<double> PDallele_given_gene;
 
-  Matrix<double> Rerror_per_sequenced_nucleotde ;//error rate
+  double Rerror_per_sequenced_nucleotde ;//error rate
   
 };
 

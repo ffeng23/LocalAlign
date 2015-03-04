@@ -81,4 +81,5 @@ bool CompareDSequenceNameByString(const string& ss1, const string& ss2);
 bool CompareDGeneNameByString(const string& ss1, const string& ss2);
 
 unsigned max_gene_index(const Genomic_Segment* _gs, const unsigned& _num);
+unsigned max_n_alleles(const Genomic_Segment* _gs, const unsigned& _num);
 #endif

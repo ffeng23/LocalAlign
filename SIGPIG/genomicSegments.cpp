@@ -786,4 +786,27 @@ unsigned max_gene_index(const Genomic_Segment* _gs, const unsigned& _num)
   return max_gi;
 }
 
+unsigned max_n_alleles(const Genomic_Segment* _gs, const unsigned& _num)
+{
+  
+  unsigned max_gi;
+  if(_num==0||_gs==NULL)
+    {
+      cout<<"ERROR in max_gene_index: zero-length array or null array passed in as input, return zero"<<endl;
+      exit(-1);
+    }
+  max_gi=_gs[0].Get_n_alleles();
+
+  for(unsigned i=1;i<_num;i++)
+    {
+      if(max_gi<_gs[i].Get_n_alleles())
+	{
+	  max_gi=_gs[i].Get_n_alleles();
+	}
+    }
+
+  return max_gi;
+}
+
+
 
