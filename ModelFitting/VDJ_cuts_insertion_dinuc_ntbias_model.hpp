@@ -9,6 +9,7 @@
 #include "../SIGPIG/GenomicJ.hpp"
 #include "../matrix/Matrix.hpp"
 
+//NOTE::::::::???todo, the read length is dynamically set???? for each seq??
 
 //inherited class
 class VDJ_cuts_insertion_dinuc_ntbias_model: public BaseModel
