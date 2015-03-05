@@ -16,7 +16,7 @@ AlignmentLibDir=../
 SIGPIGLibDir=../SIGPIG/
 MatrixLibDir=../matrix/
 
-SRCS_0=main.cpp BaseModel.cpp Assigns.cpp Counter.cpp VDJ_cuts_insertion_dinuc_ntbias_model.cpp VDJ_cuts_insertion_dinuc_ntbias_counter.cpp VDJ_cuts_insertion_dinuc_ntbias_assigns.cpp ${MatrixLibDir}Matrix.cpp ${SIGPIGLibDir}genomicSegment.cpp ${SIGPIGLibDir}GenomicV.cpp ${SIGPIGLibDir}GenomicD.cpp ${SIGPIGLibDir}GenomicJ.cpp ${AlignmentLibDir}SequenceString.cpp ${SIGPIGLibDir}genomicSegments.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}FastaHandler.cpp
+SRCS_0=main.cpp BaseModel.cpp Assigns.cpp Counter.cpp VDJ_cuts_insertion_dinuc_ntbias_model.cpp VDJ_cuts_insertion_dinuc_ntbias_counter.cpp VDJ_cuts_insertion_dinuc_ntbias_assigns.cpp ${MatrixLibDir}Matrix.cpp ${SIGPIGLibDir}genomicSegment.cpp ${SIGPIGLibDir}GenomicV.cpp ${SIGPIGLibDir}GenomicD.cpp ${SIGPIGLibDir}GenomicJ.cpp ${AlignmentLibDir}SequenceString.cpp ${SIGPIGLibDir}genomicSegments.cpp ${AlignmentLibDir}string_ext.cpp ${AlignmentLibDir}FastaHandler.cpp ${SIGPIGLibDir}AlignmentSettings.cpp
 #SRCS_1=	NGSMapping_Adaptor_main.cpp string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp TracebackTable.cpp SequenceHandlerCommon.cpp LocalAlignment.cpp
 
 #SRCS_2=	NGSMapping_PrimerDimer_main.cpp string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp TracebackTable.cpp SequenceHandlerCommon.cpp LocalAlignment.cpp

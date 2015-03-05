@@ -51,6 +51,10 @@ namespace AlignmentSettings
 
   extern unsigned max_length_D_genes;//used by match D to determine the max number of errors 
 
+  extern unsigned max_V_length;
+  extern unsigned max_D_length;
+  extern unsigned max_J_length;
+
   //this is the class used to define and pass over
   //some settings from alignment.
   //it seems that this is not used in the alignment much,

@@ -63,6 +63,16 @@ public:
   unsigned max_D_deletions;
   unsigned max_J_deletions;
 
+  //here, the _numV/D/J are the number of gene alleles,
+  //but not distinct genes
+  unsigned number_V_genes;
+  unsigned number_D_genes;
+  unsigned number_J_genes;
+
+  unsigned max_V_n_alleles;
+  unsigned max_D_n_alleles;
+  unsigned max_J_n_alleles;
+
   unsigned max_excess_V_deletions; //maximum excess deletions to consider, this is the extra number of deletions on top of observed deletion/min_deletion/cut(?)
   unsigned max_excess_D_deletions;
   unsigned max_excess_J_deletions;
@@ -71,7 +81,7 @@ public:
 
   int min_V_cut; //cut is the observed deletion==real deletion+insertion+excess error etc.
   int min_D_cut;
-  int  min_J_cut;
+  int min_J_cut;
   int max_V_cut;
   int max_D_cut;
   int max_J_cut;

@@ -6,7 +6,7 @@
 
 class VDJ_cuts_insertion_dinuc_ntbias_counter:public Counter
 {
-  VDJ_cuts_insertion_dinuc_ntbias_counter(VDJ_cuts_insertion_dinuc_ntbias_model, _model);
+  VDJ_cuts_insertion_dinuc_ntbias_counter(const VDJ_cuts_insertion_dinuc_ntbias_model& _model);
 
   virtual ~VDJ_cuts_insertion_dinuc_ntbias_counter();
 
@@ -61,7 +61,7 @@ class VDJ_cuts_insertion_dinuc_ntbias_counter:public Counter
   Matrix<double> nPpDlmax_delDl_D;// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1));
   Matrix<double> nPpDrmax_delDr_D;// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1));
 
-  double nMzeroD = 0;
+  double nMzeroD ;
   Matrix<double> nPVDJ;// = zeros(size(model.PV,1), size(model.PDJ,1), size(model.PDJ,2));
   Matrix<double> nPpVdelV;// = zeros( model.max_palindrome + 1, model.max_V_deletions + 1);
   Matrix<double> nPpDldelDl;// = zeros( model.max_palindrome + 1, model.max_D_deletions + 1);

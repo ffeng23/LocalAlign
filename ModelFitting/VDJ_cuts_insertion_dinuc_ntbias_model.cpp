@@ -2,6 +2,9 @@
 
 #include "VDJ_cuts_insertion_dinuc_ntbias_model.hpp"
 
+//NOTE: to do: do we need to add the parameter such max_assignments, max_insertions, etc
+//in the alignmentSettings (?) or some other way to specify these values!!!
+
 VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
 (const GenomicV* _genV, const unsigned& _numV, 
  const GenomicD* _genD, const unsigned& _numD,
@@ -9,6 +12,8 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   /*initilization list*/
   max_assignments(6000), max_insertions(30),
   max_V_deletions(16), max_D_deletions(16), max_J_deletions(18),
+  number_V_genes(0), number_D_genes(0), number_J_genes(0),
+  max_V_n_alleles(0), max_D_n_alleles(0), max_J_n_alleles(0),
   max_excess_V_deletions(12),  max_excess_D_deletions(15), max_excess_J_deletions(10),
   max_palindrome(6), 
   min_V_cut(0) /*cut will be set later*/, min_D_cut(0)/*later*/, min_J_cut(0)/*later*/,
@@ -35,7 +40,7 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
 
   Rerror_per_sequenced_nucleotide(0)
 {
-  
+ 
   //need to do things to initialize the parameters and arrays
   min_V_cut=-1*max_palindrome;
   min_D_cut=-1*max_palindrome;
@@ -49,6 +54,9 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   unsigned maxGeneIndex_V=max_gene_index(_genV,_numV);
   unsigned maxGeneIndex_D=max_gene_index(_genD,_numD);
   unsigned maxGeneIndex_J=max_gene_index(_genJ,_numJ);
+  number_V_genes=maxGeneIndex_V;
+  number_D_genes=maxGeneIndex_D;
+  number_J_genes=maxGeneIndex_J;
 
   unsigned dim_size[1]={max_insertions+1};
   PinsVD.initialize(1, dim_size, 1);
@@ -95,9 +103,9 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
 
   //% Initialize probabilities of alleles given genes, to 1/n_alleles for each gene.
   //V_genes = max([genV.gene_index]);
-  unsigned max_V_alleles = max_n_alleles(_genV, _numV);
+  max_V_n_alleles = max_n_alleles(_genV, _numV);
   dim_size2[0]=maxGeneIndex_V;
-  dim_size2[1]=max_V_alleles;
+  dim_size2[1]=max_V_n_alleles;
   PVallele_given_gene.initialize(2, dim_size2, 0.0);
   for(unsigned a=0;a<_numV;a++)
     {
@@ -106,9 +114,10 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
     }       //end
   
   //D_genes = max([genD.gene_index]);
-  unsigned max_D_alleles = max_n_alleles(_genD, _numD);//...n_alleles]);
+  max_D_n_alleles = max_n_alleles(_genD, _numD);//...n_alleles]);
+  max_J_n_alleles =max_n_alleles(_genJ, _numJ);
   dim_size2[0]=maxGeneIndex_D;
-  dim_size2[1]=max_D_alleles;
+  dim_size2[1]=max_D_n_alleles;
   PDallele_given_gene.initialize(2, dim_size2,0.0);// zeros(max_D_alleles , D_genes);
   for(unsigned a=0;a<_numD;a++)
     {
