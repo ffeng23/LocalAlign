@@ -403,28 +403,35 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
    pDlpDr.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
    pDlpJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
    pDrpJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
-  ??????below
-  //%------nM*** fields  
-  mononucleotideVD.initialize(1, dim_size, 0.0);// zeros(4,1);
-  mononucleotideDJ.initialize(1, dim_size, 0.0);// = zeros(4,1);
-  insertionVD.initialize(1, dim_size, 0.0);// = zeros(4,1);
-  insertionDJ.initialize(1, dim_size, 0.0);// = zeros(4,1);
+  
+  //%------nM*** fields
+   dim_size2[1]=4;
+   mononucleotideVD.initialize(2, dim_size2, 0.0);// zeros(4,1);
+  mononucleotideDJ.initialize(2, dim_size2, 0.0);// = zeros(4,1);
+  insertionVD.initialize(2, dim_size2, 0.0);// = zeros(4,1);what this is?? is this insertion or nucleotide dist'n among insertion??
+  insertionDJ.initialize(2, dim_size2, 0.0);// = zeros(4,1);
 
-  dim_size[1]=3;
-  trinucleotideVD.initialize(2, dim_size2, 0.0);// = zeros(4,4,4);
-  trinucleotideDJ.initialize(2, dim_size2, 0.0);// = zeros(4,4,4);
-  dim_size[1]=2;
-  VV_err_pos.initialize(2, dim_size2, 0.0);// = zeros(size(model.PV,1), max_V_length + model.max_V_deletions);
-  JJ_err_pos.initialize(2, dim_size2, 0.0);// = zeros(size(model.PDJ,2), max_J_length);
+  unsigned dim_size4[4]={_model.max_assignment, 4, 4, 4};
+  trinucleotideVD.initialize(4, dim_size4, 0.0);// = zeros(4,4,4);
+  trinucleotideDJ.initialize(4, dim_size4, 0.0);// = zeros(4,4,4);
+  unsigned dim_size3[3]={_model.max_assignment, _model.number_V_genes, _counter.max_V_lenght+_model.max_V_deletions};
+  VV_err_pos.initialize(3, dim_size3, 0.0);// = zeros(size(model.PV,1), max_V_length + model.max_V_deletions);
+  dim_size3[2]=_counter.max_J_length;
+  dim_size3[1]=_model.number_J_genes;
+  JJ_err_pos.initialize(3, dim_size3, 0.0);// = zeros(size(model.PDJ,2), max_J_length);
 
-  //double zeroD ;
-  nucleotideVD; nucleotideVD_5prime;//nucleotide distr's
-  nucleotideDJ; nucleotideDJ_3prime;
+  
+  zeroD.initialize(1, dim_size, 0.0) ;
+  dim_size3[1]=4;
+  dim_size3[1]=4;
+  nucleotideVD.initialize(3, dim_size3, 0.0); nucleotideVD_5prime.initialize(3, dim_size3, 0.0);//nucleotide distr's
+  nucleotideDJ.initialize(3, dim_size3, 0.0); nucleotideDJ_3prime.initialize(3, dim_size3, 0.0);
 
-  double error; double sequenced_nucleotide ;//error rate, will be 
+  error.initialize(1, dim_size,0.0); sequenced_nucleotide.initialize(1,dim_size, 0.0);//error rate, will be 
 
-  error_vs_position;//!!this is nM zeros(model.read_length,1);
-  coverage;//zeros(model.read_length,1);
+  dim_size2[1]=_model.read_length;
+  error_vs_position.initialize(2,dim_size2,0.0);//!!this is nM zeros(model.read_length,1);
+  coverage.initialize(2,dim_size2,0.0);//zeros(model.read_length,1);
 }
 
 
