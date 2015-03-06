@@ -35,7 +35,7 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
   VD_left_edge_dinucleotide(),// = zeros(4,4),
   VD_right_edge_dinucleotide(),// = zeros(4,4);
   DJ_left_edge_dinucleotide(),// = zeros(4,4);
-  DJ_right_edge_dinucleotide,// = zeros(4,4);
+  DJ_right_edge_dinucleotide(),// = zeros(4,4);
 
   pVmax_delV_V(),// =  zeros(model.max_palindrome + 1, model.max_V_deletions + 1, size(model.PV,1));
   pJmax_delJ_J(),// = zeros(model.max_palindrome + 1, model.max_J_deletions + 1, size(model.PDJ,2));
@@ -204,11 +204,11 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
   VV_err_pos(),// = zeros(size(model.PV,1), max_V_length + model.max_V_deletions);
   JJ_err_pos(),// = zeros(size(model.PDJ,2), max_J_length);
 
-  zeroD(0), 
+  zeroD(), 
   nucleotideVD(),  nucleotideVD_5prime(),//nucleotide distr's
   nucleotideDJ(), nucleotideDJ_3prime(),
 
-  error(0), sequenced_nucleotide (0),//error rate, will be 
+  error(), sequenced_nucleotide (),//error rate, will be 
 
   error_vs_position(),//!!this is nM zeros(model.read_length,1);
   coverage()//zeros(model.read_length,1);
@@ -411,10 +411,10 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
   insertionVD.initialize(2, dim_size2, 0.0);// = zeros(4,1);what this is?? is this insertion or nucleotide dist'n among insertion??
   insertionDJ.initialize(2, dim_size2, 0.0);// = zeros(4,1);
 
-  unsigned dim_size4[4]={_model.max_assignment, 4, 4, 4};
+  unsigned dim_size4[4]={_model.max_assignments, 4, 4, 4};
   trinucleotideVD.initialize(4, dim_size4, 0.0);// = zeros(4,4,4);
   trinucleotideDJ.initialize(4, dim_size4, 0.0);// = zeros(4,4,4);
-  unsigned dim_size3[3]={_model.max_assignment, _model.number_V_genes, _counter.max_V_lenght+_model.max_V_deletions};
+  unsigned dim_size3[3]={_model.max_assignments, _model.number_V_genes, _counter.max_V_length+_model.max_V_deletions};
   VV_err_pos.initialize(3, dim_size3, 0.0);// = zeros(size(model.PV,1), max_V_length + model.max_V_deletions);
   dim_size3[2]=_counter.max_J_length;
   dim_size3[1]=_model.number_J_genes;
@@ -428,7 +428,7 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
   nucleotideDJ.initialize(3, dim_size3, 0.0); nucleotideDJ_3prime.initialize(3, dim_size3, 0.0);
 
   error.initialize(1, dim_size,0.0); sequenced_nucleotide.initialize(1,dim_size, 0.0);//error rate, will be 
-
+  
   dim_size2[1]=_model.read_length;
   error_vs_position.initialize(2,dim_size2,0.0);//!!this is nM zeros(model.read_length,1);
   coverage.initialize(2,dim_size2,0.0);//zeros(model.read_length,1);

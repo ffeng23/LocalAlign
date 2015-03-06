@@ -6,6 +6,7 @@
 
 class VDJ_cuts_insertion_dinuc_ntbias_counter:public Counter
 {
+public:
   VDJ_cuts_insertion_dinuc_ntbias_counter(const VDJ_cuts_insertion_dinuc_ntbias_model& _model);
 
   virtual ~VDJ_cuts_insertion_dinuc_ntbias_counter();

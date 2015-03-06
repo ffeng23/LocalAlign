@@ -8,7 +8,8 @@
 #include "../SIGPIG/GenomicD.hpp"
 #include "../SIGPIG/GenomicJ.hpp"
 #include "../matrix/Matrix.hpp"
-
+//#include "VDJ_cuts_insertion_dinuc_ntbias_assigns.hpp"
+//#include "VDJ_cuts_insertion_dinuc_ntbias_counter.hpp"
 //NOTE::::::::???todo, the read length is dynamically set???? for each seq??
 
 //inherited class
@@ -35,7 +36,7 @@ public:
   //the outer caller need to make the couter available as well as
   //the counter is base class and will be determine by the 
   //inherited call to decide which one to use
-  virtual bool InitializeCounter(Counter& _c) const;
+  virtual void InitializeCounter(Counter& _c) const;
   
   //the user will supply the model to be populated
   //polymorphism here!! 
@@ -48,6 +49,11 @@ public:
   virtual void InitializeAssign(Assigns& _a) const;
   
   //_c is output
+  //the input: assigns _a, is the input assign after go through each alignmnent of one sequence
+  //           the assigns holding all the possible assignments for this alignment
+  //           now we want to put the information into the counter
+  //      Counter, this counter holding the information and is initialized by the
+  //            caller, and inside here, we simply summer over
   virtual void UpdateCounter(const Assigns& _a, Counter& _c) const;
 
   //sum counter

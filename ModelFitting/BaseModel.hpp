@@ -28,7 +28,7 @@ public:
   //the outer caller need to make the couter available as well as
   //the counter is base class and will be determine by the 
   //inherited call to decide which one to use
-  virtual bool InitializeCounter(Counter& _c) const =0;
+  virtual void InitializeCounter(Counter& _c) const =0;
   
   //the user will supply the model to be populated
   //polymorphism here!! 

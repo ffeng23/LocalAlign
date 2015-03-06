@@ -1,6 +1,9 @@
-
+#include <cmath>
 
 #include "VDJ_cuts_insertion_dinuc_ntbias_model.hpp"
+
+#include "VDJ_cuts_insertion_dinuc_ntbias_counter.hpp"
+#include "VDJ_cuts_insertion_dinuc_ntbias_assigns.hpp"
 
 //NOTE: to do: do we need to add the parameter such max_assignments, max_insertions, etc
 //in the alignmentSettings (?) or some other way to specify these values!!!
@@ -8,7 +11,8 @@
 VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
 (const GenomicV* _genV, const unsigned& _numV, 
  const GenomicD* _genD, const unsigned& _numD,
- const GenomicJ* _genJ, const unsigned& _numJ):
+ const GenomicJ* _genJ, const unsigned& _numJ)
+  :
   /*initilization list*/
   max_assignments(6000), max_insertions(30),
   max_V_deletions(16), max_D_deletions(16), max_J_deletions(18),
@@ -31,24 +35,24 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   use_no_D_match_seqs(true),
   read_length(101)/*the minmum read length has to be 101nts, is this good*/,
 
-/*model parameters*/
+  /*model parameters*/
   PinsVD(), PinsDJ(),
   RnucleotideVD_per_nucleotideVD_5prime(), RnucleotideDJ_per_nucleotideDJ_3prime(),
-
+  
   PcutV_given_V(), PcutJ_given_J(), PcutDlcutDr_given_D(),
   PV(), PDJ(), PVallele_given_gene(), PDallele_given_gene(),
-
+  
   Rerror_per_sequenced_nucleotide(0)
 {
- 
-  //need to do things to initialize the parameters and arrays
-  min_V_cut=-1*max_palindrome;
-  min_D_cut=-1*max_palindrome;
-  min_J_cut=-1*max_palindrome;
-  
-  max_V_cut=max_V_deletions;
-  max_D_cut=max_D_deletions;
-  max_J_cut=max_J_deletions;
+
+//need to do things to initialize the parameters and arrays
+min_V_cut=-1*max_palindrome;
+min_D_cut=-1*max_palindrome;
+min_J_cut=-1*max_palindrome;
+
+max_V_cut=max_V_deletions;
+max_D_cut=max_D_deletions;
+max_J_cut=max_J_deletions;
 
   //start intialize the various matrix
   unsigned maxGeneIndex_V=max_gene_index(_genV,_numV);
@@ -67,7 +71,7 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   PDJ.initialize(2, dim_size2, 1);
 
   dim_size2[1]=(unsigned)(max_V_cut-min_V_cut+1);
-  dim_size2[0]=maxGeneIndex_V;
+dim_size2[0]=maxGeneIndex_V;
   PcutV_given_V.initialize(2, dim_size2,1);
 
   dim_size2[1]=(unsigned)(max_J_cut-min_J_cut+1);
@@ -79,7 +83,7 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
 
   //also go through to set some impossible cases impossible
   //case where cut on both side together is longer than sequence
-  unsigned lseq;
+unsigned lseq;
   for(unsigned d=0;d<maxGeneIndex_D;d++)
     {
       lseq = _genD[d].Get_Seq().GetLength();
@@ -106,10 +110,10 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   max_V_n_alleles = max_n_alleles(_genV, _numV);
   dim_size2[0]=maxGeneIndex_V;
   dim_size2[1]=max_V_n_alleles;
-  PVallele_given_gene.initialize(2, dim_size2, 0.0);
+PVallele_given_gene.initialize(2, dim_size2, 0.0);
   for(unsigned a=0;a<_numV;a++)
     {
-      PVallele_given_gene(_genV[a].Get_GeneIndex(), _genV[a].Get_Allele()) = 
+PVallele_given_gene(_genV[a].Get_GeneIndex(), _genV[a].Get_Allele()) = 
 	1.0/_genV[a].Get_n_alleles();
     }       //end
   
@@ -124,9 +128,9 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
       PDallele_given_gene(_genD[a].Get_GeneIndex(), _genD[a].Get_Allele()) = 1.0/_genD[a].Get_n_alleles();
     }
   
-  Rerror_per_sequenced_nucleotide = 1.0E-7; //% error rate
-								 //% Normalizes all distributions
-  //doing first round of functions
+Rerror_per_sequenced_nucleotide = 1.0E-7; //% error rate
+//% Normalizes all distributions
+//doing first round of functions
   Normalize();
   CalculateAssignmentEntropies();
 }
@@ -134,26 +138,26 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
 VDJ_cuts_insertion_dinuc_ntbias_model::~VDJ_cuts_insertion_dinuc_ntbias_model
 ()
 {
-  //empty so far
+//empty so far
 }
 
 bool VDJ_cuts_insertion_dinuc_ntbias_model::ValidateModel()
 {
-  //here inside this one, we simple need to make sure all the
+//here inside this one, we simple need to make sure all the
   //fields has been initialized and not empty matrix and 
   //no unwanted default values
   
   //at this point, we don't do much, since we rely on the constructor to 
   //initialize/populate everything
 
-  return true;
+return true;
 }
 
 bool VDJ_cuts_insertion_dinuc_ntbias_model::Normalize()//normalize the model
 {
   
-  //Normalizes all probability distributions in model.
-  //NOT, the R** fields (rate fields)
+//Normalizes all probability distributions in model.
+//NOT, the R** fields (rate fields)
   //norm_model = model;
   //          ps = fieldnames(norm_model);
   //          for p=1:length(ps)
@@ -194,10 +198,11 @@ bool VDJ_cuts_insertion_dinuc_ntbias_model::Normalize()//normalize the model
   return true;
 }
 
-bool VDJ_cuts_insertion_dinuc_ntbias_model::InitializeCounter(Counter& _c) const
+void  VDJ_cuts_insertion_dinuc_ntbias_model::InitializeCounter(Counter& _c) const
 {
-  
-  return true;
+//we don't do anything
+  //the actual job was done by constructor of the Counter;
+  //return ;
 }
 
 void VDJ_cuts_insertion_dinuc_ntbias_model::GetModelFromCounter(const Counter& _c) 
@@ -206,11 +211,25 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::GetModelFromCounter(const Counter& _
 
 void VDJ_cuts_insertion_dinuc_ntbias_model::InitializeAssign(Assigns& _a) const
 {
+//we don't do anything
+//the actual job was done by constructor of the assign.
   
 }
 
 void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(const Assigns& _a, Counter& _c) const
 {
+
+const VDJ_cuts_insertion_dinuc_ntbias_assigns& vdj_assigns=
+  dynamic_cast<const VDJ_cuts_insertion_dinuc_ntbias_assigns&>(_a);
+unsigned n_as=vdj_assigns.n_assignments;
+
+if(n_as>0 && vdj_assigns.likelihood>0)
+  {
+   //first we simply create a temporary counter
+   VDJ_cuts_insertion_dinuc_ntbias_counter delta_counter(*this);
+   
+   delta_counter.logLikelihood=log(vdj_assigns.likelihood);
+  }
 }
 
 void VDJ_cuts_insertion_dinuc_ntbias_model::SumCounter(const Counter& _c1, const Counter& _c2, Counter& _retC) const

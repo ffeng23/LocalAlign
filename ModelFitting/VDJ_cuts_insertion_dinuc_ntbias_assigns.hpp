@@ -2,9 +2,11 @@
 #define VDJ_CUTS_INSERTION_DINUC_NTBIAS_ASSIGNS_HPP
 
 #include "Assigns.hpp"
-
+#include "VDJ_cuts_insertion_dinuc_ntbias_model.hpp"
+#include "VDJ_cuts_insertion_dinuc_ntbias_counter.hpp"
 class VDJ_cuts_insertion_dinuc_ntbias_assigns: public Assigns
 {
+public: 
   VDJ_cuts_insertion_dinuc_ntbias_assigns(const VDJ_cuts_insertion_dinuc_ntbias_model& _model, const VDJ_cuts_insertion_dinuc_ntbias_counter& _counter);
   virtual ~VDJ_cuts_insertion_dinuc_ntbias_assigns();
 
@@ -212,11 +214,11 @@ class VDJ_cuts_insertion_dinuc_ntbias_assigns: public Assigns
   Matrix<double> VV_err_pos;// = zeros(size(model.PV,1), max_V_length + model.max_V_deletions);
   Matrix<double> JJ_err_pos;// = zeros(size(model.PDJ,2), max_J_length);
 
-  double zeroD ;
+  Matrix<double> zeroD ;
   Matrix<double> nucleotideVD; Matrix<double> nucleotideVD_5prime;//nucleotide distr's
   Matrix<double> nucleotideDJ; Matrix<double> nucleotideDJ_3prime;
 
-  double error; double sequenced_nucleotide ;//error rate, will be 
+  Matrix<double> error; Matrix<double> sequenced_nucleotide ;//error rate, will be 
 
 
   Matrix<double> error_vs_position;//!!this is nM zeros(model.read_length,1);
