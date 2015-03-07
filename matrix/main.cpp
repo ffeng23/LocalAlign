@@ -174,6 +174,13 @@ int main(int argc, char* argv[])
   cout<<m2.toString()<<endl;
   m2.divide_by_dimension(vec, 0);
   cout<<m2.toString()<<endl;
+
+  //testing addition
+  cout<<"testing dot additon of two matrices"<<endl;
+  cout<<"===>m1:\n"<<m1.toString()<<endl;
+  cout<<"===>m2:\n"<<m2.toString()<<endl;
+  m2=(m2+m2);
+  cout<<m2.toString()<<endl;
   
   cout<<"Thanks for using our program and have a nice day!!"<<endl;
   return 0;

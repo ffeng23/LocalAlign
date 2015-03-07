@@ -365,6 +365,35 @@ Matrix<T> Matrix<T>::operator + (const T& _t)
   return temp;
 }
 
+//other operator, so all .dot operation
+  //add
+template<class T>
+Matrix<T> Matrix<T>::operator + (const Matrix<T>& _m)
+{
+  //first Note::::::::::::we only support same dimension operation
+  if(((signed)this->c_dim)==-1)
+    {
+      cout<<"ERROR:: try to apply addition on the empty/unitialized matrix"<<endl;
+      return Matrix<T>();
+    }
+  
+  //check for dimension equality
+  if(this->c_dim!=_m.c_dim)
+    {
+      cout<<"ERROR::try to apply addition on the incompatible matrices"<<endl;
+      throw runtime_error("incompatible matrices");
+    }
+  
+  //everything is alright, so do the job
+  Matrix<T> temp(_m);
+  unsigned totalNum=this->nTotal();
+  for(unsigned i=0;i<totalNum;i++)
+    {
+      temp.c_data[i]+=this->c_data[i];
+    }
+  return temp;
+}
+
 //subtract
 template<class T>
 Matrix<T> Matrix<T>::operator - (const T& _t)

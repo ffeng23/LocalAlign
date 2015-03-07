@@ -56,6 +56,10 @@ public:
   //add
   Matrix<T> operator + (const T& _t);
 
+  //other operator, so all .dot operation
+  //add
+  Matrix<T> operator + (const Matrix<T>& _t);
+
   //subtract
   Matrix<T> operator - (const T& _t);
 
