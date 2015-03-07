@@ -71,6 +71,22 @@ public:
   bool Update_nP_field(Matrix<unsigned> _index_field_a, Matrix<double> _prob_field_a, 
 		       Matrix<double> _fields_c);
 
+  //the function used to update the nM* field in the counter
+  //index_fields, fields in the assigns, contains the information about
+  //    the assigns that will be write to counter _fields_c
+  //
+  //      index_field and prob field are from assign, and _fields_c is from counter
+  //
+  //the calculation is that we add expectation value from this set
+  //of assignments for this sequence to counter variable
+  //
+  //return false if the input matrix is not what they should , such as the dimensions
+  //    or the size are not appropriate
+  bool Update_nM_field(Matrix<unsigned> _count_field_a, Matrix<double> _prob_field_a, 
+		       Matrix<double> _fields_c,
+		       const unsigned& _num_valid_assignments);
+
+
   //==================================
   //define the members
   unsigned max_assignments; //max no. of assignments to explore during Expectation step of EM algorithm

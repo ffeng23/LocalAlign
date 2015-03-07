@@ -174,6 +174,23 @@ int main(int argc, char* argv[])
   cout<<m2.toString()<<endl;
   m2.divide_by_dimension(vec, 0);
   cout<<m2.toString()<<endl;
+
+  //testing accessor by array
+  unsigned ins[]={0,0,0,0};
+  cout<<"==================="<<endl;
+  cout<<m4.toString()<<endl;
+  cout<<m4(ins, 4)<<endl;
+
+  cout<<"changing the element "<<endl;
+  m4(ins,4)=1000;
+  cout<<m4.toString()<<endl;
+  //
+  cout<<"testing scalar matrix, dim=0"<<endl;
+  Matrix<unsigned> m0(0, NULL, 15);
+  cout<<m0.toString()<<endl;
+  cout<<m0(ins, 0)<<endl;
+
+  
   
   cout<<"Thanks for using our program and have a nice day!!"<<endl;
   return 0;

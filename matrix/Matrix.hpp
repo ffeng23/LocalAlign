@@ -49,6 +49,11 @@ public:
   
   //4d
   T& operator ()(const unsigned& _d1, const unsigned& _d2, const unsigned& _d3, const unsigned& _d4);
+
+  //this allows specify the indices by an array or the array has to be of the same
+  //size as the dim of the matrix, so _dim input is the size of the indices array
+  //
+  T& operator()(const unsigned* _indices, const unsigned& _dim);
   
   //NOTE: only support 4d or below
 
@@ -105,6 +110,9 @@ public:
   //
   T Get1DArrayElement(const unsigned& _index)const;
 
+  //now try to think the c_data as a 1D array, and then set its value
+  void Set1DArrayElement(const unsigned& _index, const T& _t);
+  
   //dot divide
   
   template<class U>
