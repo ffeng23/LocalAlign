@@ -229,180 +229,180 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
   //% then the assigns variable should store the value of x, for each assignment for a sequence.
   //% eg. counter.nMerror_vs_position -> assigns.error_vs_position which stores number of errors at each position for each assignment for a sequence.
   
-   insVD.initialize(1, dim_size, 0.0);
-   insDJ.initialize(1, dim_size, 0.0);
+   insVD.initialize(1, dim_size, -1);
+   insDJ.initialize(1, dim_size, -1);
    unsigned dim_size2[2]={_model.max_assignments, 2};
-   cutV_given_V.initialize(2, dim_size2, 0.0);
-   cutJ_given_J.initialize(2, dim_size2, 0.0);
+   cutV_given_V.initialize(2, dim_size2, -1);
+   cutJ_given_J.initialize(2, dim_size2, -1);
    dim_size2[1]=3;
-   cutDlcutDr_given_D.initialize(2, dim_size2, 0.0);;
+   cutDlcutDr_given_D.initialize(2, dim_size2, -1);;
 
-   V.initialize(1, dim_size, 0.0);
+   V.initialize(1, dim_size, -1);
    dim_size2[1]=2;
-   DJ.initialize(2, dim_size2, 0.0); //Joint P(V, D, J gene choices)
-   Vallele_given_gene.initialize(2, dim_size2, 0.0); //Probabilities of alleles given gene for each gene
-   Dallele_given_gene.initialize(2, dim_size2, 0.0);
+   DJ.initialize(2, dim_size2, -1); //Joint P(V, D, J gene choices)
+   Vallele_given_gene.initialize(2, dim_size2, -1); //Probabilities of alleles given gene for each gene
+   Dallele_given_gene.initialize(2, dim_size2, -1);
 
 
-   VD_left_edge_dinucleotide.initialize(2, dim_size2, 0.0);// = zeros(4,4);
-   VD_right_edge_dinucleotide.initialize(2, dim_size2, 0.0);// = zeros(4,4);
-   DJ_left_edge_dinucleotide.initialize(2, dim_size2, 0.0);// = zeros(4,4);
-   DJ_right_edge_dinucleotide.initialize(2, dim_size2, 0.0);// = zeros(4,4);
+   VD_left_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
+   VD_right_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
+   DJ_left_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
+   DJ_right_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
 
    dim_size2[1]=3;
-   pVmax_delV_V.initialize(2, dim_size2, 0.0);// =  zeros(model.max_palindrome + 1, model.max_V_deletions + 1, size(model.PV,1));
-   pJmax_delJ_J.initialize(2, dim_size2, 0.0);// = zeros(model.max_palindrome + 1, model.max_J_deletions + 1, size(model.PDJ,2));
+   pVmax_delV_V.initialize(2, dim_size2, -1);// =  zeros(model.max_palindrome + 1, model.max_V_deletions + 1, size(model.PV,1));
+   pJmax_delJ_J.initialize(2, dim_size2, -1);// = zeros(model.max_palindrome + 1, model.max_J_deletions + 1, size(model.PDJ,2));
 
-   pDlmax_delDl_D.initialize(2, dim_size2, 0.0);// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1));
-   pDrmax_delDr_D.initialize(2, dim_size2, 0.0);// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1));
+   pDlmax_delDl_D.initialize(2, dim_size2, -1);// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1));
+   pDrmax_delDr_D.initialize(2, dim_size2, -1);// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1));
 
-   VDJ.initialize(2, dim_size2, 0.0);// = zeros(size(model.PV,1), size(model.PDJ,1), size(model.PDJ,2));
+   VDJ.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1), size(model.PDJ,1), size(model.PDJ,2));
    dim_size[1]=2;
-   pVdelV.initialize(2, dim_size2, 0.0);// = zeros( model.max_palindrome + 1, model.max_V_deletions + 1);
-   pDldelDl.initialize(2, dim_size2, 0.0);// = zeros( model.max_palindrome + 1, model.max_D_deletions + 1);
-   pDrdelDr.initialize(2, dim_size2, 0.0);// = zeros( model.max_palindrome + 1, model.max_D_deletions + 1);
-   pJdelJ.initialize(2, dim_size2, 0.0);// = zeros( model.max_palindrome + 1, model.max_J_deletions + 1);
+   pVdelV.initialize(2, dim_size2, -1);// = zeros( model.max_palindrome + 1, model.max_V_deletions + 1);
+   pDldelDl.initialize(2, dim_size2, -1);// = zeros( model.max_palindrome + 1, model.max_D_deletions + 1);
+   pDrdelDr.initialize(2, dim_size2, -1);// = zeros( model.max_palindrome + 1, model.max_D_deletions + 1);
+   pJdelJ.initialize(2, dim_size2, -1);// = zeros( model.max_palindrome + 1, model.max_J_deletions + 1);
 
 
-   VcutV.initialize(2, dim_size2, 0.0);// = zeros(size(model.PV,1),model.max_palindrome + model.max_V_deletions + 1);
-   DcutDl.initialize(2, dim_size2, 0.0);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_D_deletions + 1);
-   DcutDr.initialize(2, dim_size2, 0.0);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_D_deletions + 1);
-   JcutJ.initialize(2, dim_size2, 0.0);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_J_deletions + 1);
+   VcutV.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_V_deletions + 1);
+   DcutDl.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_D_deletions + 1);
+   DcutDr.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_D_deletions + 1);
+   JcutJ.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_J_deletions + 1);
 
-   DcutV.initialize(2, dim_size2, 0.0);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_V_deletions + 1);
-   DcutJ.initialize(2, dim_size2, 0.0);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_J_deletions + 1);
+   DcutV.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_V_deletions + 1);
+   DcutJ.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_J_deletions + 1);
 
-   VcutJ.initialize(2, dim_size2, 0.0);// = zeros(size(model.PV,1),model.max_palindrome + model.max_J_deletions + 1);
-   VcutDl.initialize(2, dim_size2, 0.0);// = zeros(size(model.PV,1),model.max_palindrome + model.max_D_deletions + 1);
-   VcutDr.initialize(2, dim_size2, 0.0);// = zeros(size(model.PV,1),model.max_palindrome + model.max_D_deletions + 1);
+   VcutJ.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_J_deletions + 1);
+   VcutDl.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_D_deletions + 1);
+   VcutDr.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_D_deletions + 1);
 
-   JcutDl.initialize(2, dim_size2, 0.0);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_D_deletions + 1);
-   JcutDr.initialize(2, dim_size2, 0.0);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_D_deletions + 1);
-   JcutV.initialize(2, dim_size2, 0.0);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_V_deletions + 1);
+   JcutDl.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_D_deletions + 1);
+   JcutDr.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_D_deletions + 1);
+   JcutV.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_V_deletions + 1);
 
-   insVDcutV.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_V_deletions + 1);
-   insDJcutV.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_V_deletions + 1);
+   insVDcutV.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_V_deletions + 1);
+   insDJcutV.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_V_deletions + 1);
 
-   insVDcutDl.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
-   insDJcutDl.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
+   insVDcutDl.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
+   insDJcutDl.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
 
-   insVDcutDr.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
-   insDJcutDr.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
+   insVDcutDr.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
+   insDJcutDr.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
 
-   insVDcutJ.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_J_deletions + 1);
-   insDJcutJ.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_J_deletions + 1);
+   insVDcutJ.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_J_deletions + 1);
+   insDJcutJ.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_J_deletions + 1);
 
   /*
   unsigned max_V_length;// = model.read_length;
   unsigned max_D_length;// = 16;
   unsigned max_J_length;// = 18;
   */
-   V_align_length.initialize(1, dim_size, 0.0);// = zeros(max_V_length + 1,1);
-   D_align_length.initialize(1, dim_size, 0.0);// = zeros(max_D_length + 1,1);
-   J_align_length.initialize(1, dim_size, 0.0);// = zeros(max_J_length + 1,1);
+   V_align_length.initialize(1, dim_size, -1);// = zeros(max_V_length + 1,1);
+   D_align_length.initialize(1, dim_size, -1);// = zeros(max_D_length + 1,1);
+   J_align_length.initialize(1, dim_size, -1);// = zeros(max_J_length + 1,1);
 
-   JJ_align_length.initialize(2, dim_size2, 0.0);// = zeros(size(model.PDJ,2), 1 + max_J_length);
-   VV_align_length.initialize(2, dim_size2, 0.0);// = zeros(size(model.PV,1), 1 + max_V_length);
-
-
-   insDJ_D_align_length.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions +1, max_D_length + 1);
-   insVD_D_align_length.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions +1, max_D_length + 1);
-
-   insDJ_J_align_length.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions +1, max_J_length + 1);
-   insVD_J_align_length.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions +1, max_J_length + 1);
-
-   insDJ_V_align_length.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions +1, max_V_length + 1);
-   insVD_V_align_length.initialize(2, dim_size2, 0.0);// = zeros(model.max_insertions +1, max_V_length + 1);
-
-   Dallele_D_align_length.initialize(2, dim_size2, 0.0);// = zeros(3, max_D_length + 1);
+   JJ_align_length.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2), 1 + max_J_length);
+   VV_align_length.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1), 1 + max_V_length);
 
 
-   delVinsVD.initialize(2, dim_size2, 0.0);// = zeros(model.max_V_deletions +1, model.max_insertions +1);
-   delVinsDJ.initialize(2, dim_size2, 0.0);// = zeros(model.max_V_deletions +1, model.max_insertions +1);
-   delVdelDl.initialize(2, dim_size2, 0.0);// = zeros(model.max_V_deletions +1, model.max_D_deletions +1);
-   delVdelDr.initialize(2, dim_size2, 0.0);// = zeros(model.max_V_deletions +1, model.max_D_deletions +1);
-   delVdelJ.initialize(2, dim_size2, 0.0);// = zeros(model.max_V_deletions +1, model.max_J_deletions +1);
+   insDJ_D_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_D_length + 1);
+   insVD_D_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_D_length + 1);
 
-   delJinsVD.initialize(2, dim_size2, 0.0);// = zeros(model.max_J_deletions +1, model.max_insertions +1);
-   delJinsDJ.initialize(2, dim_size2, 0.0);//zeros(model.max_J_deletions +1, model.max_insertions +1);
-   delJdelDl.initialize(2, dim_size2, 0.0);//zeros(model.max_J_deletions +1, model.max_D_deletions +1);
-   delJdelDr.initialize(2, dim_size2, 0.0);//zeros(model.max_J_deletions +1, model.max_D_deletions +1);
+   insDJ_J_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_J_length + 1);
+   insVD_J_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_J_length + 1);
+
+   insDJ_V_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_V_length + 1);
+   insVD_V_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_V_length + 1);
+
+   Dallele_D_align_length.initialize(2, dim_size2, -1);// = zeros(3, max_D_length + 1);
+
+
+   delVinsVD.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_insertions +1);
+   delVinsDJ.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_insertions +1);
+   delVdelDl.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_D_deletions +1);
+   delVdelDr.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_D_deletions +1);
+   delVdelJ.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_J_deletions +1);
+
+   delJinsVD.initialize(2, dim_size2, -1);// = zeros(model.max_J_deletions +1, model.max_insertions +1);
+   delJinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_J_deletions +1, model.max_insertions +1);
+   delJdelDl.initialize(2, dim_size2, -1);//zeros(model.max_J_deletions +1, model.max_D_deletions +1);
+   delJdelDr.initialize(2, dim_size2, -1);//zeros(model.max_J_deletions +1, model.max_D_deletions +1);
   
-   delDlinsVD.initialize(2, dim_size2, 0.0);//zeros(model.max_D_deletions +1, model.max_insertions +1);
-   delDlinsDJ.initialize(2, dim_size2, 0.0);//zeros(model.max_D_deletions +1, model.max_insertions +1);
-   delDldelDr.initialize(2, dim_size2, 0.0);//zeros(model.max_D_deletions +1, model.max_D_deletions +1);
+   delDlinsVD.initialize(2, dim_size2, -1);//zeros(model.max_D_deletions +1, model.max_insertions +1);
+   delDlinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_D_deletions +1, model.max_insertions +1);
+   delDldelDr.initialize(2, dim_size2, -1);//zeros(model.max_D_deletions +1, model.max_D_deletions +1);
   
-   delDrinsVD.initialize(2, dim_size2, 0.0);//zeros(model.max_D_deletions +1, model.max_insertions +1);
-   delDrinsDJ.initialize(2, dim_size2, 0.0);//zeros(model.max_D_deletions +1, model.max_insertions +1);
+   delDrinsVD.initialize(2, dim_size2, -1);//zeros(model.max_D_deletions +1, model.max_insertions +1);
+   delDrinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_D_deletions +1, model.max_insertions +1);
   
-   insVDinsDJ.initialize(2, dim_size2, 0.0);//zeros(model.max_insertions +1, model.max_insertions +1);
+   insVDinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_insertions +1, model.max_insertions +1);
   
-   VdelV.initialize(2, dim_size2, 0.0);//zeros(size(model.PV,1), model.max_V_deletions+1 );
-   DdelDl.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,1), model.max_D_deletions+1 );
-   DdelDr.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,1), model.max_D_deletions+1 );
-   JdelJ.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,2), model.max_J_deletions+1 );
+   VdelV.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_V_deletions+1 );
+   DdelDl.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_D_deletions+1 );
+   DdelDr.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_D_deletions+1 );
+   JdelJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_J_deletions+1 );
   
-   VinsVD.initialize(2, dim_size2, 0.0);//zeros(size(model.PV,1), model.max_insertions+1 );
-   DinsVD.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,1), model.max_insertions+1 );
-   DinsDJ.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,1), model.max_insertions+1 );
-   JinsDJ.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,2), model.max_insertions+1 );
+   VinsVD.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_insertions+1 );
+   DinsVD.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_insertions+1 );
+   DinsDJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_insertions+1 );
+   JinsDJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_insertions+1 );
   
-   VdelDl.initialize(2, dim_size2, 0.0);//zeros(size(model.PV,1), model.max_D_deletions+1 );
-   VdelDr.initialize(2, dim_size2, 0.0);//zeros(size(model.PV,1), model.max_D_deletions+1 );
-   VdelJ.initialize(2, dim_size2, 0.0);//zeros(size(model.PV,1), model.max_J_deletions+1 );
+   VdelDl.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_D_deletions+1 );
+   VdelDr.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_D_deletions+1 );
+   VdelJ.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_J_deletions+1 );
   
-   JdelV.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,2), model.max_V_deletions+1 );
-   JdelDl.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,2), model.max_D_deletions+1 );
-   JdelDr.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,2), model.max_D_deletions+1 );
+   JdelV.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_V_deletions+1 );
+   JdelDl.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_D_deletions+1 );
+   JdelDr.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_D_deletions+1 );
   
-   DdelV.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,1), model.max_V_deletions+1 );
-   DdelJ.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,1), model.max_J_deletions+1 );
+   DdelV.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_V_deletions+1 );
+   DdelJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_J_deletions+1 );
   
-   VinsDJ.initialize(2, dim_size2, 0.0);//zeros(size(model.PV,1), model.max_insertions+1 );
-   JinsVD.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,2), model.max_insertions+1 );
+   VinsDJ.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_insertions+1 );
+   JinsVD.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_insertions+1 );
   
-   pVinsVD.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_insertions +1);
-   pVinsDJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_insertions +1);
-   pVdelDl.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
-   pVdelDr.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
-   pVdelJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_J_deletions +1);
-   VpV.initialize(2, dim_size2, 0.0);//zeros(size(model.PV,1), model.max_palindrome+1 );
-   JpV.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
-   DpV.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
+   pVinsVD.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pVinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pVdelDl.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   pVdelDr.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   pVdelJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_J_deletions +1);
+   VpV.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_palindrome+1 );
+   JpV.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
+   DpV.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
   
-   pJinsVD.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_insertions +1);
-   pJinsDJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_insertions +1);
-   pJdelV.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_V_deletions +1);
-   pJdelDl.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
-   pJdelDr.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
-   VpJ.initialize(2, dim_size2, 0.0);//zeros(size(model.PV,1), model.max_palindrome+1 );
-   JpJ.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
-   DpJ.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
+   pJinsVD.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pJinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pJdelV.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_V_deletions +1);
+   pJdelDl.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   pJdelDr.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   VpJ.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_palindrome+1 );
+   JpJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
+   DpJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
   
-   pDlinsVD.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_insertions +1);
-   pDlinsDJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_insertions +1);
-   pDldelV.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_V_deletions +1);
-   pDldelJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_J_deletions +1);
-   pDldelDr.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
-   VpDl.initialize(2, dim_size2, 0.0);//zeros(size(model.PV,1), model.max_palindrome+1 );
-   JpDl.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
-   DpDl.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
+   pDlinsVD.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pDlinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pDldelV.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_V_deletions +1);
+   pDldelJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_J_deletions +1);
+   pDldelDr.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   VpDl.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_palindrome+1 );
+   JpDl.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
+   DpDl.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
   
-   pDrinsVD.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_insertions +1);
-   pDrinsDJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_insertions +1);
-   pDrdelV.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_V_deletions +1);
-   pDrdelJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_J_deletions +1);
-   pDrdelDl.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
-   VpDr.initialize(2, dim_size2, 0.0);//zeros(size(model.PV,1), model.max_palindrome+1 );
-   JpDr.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
-   DpDr.initialize(2, dim_size2, 0.0);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
+   pDrinsVD.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pDrinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pDrdelV.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_V_deletions +1);
+   pDrdelJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_J_deletions +1);
+   pDrdelDl.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   VpDr.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_palindrome+1 );
+   JpDr.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
+   DpDr.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
   
-   pVpDl.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
-   pVpDr.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
-   pVpJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
-   pDlpDr.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
-   pDlpJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
-   pDrpJ.initialize(2, dim_size2, 0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+   pVpDl.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+   pVpDr.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+   pVpJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+   pDlpDr.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+   pDlpJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+   pDrpJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
   
   //%------nM*** fields
    dim_size2[1]=4;

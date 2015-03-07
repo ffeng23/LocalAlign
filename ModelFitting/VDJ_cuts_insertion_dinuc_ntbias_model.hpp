@@ -54,13 +54,23 @@ public:
   //           now we want to put the information into the counter
   //      Counter, this counter holding the information and is initialized by the
   //            caller, and inside here, we simply summer over
-  virtual void UpdateCounter(const Assigns& _a, Counter& _c) const;
+  virtual void UpdateCounter(Assigns& _a, Counter& _c) const;
 
   //sum counter
   virtual void SumCounter(const Counter& _c1, const Counter& _c2, Counter& _retC) const;
 
   virtual void CalculateAssignmentEntropies();
-  
+
+  //the function used to update the nP* field in the counter
+  //index_fields, fields in the assigns, contains the information about
+  //    the assigns that will be write to counter _fields_c
+  //
+  //      index_field and prob field are from assign, and _fields_c is from counter
+  //return false if the input matrix is not what they should , such as the dimensions
+  //    or the size are not appropriate
+  bool Update_nP_field(Matrix<unsigned> _index_field_a, Matrix<double> _prob_field_a, 
+		       Matrix<double> _fields_c);
+
   //==================================
   //define the members
   unsigned max_assignments; //max no. of assignments to explore during Expectation step of EM algorithm

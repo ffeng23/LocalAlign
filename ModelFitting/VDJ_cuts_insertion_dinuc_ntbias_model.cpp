@@ -211,29 +211,325 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::GetModelFromCounter(const Counter& _
 
 void VDJ_cuts_insertion_dinuc_ntbias_model::InitializeAssign(Assigns& _a) const
 {
-//we don't do anything
-//the actual job was done by constructor of the assign.
+  //we don't do anything
+  //the actual job was done by constructor of the assign.
   
 }
 
-void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(const Assigns& _a, Counter& _c) const
+void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& _c) const
 {
 
-const VDJ_cuts_insertion_dinuc_ntbias_assigns& vdj_assigns=
-  dynamic_cast<const VDJ_cuts_insertion_dinuc_ntbias_assigns&>(_a);
-unsigned n_as=vdj_assigns.n_assignments;
+  VDJ_cuts_insertion_dinuc_ntbias_assigns& vdj_assigns=
+  dynamic_cast<VDJ_cuts_insertion_dinuc_ntbias_assigns&>(_a);
+  unsigned n_as=vdj_assigns.n_assignments;
 
-if(n_as>0 && vdj_assigns.likelihood>0)
-  {
-   //first we simply create a temporary counter
-   VDJ_cuts_insertion_dinuc_ntbias_counter delta_counter(*this);
-   
-   delta_counter.logLikelihood=log(vdj_assigns.likelihood);
-  }
+  if(n_as>0 && vdj_assigns.likelihood>0)
+    {
+      //first we simply create a temporary counter
+      VDJ_cuts_insertion_dinuc_ntbias_counter delta_counter(*this);
+      
+      delta_counter.logLikelihood=log(vdj_assigns.likelihood);
+
+      delta_counter.N_processed=1;
+
+      //normalize the probilitties of assignments
+      vdj_assigns.proba=vdj_assigns.proba/vdj_assigns.likelihood;
+
+      //now we want to update every relevant fields
+      //first, nP**** fields.
+      //--nPinsVD
+      double tempContribution=0;
+ 
+      for(unsigned i=0;i<n_as;i++)//for each valid assignment
+	{
+	  if(((signed)insVD(i))!=-1)
+	    delta.nPinsVD(insVD(i))+=vdj_assigns.prob((insVD(i));
+	}
+   insDJ.initialize(1, dim_size, -1);
+   unsigned dim_size2[2]={_model.max_assignments, 2};
+   cutV_given_V.initialize(2, dim_size2, -1);
+   cutJ_given_J.initialize(2, dim_size2, -1);
+   dim_size2[1]=3;
+   cutDlcutDr_given_D.initialize(2, dim_size2, -1);;
+
+   V.initialize(1, dim_size, -1);
+   dim_size2[1]=2;
+   DJ.initialize(2, dim_size2, -1); //Joint P(V, D, J gene choices)
+   Vallele_given_gene.initialize(2, dim_size2, -1); //Probabilities of alleles given gene for each gene
+   Dallele_given_gene.initialize(2, dim_size2, -1);
+
+
+   VD_left_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
+   VD_right_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
+   DJ_left_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
+   DJ_right_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
+
+   dim_size2[1]=3;
+   pVmax_delV_V.initialize(2, dim_size2, -1);// =  zeros(model.max_palindrome + 1, model.max_V_deletions + 1, size(model.PV,1));
+   pJmax_delJ_J.initialize(2, dim_size2, -1);// = zeros(model.max_palindrome + 1, model.max_J_deletions + 1, size(model.PDJ,2));
+
+   pDlmax_delDl_D.initialize(2, dim_size2, -1);// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1));
+   pDrmax_delDr_D.initialize(2, dim_size2, -1);// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1));
+
+   VDJ.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1), size(model.PDJ,1), size(model.PDJ,2));
+   dim_size[1]=2;
+   pVdelV.initialize(2, dim_size2, -1);// = zeros( model.max_palindrome + 1, model.max_V_deletions + 1);
+   pDldelDl.initialize(2, dim_size2, -1);// = zeros( model.max_palindrome + 1, model.max_D_deletions + 1);
+   pDrdelDr.initialize(2, dim_size2, -1);// = zeros( model.max_palindrome + 1, model.max_D_deletions + 1);
+   pJdelJ.initialize(2, dim_size2, -1);// = zeros( model.max_palindrome + 1, model.max_J_deletions + 1);
+
+
+   VcutV.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_V_deletions + 1);
+   DcutDl.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_D_deletions + 1);
+   DcutDr.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_D_deletions + 1);
+   JcutJ.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_J_deletions + 1);
+
+   DcutV.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_V_deletions + 1);
+   DcutJ.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_J_deletions + 1);
+
+   VcutJ.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_J_deletions + 1);
+   VcutDl.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_D_deletions + 1);
+   VcutDr.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_D_deletions + 1);
+
+   JcutDl.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_D_deletions + 1);
+   JcutDr.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_D_deletions + 1);
+   JcutV.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_V_deletions + 1);
+
+   insVDcutV.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_V_deletions + 1);
+   insDJcutV.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_V_deletions + 1);
+
+   insVDcutDl.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
+   insDJcutDl.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
+
+   insVDcutDr.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
+   insDJcutDr.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
+
+   insVDcutJ.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_J_deletions + 1);
+   insDJcutJ.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_J_deletions + 1);
+
+  /*
+  unsigned max_V_length;// = model.read_length;
+  unsigned max_D_length;// = 16;
+  unsigned max_J_length;// = 18;
+  */
+   V_align_length.initialize(1, dim_size, -1);// = zeros(max_V_length + 1,1);
+   D_align_length.initialize(1, dim_size, -1);// = zeros(max_D_length + 1,1);
+   J_align_length.initialize(1, dim_size, -1);// = zeros(max_J_length + 1,1);
+
+   JJ_align_length.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2), 1 + max_J_length);
+   VV_align_length.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1), 1 + max_V_length);
+
+
+   insDJ_D_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_D_length + 1);
+   insVD_D_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_D_length + 1);
+
+   insDJ_J_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_J_length + 1);
+   insVD_J_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_J_length + 1);
+
+   insDJ_V_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_V_length + 1);
+   insVD_V_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_V_length + 1);
+
+   Dallele_D_align_length.initialize(2, dim_size2, -1);// = zeros(3, max_D_length + 1);
+
+
+   delVinsVD.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_insertions +1);
+   delVinsDJ.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_insertions +1);
+   delVdelDl.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_D_deletions +1);
+   delVdelDr.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_D_deletions +1);
+   delVdelJ.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_J_deletions +1);
+
+   delJinsVD.initialize(2, dim_size2, -1);// = zeros(model.max_J_deletions +1, model.max_insertions +1);
+   delJinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_J_deletions +1, model.max_insertions +1);
+   delJdelDl.initialize(2, dim_size2, -1);//zeros(model.max_J_deletions +1, model.max_D_deletions +1);
+   delJdelDr.initialize(2, dim_size2, -1);//zeros(model.max_J_deletions +1, model.max_D_deletions +1);
+  
+   delDlinsVD.initialize(2, dim_size2, -1);//zeros(model.max_D_deletions +1, model.max_insertions +1);
+   delDlinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_D_deletions +1, model.max_insertions +1);
+   delDldelDr.initialize(2, dim_size2, -1);//zeros(model.max_D_deletions +1, model.max_D_deletions +1);
+  
+   delDrinsVD.initialize(2, dim_size2, -1);//zeros(model.max_D_deletions +1, model.max_insertions +1);
+   delDrinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_D_deletions +1, model.max_insertions +1);
+  
+   insVDinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_insertions +1, model.max_insertions +1);
+  
+   VdelV.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_V_deletions+1 );
+   DdelDl.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_D_deletions+1 );
+   DdelDr.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_D_deletions+1 );
+   JdelJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_J_deletions+1 );
+  
+   VinsVD.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_insertions+1 );
+   DinsVD.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_insertions+1 );
+   DinsDJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_insertions+1 );
+   JinsDJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_insertions+1 );
+  
+   VdelDl.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_D_deletions+1 );
+   VdelDr.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_D_deletions+1 );
+   VdelJ.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_J_deletions+1 );
+  
+   JdelV.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_V_deletions+1 );
+   JdelDl.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_D_deletions+1 );
+   JdelDr.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_D_deletions+1 );
+  
+   DdelV.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_V_deletions+1 );
+   DdelJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_J_deletions+1 );
+  
+   VinsDJ.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_insertions+1 );
+   JinsVD.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_insertions+1 );
+  
+   pVinsVD.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pVinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pVdelDl.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   pVdelDr.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   pVdelJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_J_deletions +1);
+   VpV.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_palindrome+1 );
+   JpV.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
+   DpV.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
+  
+   pJinsVD.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pJinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pJdelV.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_V_deletions +1);
+   pJdelDl.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   pJdelDr.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   VpJ.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_palindrome+1 );
+   JpJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
+   DpJ.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
+  
+   pDlinsVD.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pDlinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pDldelV.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_V_deletions +1);
+   pDldelJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_J_deletions +1);
+   pDldelDr.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   VpDl.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_palindrome+1 );
+   JpDl.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
+   DpDl.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
+  
+   pDrinsVD.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pDrinsDJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_insertions +1);
+   pDrdelV.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_V_deletions +1);
+   pDrdelJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_J_deletions +1);
+   pDrdelDl.initialize(2, dim_size2, -1);//zeros(model.max_palindrome +1, model.max_D_deletions +1);
+   VpDr.initialize(2, dim_size2, -1);//zeros(size(model.PV,1), model.max_palindrome+1 );
+   JpDr.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,2), model.max_palindrome+1 );
+   DpDr.initialize(2, dim_size2, -1);//zeros(size(model.PDJ,1), model.max_palindrome+1 );
+  
+   pVpDl.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+   pVpDr.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+   pVpJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+   pDlpDr.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+   pDlpJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+   pDrpJ.initialize(2, dim_size2, -1);//zeros(model.max_palindrome + 1, model.max_palindrome + 1);
+  
+    }
 }
 
-void VDJ_cuts_insertion_dinuc_ntbias_model::SumCounter(const Counter& _c1, const Counter& _c2, Counter& _retC) const
+  //!!!here this one needs testing............===???????????????
+  //the function used to update the nP* field in the counter
+  //index_fields, fields in the assigns, contains the information about
+  //    the assigns that will be write to counter _fields_c
+  //
+  //      index_field and prob field are from assign, and _fields_c is from counter
+  //return false if the input matrix is not what they should , such as the dimensions
+  //    or the size are not appropriate
+  bool VDJ_cuts_insertion_dinuc_ntbias_model::Update_nP_field
+    (const Matrix<unsigned>& _index_field_a, const Matrix<double>& _prob_field_a, 
+     Matrix<double>& _fields_c, unsigned _num_valid_assignments) const
+  {
+      bool flag=true;
+      //first check for the correct input
+      //_index_field_a is max_assignments x index1 x index2...x index_n
+      //_prob_field_a is max_assignments x 1
+      //_fields_c =index1 x index2 ... x index_n
+      
+      if(_index_field.size(0)<_num_valid_assignments)
+	{
+	  cout<<"Error: pass in not number of valid assignments or incorrect sized index fields, please check"<<endl;
+	  return false;
+	}
+      
+      if(_prob_fields_a.dim()!=1)
+	{
+	  cout<<"Error: pass in not correct prob_field, please check"<<endl;
+	  return false;
+	}
+      if(_index_field_a.dim()<1)
+	{
+	  cout<<"Error: pass in not correct index_field, please check"<<endl;
+	  return false;
+	}
+
+      if(_prob_field_a.size(0)!=_index_field_a.size(0))
+	{
+	  cout<<"Error: the size of two fields from assing don't match, please check"<<endl;
+	  return false;
+	}
+      if(_index_field_a.dim()!=_fields_c.dim()+1)
+	{
+	  cout<<"Error: the dimension of field from counter is not right, please check"<<endl;
+	  return false;
+	}
+
+      for(unsigned i=1;i<_index_field_a.dim();i++)
+	{
+	  //check for the size
+	  if(_index_field_a.size(i)!=_field_c.size(i-1))
+	    {
+	      cout<<"Error: the sizes for index and field don't match, please check"<<endl;
+	      return false;
+	    }
+	}
+      //phew, finally, we can do the job
+      //first, let's figure out in this index of valid assignment 
+      //so we can also do the correct normalization of proba
+      unsigned blockSize=_field.nTotal();
+      unsigned* k_all_good_assigns=new unsigned[_num_valid_assignments];
+      unsigned num_all_good_assigns=0;
+      double totalProb=0;
+      for(unsigned i=0;i<_num_valid_assignments;i++)
+	{
+	  for(unsigned j=0;j<blockSize;j++)
+	    {
+	      if(((signed)_index_fields.Get1DArrayElement(i*blockSize+j))==-1)
+		{
+		  break;
+		}
+	      if(j==blockSize-1)
+		{
+		  //set the values
+		  k_all_good_assigns[num_all_good_assigns]=i;
+		  num_all_good_assigns++;
+		  totalProb+=_prob_field_a(i);
+		}
+	    }     
+	}
+      //now we do the updating
+      for(unsigned i=0;i<num_all_good_assigns;i++)
+	{
+	  unsigned position=0;
+	  for(unsigned j=0;j<blockSize;j++)
+	    {
+	      if(j!=blockSize-1)
+		{	
+		  position+=_index_field_a.(i,j)*_field_c.size(j+1);
+		}
+	      else
+		{
+		  position+=_index_field_a.(i,j);
+		}
+	    }
+	  //_index_field_a.Get(k_all_good_assigns[i]*blockSize
+	  _field(position)+=_prob_field_a(k_all_good_assigns[i])/totalProb;
+	}
+
+      //clear mem
+      delete [] k_all_good_assigns;
+      return flag;
+
+  }
+
+void VDJ_cuts_insertion_dinuc_ntbias_model::SumCounters(const Counter& _c1, const Counter& _c2, Counter& _retC) const
 {
+  //need to dynamic casting everything
+  
 }
 
 void VDJ_cuts_insertion_dinuc_ntbias_model::CalculateAssignmentEntropies()

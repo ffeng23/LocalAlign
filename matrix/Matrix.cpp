@@ -433,6 +433,40 @@ Matrix<T>  Matrix<T>::operator / (const T& _t)
   return temp;
 }
 
+//return total number of elements
+template<class T>
+unsigned Matrix<T>::nTotal()const
+{
+  if((signed)(this->c_dim)==-1)
+    {
+      cerr<<"calling on an unitialized matrix object"<<endl;
+      return 0;
+    }
+  if(c_dim==0)
+    return 1;
+  unsigned temp=1;
+  for(unsigned i=0;i<this->c_dim;i++)
+    {
+      temp*=this->c_dim_size[i];
+    }
+  return temp;
+}
+
+//this will use the internal one D array to retrieve elements _index
+//
+template<class T>
+T Matrix<T>::Get1DArrayElement(const unsigned& _index)const
+{
+  //check for correctness
+  if(_index >= this->nTotal())
+    {
+      cout<<"index out of range!!"<<endl;
+      throw std::out_of_range("index out of rang");
+    }
+  return c_data[_index];
+}
+
+
 //size
 template<class T>
 Matrix<unsigned> Matrix<T>::size() const

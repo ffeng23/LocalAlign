@@ -73,6 +73,8 @@ public:
   //return unsigned dim_size of specific dimension
   unsigned size(const unsigned& _dim) const;
 
+  //return total number of elements
+  unsigned nTotal()const;
   //
   unsigned dim() const ;
 
@@ -98,6 +100,10 @@ public:
   //return a bool indicating whether everything is all right.
   
   bool divide_by_dimension(const Matrix<T>& _dim_vector, const unsigned& _dim); 
+
+  //this will use the internal one D array to retrieve elements _index
+  //
+  T Get1DArrayElement(const unsigned& _index)const;
 
   //dot divide
   
