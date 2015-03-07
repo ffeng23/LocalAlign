@@ -337,7 +337,43 @@ T& Matrix<T>::operator ()(const unsigned& _d0, const unsigned& _d1, const unsign
   return this->c_data[_d0*_d1*(_d2*c_dim_size[3])+_d3];
   //return this->temp;
 }
+
+//this allows specify the indices by an array or the array has to be of the same
+  //size as the dim of the matrix, so _dim input is the size of the indices array
+  //
+//at this point, we don't support reshape, so we have to check for 
+template<class T>
+T& Matrix<T>::operator()(const unsigned* _indices, const unsigned& _dim)
+{
+  //check the dim
+  if(((signed)(this->c_dim))==-1)
+    {
+      cerr<<"request elements on empty matrix, please check your data!"<<endl;
+      throw std::runtime_error("unsupported array subscription (dimension not compatible), please check your data!");
+    }
+  if(this->c_dim!=_dim)
+    {
+      cerr<<"unsuppo array subscription (dimension not compatible), please check your data!"<<endl;
+      throw std::runtime_error("unsupported array subscription (dimension not compatible), please check your data!");
+    }
+
+  //checking for the out of range of each dim size
   
+  //now do the job
+  unsigned pos=0;
+  for(unsigned i=0;i<_dim;i++)
+    {
+      if(_indices[i]>=this->c_dim_size[i])
+	{
+	  cout<<"specified index is out of range (larger than the size of the matrix)"<<endl;
+	  throw std::out_of_range("out of range index specified");
+	}
+      pos=pos*this->c_dim_size[i];
+      pos+=_indices[i];
+    }
+  return this->c_data[pos];
+}
+
   //NOTE: only support 4d or below
 
 //==========================
@@ -495,6 +531,18 @@ T Matrix<T>::Get1DArrayElement(const unsigned& _index)const
   return c_data[_index];
 }
 
+//now try to think the c_data as a 1D array, and then set its value
+template<class T>
+void Matrix<T>::Set1DArrayElement(const unsigned& _index, const T& _t)
+  {
+    if(_index >= this->nTotal())
+      {
+      cout<<"index out of range!!"<<endl;
+      throw std::out_of_range("index out of rang");
+    }
+
+    c_data[_index]=_t;
+  }
 
 //size
 template<class T>

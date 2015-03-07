@@ -45,14 +45,14 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   Rerror_per_sequenced_nucleotide(0)
 {
 
-//need to do things to initialize the parameters and arrays
-min_V_cut=-1*max_palindrome;
-min_D_cut=-1*max_palindrome;
-min_J_cut=-1*max_palindrome;
-
-max_V_cut=max_V_deletions;
-max_D_cut=max_D_deletions;
-max_J_cut=max_J_deletions;
+  //need to do things to initialize the parameters and arrays
+  min_V_cut=-1*max_palindrome;
+  min_D_cut=-1*max_palindrome;
+  min_J_cut=-1*max_palindrome;
+  
+  max_V_cut=max_V_deletions;
+  max_D_cut=max_D_deletions;
+  max_J_cut=max_J_deletions;
 
   //start intialize the various matrix
   unsigned maxGeneIndex_V=max_gene_index(_genV,_numV);
@@ -71,7 +71,7 @@ max_J_cut=max_J_deletions;
   PDJ.initialize(2, dim_size2, 1);
 
   dim_size2[1]=(unsigned)(max_V_cut-min_V_cut+1);
-dim_size2[0]=maxGeneIndex_V;
+  dim_size2[0]=maxGeneIndex_V;
   PcutV_given_V.initialize(2, dim_size2,1);
 
   dim_size2[1]=(unsigned)(max_J_cut-min_J_cut+1);
@@ -432,7 +432,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
   //    or the size are not appropriate
   bool VDJ_cuts_insertion_dinuc_ntbias_model::Update_nP_field
     (const Matrix<unsigned>& _index_field_a, const Matrix<double>& _prob_field_a, 
-     Matrix<double>& _fields_c, unsigned _num_valid_assignments) const
+     Matrix<double>& _fields_c, const unsigned& _num_valid_assignments) const
   {
       bool flag=true;
       //first check for the correct input
@@ -451,9 +451,9 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	  cout<<"Error: pass in not correct prob_field, please check"<<endl;
 	  return false;
 	}
-      if(_index_field_a.dim()<1)
+      if(_index_field_a.dim()<1||_index_field_a.dim()>2) //so far only support 1 or 2
 	{
-	  cout<<"Error: pass in not correct index_field, please check"<<endl;
+	  cout<<"Error: pass in not correct index_field (dimension not 1 or 2), please check"<<endl;
 	  return false;
 	}
 
@@ -462,12 +462,15 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	  cout<<"Error: the size of two fields from assing don't match, please check"<<endl;
 	  return false;
 	}
-      if(_index_field_a.dim()!=_fields_c.dim()+1)
+      if(_index_field_a.dim()==2 &&
+	 (_index_field_a.size(1)!=_fields_c.dim())
+	)
 	{
 	  cout<<"Error: the dimension of field from counter is not right, please check"<<endl;
 	  return false;
 	}
-
+      
+      /*
       for(unsigned i=1;i<_index_field_a.dim();i++)
 	{
 	  //check for the size
@@ -476,55 +479,174 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	      cout<<"Error: the sizes for index and field don't match, please check"<<endl;
 	      return false;
 	    }
-	}
+	    }*/
+      
       //phew, finally, we can do the job
-      //first, let's figure out in this index of valid assignment 
+      //first, let's figure out num_all_good_assigns in this index of
+      //valid assignment. A good assigns is the valid assign plus all the
+      //indices have been assigned. no not assigned index.
       //so we can also do the correct normalization of proba
-      unsigned blockSize=_field.nTotal();
+      unsigned blockSize=_field_c.nTotal();//total number of elements in the counter field
       unsigned* k_all_good_assigns=new unsigned[_num_valid_assignments];
       unsigned num_all_good_assigns=0;
       double totalProb=0;
+      
       for(unsigned i=0;i<_num_valid_assignments;i++)
 	{
-	  for(unsigned j=0;j<blockSize;j++)
+	  
+	  if(_index_field_a.dim()==1)
 	    {
-	      if(((signed)_index_fields.Get1DArrayElement(i*blockSize+j))==-1)
+	      //check for good assignment
+	      if(((signed)_index_field_a(i))==-1)
+		    {
+		      
+		      break;
+		    }
+	      else //not a bad one, so
 		{
-		  break;
+		  //set the values, if we are here, this one is good
+		      k_all_good_assigns[num_all_good_assigns]=i;
+		      num_all_good_assigns++;
+		      totalProb+=_prob_field_a(i);
 		}
-	      if(j==blockSize-1)
-		{
-		  //set the values
-		  k_all_good_assigns[num_all_good_assigns]=i;
-		  num_all_good_assigns++;
-		  totalProb+=_prob_field_a(i);
-		}
-	    }     
-	}
-      //now we do the updating
-      for(unsigned i=0;i<num_all_good_assigns;i++)
-	{
-	  unsigned position=0;
-	  for(unsigned j=0;j<blockSize;j++)
+	      
+	    }
+	  else //2, can only be two in this case
 	    {
-	      if(j!=blockSize-1)
-		{	
-		  position+=_index_field_a.(i,j)*_field_c.size(j+1);
-		}
-	      else
+	  
+	      for(unsigned j=0;j<_index_field_a.size(1);j++)
 		{
-		  position+=_index_field_a.(i,j);
+		  if(((signed)_index_field_a(i,j))==-1)
+		    {
+		      //badAssign=true;
+		      break;
+		    }
+		  if(j==_index_field_a.size(1)-1)
+		    {
+		      //set the values, if we are here, this one is good
+		      k_all_good_assigns[num_all_good_assigns]=i;
+		      num_all_good_assigns++;
+		      totalProb+=_prob_field_a(i);
+		    }
 		}
 	    }
-	  //_index_field_a.Get(k_all_good_assigns[i]*blockSize
-	  _field(position)+=_prob_field_a(k_all_good_assigns[i])/totalProb;
 	}
+      //now we do the updating
+      unsigned* position_index_field_a=new unsigned[_index_field_a.dim()];
+      //_index_field_a dimension has to be larger than 0. 1 or 2 only, can not be bigger than 2
+      //
+      unsigned* position_field_c=new unsigned[_field_c.dim()];
+      for(unsigned i=0;i<num_all_good_assigns;i++)
+	{
+	  if(_index_field_a.dim()==1)
+	    {
+	      _field_c(_index_field_a(k_all_good_assigns[i]))+=_prob_field_a(k_all_good_assigns[i]);
+	    }
+	  else //case of dimension =2, but at this dimension 2 it could 2 or 3 or bigger, which is the dimension of the field.dim()
+	    {
+	      position_index_field_a[0]=k_all_good_assigns[i];
+	      position_field_c[0]=0;//this is in case of scalar matrix, it is possible
+	      //for(unsigned j=1;j<_index_field_c.dim();j++)
+	      //	{
+	      for(unsigned k=0;k<_index_field_c.size(1);k++)
+		{
+		  position_index_field_a[1]=k;
+		  //figure out the indices of the specific entry
+		  position_field_c[k]=_index_field_a(position_index_field_a, _index_field_a.dim()); 
+		  
+		}
+	      //now we got position, let's up 
+	      _field_c(position)+=_prob_field_a(k_all_good_assigns[i])/totalProb;
+	      //}
+	    }//end of else
+	}//end of for updating
 
       //clear mem
       delete [] k_all_good_assigns;
+      delete [] position_field_c;
+      delete [] position_index_field_a;
+
+      
       return flag;
 
   }
+  //the function used to update the nM* field in the counter
+  //count_fields, fields in the assigns, contains the information about
+  //    the assigns that will be write to counter _fields_c
+  //
+  //      count_field and prob field are from assign, and _fields_c is from counter
+  //
+  //the calculation is that we add expectation value from this set
+  //of assignments for this sequence to counter variable
+  //
+  //return false if the input matrix is not what they should , such as the dimensions
+  //    or the size are not appropriate
+  bool VDJ_cuts_insertion_dinuc_ntbias_model::Update_nM_field
+    (Matrix<unsigned> _count_field_a, Matrix<double> _prob_field_a, 
+     Matrix<double> _fields_c, const unsigned& _num_valid_assignments)
+  {
+    bool flag=true;
+    //first check for the validity of the input
+    //_count_field_a is max_assignments x index1 x index2...x index_n
+      //_prob_field_a is max_assignments x 1
+      //_fields_c =index1 x index2 ... x index_n
+      
+      if(_count_field.size(0)<_num_valid_assignments)
+	{
+	  cout<<"Error: pass in not number of valid assignments or incorrect sized index fields, please check"<<endl;
+	  return false;
+	}
+      
+      if(_prob_fields_a.dim()!=1)
+	{
+	  cout<<"Error: pass in not correct prob_field, please check"<<endl;
+	  return false;
+	}
+      if(_count_field_a.dim()!=_field_c.dim()+1) //_count_field is one more dimension than _field_a
+	{
+	  cout<<"Error: pass in not correct index_field (dimension not 1 or 2), please check"<<endl;
+	  return false;
+	}
+
+      if(_prob_field_a.size(0)!=_count_field_a.size(0))
+	{
+	  cout<<"Error: the size of two fields from assing don't match, please check"<<endl;
+	  return false;
+	}
+      /*if(_index_field_a.dim()==2 &&
+	 (_index_field_a.size(1)!=_fields_c.dim())
+	)
+	{
+	  cout<<"Error: the dimension of field from counter is not right, please check"<<endl;
+	  return false;
+	  }*/
+      
+      
+      for(unsigned i=1;i<_count_field_a.dim();i++)
+	{
+	  //check for the size
+	  if(_count_field_a.size(i)!=_field_c.size(i-1))
+	    {
+	      cout<<"Error: the sizes for index and field don't match, please check"<<endl;
+	      return false;
+	    }
+	}
+      //now we are good, start doing the updating
+      //now go through each element of field of each assignment/here it is a "block"
+      unsigned blockSize=_field_c.nTotal();//total number of elements in the counter field
+      for(unsigned i=0;i<_num_valid_assignments;i++)
+	{
+	  for(unsigned j=0;j<_block_size;j++)
+	    {
+	      double temp=_field_c.Set1DArrayElement(j)+_count_field_a.Get1DArrayElement(i*blockSize+j)*_prob_field_a(i);
+	      _field_c.Set1DArrayElement(j, temp);
+	    }
+	}
+
+      //done
+      return flag;
+  }//end of function
+
 
 void VDJ_cuts_insertion_dinuc_ntbias_model::SumCounters(const Counter& _c1, const Counter& _c2, Counter& _retC) const
 {
