@@ -59,22 +59,22 @@ public:
 
   //other operator, so all .dot operation
   //add
-  Matrix<T> operator + (const T& _t);
+  Matrix<T> operator + (const T& _t) const;
 
   //other operator, so all .dot operation
   //add
-  Matrix<T> operator + (const Matrix<T>& _t);
+  Matrix<T> operator + (const Matrix<T>& _t) const;
 
   //subtract
-  Matrix<T> operator - (const T& _t);
+  Matrix<T> operator - (const T& _t) const;
 
   //multiplication
-  Matrix<T> operator * (const T& _t);
+  Matrix<T> operator * (const T& _t) const;
 
   //division
-  Matrix<T> operator / (const T& _t);
+  Matrix<T> operator / (const T& _t) const;
 
-  //Matrix<T> operator /(const Matrix<T>& _m);
+  Matrix<T> operator /(const Matrix<T>& _m)const;
   
   //size 
   Matrix<unsigned> size() const;
@@ -88,6 +88,9 @@ public:
   unsigned dim() const ;
 
   //get submatrix
+  // _n is the size of following _dim_pos array. number of element in that array
+  // _dim_pos[] is the arraying holding the positions/indices of the sub matrix
+  //       it could be 0~some valid indecies or -1. -1 mean in that dimension take all
   Matrix<T> SubMatrix(const unsigned& _n, const int _dim_pos[]) const;
 
   //get submatrix
@@ -116,7 +119,12 @@ public:
 
   //now try to think the c_data as a 1D array, and then set its value
   void Set1DArrayElement(const unsigned& _index, const T& _t);
-  
+
+  //here, we only copy over the valid elements (is not a nan), otherwise
+  //leave the old value unchanged
+  //return false if the size and dimension are not compatible
+  bool CopyValidElements( const Matrix<T>& _src);
+
   //dot divide
   
   template<class U>

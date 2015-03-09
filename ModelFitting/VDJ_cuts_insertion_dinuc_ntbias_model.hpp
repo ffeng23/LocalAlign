@@ -1,6 +1,6 @@
 #ifndef VDJ_CUTS_INSERTION_DINUC_NTBIAS_MODEL_HPP
 #define VDJ_CUTS_INSERTION_DINUC_NTBIAS_MODEL_HPP
-
+#include <cmath>
 #include "BaseModel.hpp"
 #include "../SIGPIG/genomicSegments.hpp"
 #include "../SIGPIG/genomicSegment.hpp"
@@ -8,8 +8,10 @@
 #include "../SIGPIG/GenomicD.hpp"
 #include "../SIGPIG/GenomicJ.hpp"
 #include "../matrix/Matrix.hpp"
+#include "VDJ_cuts_insertion_dinuc_ntbias_model_params.hpp"
+
 //#include "VDJ_cuts_insertion_dinuc_ntbias_assigns.hpp"
-//#include "VDJ_cuts_insertion_dinuc_ntbias_counter.hpp"
+#include "VDJ_cuts_insertion_dinuc_ntbias_counter.hpp"
 //NOTE::::::::???todo, the read length is dynamically set???? for each seq??
 
 //inherited class
@@ -19,7 +21,9 @@ public:
   VDJ_cuts_insertion_dinuc_ntbias_model
   (const GenomicV* _genV, const unsigned& _numV, 
    const GenomicD* _genD, const unsigned& _numD,
-   const GenomicJ* _genJ, const unsigned& _numJ);
+   const GenomicJ* _genJ, const unsigned& _numJ,
+   const VDJ_cuts_insertion_dinuc_ntbias_model_params& vdj_mps
+   );
 
   virtual ~VDJ_cuts_insertion_dinuc_ntbias_model();
 
@@ -40,7 +44,7 @@ public:
   
   //the user will supply the model to be populated
   //polymorphism here!! 
-  virtual void GetModelFromCounter(const Counter& _c); 
+  virtual void GetModelFromCounter(Counter& _c); 
   
   //initialize the assign and set up the parameter
   //the caller needs to make the assigns available
@@ -56,8 +60,6 @@ public:
   //            caller, and inside here, we simply summer over
   virtual void UpdateCounter(Assigns& _a, Counter& _c) const;
 
-  //sum counter
-  virtual void SumCounter(const Counter& _c1, const Counter& _c2, Counter& _retC) const;
 
   virtual void CalculateAssignmentEntropies();
 
@@ -68,8 +70,10 @@ public:
   //      index_field and prob field are from assign, and _fields_c is from counter
   //return false if the input matrix is not what they should , such as the dimensions
   //    or the size are not appropriate
-  bool Update_nP_field(Matrix<unsigned> _index_field_a, Matrix<double> _prob_field_a, 
-		       Matrix<double> _fields_c);
+  bool Update_nP_field(Matrix<unsigned>& _index_field_a, 
+		       Matrix<double>& _prob_field_a, 
+		       Matrix<double>& _fields_c, 
+		       const unsigned& _num_valid_assignments) const;
 
   //the function used to update the nM* field in the counter
   //index_fields, fields in the assigns, contains the information about
@@ -82,13 +86,27 @@ public:
   //
   //return false if the input matrix is not what they should , such as the dimensions
   //    or the size are not appropriate
-  bool Update_nM_field(Matrix<unsigned> _count_field_a, Matrix<double> _prob_field_a, 
+  bool Update_nM_field(Matrix<double> _count_field_a, Matrix<double> _prob_field_a, 
 		       Matrix<double> _fields_c,
-		       const unsigned& _num_valid_assignments);
+		       const unsigned& _num_valid_assignments) const;
+
+  //another version of above one. for the case where nM field is a vector and 
+  //    counter field is a scalar
+  bool Update_nM_field(Matrix<double> _count_field_a, Matrix<double> _prob_field_a, 
+		       double _fields_c,
+		       const unsigned& _num_valid_assignments) const;
+
+ //sum counter
+VDJ_cuts_insertion_dinuc_ntbias_counter SumCounter
+(const VDJ_cuts_insertion_dinuc_ntbias_counter& _c1, const VDJ_cuts_insertion_dinuc_ntbias_counter& _c2) ;
+
+VDJ_cuts_insertion_dinuc_ntbias_counter SumCounter
+(const VDJ_cuts_insertion_dinuc_ntbias_counter* _c, const unsigned _size);
 
 
   //==================================
   //define the members
+  VDJ_cuts_insertion_dinuc_ntbias_model_params model_params;
   unsigned max_assignments; //max no. of assignments to explore during Expectation step of EM algorithm
   unsigned max_insertions;
 
@@ -154,7 +172,7 @@ public:
 
   //Read length in data set, usually set by main model fitting script
   //we don't use this as a fixed param, but instead, we MIGHT use
-  //it as a cutoff value
+  //it as a cutoff value ?????
   unsigned read_length;
 
   //model parameters

@@ -6,7 +6,7 @@
 //#include <stdio.h>
 #include <cstring>
 #include <stdlib.h>
-
+#include <cmath>
 #include "Matrix.hpp"
 
 
@@ -380,7 +380,7 @@ T& Matrix<T>::operator()(const unsigned* _indices, const unsigned& _dim)
   //other operator, so all .dot operation
   //add
 template<class T>
-Matrix<T> Matrix<T>::operator + (const T& _t)
+Matrix<T> Matrix<T>::operator + (const T& _t) const
 {
   if((signed)(this->c_dim)==-1)
     {
@@ -404,7 +404,7 @@ Matrix<T> Matrix<T>::operator + (const T& _t)
 //other operator, so all .dot operation
   //add
 template<class T>
-Matrix<T> Matrix<T>::operator + (const Matrix<T>& _m)
+Matrix<T> Matrix<T>::operator + (const Matrix<T>& _m) const
 {
   //first Note::::::::::::we only support same dimension operation
   if(((signed)this->c_dim)==-1)
@@ -432,7 +432,7 @@ Matrix<T> Matrix<T>::operator + (const Matrix<T>& _m)
 
 //subtract
 template<class T>
-Matrix<T> Matrix<T>::operator - (const T& _t)
+Matrix<T> Matrix<T>::operator - (const T& _t) const
 {
   if((signed)(this->c_dim)==-1)
     {
@@ -455,7 +455,7 @@ Matrix<T> Matrix<T>::operator - (const T& _t)
 
 //multiplication
 template<class T>
-Matrix<T>  Matrix<T>::operator * (const T& _t)
+Matrix<T>  Matrix<T>::operator * (const T& _t) const
 {
   if((signed)(this->c_dim)==-1)
     {
@@ -477,7 +477,7 @@ Matrix<T>  Matrix<T>::operator * (const T& _t)
 }
 //division
 template<class T>
-Matrix<T>  Matrix<T>::operator / (const T& _t)
+Matrix<T>  Matrix<T>::operator / (const T& _t) const
 {
   if((signed)(this->c_dim)==-1)
     {
@@ -495,6 +495,42 @@ Matrix<T>  Matrix<T>::operator / (const T& _t)
     {
       temp.c_data[i]=temp.c_data[i]/_t;
     }
+  return temp;
+}
+//division dot on two matrix
+template<class T>
+Matrix<T> Matrix<T>::operator /(const Matrix<T>& _m)const
+{
+  if((signed)(this->c_dim)==-1)
+    {
+      cerr<<"unitialized matrix, exception thrown"<<endl;
+      throw std::runtime_error("unitialized matrix");
+    }
+  //check for compatibility
+  if(this->c_dim!=_m.c_dim)
+    {
+     cout<<"the dimensions are not equal in CopyValidElements request"<<endl;
+     cerr<<"the dimensions are not equal in CopyValidElements request"<<endl;
+     throw std::runtime_error("incompatible matrix (dimension)");
+    }
+  unsigned total=1;
+  for(unsigned i=0;i<this->c_dim;i++)
+    {
+      total*=this->c_dim_size[i];
+      if(this->c_dim_size[i]!=_m.c_dim_size[i])
+	{
+	  cout<<"the dimensions are not equal in CopyValidElements request"<<endl;
+	  cerr<<"the dimensions are not equal in CopyValidElements request"<<endl;
+	  throw std::runtime_error("incompatible matrix (dimension)");
+	}
+    }
+  Matrix<T> temp(*this);
+  //determine total number of elements
+  for(unsigned i=0;i<total;i++)
+    {
+      temp.c_data[i]=this->c_data[i]/_m.c_data[i];
+    }
+  //done
   return temp;
 }
 
@@ -1118,8 +1154,39 @@ std::string Matrix<T>::toString() const
 
   return "";
 }
-
-
+template <class T>
+bool Matrix<T>::CopyValidElements( const Matrix<T>& _src)
+{
+  //check for compatibility
+  if(this->c_dim!=_src.c_dim)
+    {
+     cout<<"the dimensions are not equal in CopyValidElements request"<<endl;
+     cerr<<"the dimensions are not equal in CopyValidElements request"<<endl;
+     return false;
+    }
+  unsigned total=1;
+  for(unsigned i=0;i<this->c_dim;i++)
+    {
+      total*=this->c_dim_size[i];
+      if(this->c_dim_size[i]!=_src.c_dim_size[i])
+	{
+	  cout<<"the dimensions are not equal in CopyValidElements request"<<endl;
+	  cerr<<"the dimensions are not equal in CopyValidElements request"<<endl;
+	  return false;
+	}
+    }
+  //now copy over
+  
+  for(unsigned i=0;i<total;i++)
+    {
+      if(!isnan(_src.c_data[i]))
+	{
+	  this->c_data[i]=_src.c_data[i];
+	}
+    }
+  //done
+  return true;
+}
 
 //c++ equivalent to Matlab sum(A), return
 //the sum of the elements of A along the first array 

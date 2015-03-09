@@ -2,14 +2,16 @@
 #define VDJ_CUTS_INSERTION_DINUC_NTBIAS_COUNTER_HPP
 
 #include "Counter.hpp"
-#include "VDJ_cuts_insertion_dinuc_ntbias_model.hpp"
-
+//#include "VDJ_cuts_insertion_dinuc_ntbias_model.hpp"
+#include "VDJ_cuts_insertion_dinuc_ntbias_model_params.hpp"
+#include "../matrix/Matrix.hpp"
 class VDJ_cuts_insertion_dinuc_ntbias_counter:public Counter
 {
 public:
-  VDJ_cuts_insertion_dinuc_ntbias_counter(const VDJ_cuts_insertion_dinuc_ntbias_model& _model);
+  VDJ_cuts_insertion_dinuc_ntbias_counter(const VDJ_cuts_insertion_dinuc_ntbias_model_params& _model_ps);
 
   virtual ~VDJ_cuts_insertion_dinuc_ntbias_counter();
+
 
   //==========================>member declaration, from the model
   double logLikelihood;//This adds up the log likelihood of generating a sequence given the model
@@ -219,5 +221,8 @@ public:
 
 
 };
+
+
+ 
 
 #endif

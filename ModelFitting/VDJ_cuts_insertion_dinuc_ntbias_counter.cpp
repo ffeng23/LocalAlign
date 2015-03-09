@@ -1,12 +1,14 @@
+#include <iostream>
 
 #include "VDJ_cuts_insertion_dinuc_ntbias_counter.hpp"
 #include "../SIGPIG/AlignmentSettings.hpp"
+
 //NOTE: to do:
 //model read length ??? what is the value, what is the purpose
 //max_V/D/J_length in the alignmentSettings???
 
-VDJ_cuts_insertion_dinuc_ntbias_counter::VDJ_cuts_insertion_dinuc_ntbias_counter(const 
-VDJ_cuts_insertion_dinuc_ntbias_model& _model):
+VDJ_cuts_insertion_dinuc_ntbias_counter::VDJ_cuts_insertion_dinuc_ntbias_counter
+(const VDJ_cuts_insertion_dinuc_ntbias_model_params& _model_ps):
   /*initialization list, intialize default value and do matrices too*/
   logLikelihood(0),//This adds up the log likelihood of generating a sequence given the model
   N_processed(0),
@@ -39,13 +41,13 @@ VDJ_cuts_insertion_dinuc_ntbias_model& _model):
   //add any other fields you might want to keep track of, but are not in model,
   //below, begin the name with an 'nP' or 'nM',
   //if it is a distribution or mean value, respectively,
-   nMmononucleotideVD(),// zeros(4,1),
-   nMmononucleotideDJ(),// = zeros(4,1),
-   nMinsertionVD(),// = zeros(4,1),
-   nMinsertionDJ(),// = zeros(4,1),
-
-   nPVD_left_edge_dinucleotide(),// = zeros(4,4),
-   nPVD_right_edge_dinucleotide(),// = zeros(4,4),
+  nMmononucleotideVD(),// zeros(4,1),
+  nMmononucleotideDJ(),// = zeros(4,1),
+  nMinsertionVD(),// = zeros(4,1),
+  nMinsertionDJ(),// = zeros(4,1),
+  
+  nPVD_left_edge_dinucleotide(),// = zeros(4,4),
+  nPVD_right_edge_dinucleotide(),// = zeros(4,4),
   nPDJ_left_edge_dinucleotide(),// = zeros(4,4),
   nPDJ_right_edge_dinucleotide(),// = zeros(4,4),
 
@@ -213,31 +215,31 @@ VDJ_cuts_insertion_dinuc_ntbias_model& _model):
   nMcoverage()//1, _model.read_length)//zeros(model.read_length,1);
 {
   //here we will correctly initialize the matrices
-  unsigned dim_size1[]={_model.max_insertions+1};
+  unsigned dim_size1[]={_model_ps.max_insertions+1};
   nPinsVD.initialize(1, dim_size1, 0.0);
   nPinsDJ.initialize(1, dim_size1, 0.0);
   
-  unsigned dim_size2[]={_model.number_V_genes, (unsigned)(_model.max_V_cut-_model.min_V_cut+1)};
+  unsigned dim_size2[]={_model_ps.number_V_genes, (unsigned)(_model_ps.max_V_cut-_model_ps.min_V_cut+1)};
   nPcutV_given_V.initialize(2, dim_size2, 0.0);
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=(unsigned)(_model.max_J_cut-_model.min_J_cut+1);
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=(unsigned)(_model_ps.max_J_cut-_model_ps.min_J_cut+1);
   nPcutJ_given_J.initialize(2,dim_size2, 0.0);
   
-  unsigned dim_size3[3]={_model.number_D_genes, (unsigned)(_model.max_D_cut-_model.min_D_cut+1), (unsigned)(_model.max_D_cut-_model.min_D_cut+1) };
+  unsigned dim_size3[3]={_model_ps.number_D_genes, (unsigned)(_model_ps.max_D_cut-_model_ps.min_D_cut+1), (unsigned)(_model_ps.max_D_cut-_model_ps.min_D_cut+1) };
   nPcutDlcutDr_given_D.initialize(3, dim_size3, 0.0);
   
-  unsigned dim_size[1]={_model.number_V_genes};
+  unsigned dim_size[1]={_model_ps.number_V_genes};
   nPV.initialize(1, dim_size, 0.0);
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.number_J_genes;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.number_J_genes;
   nPDJ.initialize(2, dim_size2, 0.0);
   
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_V_n_alleles;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_V_n_alleles;
   nPVallele_given_gene.initialize(2, dim_size2, 0.0);
   
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_D_n_alleles;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_D_n_alleles;
   nPDallele_given_gene.initialize(2, dim_size2,0.0);// zeros(max_D_alleles , D_genes);
   
   dim_size2[0]=4;
@@ -265,99 +267,99 @@ VDJ_cuts_insertion_dinuc_ntbias_model& _model):
   nMtrinucleotideVD.initialize(2, dim_size2,0.0);// = zeros(4,4,4),
   nMtrinucleotideDJ.initialize(2, dim_size2,0.0);// = zeros(4,4,4),
   
-  dim_size3[0]=_model.number_V_genes;
-  dim_size3[1]=_model.max_palindrome+1;
-  dim_size3[2]=_model.max_V_deletions+1;
+  dim_size3[0]=_model_ps.number_V_genes;
+  dim_size3[1]=_model_ps.max_palindrome+1;
+  dim_size3[2]=_model_ps.max_V_deletions+1;
   nPpVmax_delV_V.initialize(3, dim_size3,0.0);// =  zeros(model.max_palindrome + 1, model.max_V_deletions + 1, size(model.PV,1)),
-  dim_size3[0]=_model.number_J_genes;
-  dim_size3[1]=_model.max_J_deletions+1;
+  dim_size3[0]=_model_ps.number_J_genes;
+  dim_size3[1]=_model_ps.max_J_deletions+1;
   nPpJmax_delJ_J.initialize(3, dim_size3,0.0);// = zeros(model.max_palindrome + 1, model.max_J_deletions + 1, size(model.PDJ,2)),
-  dim_size3[0]=_model.number_D_genes;
-  dim_size3[1]=_model.max_D_deletions+1;
+  dim_size3[0]=_model_ps.number_D_genes;
+  dim_size3[1]=_model_ps.max_D_deletions+1;
   nPpDlmax_delDl_D.initialize(3, dim_size3,0.0);// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1)),
   nPpDrmax_delDr_D.initialize(3, dim_size3,0.0);// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1)),
 
   //nMzeroD(0),// = 0,
-  dim_size3[0]=_model.number_V_genes;
-  dim_size3[1]=_model.number_D_genes;
-  dim_size3[2]=_model.number_J_genes;
+  dim_size3[0]=_model_ps.number_V_genes;
+  dim_size3[1]=_model_ps.number_D_genes;
+  dim_size3[2]=_model_ps.number_J_genes;
   nPVDJ.initialize(3, dim_size3,0.0);// = zeros(size(model.PV,1), size(model.PDJ,1), size(model.PDJ,2)),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_V_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_V_deletions+1;
   nPpVdelV.initialize(2, dim_size2,0.0);// = zeros( model.max_palindrome + 1, model.max_V_deletions + 1),
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPpDldelDl.initialize(2, dim_size2,0.0);// = zeros( model.max_palindrome + 1, model.max_D_deletions + 1),
   nPpDrdelDr.initialize(2, dim_size2,0.0);// = zeros( model.max_palindrome + 1, model.max_D_deletions + 1),
-  dim_size2[1]=_model.max_J_deletions+1;
+  dim_size2[1]=_model_ps.max_J_deletions+1;
   nPpJdelJ.initialize(2, dim_size2,0.0);// = zeros( model.max_palindrome + 1, model.max_J_deletions + 1),
   
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_V_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_V_deletions+1+_model_ps.max_palindrome;
   nPVcutV.initialize(2, dim_size2,0.0);// = zeros(size(model.PV,1),model.max_palindrome + model.max_V_deletions + 1),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_D_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1+_model_ps.max_palindrome;
   nPDcutDl.initialize(2, dim_size2,0.0);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_D_deletions + 1),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_D_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1+_model_ps.max_palindrome;
   nPDcutDr.initialize(2, dim_size2,0.0);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_D_deletions + 1),
   
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_J_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_J_deletions+1+_model_ps.max_palindrome;
   nPJcutJ.initialize(2, dim_size2,0.0);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_J_deletions + 1),
   
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_V_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_V_deletions+1+_model_ps.max_palindrome;
   nPDcutV.initialize(2, dim_size2,0.0);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_V_deletions + 1),
   
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_J_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_J_deletions+1+_model_ps.max_palindrome;
   nPDcutJ.initialize(2, dim_size2,0.0);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_J_deletions + 1),
   
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_J_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_J_deletions+1+_model_ps.max_palindrome;
   nPVcutJ.initialize(2, dim_size2,0.0);// = zeros(size(model.PV,1),model.max_palindrome + model.max_J_deletions + 1),
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_D_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1+_model_ps.max_palindrome;
   nPVcutDl.initialize(2, dim_size2,0.0);// = zeros(size(model.PV,1),model.max_palindrome + model.max_D_deletions + 1),
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_D_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1+_model_ps.max_palindrome;
   nPVcutDr.initialize(2, dim_size2,0.0);// = zeros(size(model.PV,1),model.max_palindrome + model.max_D_deletions + 1),
   
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_D_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1+_model_ps.max_palindrome;
   nPJcutDl.initialize(2, dim_size2,0.0);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_D_deletions + 1),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_D_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1+_model_ps.max_palindrome;
   nPJcutDr.initialize(2, dim_size2,0.0);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_D_deletions + 1),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_V_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_V_deletions+1+_model_ps.max_palindrome;
   nPJcutV.initialize(2, dim_size2,0.0);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_V_deletions + 1),
   
-  dim_size2[0]=_model.max_insertions+1;
-  dim_size2[1]=_model.max_V_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.max_insertions+1;
+  dim_size2[1]=_model_ps.max_V_deletions+1+_model_ps.max_palindrome;
   nPinsVDcutV.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_V_deletions + 1),
-  dim_size2[0]=_model.max_insertions+1;
-  dim_size2[1]=_model.max_V_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.max_insertions+1;
+  dim_size2[1]=_model_ps.max_V_deletions+1+_model_ps.max_palindrome;
   nPinsDJcutV.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_V_deletions + 1),
   
-  dim_size2[0]=_model.max_insertions+1;
-  dim_size2[1]=_model.max_D_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.max_insertions+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1+_model_ps.max_palindrome;
   nPinsVDcutDl.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1),
-  dim_size2[0]=_model.max_insertions+1;
-  dim_size2[1]=_model.max_D_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.max_insertions+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1+_model_ps.max_palindrome;
   nPinsDJcutDl.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1),
   
-  dim_size2[0]=_model.max_insertions+1;
-  dim_size2[1]=_model.max_D_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.max_insertions+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1+_model_ps.max_palindrome;
   nPinsVDcutDr.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1),
-  dim_size2[0]=_model.max_insertions+1;
-  dim_size2[1]=_model.max_D_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.max_insertions+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1+_model_ps.max_palindrome;
   nPinsDJcutDr.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1),
-  dim_size2[0]=_model.max_insertions+1;
-  dim_size2[1]=_model.max_J_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.max_insertions+1;
+  dim_size2[1]=_model_ps.max_J_deletions+1+_model_ps.max_palindrome;
   nPinsVDcutJ.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_J_deletions + 1),
-  dim_size2[0]=_model.max_insertions+1;
-  dim_size2[1]=_model.max_J_deletions+1+_model.max_palindrome;
+  dim_size2[0]=_model_ps.max_insertions+1;
+  dim_size2[1]=_model_ps.max_J_deletions+1+_model_ps.max_palindrome;
   nPinsDJcutJ.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_J_deletions + 1),
 
   //???????????????????????????/to do
@@ -368,269 +370,269 @@ VDJ_cuts_insertion_dinuc_ntbias_model& _model):
   dim_size[0]=max_J_length+1;
   nPJ_align_length.initialize(1, dim_size,0.0);// = zeros(max_J_length + 1,1),
 
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=max_V_length+_model.max_V_deletions;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=max_V_length+_model_ps.max_V_deletions;
   nMVV_err_pos.initialize(2, dim_size2,0.0);// = zeros(size(model.PV,1), max_V_length + model.max_V_deletions),
-  dim_size2[0]=_model.number_J_genes;
+  dim_size2[0]=_model_ps.number_J_genes;
   dim_size2[1]=max_J_length;
   nMJJ_err_pos.initialize(2, dim_size2,0.0);// = zeros(size(model.PDJ,2), max_J_length),
   //Note:: WHY this is different from above V case, not adding max_V_deletions
 
-  dim_size2[0]=_model.number_J_genes;
+  dim_size2[0]=_model_ps.number_J_genes;
   dim_size2[1]=max_J_length+1;
   nPJJ_align_length.initialize(2, dim_size2,0.0);// = zeros(size(model.PDJ,2), 1 + max_J_length),
-  dim_size2[0]=_model.number_V_genes;
+  dim_size2[0]=_model_ps.number_V_genes;
   dim_size2[1]=max_V_length+1;  
   nPVV_align_length.initialize(2, dim_size2,0.0);// = zeros(size(model.PV,1), 1 + max_V_length),
   
-  dim_size2[0]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_insertions+1;
   dim_size2[1]=max_D_length+1;  
   nPinsDJ_D_align_length.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions +1, max_D_length + 1),
-  dim_size2[0]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_insertions+1;
   dim_size2[1]=max_D_length+1;  
   nPinsVD_D_align_length.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions +1, max_D_length + 1),
 
-  dim_size2[0]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_insertions+1;
   dim_size2[1]=max_J_length+1;  
   nPinsDJ_J_align_length.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions +1, max_J_length + 1),
-  dim_size2[0]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_insertions+1;
   dim_size2[1]=max_J_length+1;  
   nPinsVD_J_align_length.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions +1, max_J_length + 1),
 
-  dim_size2[0]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_insertions+1;
   dim_size2[1]=max_V_length+1;  
   nPinsDJ_V_align_length.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions +1, max_V_length + 1),
-  dim_size2[0]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_insertions+1;
   dim_size2[1]=max_V_length+1;
   nPinsVD_V_align_length.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions +1, max_V_length + 1),
 
-  dim_size2[0]=_model.max_D_n_alleles;
+  dim_size2[0]=_model_ps.max_D_n_alleles;
   dim_size2[1]=max_D_length+1;
   nPDallele_D_align_length.initialize(2, dim_size2,0.0);// = zeros(3, max_D_length + 1),
 
-  dim_size2[0]=_model.max_V_deletions+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_V_deletions+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPdelVinsVD.initialize(2, dim_size2,0.0);// = zeros(model.max_V_deletions +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_V_deletions+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_V_deletions+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPdelVinsDJ.initialize(2, dim_size2,0.0);// = zeros(model.max_V_deletions +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_V_deletions+1;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.max_V_deletions+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPdelVdelDl.initialize(2, dim_size2,0.0);// = zeros(model.max_V_deletions +1, model.max_D_deletions +1),
   
-  dim_size2[0]=_model.max_V_deletions+1;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.max_V_deletions+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPdelVdelDr.initialize(2, dim_size2,0.0);// = zeros(model.max_V_deletions +1, model.max_D_deletions +1),
   
-  dim_size2[0]=_model.max_V_deletions+1;
-  dim_size2[1]=_model.max_J_deletions+1;
+  dim_size2[0]=_model_ps.max_V_deletions+1;
+  dim_size2[1]=_model_ps.max_J_deletions+1;
   nPdelVdelJ.initialize(2, dim_size2,0.0);// = zeros(model.max_V_deletions +1, model.max_J_deletions +1),
   
-  dim_size2[0]=_model.max_J_deletions+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_J_deletions+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPdelJinsVD.initialize(2, dim_size2,0.0);// = zeros(model.max_J_deletions +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_J_deletions+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_J_deletions+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPdelJinsDJ.initialize(2, dim_size2,0.0);//zeros(model.max_J_deletions +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_J_deletions+1;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.max_J_deletions+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPdelJdelDl.initialize(2, dim_size2,0.0);//zeros(model.max_J_deletions +1, model.max_D_deletions +1),
-  dim_size2[0]=_model.max_J_deletions+1;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.max_J_deletions+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPdelJdelDr.initialize(2, dim_size2,0.0);//zeros(model.max_J_deletions +1, model.max_D_deletions +1),
-  dim_size2[0]=_model.max_D_deletions+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_D_deletions+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPdelDlinsVD.initialize(2, dim_size2,0.0);//zeros(model.max_D_deletions +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_J_deletions+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_J_deletions+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPdelDlinsDJ.initialize(2, dim_size2,0.0);//zeros(model.max_D_deletions +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_D_deletions+1;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.max_D_deletions+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPdelDldelDr.initialize(2, dim_size2,0.0);//zeros(model.max_D_deletions +1, model.max_D_deletions +1),
 
-  dim_size2[0]=_model.max_D_deletions+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_D_deletions+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPdelDrinsVD.initialize(2, dim_size2,0.0);//zeros(model.max_D_deletions +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_D_deletions+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_D_deletions+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPdelDrinsDJ.initialize(2, dim_size2,0.0);//zeros(model.max_D_deletions +1, model.max_insertions +1),
 
-  dim_size2[0]=_model.max_insertions+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_insertions+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPinsVDinsDJ.initialize(2, dim_size2,0.0);//zeros(model.max_insertions +1, model.max_insertions +1),
 
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_V_deletions+1;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_V_deletions+1;
   nPVdelV.initialize(2, dim_size2,0.0);//zeros(size(model.PV,1), model.max_V_deletions+1 ),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPDdelDl.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,1), model.max_D_deletions+1 ),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPDdelDr.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,1), model.max_D_deletions+1 ),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_J_deletions+1;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_J_deletions+1;
   nPJdelJ.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,2), model.max_J_deletions+1 ),
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPVinsVD.initialize(2, dim_size2,0.0);//zeros(size(model.PV,1), model.max_insertions+1 ),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPDinsVD.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,1), model.max_insertions+1 ),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPDinsDJ.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,1), model.max_insertions+1 ),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPJinsDJ.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,2), model.max_insertions+1 ),
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPVdelDl.initialize(2, dim_size2,0.0);//zeros(size(model.PV,1), model.max_D_deletions+1 ),
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPVdelDr.initialize(2, dim_size2,0.0);//zeros(size(model.PV,1), model.max_D_deletions+1 ),
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_J_deletions+1;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_J_deletions+1;
   nPVdelJ.initialize(2, dim_size2,0.0);//zeros(size(model.PV,1), model.max_J_deletions+1 ),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_V_deletions+1;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_V_deletions+1;
   nPJdelV.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,2), model.max_V_deletions+1 ),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPJdelDl.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,2), model.max_D_deletions+1 ),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPJdelDr.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,2), model.max_D_deletions+1 ),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_V_deletions+1;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_V_deletions+1;
   nPDdelV.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,1), model.max_V_deletions+1 ),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_J_deletions+1;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_J_deletions+1;
   nPDdelJ.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,1), model.max_J_deletions+1 ),
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPVinsDJ.initialize(2, dim_size2,0.0);//zeros(size(model.PV,1), model.max_insertions+1 ),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPJinsVD.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,2), model.max_insertions+1 ),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPpVinsVD.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPpVinsDJ.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPpVdelDl.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPpVdelDr.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_J_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_J_deletions+1;
   nPpVdelJ.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_J_deletions +1),
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPVpV.initialize(2, dim_size2,0.0);//zeros(size(model.PV,1), model.max_palindrome+1 ),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPJpV.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,2), model.max_palindrome+1 ),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPDpV.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,1), model.max_palindrome+1 ),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPpJinsVD.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPpJinsDJ.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_V_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_V_deletions+1;
   nPpJdelV.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_V_deletions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPpJdelDl.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPpJdelDr.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1),
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPVpJ.initialize(2, dim_size2,0.0);//zeros(size(model.PV,1), model.max_palindrome+1 ),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPJpJ.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,2), model.max_palindrome+1 ),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPDpJ.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,1), model.max_palindrome+1 ),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPpDlinsVD.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPpDlinsDJ.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_V_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_V_deletions+1;
   nPpDldelV.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_V_deletions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_J_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_J_deletions+1;
   nPpDldelJ.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_J_deletions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPpDldelDr.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1),
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPVpDl.initialize(2, dim_size2,0.0);//zeros(size(model.PV,1), model.max_palindrome+1 ),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPJpDl.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,2), model.max_palindrome+1 ),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPDpDl.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,1), model.max_palindrome+1 ),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPpDrinsVD.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_insertions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_insertions+1;
   nPpDrinsDJ.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_insertions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_V_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_V_deletions+1;
   nPpDrdelV.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_V_deletions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_J_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_J_deletions+1;
   nPpDrdelJ.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_J_deletions +1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_D_deletions+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_D_deletions+1;
   nPpDrdelDl.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome +1, model.max_D_deletions +1),
-  dim_size2[0]=_model.number_V_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_V_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPVpDr.initialize(2, dim_size2,0.0);//zeros(size(model.PV,1), model.max_palindrome+1 ),
-  dim_size2[0]=_model.number_J_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPJpDr.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,2), model.max_palindrome+1 ),
-  dim_size2[0]=_model.number_D_genes;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.number_D_genes;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPDpDr.initialize(2, dim_size2,0.0);//zeros(size(model.PDJ,1), model.max_palindrome+1 ),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPpVpDl.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPpVpDr.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPpVpJ.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPpDlpDr.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPpDlpJ.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1),
-  dim_size2[0]=_model.max_palindrome+1;
-  dim_size2[1]=_model.max_palindrome+1;
+  dim_size2[0]=_model_ps.max_palindrome+1;
+  dim_size2[1]=_model_ps.max_palindrome+1;
   nPpDrpJ.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1),
-  dim_size[0]=_model.read_length;
-  nMerror_vs_position.initialize(1, dim_size,0.0);//1,_model.read_length),//zeros(model.read_length,1),
+  dim_size[0]=_model_ps.read_length;
+  nMerror_vs_position.initialize(1, dim_size,0.0);//1,_model_ps.read_length),//zeros(model.read_length,1),
   
-  nMcoverage.initialize(1, dim_size,0.0);//1, _model.read_length)//zeros(model.read_length,1);
+  nMcoverage.initialize(1, dim_size,0.0);//1, _model_ps.read_length)//zeros(model.read_length,1);
 
   //finally done!!
 
@@ -640,3 +642,4 @@ VDJ_cuts_insertion_dinuc_ntbias_counter::~VDJ_cuts_insertion_dinuc_ntbias_counte
 {
   //empty so far
 }
+

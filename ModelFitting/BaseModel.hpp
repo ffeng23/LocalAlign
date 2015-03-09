@@ -32,7 +32,7 @@ public:
   
   //the user will supply the model to be populated
   //polymorphism here!! 
-  virtual void GetModelFromCounter(const Counter& _c)=0; 
+  virtual void GetModelFromCounter(Counter& _c)=0; 
   
   //initialize the assign and set up the parameter
   //the caller needs to make the assigns available
@@ -43,8 +43,9 @@ public:
   //_c is output
   virtual void UpdateCounter(const Assigns& _a, Counter& _c) const = 0;
 
+ 
   //sum counter
-  virtual void SumCounter(const Counter& _c1, const Counter& _c2, Counter& _retC) const =0 ;
+  //virtual void SumCounter(const Counter& _c1, const Counter& _c2, Counter& _retC) const =0 ;
 
   virtual void CalculateAssignmentEntropies()=0;
   

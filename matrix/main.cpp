@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <cmath>
 //#include "score.hpp"
 //#include "SequenceString.hpp"
 //#include "LocalAlignment.hpp"
@@ -197,7 +197,15 @@ int main(int argc, char* argv[])
   cout<<m0.toString()<<endl;
   cout<<m0(ins, 0)<<endl;
 
-    
+  //testing a nan
+  cout<<"====>testing nan"<<endl;
+  double x=0;
+  double y=0/x;
+  cout<<y<<endl;
+  if(isnan(y))
+    {
+      cout<<"y is a nan"<<endl;
+    }
   cout<<"Thanks for using our program and have a nice day!!"<<endl;
   return 0;
 }
