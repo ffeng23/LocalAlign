@@ -158,5 +158,8 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim);
 template<class T>
 T sum_all(const Matrix<T>& _m);
 
+//find the max element in the matrix
+template<class T>
+Matrix<T> max(const Matrix<T>& _m, const unsigned& _dim);
 
 #endif
