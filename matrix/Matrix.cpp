@@ -1154,6 +1154,7 @@ std::string Matrix<T>::toString() const
 
   return "";
 }
+
 template <class T>
 bool Matrix<T>::CopyValidElements( const Matrix<T>& _src)
 {
@@ -1186,6 +1187,68 @@ bool Matrix<T>::CopyValidElements( const Matrix<T>& _src)
     }
   //done
   return true;
+}
+
+
+//to vector, arranged like what matlab does. it is (1,1), (2,1), (3,1)...(1,2),(2,2)
+  //..(1,3),(2,3)...not like we I have in here inside c_data, eg. (1,1), (1,2),
+  //(1,3)...(2,1),(2,2)....
+  //
+template<class T>
+Matrix<T> Matrix<T>::m2vec()
+{
+  if(this->c_dim<2)
+    {
+      return *this;
+    }
+  //else we need to rearrange the elements in the c_data, in order to
+  //make it ready for output, basically following the matlab style
+  unsigned total=this->nTotal();
+  unsigned dim_size[]={total};
+  Matrix<T> temp_m(1,dim_size);
+  unsigned* temp_index=new unsigned[total];
+  memset(temp_index, sizeof(unsigned)*total, 0);//set the default value
+  cout<<"inside m2vec, ready to test"<<endl;
+  cout<<temp_m.toString()<<endl;
+
+  //since we are following matlab style, we need to go through
+  //dimension back to front
+  unsigned running_block_number=1;
+  unsigned running_block_size=total;
+
+  cout<<"this->c_dim:"<<this->c_dim<<endl;
+  
+  for(unsigned i=this->c_dim-1;((signed)i)>=0;i--)
+    {
+      cout<<"loop i:"<<i<<endl;
+      running_block_number*=c_dim_size[i]; //for temp_index
+      running_block_size=total/running_block_number;//for temp_index
+      for(unsigned j=0;j<running_block_number;j++)
+	{
+	  //we need to get the in the current dimension
+	  unsigned index_position_at_current_dimension;
+	  for(unsigned p=this->c_dim-1;p>=i;p--)
+	    {
+	      
+	    }
+	  for(unsigned k=0;k<running_block_size;k++)
+	    {
+	      temp_index[j*running_block_size+k]+=j*(total/(c_dim_size[i]*running_block_size));
+	      cout<<"\tindex:"<<j*running_block_size+k<<"index out:"<<
+		  j*(total/(c_dim_size[i]*running_block_size))<<endl;
+	    }
+	}
+      
+    }
+
+  //now we have the index, copy over the element
+  for(unsigned i=0;i<total;i++)
+    {
+      temp_m.c_data[i]=this->c_data[temp_index[i]];
+    }
+
+  delete [] temp_index;
+  return temp_m;
 }
 
 //c++ equivalent to Matlab sum(A), return
@@ -1496,6 +1559,25 @@ Matrix<T> max(const Matrix<T>& _m, const unsigned& _dim)
   return temp_m;
 }
 
+//take the logarithm
+template<class T>
+Matrix<T> matrix_log(const Matrix<T>& _m)
+{
+  if((signed)(_m.dim())==-1)
+    {
+      cerr<<"call on an unitialized Matrix object for sum(), exception thrown"<<endl;
+      throw runtime_error("call on an unitialized Matrix object for sum()");
+    }
+  //if we are here, then we are good
+  //do the job, take logarithm
+  unsigned total=_m.nTotal();
+  Matrix<T> temp_m(_m);
+  for(unsigned i=0;i<total;i++)
+    {
+      temp_m.c_data[i]=log(_m.c_data[i]);
+    }
+  return temp_m;
+}
 
 //======template instantiation
 //class
@@ -1534,3 +1616,4 @@ template Matrix<int> max(const Matrix<int>& _m, const unsigned& _dim);
 template Matrix<unsigned> max(const Matrix<unsigned>& _m, const unsigned& _dim);
 template Matrix<double> max(const Matrix<double>& _m, const unsigned& _dim);
 
+template Matrix<double> matrix_log(const Matrix<double>& _m);

@@ -211,6 +211,13 @@ int main(int argc, char* argv[])
   cout<<m4.toString()<<endl;
   cout<<max(m4,3).toString()<<endl;
 
+  //testing m2vec()
+  cout<<"------testing m2vec----"<<endl;
+  Matrix<double> mvec=m4.m2vec();
+  cout<<mvec.toString()<<endl;
+
+  cout<<"-====-----m4"<<endl;
+  cout<<m4.toString()<<endl;
   cout<<"Thanks for using our program and have a nice day!!"<<endl;
   return 0;
 }

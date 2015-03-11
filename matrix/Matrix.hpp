@@ -125,6 +125,13 @@ public:
   //return false if the size and dimension are not compatible
   bool CopyValidElements( const Matrix<T>& _src);
 
+  //to vector, arranged like what matlab does. it is (1,1), (2,1), (3,1)...(1,2),(2,2)
+  //..(1,3),(2,3)...not like we I have in here inside c_data, eg. (1,1), (1,2),
+  //(1,3)...(2,1),(2,2)....
+  //
+  Matrix<T> m2vec();
+
+  //-------friend zone----------
   //dot divide
   
   template<class U>
@@ -140,6 +147,11 @@ public:
   template<class U>
   friend Matrix<U> max(const Matrix<U> & _m, const unsigned& _dim);
 
+  //take the logarithm
+  template<class U>
+  friend Matrix<U> matrix_log(const Matrix<U>& _m);
+
+  //==================
 protected:
   unsigned c_dim;
   unsigned* c_dim_size;
@@ -173,5 +185,8 @@ Matrix<T> max(const Matrix<T>& _m, const unsigned& _dim);
 template<class T>
 T max(const Matrix<T>& _m);
 
+//take the logarithm
+template<class T>
+Matrix<T> matrix_log(const Matrix<T>& _m);
 
 #endif

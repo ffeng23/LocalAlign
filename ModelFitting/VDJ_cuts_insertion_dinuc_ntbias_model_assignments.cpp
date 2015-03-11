@@ -32,7 +32,16 @@ bool VDJ_model_assignments
 
   assignment_params.assume_palindrome_negative_deletions=true;
 
-  //assignment_params.log_max_model_p_nt_DJ=
+  assignment_params.log_max_model_p_nt_DJ=matrix_log(max(model.RnucleotideDJ_per_nucleotideDJ_3_prime,2));
+  assignment_params.log_max_model_p_nt_VD=matrix_log(max(model.RnucleotideVD_per_nucleotideVD_5_prime,2));
+  assignment_params.log_max_model_p_nt=max(assignment_params.log_max_model_p_nt_DJ);
+  double temp=max(assignment_params.log_max_model_p_nt_VD);
+  if(assignment_params.log_max_model_p_nt<temp)
+    {
+      assignment_params.log_max_model_p_nt=temp;
+    }
+
+  //
 
   return true;
 
