@@ -206,6 +206,11 @@ int main(int argc, char* argv[])
     {
       cout<<"y is a nan"<<endl;
     }
+  //testing max()
+  cout<<"=============>testing max()";
+  cout<<m4.toString()<<endl;
+  cout<<max(m4,3).toString()<<endl;
+
   cout<<"Thanks for using our program and have a nice day!!"<<endl;
   return 0;
 }

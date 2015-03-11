@@ -133,6 +133,13 @@ public:
   template<class U>
   friend U sum_all(const Matrix<U> & _m);
   //
+
+  template<class U>
+  friend U max(const Matrix<U> & _m);
+
+  template<class U>
+  friend Matrix<U> max(const Matrix<U> & _m, const unsigned& _dim);
+
 protected:
   unsigned c_dim;
   unsigned* c_dim_size;
@@ -161,5 +168,10 @@ T sum_all(const Matrix<T>& _m);
 //find the max element in the matrix
 template<class T>
 Matrix<T> max(const Matrix<T>& _m, const unsigned& _dim);
+
+//find the max element in the matrix
+template<class T>
+T max(const Matrix<T>& _m);
+
 
 #endif

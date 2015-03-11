@@ -1354,6 +1354,148 @@ T sum_all(const Matrix<T>& _m)
   return ret;
 }
 
+//find the max element in the matrix 
+template<class T>
+T max(const Matrix<T>& _m)
+{
+  if((signed)(_m.dim())==-1)
+    {
+      cerr<<"call on an unitialized Matrix object for sum(), exception thrown"<<endl;
+      throw runtime_error("call on an unitialized Matrix object for sum()");
+    }
+
+  //go through the linear array to find the biggest one
+  unsigned total= _m.nTotal();
+  T biggest=_m.c_data[0];
+  for(unsigned i=1;i<total;i++)   
+    {
+      if(biggest<_m.c_data[i])
+	biggest=_m.c_data[i];
+    }
+
+  return biggest;
+}
+
+//find the max element in the matrix along the dimension specified
+template<class T>
+Matrix<T> max(const Matrix<T>& _m, const unsigned& _dim)
+{
+  
+  if((signed)(_m.dim())==-1)
+    {
+      cerr<<"call on an unitialized Matrix object for sum(), exception thrown"<<endl;
+      throw runtime_error("call on an unitialized Matrix object for sum()");
+    }
+  if(_m.dim()==0)
+    {
+      cerr<<"calling on an scalar like matrix"<<endl;
+      //no sum to do
+      return _m;
+    }
+  //first determine dimension and size of each dim
+  if(_dim>=_m.dim())
+    {
+      cerr<<"dimension is out of range, exception thrown"<<endl;
+      throw std::out_of_range("dimension is out of range");
+    }
+
+  //cout<<"calling sum 1"<<endl;
+  unsigned new_dim=_m.dim()-1;
+  unsigned* new_dim_size=new unsigned [new_dim];
+  unsigned totalNumberOfElements=1;
+  unsigned new_index_counter=0;
+  for(unsigned i=0;i<_m.c_dim;i++)
+    {
+      if(i!=_dim)
+	{
+	  new_dim_size[new_index_counter]=_m.size(i);
+	  //cout<<"dim size:"<<new_dim_size[new_index_counter]<<endl;
+	  new_index_counter++;
+	  
+	}
+    }
+  //cout<<"calling sum 2, new_dim:"<<new_dim<<",new_dim_size:"<<new_dim_size[0]<<endl;
+
+  Matrix<T> temp_m(new_dim, new_dim_size, (T*)NULL);
+  //cout<<temp_m.toString()<<endl;
+  //start getting the sums
+  //first need to figuire out how many blocks we need
+  T* p_firstElementEachBlock_dst;
+  T* p_firstElementEachBlock_src;
+  
+  unsigned numberOfBlocks=1;
+  unsigned sizeOfEachBlock_output=1;
+  unsigned sizeOfEachBlock_input=1;
+  bool flag=false;//indicating whether the deterimin the block number action is done
+  //cout<<"calling sum 3"<<endl;
+
+  //start to determine the numOfBlocks
+  for(unsigned i=0;i<_m.dim();i++)
+    {
+      if(i==_dim) //we are doing with determine the block number
+	flag=true;//we are done
+      
+      if(!flag)
+	{
+	  numberOfBlocks*=_m.size(i);
+	}
+      else
+	{//we skip this current if this is the flag round, since it will collapsed on this _dim dimension
+	  if(i!=_m.c_dim-1)
+	    {
+	      sizeOfEachBlock_output *= _m.size(i+1);
+	    }
+	  sizeOfEachBlock_input*=_m.size(i);
+	}
+
+      totalNumberOfElements*=_m.size(i);
+    }
+  /*
+  cout<<"totalNumberOfElements:"<<totalNumberOfElements
+      <<"number of blocks:"<<numberOfBlocks
+      <<";sizeOfEachBlock_output:"<<sizeOfEachBlock_output
+      <<";sizeOfEachBlack_input:"<<sizeOfEachBlock_input<<endl;
+  */
+  //cout<<temp_m.toString()<<endl;
+  //temp
+  //now we need to determine the sizeOfEachBlock
+  p_firstElementEachBlock_dst=temp_m.c_data; //starting point destination
+  p_firstElementEachBlock_src=_m.c_data;//starting point source
+  //cout<<"p_first dst:"<<p_firstElementEachBlock_dst<<";p_first src:"<<p_firstElementEachBlock_src<<endl;
+  for(unsigned i=0;i<numberOfBlocks;i++)
+    {
+      //cout<<"==>loop i:"<<i<<endl;
+      p_firstElementEachBlock_dst =temp_m.c_data+i* sizeOfEachBlock_output;
+      p_firstElementEachBlock_src = _m.c_data+i*sizeOfEachBlock_input;
+      //cout<<"\ti*sizeOfEachBlock_output:"<<i*sizeOfEachBlock_output<<endl;
+      //cout<<"\ti*sizeOfEachBlock_input:"<<i*sizeOfEachBlock_input<<endl;
+      for(unsigned k=0;k<sizeOfEachBlock_output;k++)
+	{
+	  //cout<<"\tk:"<<k<<endl;
+	  p_firstElementEachBlock_dst[k]=0;
+	  //cout<<"\t_m.size(_dim):"<<_m.size(_dim)<<endl;
+	  for(unsigned j=0;j<_m.size(_dim);j++)
+	    {
+	      //cout<<"\t\tj:"<<j<<";k+j*sizeOfEachBlock_output:"<<k+j*sizeOfEachBlock_output<<endl;
+	      //cout<<"\t\telement:"<<p_firstElementEachBlock_src[k+j*sizeOfEachBlock_output]<<endl;
+	      if(j==0)//first one, then set the best one to be this one
+		{
+		  p_firstElementEachBlock_dst[k]=p_firstElementEachBlock_src[k+j*sizeOfEachBlock_output];
+		}
+	      else //check for the biggest one
+		{
+		  if(p_firstElementEachBlock_dst[k]<p_firstElementEachBlock_src[k+j*sizeOfEachBlock_output])
+		    {
+		      p_firstElementEachBlock_dst[k]=p_firstElementEachBlock_src[k+j*sizeOfEachBlock_output];
+		    }
+		}
+	    }
+	}//end k for loop
+    }//end of i for loop
+  
+  return temp_m;
+}
+
 
 //======template instantiation
 //class
@@ -1383,3 +1525,12 @@ template unsigned sum_all(const Matrix<unsigned>& _m);
 template float sum_all(const Matrix<float>& _m);
 template double sum_all(const Matrix<double>& _m);
 //*/
+
+template int max(const Matrix<int>& _m);
+template unsigned max(const Matrix<unsigned>& _m);
+template double max(const Matrix<double>& _m);
+
+template Matrix<int> max(const Matrix<int>& _m, const unsigned& _dim);
+template Matrix<unsigned> max(const Matrix<unsigned>& _m, const unsigned& _dim);
+template Matrix<double> max(const Matrix<double>& _m, const unsigned& _dim);
+
