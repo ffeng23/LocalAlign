@@ -1215,27 +1215,31 @@ Matrix<T> Matrix<T>::m2vec()
   //dimension back to front
   unsigned running_block_number=1;
   unsigned running_block_size=total;
-
+  unsigned previous_block_number=1;
   cout<<"this->c_dim:"<<this->c_dim<<endl;
   
   for(unsigned i=this->c_dim-1;((signed)i)>=0;i--)
     {
-      cout<<"loop i:"<<i<<endl;
+      cout<<"==>loop i:"<<i;
+      
+      previous_block_number=running_block_number;
       running_block_number*=c_dim_size[i]; //for temp_index
       running_block_size=total/running_block_number;//for temp_index
-      for(unsigned j=0;j<running_block_number;j++)
+      cout<<"; previous_block_number:"<<previous_block_number
+	  <<";running_block_number:"<<running_block_number
+	  <<";running_block_size:"<<running_block_size<<endl;
+      for(unsigned j=0;j<c_dim_size[i];j++)
 	{
-	  //we need to get the in the current dimension
-	  unsigned index_position_at_current_dimension;
-	  for(unsigned p=this->c_dim-1;p>=i;p--)
+	  for(unsigned p=0;p<previous_block_number;p++)
 	    {
-	      
-	    }
-	  for(unsigned k=0;k<running_block_size;k++)
-	    {
-	      temp_index[j*running_block_size+k]+=j*(total/(c_dim_size[i]*running_block_size));
-	      cout<<"\tindex:"<<j*running_block_size+k<<"index out:"<<
-		  j*(total/(c_dim_size[i]*running_block_size))<<endl;
+	      //we need to get the in the current dimension
+	  
+	      for(unsigned k=0;k<running_block_size;k++)
+		{
+		  temp_index[p*j*running_block_size+k]+=j*(total/(c_dim_size[i]*running_block_size));
+		  cout<<"\tindex:"<<p*j*running_block_size+k<<"index out:"<<
+		    j*(total/(c_dim_size[i]*running_block_size))<<endl;
+		}
 	    }
 	}
       
