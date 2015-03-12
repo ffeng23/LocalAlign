@@ -51,7 +51,39 @@ struct VDJ_model_assignments_settings
 
   double log_highest_probability;
   unsigned best_D_align_length;
-  unsigned max_nerrorsv_1;
+  //unsigned max_nerrorsv_1;
+
+  unsigned high_error_region;//don't actually use it in my code,
+  //but keep it for now for compatibility purpose
+
+  //for v gene
+  unsigned v;//this is the v allele index in the alignment
+  unsigned v_a; //v allele number
+  unsigned v_g; //v gene index
+  Matrix<unsigned> v_err_pos;
+  double log_highest_probability_GIVEN_current_V_allele;
+  bool v_break_out;
+  unsigned n_assignments_v_gene;
+
+  //for J gene
+  unsigned j;
+  unsigned j_a; //j allele
+  unsigned j_g; //J gene index
+  double log_max_pcutJ_loop_J;
+  double log_highest_probability_GIVEN_current_J_allele;
+  bool j_break_out;
+  unsigned n_assignment_j_gene;
+  
+  unsigned niVD_DJ0; //first insertion between VD and DJ
+
+  //for D gene
+  unsigned d;
+  unsigned d_a;
+  unsigned d_g;
+  unsigned l_d_seq;
+  unsigned n_assignments_d_gene;
+  bool d_break_out=false;
+  
 };
 
 

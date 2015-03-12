@@ -10,6 +10,9 @@ bool VDJ_model_assignments
  const VDJ_cuts_insertion_dinuc_ntbias_model& _model,
  const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
+ const GenomicV* _geneV, const unsigned& _numV,
+ const GenomicD* _geneD, const unsigned& _numD,
+ const GenomicJ* _geneJ, const unsigned& _numJ,
  const double& _probability_threshold_factor, const bool& _no_err,
  const bool& _ignore_deep_error, const bool& _do_smoothing,
  const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
@@ -77,7 +80,7 @@ bool VDJ_model_assignments
     }
   assignment_params.log_highest_probability=-1000.0;
   assignment_params.best_D_align_length=0;
-  assignment_params.max_nerrorsv_1=0;
+  //assignment_params.max_nerrorsv_1=0;
   
 
   return true;
@@ -85,22 +88,138 @@ bool VDJ_model_assignments
 }
 			   
 
-bool assign_V_alleles
+bool assign_VDJ_alleles
 (const VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
- /*output, input*/VDJ_model_assignment_settings& _params,
+ const bool ignore_deep_error,
+ /*output, input*/VDJ_model_assignment_settings& assignment_params,
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns )
 {
-  for(unsigned i=0;i<_V.numOfAligned;i++)
+  unsigned dim_size[4]={0,0,0,0};
+  unsigned deletable_errorss=0;
+  unsigned max_nerrorsv_1=0;
+  unsigned min_nerrorsv, max_nerrorsv;
+
+  double log_max_pcutV_loop_v;
+  for(unsigned v=0;v<_V.numOfAligned;i++)
     {
+      assignment_params.v=v;
       //check for validity
-      if(_params.skips>_params.max_skips)
+      if(assignment_params.skips>assignment_params.max_skips)
 	{
-	  _assign.n_assignments=_params.in;
-	  _assign.skips=_params.skips;
+	  _assign.n_assignments=assignment_params.in;
+	  _assign.skips=assignment_params.skips;
 	  return true;
 	}
-    }
+      assignment_params.v_a=_V.alleles_all(v);
+      assignment_params.v_g=_genV[v_a].Get_GeneIndex();
+
+      //for high_error_region, we don't use in my code,
+      //but keep it for now anyway
+      if(ignore_deep_error)
+	assignment_params.high_error_region=_model.high_error_region;
+      else
+	assignment_params.high_error_region=_model.high_error_region;
+
+      if(v==0)//for first round, set some starting point
+	{
+	  dim_size[0]=_V.n_errors[v];
+	  v_err_pos.initialize(1, dim_size, _V.error_positions[v]);
+	  deletable_errors=sum_all_bool(v_err_pos > (_V.align_length[v]-_model.max_excess_V_deletions));
+	  min_nerrorsv=_V.n_errors[v]-deletable_errors;
+	  //here it is different from Matlab code,
+	  //since we don't have high_error region anyway.
+	  //We simply don't account for it
+	  max_nerrorsv_1=_V.n_errors[v];//again, this is different from Matlab code.
+	  //since we don't have high error region
+	  if(no_error && min_nerrorsv>0)
+	    {
+	      //we don't allow errors , but do have errors in here, so do next
+	      continue;
+	    }
+	}
+      else  //for other cases not v==1
+	{
+	  //check if this v has too many more eerors than the best V
+	  v_error_pos.clear();
+	  dim_size[0]=_V.n_errors[v];
+	  v_err_pos.initialize(1, dim_size, _V.error_positions[v]);
+	  deletable_errors=sum_all_bool(v_err_pos > (_V.align_length[v]-_model.max_excess_V_deletions));
+	  min_nerrorsv=_V.n_errors[v]-deletable_errors;
+	  //here it is different from Matlab code,
+	  //since we don't have high_error region anyway.
+	  //We simply don't account for it
+	  max_nerrorsv=_V.n_errors[v];//again, this is different from Matlab code.
+	  //since we don't have high error region
+	  if(no_error && min_nerrorsv>0)
+	    {
+	      //we don't allow errors , but do have errors in here, so do next
+	      continue;
+	    }
+	  //check for too many more errors compared with best V
+	  double log_min_diff_perrv=(max_nerrorsv-max_nerrorsv_1) * assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
+	  if(log_min_diff_perrv<assignment.params.log_probability_factor)
+	    {
+	      assignment_params.skips+=1;
+	      continue;//why did not count skips in the above no_error position
+	    }
+	  
+	}//end of else
+      log_max_pcutV_loop_V=assignment_params.log_max_model_pcutV_given_gene(v_g);
+
+      assignment_params.log_highest_probability_GIVEN_V_allele=-1000.0;
+      assignment_params.v_break_out=false;
+      assignment_params.n_assignments_v_gene=0;
+
+      //========loop over J alleles
+      for(unsigned j=0;j<_J.numOfAligned;j++)
+	{
+	  assignment_params.j=j;
+	  if(assignment_params.skips>assignment_params.max_skips)
+	    {
+	      _assigns.n_assignments=assignment_params.in;
+	      _assigns.skips=assignment_param.skips;
+	      return;
+	    }
+	  if(_J.align_length(j)<_model.min_J_align_length)
+	    continue;
+	  assignment_params.j_a=_J.alleles_all[j];
+	  assignment_params.j_g=_genJ[assignment_params.j_a].Get_GeneIndex();
+	  
+	  assignment_params.niVD_DJ0=_J.align_position[j][0] -(_V.align_position[v][0]+ _V.align_length[v]-1)-1;
+	  //NOTE:::here the code is different, since the alignment of V not starting from zero. By adding _V.align_position[v][0]
+
+	  assignment_params.log_max_pcutJ_loop_j=assignment_params.log_max_odel_pcutJ_given_gene(j_g);
+
+	  assignment_params.log_highest_probability_GIVEN_current_J_allele=-1000.0;
+	  assignment_params.n_assignment_j_gene=0;
+	  assignment_params.j_break_out=false;
+
+	  //=======loop over D alleles
+	  for(unsigned d_i=0;d_i<_numD;d_i++)
+	    {
+	      if(assignment_params.skips>assignment_params.max_skips)
+		{
+		  _assigns.n_assignments=assignment_params.in;
+		  _assigns.skips=assignment_param.skips;
+		  return;
+		}
+	      unsigned d=D.allele_order[d_i];
+	      assignment_params.d=d;
+	      assignment_params.d_a=d;
+	      assignment_params.d_g=_genD(assignment_params.d_a).Get_GeneIndex();
+
+	      assignment_params.n_assignment_d_gene=0;
+	      assignment_params.d_break_out=false;
+
+	      //base probability of gene choices, multiplied by conditional probability for allele choices, given genes
+	      //J have no distinugishable alles for original code, but not for project
+	      double probabase=_model.PV((v_g)*_model.PDJ(d_g, j_g)*_model.PVallele
+	    }//end of d loop ====
+	  
+	}//end of j loop =====
+      
+    }//end of for outer for v loop  ========
   
 }
 

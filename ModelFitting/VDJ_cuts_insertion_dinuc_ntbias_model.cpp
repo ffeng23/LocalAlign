@@ -44,7 +44,7 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   RnucleotideVD_per_nucleotideVD_5prime(), RnucleotideDJ_per_nucleotideDJ_3prime(),
   
   PcutV_given_V(), PcutJ_given_J(), PcutDlcutDr_given_D(),
-  PV(), PDJ(), PVallele_given_gene(), PDallele_given_gene(),
+  PV(), PDJ(), PVallele_given_gene(), PDallele_given_gene(), PJallele_given_gene(),
   
   Rerror_per_sequenced_nucleotide(0)
 {
@@ -131,6 +131,7 @@ PVallele_given_gene(_genV[a].Get_GeneIndex(), _genV[a].Get_Allele()) =
     {
       PDallele_given_gene(_genD[a].Get_GeneIndex(), _genD[a].Get_Allele()) = 1.0/_genD[a].Get_n_alleles();
     }
+  dim_size2[0]=maxGene
   
 Rerror_per_sequenced_nucleotide = 1.0E-7; //% error rate
 //% Normalizes all distributions

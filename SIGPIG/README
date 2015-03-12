@@ -14,3 +14,8 @@ segment
 	inherited by GenomicV, GenomicJ, GenomicD
 GenomicSegments.hpp cpp defines 3 individual methods to read in the Genomic
 gene segments. In addition, it defines necessary functions.
+
+
+note: for ==>alignment object<<====,
+      the J align position is relative to the begin /left side.
+      but the J align error position is relative to the end/right side of the sequence

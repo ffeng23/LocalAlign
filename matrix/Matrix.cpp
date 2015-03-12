@@ -534,6 +534,72 @@ Matrix<T> Matrix<T>::operator /(const Matrix<T>& _m)const
   return temp;
 }
 
+//comparision
+template<class T> 
+Matrix<bool> Matrix<T>::operator >(const T& _t)const
+{
+  if(((signed)this->c_dim)==-1)
+    {
+      cerr<<"ERROR: request to do relational comparison on an empty/unitialized matrix, quit";
+      throw runtime_error("reuqest to do relational comparison (>) on empty matrix");
+    }
+  unsigned total =nTotal();
+  Matrix<bool> temp_m(this->c_dim, this->c_dim_size);
+  for(unsigned i=0;i<total;i++)
+    {
+      temp_m.Set1DArrayElement(i, this->c_data[i] > _t);
+    }
+  return temp_m;
+}
+template<class T>
+Matrix<bool> Matrix<T>::operator <(const T& _t)const
+  {
+    if(((signed)this->c_dim)==-1)
+    {
+      cerr<<"ERROR: request to do relational comparison on an empty/unitialized matrix, quit";
+      throw runtime_error("reuqest to do relational comparison (<) on empty matrix");
+    }
+  unsigned total =nTotal();
+  Matrix<bool> temp_m(this->c_dim, this->c_dim_size);
+  for(unsigned i=0;i<total;i++)
+    {
+      temp_m.Set1DArrayElement(i, this->c_data[i]<_t);
+    }
+  return temp_m;
+  }
+template<class T>
+Matrix<bool> Matrix<T>::operator <=(const T& _t)const
+  {
+    if(((signed)this->c_dim)==-1)
+    {
+      cerr<<"ERROR: request to do relational comparison on an empty/unitialized matrix, quit";
+      throw runtime_error("reuqest to do relational comparison (<=) on empty matrix");
+    }
+  unsigned total =nTotal();
+  Matrix<bool> temp_m(this->c_dim, this->c_dim_size);
+  for(unsigned i=0;i<total;i++)
+    {
+      temp_m.Set1DArrayElement(i, this->c_data[i]<=_t);
+    }
+  return temp_m;
+  }
+template<class T>
+Matrix<bool> Matrix<T>::operator >=(const T& _t)const
+  {
+    if(((signed)this->c_dim)==-1)
+    {
+      cerr<<"ERROR: request to do relational comparison on an empty/unitialized matrix, quit";
+      throw runtime_error("reuqest to do relational comparison (>=) on empty matrix");
+    }
+  unsigned total =nTotal();
+  Matrix<bool> temp_m(this->c_dim, this->c_dim_size);
+  for(unsigned i=0;i<total;i++)
+    {
+      temp_m.Set1DArrayElement(i, this->c_data[i]>=_t);
+    }
+  return temp_m;
+  }
+
 //return total number of elements
 template<class T>
 unsigned Matrix<T>::nTotal()const
@@ -963,6 +1029,25 @@ void Matrix<T>::initialize(const unsigned& _dim, const unsigned _dim_size[], con
     }
   //done
 }
+
+//clear the matrix data, make it unitialized, but keep the object
+template<class T>
+void Matrix<T>::clear()
+{
+  if(c_data!=NULL)
+    {
+      delete [] c_data;
+      c_data=NULL;
+    }
+  if(c_dim_size!=NULL)
+    {
+      delete [] c_dim_size;
+      c_dim_size=NULL;
+    }
+  c_dim=-1;
+}
+
+
 
 
 /*  Matrix<T> GetSubMatrix(int d1, int d2);
@@ -1421,6 +1506,17 @@ T sum_all(const Matrix<T>& _m)
   return ret;
 }
 
+unsigned sum_all_bool(const Matrix<bool>& _m)
+{
+  unsigned ret=0;
+  unsigned total=_m.nTotal();
+  for(unsigned i=0;i<total;i++)
+    {
+      ret+=_m.c_data[i];
+    }
+  return ret;
+}
+
 //find the max element in the matrix 
 template<class T>
 T max(const Matrix<T>& _m)
@@ -1587,7 +1683,7 @@ Matrix<T> matrix_log(const Matrix<T>& _m)
 //class
 template class Matrix<int>;
 template class Matrix<unsigned>;
-//template class Matrix<bool>;
+template class Matrix<bool>; //<<===this will become a specualtion, since it is different at the most parts;
 template class Matrix<double>;
 template class Matrix<float>;
 //template class Matrix<byte>;

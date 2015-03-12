@@ -190,7 +190,8 @@ VDJ_cuts_insertion_dinuc_ntbias_counter SumCounter
   Matrix<double> PDJ; //Joint P(V, D, J gene choices)
   Matrix<double> PVallele_given_gene; //Probabilities of alleles given gene for each gene
   Matrix<double> PDallele_given_gene;
-
+  Matrix<double> PJallele_given_gene;
+  
   double Rerror_per_sequenced_nucleotide ;//error rate
   
 };

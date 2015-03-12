@@ -29,12 +29,16 @@ public:
   //destructor
   ~Matrix();
 
+  //clear the matrix data, make it unitialized, but keep the object
+  void clear();
+  
   //copy constructor
   Matrix(const Matrix<T>& _m);
 
   //assignment operator
   Matrix<T>& operator = (const Matrix<T>& _m);
 
+  
   //subscript
   //scalar-like matrix
   T& operator ()();
@@ -75,7 +79,12 @@ public:
   Matrix<T> operator / (const T& _t) const;
 
   Matrix<T> operator /(const Matrix<T>& _m)const;
-  
+
+  //comparision
+  Matrix<bool> operator >(const T& _t)const;
+  Matrix<bool> operator <(const T& _t)const;
+  Matrix<bool> operator <=(const T& _t)const;
+  Matrix<bool> operator >=(const T& _t)const;
   //size 
   Matrix<unsigned> size() const;
   
@@ -141,6 +150,8 @@ public:
   friend U sum_all(const Matrix<U> & _m);
   //
 
+  friend unsigned sum_all_bool(const Matrix<bool>& _m);
+  
   template<class U>
   friend U max(const Matrix<U> & _m);
 
@@ -176,6 +187,9 @@ Matrix<T> sum(const Matrix<T>& _m, const unsigned& _dim);
 //get the result
 template<class T>
 T sum_all(const Matrix<T>& _m);
+
+//specificall for summing bool matrix
+unsigned sum_all_bool(const Matrix<bool>& _m);
 
 //find the max element in the matrix
 template<class T>

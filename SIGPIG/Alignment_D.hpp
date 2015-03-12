@@ -65,7 +65,8 @@ public:
 
   unsigned*** excess_error_positions_right;//same as above
   
-  unsigned* allele_order;
+  unsigned* allele_order;//this is sorted allele array, contains all
+  //D segments/alleles, but in an order according to the aligned score.
 };
 
 
