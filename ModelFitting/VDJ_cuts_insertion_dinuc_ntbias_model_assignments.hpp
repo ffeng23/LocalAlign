@@ -18,6 +18,15 @@ bool VDJ_model_assignments
  const bool& _force_all_alleles,
  /*output*/ VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns); 
 			   
+
+//==============start the function do the assignment
+bool assign_V_alleles
+(
+ const VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
+ const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
+ /*output, input*/VDJ_model_assignment_settings& _params,
+ /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns);
+
 		    
 
 #endif

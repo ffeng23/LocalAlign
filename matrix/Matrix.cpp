@@ -1208,26 +1208,26 @@ Matrix<T> Matrix<T>::m2vec()
   Matrix<T> temp_m(1,dim_size);
   unsigned* temp_index=new unsigned[total];
   memset(temp_index, sizeof(unsigned)*total, 0);//set the default value
-  cout<<"inside m2vec, ready to test"<<endl;
-  cout<<temp_m.toString()<<endl;
+  //cout<<"inside m2vec, ready to test"<<endl;
+  //cout<<temp_m.toString()<<endl;
 
   //since we are following matlab style, we need to go through
   //dimension back to front
   unsigned running_block_number=1;
   unsigned running_block_size=total;
   unsigned previous_block_number=1;
-  cout<<"this->c_dim:"<<this->c_dim<<endl;
+  //cout<<"this->c_dim:"<<this->c_dim<<endl;
   
   for(unsigned i=this->c_dim-1;((signed)i)>=0;i--)
     {
-      cout<<"==>loop i:"<<i;
+      //cout<<"==>loop i:"<<i;
       
       previous_block_number=running_block_number;
       running_block_number*=c_dim_size[i]; //for temp_index
       running_block_size=total/running_block_number;//for temp_index
-      cout<<"; previous_block_number:"<<previous_block_number
-	  <<";running_block_number:"<<running_block_number
-	  <<";running_block_size:"<<running_block_size<<endl;
+      //cout<<"; previous_block_number:"<<previous_block_number
+      //  <<";running_block_number:"<<running_block_number
+      //  <<";running_block_size:"<<running_block_size<<endl;
       for(unsigned j=0;j<c_dim_size[i];j++)
 	{
 	  for(unsigned p=0;p<previous_block_number;p++)
@@ -1236,9 +1236,9 @@ Matrix<T> Matrix<T>::m2vec()
 	  
 	      for(unsigned k=0;k<running_block_size;k++)
 		{
-		  temp_index[p*j*running_block_size+k]+=j*(total/(c_dim_size[i]*running_block_size));
-		  cout<<"\tindex:"<<p*j*running_block_size+k<<"index out:"<<
-		    j*(total/(c_dim_size[i]*running_block_size))<<endl;
+		  temp_index[p*c_dim_size[i]*running_block_size+j*running_block_size+k]+=j*(total/(c_dim_size[i]*running_block_size));
+		  //cout<<"\tindex:"<<p*c_dim_size[1]*running_block_size+j*running_block_size+k<<"index out:"<<
+		  // j*(total/(c_dim_size[i]*running_block_size))<<endl;
 		}
 	    }
 	}

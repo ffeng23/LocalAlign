@@ -46,7 +46,7 @@ struct VDJ_model_assignments_settings
   double log_max_model_pinsDJ;
   double log_max_model_pins;
 
-  unsigned nd_start;
+  int nd_start;
   bool np_start_from_max;
 
   double log_highest_probability;
