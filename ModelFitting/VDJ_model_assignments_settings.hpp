@@ -75,6 +75,7 @@ struct VDJ_model_assignments_settings
   unsigned n_assignment_j_gene;
   
   unsigned niVD_DJ0; //first insertion between VD and DJ
+  unsigned niVD_DJ_min;
 
   //for D gene
   unsigned d;
@@ -83,9 +84,19 @@ struct VDJ_model_assignments_settings
   unsigned l_d_seq;
   unsigned n_assignments_d_gene;
   bool d_break_out=false;
+  double log_max_pcutD_loop_d;
+  //double log_max_pcutVDJ_loop_d; <=== here for this one, we did not define, since it is the sum of pcutV/D/J together.
+  double log_highest_probability_GIVEN_D_allele;
+
+  unsigned p_max_Dl;
+  unsigned p_max_Dr;
+  unsigned  p_max_J
+
+  double log_probabase;//is the probability of vdj choices with allele
   
 };
 
-
+//NOTE: p is palindrome
+//     P is probability
 
 #endif

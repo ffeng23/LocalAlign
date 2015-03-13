@@ -40,6 +40,7 @@ public:
   Matrix<unsigned>  DJ; //Joint P(V, D, J gene choices)
   Matrix<unsigned>  Vallele_given_gene; //Probabilities of alleles given gene for each gene
   Matrix<unsigned>  Dallele_given_gene;
+  Matrix<unsigned>  Jallele_given_gene;
 
 
   Matrix<unsigned>  VD_left_edge_dinucleotide;// = zeros(4,4);

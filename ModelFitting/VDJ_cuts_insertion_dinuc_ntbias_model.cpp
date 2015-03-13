@@ -62,9 +62,9 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   max_gene_index(_genV,_numV);
   =max_gene_index(_genD,_numD);
   =max_gene_index(_genJ,_numJ);*/
-  unsigned maxGeneIndex_V=maxGeneIndex_V;
-  unsigned maxGeneIndex_D=maxGeneIndex_D;
-  unsigned maxGeneIndex_J=maxGeneIndex_J;
+  unsigned maxGeneIndex_V=vdj_mps.number_V_genes;
+  unsigned maxGeneIndex_D=vdj_mps.number_D_genes;
+  unsigned maxGeneIndex_J=vdj_mps.number_J_genes;
 
   unsigned dim_size[1]={max_insertions+1};
   PinsVD.initialize(1, dim_size, 1);
@@ -114,10 +114,10 @@ unsigned lseq;
   //max_V_n_alleles = max_n_alleles(_genV, _numV);
   dim_size2[0]=maxGeneIndex_V;
   dim_size2[1]=max_V_n_alleles;
-PVallele_given_gene.initialize(2, dim_size2, 0.0);
+  PVallele_given_gene.initialize(2, dim_size2, 0.0);
   for(unsigned a=0;a<_numV;a++)
     {
-PVallele_given_gene(_genV[a].Get_GeneIndex(), _genV[a].Get_Allele()) = 
+      PVallele_given_gene(_genV[a].Get_GeneIndex(), _genV[a].Get_Allele()) = 
 	1.0/_genV[a].Get_n_alleles();
     }       //end
   
@@ -131,7 +131,15 @@ PVallele_given_gene(_genV[a].Get_GeneIndex(), _genV[a].Get_Allele()) =
     {
       PDallele_given_gene(_genD[a].Get_GeneIndex(), _genD[a].Get_Allele()) = 1.0/_genD[a].Get_n_alleles();
     }
-  dim_size2[0]=maxGene
+  //J gene alleles
+  dim_size2[0]=maxGeneIndex_J;
+  dim_size2[1]=max_J_n_alleles;
+  PJallele_given_gene.initialize(2, dim_size2, 0.0);
+  for(unsigned a=0;a<_numV;a++)
+    {
+      PJallele_given_gene(_genJ[a].Get_GeneIndex(), _genJ[a].Get_Allele()) = 
+	1.0/_genJ[a].Get_n_alleles();
+    }       
   
 Rerror_per_sequenced_nucleotide = 1.0E-7; //% error rate
 //% Normalizes all distributions
@@ -200,6 +208,10 @@ bool VDJ_cuts_insertion_dinuc_ntbias_model::Normalize()//normalize the model
 
   GeneTotal=sum(PDallele_given_gene,1);
   PDallele_given_gene.divide_by_dimension(GeneTotal, 0);
+
+  GeneTotal=sum(PJallele_given_gene,1);
+  PJallele_given_gene.divide_by_dimension(GeneTotal,0);
+
   return true;
 }
 
@@ -248,6 +260,10 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::GetModelFromCounter(Counter& _c)
   GeneTotal=sum(vdj_model_counter.nPDallele_given_gene,1);
   vdj_model_counter.nPDallele_given_gene.divide_by_dimension(GeneTotal, 0);
   this->PDallele_given_gene.CopyValidElements(vdj_model_counter.nPDallele_given_gene);
+
+  GeneTotal=sum(vdj_model_counter.nPJallele_given_gene, 1);
+  vdj_model_counter.nPJallele_given_gene.divide_by_dimension(GeneTotal, 0);
+  this->PJallele_given_gene.CopyValidElements(vdj_model_counter.nPJallele_given_gene);
 
   //now doing the R****** fields
   RnucleotideVD_per_nucleotideVD_5prime=
@@ -347,6 +363,13 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
       if(!Update_nP_field(vdj_assigns.Dallele_given_gene, vdj_assigns.proba, delta_counter.nPDallele_given_gene, n_as ))
 	{
 	  cout<<"error on updating counter field Dallele_given_gene"<<endl;
+	  exit(-1);
+	}
+
+      //Jallele_given_gene.initialize(2, dim_size2, -1);
+      if(!Update_nP_field(vdj_assigns.Jallele_given_gene, vdj_assigns.proba, delta_counter.nPJallele_given_gene, n_as ))
+	{
+	  cout<<"error on updating counter field Jallele_given_gene"<<endl;
 	  exit(-1);
 	}
 
@@ -1496,7 +1519,8 @@ VDJ_cuts_insertion_dinuc_ntbias_counter VDJ_cuts_insertion_dinuc_ntbias_model::S
   c_ret.nPDJ=_c1.nPDJ+_c2.nPDJ; //Joint P(V, D, J gene choices)
   c_ret.nPVallele_given_gene=_c1.nPVallele_given_gene+_c2.nPVallele_given_gene; //Probabilities of alleles given gene for each gene
   c_ret.nPDallele_given_gene=_c1.nPDallele_given_gene+_c2.nPDallele_given_gene;
-
+  c_ret.nPJallele_given_gene=_c1.nPJallele_given_gene+_c2.nPJallele_given_gene;
+  
   //_per_
   //% Rate parameter. So make two 'nM' variables in counter, one for numerator and one for denominator.
   //% Names of these two should be separated by '_per_'.

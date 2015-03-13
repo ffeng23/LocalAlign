@@ -31,7 +31,8 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
   DJ(),//Joint P(V, D, J gene choices)
   Vallele_given_gene(),//Probabilities of alleles given gene for each gene
   Dallele_given_gene(),
-  
+  Jallele_given_gene(),
+
   VD_left_edge_dinucleotide(),// = zeros(4,4),
   VD_right_edge_dinucleotide(),// = zeros(4,4);
   DJ_left_edge_dinucleotide(),// = zeros(4,4);
@@ -242,7 +243,7 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
    DJ.initialize(2, dim_size2, -1); //Joint P(V, D, J gene choices)
    Vallele_given_gene.initialize(2, dim_size2, -1); //Probabilities of alleles given gene for each gene
    Dallele_given_gene.initialize(2, dim_size2, -1);
-
+   Jallele_given_gene.initialize(2, dim_size2, -1);
 
    VD_left_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
    VD_right_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);

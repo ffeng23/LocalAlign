@@ -30,6 +30,7 @@ public:
   Matrix<double> nPDJ; //Joint P(V, D, J gene choices)
   Matrix<double> nPVallele_given_gene; //Probabilities of alleles given gene for each gene
   Matrix<double> nPDallele_given_gene;
+  Matrix<double> nPJallele_given_gene;
 
   //_per_
   //% Rate parameter. So make two 'nM' variables in counter, one for numerator and one for denominator.

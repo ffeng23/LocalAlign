@@ -214,15 +214,74 @@ bool assign_VDJ_alleles
 
 	      //base probability of gene choices, multiplied by conditional probability for allele choices, given genes
 	      //J have no distinugishable alles for original code, but not for project
-	      double probabase=_model.PV((v_g)*_model.PDJ(d_g, j_g)*_model.PVallele
+	      double probabase=_model.PV(v_g)*_model.PDJ(d_g, j_g)*_model.PVallele_given_gene(_gen[v_a], v_g)*_model.PDallele_given_gene(_genD[d_a],d_g)*_model.PJallele_given_gene(_genJ[j_a], j_g);
+	      //code change*****, different from matlab, since we add PJallele_given_gene. 
+	      //since we can distinguish J allele now.
+	      unsigned dim_pos[]={d,-1,-1};
+	      assignment_params.p_max_Dl=max(_D.p_region_max_length_left.SubMatrix(3, dim_pos));
+	      assignment_params.p_max_Dr=max(_D.p_region_max_length_left.SubMatrix(3, dim_pos));
+	      dim_pos[0]=j;
+	      assignment_params.p_max_J=max(_J.p_region_max_length.SubMatrix(2, dim_pos));
+	      
+	      //upper boun on insertion nt bias factor
+	      assignment_params.niVD_DJ_min=0;
+	      dim_pos[0]=v;
+	      unsigned temp_int=assignment_params.niVD_DJ0- _D.align_length[d][0]-max(_V.p_region_max_length.SubMatrix(2, dim_pos))-assignment_params.p_max_J - assignment_params.p_max_Dl- assignment_params.p_max_Dr;
+	      if(temp_int>0)
+		assignment_params.niVD_DJ_min=temp_int;
+	      double log_p_max_nt_VD_DJ_d_allele=niVD_DJ_min*assignment_params.log_max_model_p_nt;
+	      
+	      assignment_params.log_max_pcutD_loop_d=assignment_params.log_max_model_pcutD_given_gene(d_g);
+	      //assignment_params.log_max_pcutVDJ_loop_d=assignment_params.log
+
+	      if(probabase==0||
+		 (log(probabase)+assignment_params.log_max_pcutV_loop_v+
+		  assignment_params.log_max_pcutD_loop_d+assignment_params.log_max_pcutJ_loop_j+
+		  assignment_params.log_max_model_pins+
+		  assignment_params.log_max_nt_VD_DJ_d_allele)<
+		 (assignment_params.log_highest_probability
+		  +assignement_params.log_probability_theshold_factor))
+		{
+		  assigments_params.skips+=1;
+		  continue;
+		}
+	      assignment_params.log_probabase=log(probabase);
+		
+	      asignment_log_highest_probability_GIVEN_D_allele=-1000.0;
+
+	      //=======now loop over V deletions
+	      ???assign_V_deletions();
+
 	    }//end of d loop ====
 	  
 	}//end of j loop =====
       
     }//end of for outer for v loop  ========
   
-}
+}//end of function of assign VDJ alleles
 
+bool assign_V_deletions
+(
+ const VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
+ const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
+ /*output, input*/VDJ_model_assignment_settings& _params,
+ /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns)
+{
+  unsigned ndV_max=_model.max_excess_V_deletions;
+  if(ndV_max>_V.align_length[assignment_params.v]-_model.min_V_length)
+    {
+      ndV_max=_V.align_length[assignment_params.v]-_model.min_V_length;
+    }
+  if(ndV_max>_model.max_V_deletions-_V.min_deletions[assignment_params.v])
+    {
+      ndV_max=_model.max_V_deletions-_V.min_deletions[assignment_params.v];
+    }
+  for(unsigned ndV1=assignment_params.nd_start;ndV1<ndV_max;ndV1++)
+    {
+
+    }
+
+}//end of assign_V_deletions
 
 
 

@@ -26,6 +26,7 @@ VDJ_cuts_insertion_dinuc_ntbias_counter::VDJ_cuts_insertion_dinuc_ntbias_counter
    nPDJ(), //Joint P(V, D, J gene choices)
    nPVallele_given_gene(), //Probabilities of alleles given gene for each gene
    nPDallele_given_gene(),
+  nPJallele_given_gene(),
 
   //_per_
   //% Rate parameter. So make two 'nM' variables in counter, one for numerator and one for denominator.
@@ -241,6 +242,10 @@ VDJ_cuts_insertion_dinuc_ntbias_counter::VDJ_cuts_insertion_dinuc_ntbias_counter
   dim_size2[0]=_model_ps.number_D_genes;
   dim_size2[1]=_model_ps.max_D_n_alleles;
   nPDallele_given_gene.initialize(2, dim_size2,0.0);// zeros(max_D_alleles , D_genes);
+
+  dim_size2[0]=_model_ps.number_J_genes;
+  dim_size2[1]=_model_ps.max_J_n_alleles;
+  nPJallele_given_gene.initialize(2, dim_size2,0.0);
   
   dim_size2[0]=4;
   dim_size2[1]=4;
