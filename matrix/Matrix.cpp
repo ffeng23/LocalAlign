@@ -598,7 +598,28 @@ Matrix<bool> Matrix<T>::operator >=(const T& _t)const
       temp_m.Set1DArrayElement(i, this->c_data[i]>=_t);
     }
   return temp_m;
-  }
+}
+
+//bit wise operation
+template<class T>
+Matrix<bool> Matrix<T>::operator & (const T& _t)const
+{
+  if(((signed)this->c_dim)==-1)
+    {
+      cerr<<"ERROR: request to do relational comparison on an empty/unitialized matrix, quit";
+      throw runtime_error("reuqest to do relational comparison (>=) on empty matrix");
+    }
+
+  unsigned total =nTotal();
+  Matrix<bool> temp_m(this->c_dim, this->c_dim_size);
+  for(unsigned i=0;i<total;i++)
+    {
+      temp_m.Set1DArrayElement(i, this->c_data[i]&_t);
+    }
+  return temp_m;
+  
+}
+
 
 //return total number of elements
 template<class T>
@@ -1280,7 +1301,7 @@ bool Matrix<T>::CopyValidElements( const Matrix<T>& _src)
   //(1,3)...(2,1),(2,2)....
   //
 template<class T>
-Matrix<T> Matrix<T>::m2vec()
+Matrix<T> Matrix<T>::m2vec() const
 {
   if(this->c_dim<2)
     {

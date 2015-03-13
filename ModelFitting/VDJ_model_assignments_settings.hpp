@@ -29,12 +29,12 @@ struct VDJ_model_assignments_settings
 
   Matrix<double> log_max_model_p_nt_DJ;
   Matrix<double> log_max_model_p_nt_VD;
-  Matrix<double> log_max_model_p_nt;
+  double log_max_model_p_nt;
 
   Matrix<double> log_RnucleotideDJ_per_nucleotideDJ_3prime;
   Matrix<double> log_RnucleotideVD_per_nucleotideVD_5prime;
 
-  double log_Rerror_per_sequenced_nucleotide_div_by_3;
+  double log_Rerror_per_sequenced_nucleotide_divided_by_3;
 
   unsigned L_err;
   double log_proba_Rerror_normalization;
@@ -64,18 +64,21 @@ struct VDJ_model_assignments_settings
   double log_highest_probability_GIVEN_current_V_allele;
   bool v_break_out;
   unsigned n_assignments_v_gene;
-
+  double log_max_pcutV_loop_v;
+  
   //for J gene
   unsigned j;
   unsigned j_a; //j allele
   unsigned j_g; //J gene index
-  double log_max_pcutJ_loop_J;
+  double log_max_pcutJ_loop_j;
   double log_highest_probability_GIVEN_current_J_allele;
   bool j_break_out;
   unsigned n_assignment_j_gene;
   
   unsigned niVD_DJ0; //first insertion between VD and DJ
   unsigned niVD_DJ_min;
+  unsigned nerrorsv;
+  unsigned v_ex_errs;
 
   //for D gene
   unsigned d;
@@ -83,17 +86,19 @@ struct VDJ_model_assignments_settings
   unsigned d_g;
   unsigned l_d_seq;
   unsigned n_assignments_d_gene;
-  bool d_break_out=false;
+  bool d_break_out;
   double log_max_pcutD_loop_d;
   //double log_max_pcutVDJ_loop_d; <=== here for this one, we did not define, since it is the sum of pcutV/D/J together.
   double log_highest_probability_GIVEN_D_allele;
 
   unsigned p_max_Dl;
   unsigned p_max_Dr;
-  unsigned  p_max_J
+  unsigned p_max_J;
 
   double log_probabase;//is the probability of vdj choices with allele
-  
+
+  //deletions
+  int ndV;
 };
 
 //NOTE: p is palindrome

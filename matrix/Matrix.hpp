@@ -85,6 +85,10 @@ public:
   Matrix<bool> operator <(const T& _t)const;
   Matrix<bool> operator <=(const T& _t)const;
   Matrix<bool> operator >=(const T& _t)const;
+
+  //bit wise operation
+  Matrix<bool> operator & (const T& _t)const;
+  
   //size 
   Matrix<unsigned> size() const;
   
@@ -138,7 +142,7 @@ public:
   //..(1,3),(2,3)...not like we I have in here inside c_data, eg. (1,1), (1,2),
   //(1,3)...(2,1),(2,2)....
   //
-  Matrix<T> m2vec();
+  Matrix<T> m2vec() const;
 
   //-------friend zone----------
   //dot divide

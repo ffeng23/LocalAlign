@@ -13,6 +13,23 @@ double max_mf(const vector<double>& _m);
 double max_mf(const double*  _m, const unsigned& _len);
 unsigned max_mf(const vector<unsigned>& _m);
 unsigned max_mf(const unsigned* _m, const unsigned& _len);
+//this is the function to find max value among the 2 D array
+//input: T** _m1: 2D array pointer
+//       _len1: is the size of the first diment
+//      unsigned* _m1_size is the size of the second dimenstion.
+//           by doing this, we allow non_square arrays
+template<class T>
+T max_mf2(const T* const* _m1, const unsigned& _len1, const unsigned* _m1_size);
+
+
+//this is the function to find max value among the 2 D array
+//input: T** _m1: 2D array pointer
+//       _len1: is the size of the first diment
+//      _len2: is the size of the second dimenstion.
+//           by doing this, we allow rectangle arrays
+template<class T>
+T max_mf2(const T* const* _m1, const unsigned& _len1, 
+	  const unsigned& _len2);
 
 
 double min_mf(const vector<double>& _m);

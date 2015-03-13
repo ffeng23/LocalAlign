@@ -14,7 +14,7 @@ public:
   Matrix<double> proba; //zeros(model.max_assignments, 1);
   Matrix<double> event_probability; //zeros(model.max_assignments,1);
   unsigned n_assignments;//0, number of valid assignments
-  unsigned skip;//0, skipped sequences
+  unsigned skips;//0, skipped sequences
   double likelihood;//0, total probability of generating the sequence (sum over ssignments
   double generation_probability;//0, total probability of generating the sequence (assuming zero error rate);
   unsigned max_proba_index;//0, index of the best one

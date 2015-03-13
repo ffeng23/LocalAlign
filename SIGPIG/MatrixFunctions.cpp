@@ -90,6 +90,69 @@ unsigned max_mf(const unsigned* _m, const unsigned& _len)
   return temp;
 }
 
+
+//this is the function to find max value among the 2 D array
+//input: T** _m1: 2D array pointer
+//       _len1: is the size of the first diment
+//      _len2: is the size of the second dimenstion.
+//           by doing this, we allow rectangle arrays
+template<class T>
+T max_mf2(const T* const* _m1, const unsigned& _len1, 
+		const unsigned& _len2)
+{
+  
+  T max_temp=_m1[0][0];
+  //go through the loop to get the max value
+  for(unsigned i=0;i<_len1;i++)
+    {
+      for(unsigned j=0;j<_len2;j++)
+	{
+	  if(max_temp<_m1[i][j])
+	    {
+	      max_temp=_m1[i][j];
+	    }
+	}
+    }
+  return max_temp;
+}
+
+template
+double max_mf2(const double* const* _m1, const unsigned& _len1, 
+	  const unsigned& _len2);
+template
+unsigned max_mf2(const unsigned* const* _m1, const unsigned& _len1, 
+	  const unsigned& _len2);
+
+
+//this is the function to find max value among the 2 D array
+//input: T** _m1: 2D array pointer
+//       _len1: is the size of the first diment
+//      unsigned* _m1_size is the size of the second dimenstion.
+//           by doing this, we allow non_square arrays
+template<class T>
+T max_mf2(const T* const* _m1, const unsigned& _len1, 
+		const unsigned* _m1_size)
+{
+  
+  T max_temp=_m1[0][0];
+  //go through the loop to get the max value
+  for(unsigned i=0;i<_len1;i++)
+    {
+      for(unsigned j=0;j<_m1_size[i];j++)
+	{
+	  if(max_temp<_m1[i][j])
+	    {
+	      max_temp=_m1[i][j];
+	    }
+	}
+    }
+  return max_temp;
+}
+
+template double max_mf2<double>(const double* const* _m1, const unsigned& _len1, const unsigned* _m1_size);
+template unsigned max_mf2<unsigned>(const unsigned* const* _m1, const unsigned& _len1, const unsigned* _m1_size);
+
+
 double min_mf(const vector<double>& _m)
 {
   unsigned size=_m.size();

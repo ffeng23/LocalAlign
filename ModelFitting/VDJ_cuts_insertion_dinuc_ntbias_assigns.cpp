@@ -5,7 +5,7 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
   proba(),//zeros(model.max_assignments, 1);
   event_probability(),//zeros(model.max_assignments,1);
   n_assignments(0),//0, number of valid assignments
-  skip(0),//0, skipped sequences
+  skips(0),//0, skipped sequences
   likelihood(0),//0, total probability of generating the sequence (sum over ssignments
   generation_probability(0),//0, total probability of generating the sequence (assuming zero error rate);
   max_proba_index(0),//0, index of the best one

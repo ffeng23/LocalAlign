@@ -11,28 +11,41 @@
 
 //define the function to run the assignment for each alignment from the input
 bool VDJ_model_assignments
-(const VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
+(VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
- const double& _probability_threshold_factor, const bool& _no_err,
+ const GenomicV* _genV, const unsigned& _numV,
+ const GenomicD* _genD, const unsigned& _numD,
+ const GenomicJ* _genJ, const unsigned& _numJ,
+ const double& _probability_threshold_factor, const bool& _no_error,
  const bool& _ignore_deep_error, const bool& _do_smoothing,
- const bool& _force_all_alleles,
+ const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
  /*output*/ VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns); 
 			   
 
 //==============start the function do the assignment
 bool assign_VDJ_alleles
-(
- const VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
+(VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
- /*output, input*/VDJ_model_assignment_settings& _params,
- /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns);
+ const GenomicV* _genV, const unsigned& _numV,
+ const GenomicD* _genD, const unsigned& _numD,
+ const GenomicJ* _genJ, const unsigned& _numJ,
+ const double& _probability_threshold_factor, const bool& _no_error,
+ const bool& _ignore_deep_error, const bool& _do_smoothing,
+ const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
+ /*output, input*/VDJ_model_assignments_settings& assignment_params,
+ /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns );
 
 bool assign_V_deletions
-(
- const VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
+(VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
- /*output, input*/VDJ_model_assignment_settings& _params,
- /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns);
+ const GenomicV* _genV, const unsigned& _numV,
+ const GenomicD* _genD, const unsigned& _numD,
+ const GenomicJ* _genJ, const unsigned& _numJ,
+ const double& _probability_threshold_factor, const bool& _no_error,
+ const bool& _ignore_deep_error, const bool& _do_smoothing,
+ const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
+ /*output, input*/VDJ_model_assignments_settings& assignment_params,
+ /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns );
 		    
 
 #endif

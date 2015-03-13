@@ -72,6 +72,17 @@ int main(int argc, char* argv[])
   cout<<"return min : "<<min_mf(vec_int)<<endl;
   cout<<"return min : "<<min_mf(vec_double)<<endl;
 
+  //testing max_mf 2d array
+  cout<<"******=====>testing 2 d array max"<<endl;
+  double** d2Array=new double* [2];
+  d2Array[0]=array_double;
+  d2Array[1]=array_double2;
+  unsigned* d2ArraySize=new unsigned[2];
+  d2ArraySize[0]=4;
+  d2ArraySize[1]=8;
+  unsigned dim_size=2;
+  cout<<  max_mf2(d2Array, dim_size, d2ArraySize)<<endl;
+
   cout<<"***********testing get median index***********"<<endl;
   cout<<"\tmedian:first:"<<0<<";last:"<<7<<";middle:"<<3<<";median:"<<GetMedianIndex(array_double2,0,7,3, NULL)<<endl;
   cout<<"\t\tpivot value:"<<array_double2[GetMedianIndex(array_double2,0,7,3, NULL)]<<endl;
