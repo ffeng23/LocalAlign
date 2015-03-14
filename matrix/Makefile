@@ -7,7 +7,7 @@
 GCC = gcc
 GXX = g++
 
-CFLAG= -Wall -g -Werror -O 
+CFLAG= -Wall -g -Werror -O #-std=gnu++11
 LOADFLAG=-s -lm
 
 CXXFLAG=${CFLAG}
@@ -86,7 +86,7 @@ $(PROG_0): $(OBJS_0)
 depend: .depend
 
 .depend: Makefile $(SRCS_0) #$(SRCS_1) $(SRCS_2) $(SRCS_3)
-	$(GXX) -MM *.cpp >.depend
+	$(GXX) -MM -std=c++11 *.cpp >.depend
 	@echo " "
 	@echo "****Dependencies generated successfully."
 

@@ -54,10 +54,14 @@ public:
   //4d
   T& operator ()(const unsigned& _d1, const unsigned& _d2, const unsigned& _d3, const unsigned& _d4);
 
+  //the input _m is bool matrix and we return a vector containning the elements
+  //that are true in _m entries. vector is following matlab style
+  Matrix<T> GetElements(const Matrix<bool>& _m)const;
+
   //this allows specify the indices by an array or the array has to be of the same
   //size as the dim of the matrix, so _dim input is the size of the indices array
   //
-  T& operator()(const unsigned* _indices, const unsigned& _dim);
+  T& operator()(const unsigned* _indices, const unsigned& _dim)const;
   
   //NOTE: only support 4d or below
 
@@ -87,9 +91,9 @@ public:
   Matrix<bool> operator >=(const T& _t)const;
 
   //bit wise operation
-  Matrix<bool> operator & (const T& _t)const;
-  
-  //size 
+  Matrix<T> operator & (const Matrix<T>& _m)const;
+
+   //size 
   Matrix<unsigned> size() const;
   
   //return unsigned dim_size of specific dimension
@@ -174,6 +178,11 @@ protected:
   T* c_data; //the real data container, is allocated in one d
 
 };
+
+//sepcialization, defining boolean matrix bitwise operation
+template<>
+Matrix<bool> Matrix<bool>::operator &(const Matrix<bool>& _m) const;
+
 //c++ equivalent to Matlab sum(A), return
 //the sum of the elements of A along the first array 
 //dimension whose size does not equal 1:
@@ -206,5 +215,7 @@ T max(const Matrix<T>& _m);
 //take the logarithm
 template<class T>
 Matrix<T> matrix_log(const Matrix<T>& _m);
+
+
 
 #endif

@@ -7,6 +7,7 @@
 #include <cstring>
 #include <stdlib.h>
 #include <cmath>
+//#include <type_traits>
 #include "Matrix.hpp"
 
 
@@ -343,7 +344,7 @@ T& Matrix<T>::operator ()(const unsigned& _d0, const unsigned& _d1, const unsign
   //
 //at this point, we don't support reshape, so we have to check for 
 template<class T>
-T& Matrix<T>::operator()(const unsigned* _indices, const unsigned& _dim)
+T& Matrix<T>::operator()(const unsigned* _indices, const unsigned& _dim) const
 {
   //check the dim
   if(((signed)(this->c_dim))==-1)
@@ -374,6 +375,48 @@ T& Matrix<T>::operator()(const unsigned* _indices, const unsigned& _dim)
   return this->c_data[pos];
 }
 
+//the input _m is bool matrix and we return a vector containning the elements
+  //that are true in _m entries. vector is following matlab style
+template<class T>
+Matrix<T> Matrix<T>::GetElements(const Matrix<bool>& _m)const
+{
+  //first check to make sure the dimension are the size
+  if((signed)(this->c_dim)==-1)
+    {
+      cerr<<"unitialized matrix, exception thrown"<<endl;
+      throw std::runtime_error("unitialized matrix");
+    }
+  
+  //check for dimension equality
+  if(this->c_dim!=_m.dim())
+    {
+      cout<<"ERROR::try to apply addition on the incompatible matrices"<<endl;
+      throw runtime_error("incompatible matrices");
+    }
+  
+  //everything is alright, so do the job
+  Matrix<T> m_this(this->m2vec());
+  Matrix<bool> m_m(_m.m2vec());
+  
+  T* t=new T[m_m.nTotal()];
+  unsigned total=m_m.nTotal();
+  unsigned count=0;
+  for(unsigned i=0;i<total;i++)
+    {
+      if(m_m(i))
+	{
+	  t[count]=m_this.c_data[i];
+	  count++;
+	}
+    }
+  //good so far
+  m_this.clear();
+  unsigned dimSize[]={count};
+  m_this.initialize(1, dimSize, t);
+
+  delete [] t;
+  return m_this;
+}
   //NOTE: only support 4d or below
 
 //==========================
@@ -600,9 +643,31 @@ Matrix<bool> Matrix<T>::operator >=(const T& _t)const
   return temp_m;
 }
 
-//bit wise operation
+//bit wise operation === generic implementation
 template<class T>
-Matrix<bool> Matrix<T>::operator & (const T& _t)const
+Matrix<T> Matrix<T>::operator & (const Matrix<T>& _m)const
+{
+  //so far rely one the user to be careful, not requesting this on non boolean
+  /*
+  if(((signed)this->c_dim)==-1)
+    {
+      cerr<<"ERROR: request to do relational comparison on an empty/unitialized matrix, quit";
+      throw runtime_error("reuqest to do relational comparison (>=) on empty matrix");
+    }
+
+    unsigned total =nTotal();*/
+  //Matrix<bool> temp_m(this->c_dim, this->c_dim_size);
+  /*for(unsigned i=0;i<total;i++)
+    {
+      temp_m.c_data[i]=this->c_data[i]&_m.c_data[i]);
+      }*/
+  //static_assert(std::is_same<T,bool>::value,"work only with boolean");
+  return _m;
+  
+}
+
+template<>
+Matrix<bool> Matrix<bool>::operator & (const Matrix<bool>& _m)const
 {
   if(((signed)this->c_dim)==-1)
     {
@@ -614,7 +679,7 @@ Matrix<bool> Matrix<T>::operator & (const T& _t)const
   Matrix<bool> temp_m(this->c_dim, this->c_dim_size);
   for(unsigned i=0;i<total;i++)
     {
-      temp_m.Set1DArrayElement(i, this->c_data[i]&_t);
+      temp_m.c_data[i]=this->c_data[i]&_m.c_data[i];
     }
   return temp_m;
   
