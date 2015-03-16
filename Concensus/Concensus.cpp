@@ -9,10 +9,12 @@
 SequenceString GetConcensus(const string& _fileName, unsigned& _numOfSeq)
 {
   srand(time(NULL));
+
+  cout<<"---->doing file:"<<_fileName<<endl;
   //calling the FastaHandler to handle it
   vector<SequenceString> seq;
-  unsigned totalNumber=ReadFasta(_fastaFileName, seq, true);
-  _numOfSeq=totlaNumber;
+  unsigned totalNumber=ReadFasta(_fileName, seq, true);
+  _numOfSeq=totalNumber;
   SequenceString c_seq; //consensus seq
   c_seq.SetName(_fileName.substr(0, _fileName.length()-5));
   
@@ -26,11 +28,12 @@ SequenceString GetConcensus(const string& _fileName, unsigned& _numOfSeq)
       if(len<seq.at(i).GetLength())
 	len=seq.at(i).GetLength();
     }
+  //cout<<"len: "<<len<<endl;
   //now we got the length of the consensus
   //we assume the sequences in the input file are aligned well
   //they could be of different length, but should be fixed in the front
   
-  c_seq.SetSequence(string(len, 'A'));
+  //c_seq.SetSequence(string(len, 'A'));
   char nt[4]={'A', 'C','G', 'T'};
   char currentLetter;
   unsigned stats[5]={0,0,0,0,0}; 
@@ -38,8 +41,12 @@ SequenceString GetConcensus(const string& _fileName, unsigned& _numOfSeq)
   //remembering the count stats for each "A/a, C/c, G/g, T/t or something else"
   
   //now go through to get the concensus
+
+  string sequence_con(len, 'A'); //set the concensus sequence to be all 'A' in the beginning.
+  //cout<<"start doing the loop"<<endl;
   for(unsigned i=0;i<len;i++)
     {
+      //cout<<"loop i:"<<i<<endl;
       stats[0]=0;stats[1]=0;stats[2]=0;stats[3]=0;stats[4]=0;
       stats_index[0]=0;stats_index[1]=1;stats_index[2]=2;stats_index[3]=3;stats_index[4]=4;
       for(unsigned j=0;j<totalNumber;j++)
@@ -53,7 +60,7 @@ SequenceString GetConcensus(const string& _fileName, unsigned& _numOfSeq)
 	      stats[0]++;
 	      break;
 	    case 'C':
-	    case 'a':
+	    case 'c':
 	      stats[1]++;
 	      break;
 	    case 'G':
@@ -75,6 +82,7 @@ SequenceString GetConcensus(const string& _fileName, unsigned& _numOfSeq)
 	}//end of inner for all sequences
       //now for "this" position, we need to get the concensus
       //check for the best stats
+      //cout<<"do sorting...."<<endl;
       QuickSort<unsigned>(stats, 0,5,stats_index,NULL);//in ascending order
       //stats now is in ascending order
 
@@ -89,6 +97,8 @@ SequenceString GetConcensus(const string& _fileName, unsigned& _numOfSeq)
 	      numberOfTies++;
 	    }
 	}
+      //cout<<"numberOfTies:"<<numberOfTies<<endl;
+      
       //if numberOfTies is not zero, means we have ties,
       //need to decide which one to get
       //run random number to get randomly picked one
@@ -109,30 +119,38 @@ SequenceString GetConcensus(const string& _fileName, unsigned& _numOfSeq)
       else //we get a tie,
 	{
 	  //randomly pick one from the ties
-	 
+	  //cout<<"===tie breaker now"<<endl;
 	  unsigned index_r=4;
 	  while(index_r==4)
 	    {
-	      index_r=stats_index[4-rand()%numOfTies];
+	      //cout<<"keep working...."<<endl;
+	      index_r=stats_index[4-rand()%(numberOfTies+1)];
 	    }
 	  currentLetter=nt[index_r];
 	}
       //now set the letter to the c_seq
-      c_seq.GetSequence()[i]=currentLetter;
+      sequence_con[i]=currentLetter;
+      /*if(i%50==0)
+	{
+	  cout<<".";
+	  fflush(stdout);
+	  }*/
     }//end of positions of c_seq
   //now we are doine.
+  cout<<"done!!"<<endl;
+  c_seq.SetSequence(sequence_con);
   return c_seq;
 }
 
 
 //go through a bunch of input file and generate one sequence from each file,
 //we also want to remember how many sequences for each concensus sequence.
-void GenerateConcensus(const string* _ifileNames, const unsigned& _numOfFiles
+void GenerateConcensus(const string* _ifileNames, const unsigned& _numOfFiles,
 		       /*output*/ SequenceString* _ss, unsigned* countOfConcensus
 		       )
 {
   //for each file, run the concensus 
-  for(unsigned i=0;i<_numOfFiles;i++0
+  for(unsigned i=0;i<_numOfFiles;i++)
     {
       _ss[i]=GetConcensus(_ifileNames[i], countOfConcensus[i]);
     }
@@ -156,12 +174,12 @@ void GenerateSequenceFile(const SequenceString* _ss, const unsigned* countOfConc
     }
   //start writing the header
   ofs_p<<"#Pool=mem\n"
-       <<"#Frame=coding"
+       <<"#Frame=coding\n"
        <<"#N_Sequences="<<_numOfSeq<<"\n"
-       <<"#Read_Length=-1"
-       <<"#N_Reads="<<_numOfSeq
-       <<"#N_Reads_Pool="<<_numOfSeq
-       <<"Sequence Counts";
+       <<"#Read_Length=-1\n"
+       <<"#N_Reads="<<_numOfSeq<<"\n"
+       <<"#N_Reads_Pool="<<_numOfSeq<<"\n"
+       <<"Sequence Counts\n";
   for(unsigned i=0;i<_numOfSeq;i++)
     {
       ofs_p<<_ss[i].GetSequence()<<" "<<countOfConcensus[i]<<"\n";
@@ -169,3 +187,34 @@ void GenerateSequenceFile(const SequenceString* _ss, const unsigned* countOfConc
   //done
   ofs_p.close();
   }
+
+
+//this is the function to put together everything, so the main function only
+//providing the directory and this function will go through it and generate concensus
+//write a sequence input file.
+//
+bool DoGenerateSequenceFile(const char* _path, const string& _ofname)
+{
+  //calling first to get the file array
+  string* files=NULL;
+  unsigned numOfFiles=0;
+  cout<<"Collecting the files with \".fasta\" formats...."<<endl;
+  GetFileNames(_path, &files, numOfFiles);
+  cout<<"Done....."<<numOfFiles<<" found!"<<endl;
+
+  cout<<"Start generating concensus...."<<endl;
+  SequenceString* ss=new SequenceString[numOfFiles];
+  unsigned* countOfConcensus=new unsigned[numOfFiles];
+  GenerateConcensus(files, numOfFiles, ss, countOfConcensus);
+  cout<<"Done with concensus!"<<endl;
+  //
+  cout<<"Start writing the seuqnece files....."<<endl;
+  GenerateSequenceFile(ss, countOfConcensus, numOfFiles, _ofname);
+  cout<<"Done!!"<<endl;
+  //mem
+  delete[] files;
+  delete[] ss;
+  delete[] countOfConcensus;
+		    
+  return true;
+}

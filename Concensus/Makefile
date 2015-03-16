@@ -12,8 +12,8 @@ LOADFLAG=-s -lm
 
 CXXFLAG=${CFLAG}
 ALIGNMENTDIR=../
-
-SRCS_0=main.cpp ${ALIGNMENTDIR}SequenceString.cpp FileManipulator.cpp Concensus.cpp
+SIGPIGDIR=../SIGPIG/
+SRCS_0=main.cpp ${ALIGNMENTDIR}SequenceString.cpp FileManipulator.cpp Concensus.cpp ${ALIGNMENTDIR}FastaHandler.cpp ${SIGPIGDIR}MatrixFunctions.cpp ${ALIGNMENTDIR}string_ext.cpp 
 
 #SRCS_1=	NGSMapping_Adaptor_main.cpp string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp TracebackTable.cpp SequenceHandlerCommon.cpp LocalAlignment.cpp
 

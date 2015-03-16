@@ -86,7 +86,7 @@ $(PROG_0): $(OBJS_0)
 depend: .depend
 
 .depend: Makefile $(SRCS_0) #$(SRCS_1) $(SRCS_2) $(SRCS_3)
-	$(GXX) -MM -std=c++11 *.cpp >.depend
+	$(GXX) -MM *.cpp >.depend
 	@echo " "
 	@echo "****Dependencies generated successfully."
 

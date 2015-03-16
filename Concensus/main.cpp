@@ -11,6 +11,8 @@
 
 #include "../SequenceString.hpp"
 #include "../FastaHandler.hpp"
+#include "FileManipulator.hpp"
+#include "Concensus.hpp"
 
 using namespace std;
 
@@ -26,8 +28,25 @@ int main(int argc, char* argv[])
   //c: flag to indicate to count each gene length.
   //o: output file name
   parseArguments(argc, argv, opts);
-  
 
+  //start testing the directory file information collection
+  string* files=NULL;
+  unsigned numOfFiles=0;
+  GetFileNames("./",&files, numOfFiles);
+
+  cout<<"number of fasta files found:"<<numOfFiles<<endl;
+  cout<<"showing the files "<<endl;
+  for(unsigned i=0;i<numOfFiles;i++)
+    {
+      cout<<"\t"<<files[i]<<endl;
+    }
+
+  
+  //now we are good for the files, we just need to run concensus
+  //first get the concensus sequenceS from the files
+  DoGenerateSequenceFile("./", "concensus.data");
+  
+  delete [] files;
   return 0;
 }
 
