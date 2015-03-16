@@ -1142,7 +1142,7 @@ for(unsigned i=0;i<_numOfAligned;i++)
   //return true;
 }
 
-void Alignment_Object::Serialize(ofstream& _ofs)
+void Alignment_Object::Serialize(ofstream& _ofs) const
 {
   //do necessary checking
   if(!_ofs.is_open())

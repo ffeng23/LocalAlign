@@ -22,7 +22,8 @@
 //unsigned Alignment_D::n_D_alleles=AlignmentSettings::n_D_alleles;
 //unsigned Alignnment_D::D_max_errors=
 
-Alignment_D::Alignment_D(): numOfAligned(NULL), align_length(NULL), score(NULL),
+Alignment_D::Alignment_D(): n_D_alleles(0), D_max_errors(0),
+			    numOfAligned(NULL), align_length(NULL), score(NULL),
 			    n_errors(NULL), error_positions(NULL),
 			    excess_error_positions_left(NULL),
 			    excess_error_positions_right(NULL),
@@ -1579,7 +1580,7 @@ void DeterminePalindromAndExcessError_D
 }//end of function find p-nucleotides
 
 //usually, D alignment is successful anyway.
-void Alignment_D::Serialize(ofstream& _ofs)
+void Alignment_D::Serialize(ofstream& _ofs)const
 {
   //do necessary checking
   if(!_ofs.is_open())
@@ -1713,7 +1714,7 @@ void Alignment_D::Serialize(ofstream& _ofs)
 //zero or NULL.
 void Alignment_D::Deserialize(ifstream& _ifs)
 {
-  cout<<"inside the deserialize function"<<endl;
+  //cout<<"inside the deserialize function"<<endl;
   //first we need to check for there is fields to read
   if(_ifs.eof())
     {
@@ -1722,9 +1723,17 @@ void Alignment_D::Deserialize(ifstream& _ifs)
     }
 
   //now do the reading.
+  // one important thing here is we want to check whether the original
+  //object is empty, it could be nonempty, so we want to clean it
+  //up while we are reading the new one
+  //cout<<"n_D_alleles:"<<n_D_alleles<<endl;
   unsigned original_n_D_alleles=n_D_alleles;
   unsigned original_max_errors=D_max_errors;
-  unsigned * original_numOfAligned=new unsigned[original_n_D_alleles];
+  unsigned * original_numOfAligned;
+  if((signed)original_n_D_alleles!=0)
+    original_numOfAligned=new unsigned[original_n_D_alleles];
+  else
+    original_numOfAligned=new unsigned[34];//AlignmentSettings::n_D_alleles];
   //read n_D_alleles
   char* p_char=(char*)&n_D_alleles;
   _ifs.read(p_char, sizeof(unsigned));
@@ -1802,7 +1811,7 @@ void Alignment_D::Deserialize(ifstream& _ifs)
     }
 
   //error_positions
-  cout<<"error_positions"<<endl;
+  //cout<<"error_positions"<<endl;
   if(error_positions!=NULL)
     {
       //cout<<"non-null value"<<endl;

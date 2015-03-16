@@ -57,6 +57,7 @@ static bool do_VDJ_alignment_single
 	 AlignmentSettings::negative_excess_deletions_max, 
 	 AlignmentSettings::J_allowed_errors, _error_cost, 
 	 _j_align);
+  //cout<<"done!!!"<<endl;
   if(!seq_j_ok)
     {
       cout<<"====>match J failed"<<endl;
@@ -116,7 +117,7 @@ unsigned do_VDJ_alignment
   bool align_ok;
   pthread_mutex_lock(&progressMutex);
   cout<<"<<)))))))_numOfSeq:"<<_numOfSeq<<endl;
-pthread_mutex_unlock(&progressMutex);
+  pthread_mutex_unlock(&progressMutex);
   for(unsigned i=0;i<_numOfSeq;i++)
     {
       //do we need to check for end????

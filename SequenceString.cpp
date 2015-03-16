@@ -3,7 +3,7 @@
 #include<iostream>
 #include <string>
 #include <sstream>
-
+#include <stdlib.h>
 using namespace std;
 SequenceString::SequenceString():c_name(""),c_seq("")
 {
@@ -64,4 +64,57 @@ bool SequenceString::operator < (const SequenceString& other) const
 		return true;
 	else
 		return false;
+}
+
+void SequenceString::Serialize(ofstream& _ofs) const
+{
+//do necessary checking
+  if(!_ofs.is_open())
+    {
+      cout<<"**ERROR**: closed file buffer. quit..."<<endl;
+      exit(-1);
+    }
+  //serializing......
+  const char* p_char; //pointer used to direct the writing to the file stream
+  //save name 
+  unsigned l=c_name.length()+1;
+  p_char=(char*)&l;
+  _ofs.write(p_char, sizeof(unsigned));
+  p_char=c_name.c_str();
+  _ofs.write(p_char, c_name.length()+1);
+
+  //seq
+  l=c_seq.length()+1;
+  p_char=(char*)&l;
+  _ofs.write(p_char, sizeof(unsigned));
+  p_char=c_seq.c_str();
+  _ofs.write(p_char, c_seq.length()+1);
+}
+void SequenceString::Deserialize(ifstream& _ifs)
+{
+//do necessary checking
+  if(!_ifs.is_open())
+    {
+      cout<<"**ERROR**: closed file buffer. quit..."<<endl;
+      exit(-1);
+    }
+  //serializing......
+  char* p_char; //pointer used to direct the writing to the file stream
+  //save name
+  unsigned l;//=c_name.length()+1;
+  p_char=(char*)&l;
+  _ifs.read(p_char, sizeof(unsigned));
+  p_char=new char[l];
+  _ifs.read(p_char,l);
+  c_name=string(p_char);
+  delete[] p_char;
+
+  //
+  //l=c_seq.length()+1;
+  p_char=(char*)&l;
+  _ifs.read(p_char, sizeof(unsigned));
+  p_char=new char[l];
+  _ifs.read(p_char, l);
+  c_seq=string(p_char);
+  delete[] p_char;
 }

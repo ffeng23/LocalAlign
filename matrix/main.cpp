@@ -225,6 +225,17 @@ int main(int argc, char* argv[])
 
   cout<<"-====-----m4"<<endl;
   cout<<m4.toString()<<endl;
+
+  //testing comparison and bitwise operation
+  cout<<"666666666666testing bitwise operation"<<endl;
+  Matrix<bool> m4Big0(m4>0);
+  Matrix<bool> m4Big10(m4>10);
+  cout<<"m4>0"<<m4Big0.toString()<<endl;
+  cout<<"m4>10"<<m4Big10.toString()<<endl;
+  cout<<"m4>10&m4>0"<<(m4Big10&m4Big0).toString()<<endl;
+
+  cout<<"m4 >0 elements"<<m4.GetElements(m4Big0&(m4<0)).toString()<<endl;
+  cout<<"m4:\n"<<m4.toString()<<endl;
   cout<<"Thanks for using our program and have a nice day!!"<<endl;
   return 0;
 }

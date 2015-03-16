@@ -2,6 +2,7 @@
 #define SEQUENCESTRING_HPP
 
 #include <string>
+#include <fstream>
 using namespace std;
 
 class SequenceString
@@ -26,6 +27,8 @@ public:
 
   bool operator < (const SequenceString& other) const;
 
+  void Serialize(ofstream& _ofs)const;
+  void Deserialize(ifstream& _ifs);
 private:
   string c_name;
   string c_seq;

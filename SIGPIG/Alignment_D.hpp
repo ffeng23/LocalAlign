@@ -30,7 +30,7 @@ public:
    */
   bool initialize(const unsigned& _n_D_alleles);
 
-  void Serialize(ofstream& _ofs);
+  void Serialize(ofstream& _ofs) const;
   void Deserialize(ifstream& _ifs);
 
   //======>start to define members

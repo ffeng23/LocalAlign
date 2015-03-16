@@ -47,7 +47,7 @@ class Alignment_Object
   void ResetData();
 
   //output file stream need to be opened and ready to be write to
-  void Serialize(ofstream& _ofs);
+  void Serialize(ofstream& _ofs) const;
   void Deserialize(ifstream& _ifs);
   /*
   //for initializing

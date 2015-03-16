@@ -31,6 +31,7 @@
 #include "Alignment_V.hpp"
 #include "Alignment_D.hpp"
 #include "do_VDJ_alignment.hpp"
+#include "DataIO.hpp"
 //#include 
 
 using namespace std;
@@ -198,7 +199,14 @@ int main(int argc, char* argv[])
   GenomicV* genV=NULL;
   GenomicJ* genJ=NULL;
   GenomicD* genD=NULL;
-  
+  unsigned totalNumV, totalNumD, totalNumJ;
+  if(!DoGenomicTemplateReading(vSegmentFileName, dSegmentFileName, jSegmentFileName,
+			      &genV, &genD, &genJ, totalNumV, totalNumD, totalNumJ))
+    {
+      cout<<"Error in reading genomic template files, quit"<<endl;
+      exit(-1);
+    }
+  /*
   unsigned totalNumJ=  ReadGenomicJ("genomicJs_all_curated.fasta",&genJ);
   
   cout<<totalNumJ<<" J genomic segments are read in."<<endl; 
@@ -222,7 +230,7 @@ int main(int argc, char* argv[])
       cout<<"\t==>n_allele:"<<genD[i].Get_n_alleles()<<endl;
       cout<<"\t==>allele:"<<genD[i].Get_Allele()<<endl;
     }
-  */
+  // 
   unsigned totalNumV=  ReadGenomicV("genomicVs_alleles.fasta",&genV);
   /*
   cout<<totalNumV<<" V genomic segments are read in."<<endl; 
@@ -238,7 +246,8 @@ int main(int argc, char* argv[])
   cout<<216<<":"<<genV[216].Get_Seq().toString()<<endl;
   cout<<217<<":"<<genV[217].Get_Seq().toString()<<endl;
   */
-  //now testing load sequence data
+
+  //now testing load sequence data, reading the sequence input data
   vector<SequenceString> data_vec;
   vector<string> header_vec;
   vector<unsigned> count_vec;
@@ -262,6 +271,28 @@ int main(int argc, char* argv[])
     {
       cout<<"\t"<<i<<":"<<data_vec.at(i).toString()<<endl;
     }
+  //testing********sequence string serialize/deserialize
+  //open up a file first
+  ofstream ofs_ss("sequencestring.ss", std::ios::binary);
+  if(!ofs_ss.is_open())
+    {
+      cout<<"******ERROR: can not open file, quit..."<<endl;
+    }
+  data_vec.at(0).Serialize(ofs_ss);
+  ofs_ss.close();
+
+  //deserialize
+  //open up a file first
+  ifstream ifs_ss("sequencestring.ss", std::ios::binary);
+  if(!ifs_ss.is_open())
+    {
+      cout<<"******ERROR: can not open file, quit..."<<endl;
+    }
+  SequenceString ss_new;
+  ss_new.Deserialize(ifs_ss);
+  cout<<"=========>testing serialize/deserialize"<<endl;
+  cout<<"\toriginal ss:"<<data_vec.at(0).toString()<<endl;
+  cout<<"\tss_new:"<<ss_new.toString()<<endl;
 
   //now we need to see whether we need to flip the input sequence.
   //sometime it is necessary depending on how the sequences are read
@@ -302,12 +333,17 @@ int main(int argc, char* argv[])
   Alignment_Object V_align[1];
   Alignment_D D_align[1];
   bool align_ok_array[1];
-  unsigned numOfGoodAlignments=do_VDJ_alignment(all_Sequences.begin()+9, 1, genV, totalNumV,
+  unsigned numOfGoodAlignments=do_VDJ_alignment(all_Sequences.begin()+0, 1, genV, totalNumV,
 						genD, totalNumD, genJ, totalNumJ,
 						errorCost, sm, max_align, 
 						/*output*/ V_align, D_align, J_align, 
 						align_ok_array);
   cout<<"successfully aligned "<<numOfGoodAlignments<<" sequences."<<endl;
+  cout<<"==========================\nD_align:"
+      <<D_align[0].toString()<<endl;
+  cout<<"==========================\nJ_align:"
+      <<J_align[0].toString()<<endl;
+  
 
   cout<<"===>Testing serialization"<<endl;
   //open up a file first
@@ -316,8 +352,9 @@ int main(int argc, char* argv[])
     {
       cout<<"******ERROR: can not open file, quit..."<<endl;
     }
-  cout<<D_align[0].toString()<<endl;
-  D_align[0].Serialize(ofs);
+  cout<<V_align[0].toString()<<endl;
+  V_align[0].Serialize(ofs);
+  //cout<<">>>>>>>>n_D_alleles:"<<J_align[0].n_D_alleles<<endl;
   ofs.close();
   cout<<"Done..........."<<endl;
 
@@ -327,11 +364,14 @@ int main(int argc, char* argv[])
     {
       cout<<"******ERROR: can not open file, quit..."<<endl;
     }
-  Alignment_D D_align_read;
-  D_align_read.Deserialize(ifs);
+  Alignment_Object V_align_read;
+  V_align_read.Deserialize(ifs);
   cout<<"Printing out the object......."<<endl;
-  cout<<D_align_read.toString()<<endl;
+  cout<<V_align_read.toString()<<endl;
   ifs.close();
+
+  //if(2>1)
+  //  return 0;
    /*
   //==============================================================
   //start testing the alignment, first mathJ
@@ -457,6 +497,12 @@ int main(int argc, char* argv[])
   unsigned* numOfAlignedSequenceForThread=new unsigned[numberOfThread];
   bool** vdj_align_ok_arrays=new bool*[numberOfThread];
   
+  unsigned* numOfInputSequencesForThread=new unsigned[numberOfThread];//used to "remember how many sequences are aligned for each thread. more of thread are working on equal number of
+  //sequences, but the last one(s) might only work one less sequences or no.
+  //this number is used when we go through the output arrays, so we know how many
+  //we need to check for the array, of course some of them are not good, because
+  //align_ok_array shows it is not successfully aligned
+
   for(unsigned i=0;i<numOfOutFiles;i++) //outer for loops for the alignment
     {
       //determine the number of sequences
@@ -498,6 +544,7 @@ int main(int argc, char* argv[])
 	      break;
 	    }
 	  cout<<"numOfSeqForCurrentThread:"<<numOfSeqForCurrentThread<<endl;
+	  numOfInputSequencesForThread[j]=numOfSeqForCurrentThread;
 	  //we are here means we have some seqs to do. do it using the thread
 	  //first thing is to pack up parameters
 	  it_arrays[j]=all_Sequences.begin();
@@ -526,9 +573,9 @@ int main(int argc, char* argv[])
 	    exit(EXIT_FAILURE);
 	  }
 	  pthread_mutex_unlock(&progressMutex);
-	}
+	}//end of for each thread loop
       
-      //join the threads and make the main threads to 
+      //join the threads and make the main threads to wait
       for(unsigned k=0;k<numberOfThread;k++)
 	{
 	  //void* numOfAligned;
@@ -543,9 +590,78 @@ int main(int argc, char* argv[])
 	}
       
       // *******cleaning up the threads
-      //cout<<"deleting work thread"<<endl;
+      cout<<"deleting work thread"<<endl;
       delete[] workThreads;
-      //cout<<"done with deleting thread"<<endl;
+      cout<<"done with deleting thread"<<endl;
+
+      //done for each output file,now we need to write the output to disk
+      //serialization, I mean <===========
+      //
+      //first figure out the total number of aligned, this is number
+      //of alignments to write to the file
+      unsigned totalCountOfAligned=0;
+      for(unsigned k=0;k<numberOfThread;k++)
+	{
+	  cout<<"loop:"<<k<<endl;
+	  cout<<"good alinment number:"<<numOfAlignedSequenceForThread[k]<<endl;
+	  //first check for the valid assignment, I mean, ok_align is true
+	  for(unsigned q=0;q<numOfInputSequencesForThread[k];q++)
+	    {
+	      if(vdj_align_ok_arrays[k][q])//good one
+		{
+		  totalCountOfAligned++;
+		}
+	    }
+	  cout<<"total aligned so far:"<<totalCountOfAligned<<endl;
+	}
+     
+      //now start doing the serialization
+      //the output file is using the input file name plus the output file # 
+      //
+      //figure out file name first
+      cout<<"---> writing output alignment file, outFileNames:"<<outFileNames.at(i)<<endl;
+      //calling to do serialization
+      if(!DoSerialization(vdj_align_ok_arrays, v_align_arrays, d_align_arrays,
+			 j_align_arrays, it_arrays, numOfAlignedSequenceForThread, 
+			 numOfInputSequencesForThread, numberOfThread,
+			 outFileNames.at(i))
+	 )
+	{
+	  cout<<"ERROR in serialize the alignment data"<<endl;
+	  exit(-1);
+	}
+      cout<<"Successfully do the serialization"<<endl;
+      
+      //take care the alignment output arrays, we clean it up at the end of each
+      //alignment files and then will do it again for next round of alignment file out
+      for(unsigned k=0;k<numberOfThread;k++)
+	{
+	  //cout<<")))))deleting loep:"<<i<<endl;
+	  //cout<<"vvvvvvvvvvvvdeleting v align......."<<endl;
+	  if(v_align_arrays[k]!=NULL)
+	    {
+	      delete[] v_align_arrays[k];
+	      v_align_arrays[k]=NULL;
+	    }
+	  //cout<<"dddddddddddddddeleting d align....."<<endl;
+	  if(d_align_arrays[k]!=NULL)
+	    {
+	      delete[] d_align_arrays[k];
+	      d_align_arrays[k]=NULL;
+	    }
+	  //cout<<"jjjjjjjjjjjjjjdeleting j align......."<<endl;
+	  if(j_align_arrays[k]!=NULL)
+	    {
+	      delete[] j_align_arrays[k];
+	      j_align_arrays[k]=NULL;
+	    }
+	  //cout<<"done.........."<<endl;
+	  if(vdj_align_ok_arrays[k]!=NULL)
+	    {
+	      delete[] vdj_align_ok_arrays[k];
+	      vdj_align_ok_arrays[k]=NULL;
+	    }
+	}
     }
 //*/
   //by the time we are here, all the thread has finished the job and the output 
@@ -579,16 +695,36 @@ int main(int argc, char* argv[])
       if(vdj_align_ok_arrays[i]!=NULL)
 	delete[] vdj_align_ok_arrays[i];
     }
-  cout<<"in main::done with individual deletion"<<endl;
+  cout<<"in main::done with individual deletion/cleaning align object arrays"<<endl;
   delete[] v_align_arrays;
   delete[] d_align_arrays;
   delete[] j_align_arrays;
   delete[] vdj_align_ok_arrays;
   delete[] it_arrays;
   delete[] numOfAlignedSequenceForThread;
+  delete[] numOfInputSequencesForThread;
   //*/
-  cout<<"in main::Done!!!"<<endl;
+  cout<<"in main::Done with deleting/cleaning all arrays!!!"<<endl;
 
+  //testing the deserialization
+  Alignment_Object* v_align_read=NULL;
+  Alignment_D* d_align_read=NULL;
+  Alignment_Object* j_align_read=NULL;
+  unsigned total_alignment=0;
+  SequenceString* seq_read=NULL;
+  cout<<"doing deserialization...."<<endl;
+  if(!DoDeserialization(outFileNames.at(0), total_alignment,  &v_align_read, 
+			&d_align_read, &j_align_read, &seq_read)
+     )
+    {
+      cout<<"Error in deserializing the alignment"<<endl;
+      exit(-1);
+    } 
+  cout<<"Succefully deserialize the alignments"<<endl;
+  cout<<"Deserialization summary:"<<endl;
+  cout<<"\tnumber of aligments read in:"<<total_alignment<<endl;
+  cout<<"\tv_align"<<v_align_read[0].toString()<<endl;
+  cout<<"\tseq read"<<seq_read[0].toString()<<endl;
   pthread_exit(NULL);
 }
 
