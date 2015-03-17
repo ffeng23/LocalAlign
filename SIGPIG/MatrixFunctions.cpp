@@ -382,7 +382,7 @@ template unsigned Pivot<unsigned>(unsigned* _a, const unsigned int& _first, cons
 // return index of the median value
 template <class T> unsigned GetMedianIndex(const T* m, const unsigned& a, const unsigned& b, const unsigned& c, const unsigned* _index)
 {
-  if(m[a]==m[b]==m[c])
+  if((m[a]==m[b])&&(m[a]==m[c]))
     {
       if(_index!=NULL)
 	{

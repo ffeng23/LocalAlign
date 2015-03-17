@@ -67,6 +67,7 @@ struct VDJ_model_assignments_settings
   double log_max_pcutV_loop_v;
 
   unsigned V_align_length;
+  unsigned J_align_length;
   
   //for J gene
   unsigned j;
@@ -101,17 +102,25 @@ struct VDJ_model_assignments_settings
   double log_probabase;//is the probability of vdj choices with allele
 
   //v deletions
-  int ndV;
+  int ndV; int ndV1;
   double log_perrv;
   double log_highest_probability_GIVEN_current_V_deletions;
 
-  //palidrome?
-  unsinged npV_max;
+  //palidrome
+  unsigned npV_max;
   unsigned npV_potential_max;
+  unsigned npJ_max;
+  unsigned npJ_potential_max;
 
   //j deletions
   int ndJ1;
   int ndJ;
+  
+  Matrix<bool> j_ex_errs_i;
+  unsigned j_ex_errs;
+  unsigned nerrorsj;
+  double log_perrj;
+  double log_highest_probability_GIVEN_current_J_deletions;
 };
 
 //NOTE: p is palindrome

@@ -35,7 +35,7 @@ bool assign_VDJ_alleles
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns );
 
-bool assign_V_deletions
+bool assign_VJ_deletions
 (VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
  const GenomicV* _genV, const unsigned& _numV,
@@ -47,5 +47,5 @@ bool assign_V_deletions
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns );
 		    
-
+bool assign_VJ_palindrome();
 #endif

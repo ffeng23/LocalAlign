@@ -271,7 +271,7 @@ bool assign_VDJ_alleles
 
 //return false if something not right, like too many skips and so we
 //want the outer caller finish too. just stop doing this alignment.
-bool assign_V_deletions
+bool assign_VJ_deletions
 (VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
  const GenomicV* _genV, const unsigned& _numV,
@@ -284,7 +284,6 @@ bool assign_V_deletions
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns )
 
 {
-
   //% Loop over V deletions.
   //% ndV1 is the deviation from the no. of deletions implied by the alignment (min_deletions).
   //% Lower bound is nd_start (usually -3).
@@ -299,21 +298,21 @@ bool assign_V_deletions
       ndV_max=_model.max_V_deletions-_V.min_deletions[assignment_params.v];
     }
   //loop over V deletions
-  for(unsigned ndV1=assignment_params.nd_start;ndV1<ndV_max;ndV1++)
+  for(assignment_params.ndV1=assignment_params.nd_start;assignment_params.ndV1<(signed)ndV_max;assignment_params.ndV1++)
     {
       if (assignment_params.skips > assignment_params.max_skips)
 	{
-	  assigns.n_assignments = in;
-	  assigns.skips = skips;
+	  _assigns.n_assignments = assignment_params.in;
+	  _assigns.skips =  assignment_params.skips;
 	  return false;
 	}//       end
                 
       //% Actual number of deletions
-      assignment_params.ndV = _V.min_deletions[v] + ndV1;
+      assignment_params.ndV = _V.min_deletions[assignment_params.v] + assignment_params.ndV1;
 
       //% This is a violation of a constraint.
       //% Happens for eg. when min_deletions is 0 and I consider 'negative' deletions.
-      if( assignment_params.ndV < 0 || assignment_params.ndV > _model.max_V_deletions)
+      if( assignment_params.ndV < 0 || assignment_params.ndV > ((signed)_model.max_V_deletions))
 	//                    % Go to next iteration of loop.
                     continue;
       //        end
@@ -323,34 +322,34 @@ bool assign_V_deletions
                 
       if( _ignore_deep_error)
 	{
-	  high_error_region = _model_high_error_region;//max(model.high_error_region, V.align_length(v) - ndV1 - deep_error_limit);
+	  assignment_params.high_error_region = _model.high_error_region;//max(model.high_error_region, V.align_length(v) - ndV1 - deep_error_limit);
 	}
       else
-	high_error_region = _model.high_error_region;
+	assignment_params.high_error_region = _model.high_error_region;
       
       assignment_params.v_err_pos.clear();
-      unsigned dim_size[]={_V.n_errors[assignment_params.v]}
+      unsigned dim_size[]={_V.n_errors[assignment_params.v]};
       assignment_params.v_err_pos.initialize(1, dim_size, _V.error_positions[assignment_params.v]); //% error positions in V alignment
       dim_size[0]=3;
-      Matrix<unsigned> v_err_excess_pos(1, dim_size,_V.excess_error_positions[v]); //% error positions in extended V alignment for 'negative' deletions, array format so far, not Matrix format yet
+      Matrix<unsigned> v_err_excess_pos(1, dim_size,_V.excess_error_positions[assignment_params.v]); //% error positions in extended V alignment for 'negative' deletions, array format so far, not Matrix format yet
        
-      if(ndV1 < 0)
+      if(assignment_params.ndV1 < 0)
 	{
 	  //% Case of 'negative' deletions
-	  assignment_params.v_ex_errs_i = (v_err_excess_pos <= (V.align_position[assignment_params.v][0]+V.align_length[assignment_params.v] -1 - ndV1) ) & (v_err_excess_pos > 0 );
-	  assignment_params.v_ex_errs = sum_all_bool(v_ex_errs_i);
-	  if (v_ex_errs > 1)//, % If the nts beyond the 1st -ve nt don't match, just skip.
+	  assignment_params.v_ex_errs_i = (v_err_excess_pos <= (_V.align_position[assignment_params.v][0]+_V.align_length[assignment_params.v] -1 - assignment_params.ndV1) ) & (v_err_excess_pos > 0 );
+	  assignment_params.v_ex_errs = sum_all_bool(assignment_params.v_ex_errs_i);
+	  if (assignment_params.v_ex_errs > 1)//, % If the nts beyond the 1st -ve nt don't match, just skip.
 	    {	    
 	      continue;
 	    }
-	  assignment_params.nerrorsv = _V.n_errors[v] + assignment_params.v_ex_errs;// - sum(v_err_pos <= high_error_region & v_err_pos > 0);
+	  assignment_params.nerrorsv = _V.n_errors[assignment_params.v] + assignment_params.v_ex_errs;// - sum(v_err_pos <= high_error_region & v_err_pos > 0);
 	  //here we change the code, since we don't have to account for high_error_region
 	}
       else
 	{//% Case of positive deletions
 	  assignment_params.v_ex_errs=0;
 	  assignment_params.v_ex_errs_i.clear();//remove everything
-	  assignment_param.nerrorsv = V.n_errors[assignment_params.v] - sum_all_bool(assignment_params.v_err_pos > (V.align_position[assignment_params.v][0]+V.align_length[assignment_params.v]-1 - ndV1)) - sum_all_bool(assignment_params.v_err_pos > 0);
+	  assignment_params.nerrorsv = _V.n_errors[assignment_params.v] - sum_all_bool(assignment_params.v_err_pos > (_V.align_position[assignment_params.v][0]+_V.align_length[assignment_params.v]-1 - assignment_params.ndV1)) - sum_all_bool(assignment_params.v_err_pos > 0);
 	  //            here change the very last part of the sum to not including
 	  //the high error region. since we know we don't have this.
 	}
@@ -360,10 +359,10 @@ bool assign_V_deletions
                            
       assignment_params.log_perrv = assignment_params.nerrorsv*assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
                 
-      if (assignment_params.ndV==0 || ~assume_palindrome_negative_deletions)
+      if (assignment_params.ndV==0 || ~assignment_params.assume_palindrome_negative_deletions)
 	{
 	  assignment_params.npV_max = _model.max_palindrome;
-	  if(assignment_params.npV_max > _V .p_region_max_length[assignment_params.v][ 1+ndV] )
+	  if(assignment_params.npV_max > _V.p_region_max_length[assignment_params.v][ 1+assignment_params.ndV] )
 	    {
 	      assignment_params.npV_max=_V.p_region_max_length[assignment_params.v][ 1+assignment_params.ndV]; 
 	    }
@@ -371,18 +370,18 @@ bool assign_V_deletions
 	}
       else
 	{
-                    assignment_params.npV_max = 0;
-                    assignment_params.npV_potential_max = _model.max_palindrome;
-		    if(assignment_params.npV_potential_max> _V.p_region_max_length[assignment_params.v] [1+assignment_params.ndV]);
-		    {
-		      assignment_params.npV_potential_max=_V.p_region_max_length[assignment_params.v][1+assignment_params.ndV];
-		    }
+	  assignment_params.npV_max = 0;
+	  assignment_params.npV_potential_max = _model.max_palindrome;
+	  if(assignment_params.npV_potential_max> _V.p_region_max_length[assignment_params.v] [1+assignment_params.ndV]);
+	  {
+	    assignment_params.npV_potential_max=_V.p_region_max_length[assignment_params.v][1+assignment_params.ndV];
+	  }
 	}                
                 
       //Upper bound on insertions nt bias factor
-      assignment_params.niVD_DJ_min= assigment_params.niVD_DJ0+ndV1-_D.align_length[assignment_params.d][0]-assignment_params.npV_max-assignment_params.p_max_J-assignment_params.p_max_Dl-assignment_params.p_max_Dr;
+      assignment_params.niVD_DJ_min= assignment_params.niVD_DJ0+assignment_params.ndV1-_D.align_length[assignment_params.d][0] - assignment_params.npV_max - assignment_params.p_max_J-assignment_params.p_max_Dl-assignment_params.p_max_Dr;
       
-      if(((singed)assignment_params.niVD_DJ_min) <0)
+      if(((signed)assignment_params.niVD_DJ_min) <0)
 	{
 	  assignment_params.niVD_DJ_min=0;
 	}
@@ -390,7 +389,7 @@ bool assign_V_deletions
                 
       assignment_params.log_highest_probability_GIVEN_current_V_deletions = -1000;// % Highest probability so far GIVEN current V deletions AND outer loop variables {V, J, D alleles}                
       
-      double test_proba = assignment_params.log_probabase + assignment_params.log_perrv + assignment_params.log_max_pcutVDJ_loop_d + assignment_params.log_max_model_pins + log_p_max_nt_VD_DJ_dV;               
+      double test_proba = assignment_params.log_probabase + assignment_params.log_perrv + (assignment_params.log_max_pcutV_loop_v+assignment_params.log_max_pcutJ_loop_j+assignment_params.log_max_pcutD_loop_d) + assignment_params.log_max_model_pins + log_p_max_nt_VD_DJ_dV;               
                 
       if (test_proba < assignment_params.log_probability_threshold_factor + assignment_params.log_highest_probability)
 	{
@@ -398,7 +397,7 @@ bool assign_V_deletions
                     continue;
 	}
                 
-      assignment_params.V_align_length = _V.align_length[assignment_params.v] - ndV1 - assignment_params.READ_LENGTH_CORRECTION;
+      assignment_params.V_align_length = _V.align_length[assignment_params.v] - assignment_params.ndV1 - assignment_params.READ_LENGTH_CORRECTION;
 
 
       //======now start doing j deletions loop for
@@ -406,21 +405,21 @@ bool assign_V_deletions
       //% ndJ1 is the deviation from the no. of deletions implied by the alignment (min_deletions).
       //% Lower bound is nd_start (usually -3).
       //% Upper bound is set by maximum deletions allowed and by minimum match length required
-      unsigned temp_array={_model.max_excess_J_deletions,_J.align_length[assignment_params.j]-_model.min_J_assign_length , _model.max_J_deletions - _J.min_deletions[assignment_params.j]};
+      unsigned temp_array[]={_model.max_excess_J_deletions,_J.align_length[assignment_params.j]-_model.min_J_assign_length , _model.max_J_deletions - _J.min_deletions[assignment_params.j]};
       unsigned ndJ_max = min_mf(temp_array, 3);
-      for( assignment_params.ndJ1=nd_start;assignment_params.ndJ1<ndJ_max;assignment_[arams.ndJ1++)
+      for( assignment_params.ndJ1=assignment_params.nd_start;assignment_params.ndJ1<(signed)ndJ_max;assignment_params.ndJ1++)
 	{	//		%ndJ1=nd_start
 	  if (assignment_params.skips > assignment_params.max_skips)
 	    {
 	      _assigns.n_assignments = assignment_params.in;
-	      _assigns.skips = skips;
+	      _assigns.skips = assignment_params.skips;
 	      return false;//reason we report false is that we want the outside caller to jump out too. since we are doing too many skips
 	    }
 	  //% actual number of J deletions
-	  assignment_parms.ndJ = _J.min_deletions[assignment_param.j] + assignment_param.ndJ1;
+	  assignment_params.ndJ = _J.min_deletions[assignment_params.j] + assignment_params.ndJ1;
 	  //% This is a violation of a constraint.
 	  //% Happens for eg. when min_deletions is 0 and I consider 'negative' deletions.
-	  if (assignment_params.ndJ < 0 || assignment_param.ndJ > _model.max_J_deletions)
+	  if (assignment_params.ndJ < 0 || assignment_params.ndJ >(signed) _model.max_J_deletions)
 	    {
 	      //% Go to next iteration of loop.
 	      continue;
@@ -428,94 +427,113 @@ bool assign_V_deletions
                                  
 	  //niVD_DJ_total_with_ps = niVD_DJ0 + ndV1 + ndJ1;
           //          % Violation of constraint. V and J overlap in this assignment. So move on until this is not true.
-	  if (assignment_params.niVD_DJ0+ assignment_param.ndV1+assignment_params.ndJ1 < 0)
-                        continue;
+	  if (assignment_params.niVD_DJ0+ assignment_params.ndV1+assignment_params.ndJ1 < 0)
+	    continue;
                                       
 	  //% Calculate number of errors in J section, by leaving out errors that are in deleted region for this assignment.
-	  dim_size[0]=_J.nerrors[assignment_params.j];
+	  dim_size[0]=_J.n_errors[assignment_params.j];
 	  Matrix<unsigned> j_err_pos(1, dim_size, _J.error_positions[assignment_params.j]); //% error positions in J alignment
 	  dim_size[0]=3;
-	  Matrix<unsigned> j_err_excess_pos(1, dim_size, _J.excess_error_positions[assignment_param.j]);// % error positions in extended J alignment for 'negative' deletions
-	  if (ndJ1 < 0)
+	  Matrix<unsigned> j_err_excess_pos(1, dim_size, _J.excess_error_positions[assignment_params.j]);// % error positions in extended J alignment for 'negative' deletions
+	  if (assignment_params.ndJ1 < 0)
 	    {
 	      //% Case of 'negative' deletions
-	      j_ex_errs_i = j_err_excess_pos >= (J.align_position(1,j) + ndJ1);
-	      j_ex_errs = sum(j_ex_errs_i);
-	      if (j_ex_errs > 1)
+	      assignment_params.j_ex_errs_i = j_err_excess_pos >= (_J.align_position[assignment_params.j][0] + assignment_params.ndJ1);
+	      assignment_params.j_ex_errs = sum_all_bool(assignment_params.j_ex_errs_i);
+	      if (assignment_params.j_ex_errs > 1)
 		continue;
 	      
-	      nerrorsj = J.n_errors(j) + j_ex_errs;
+	      assignment_params.nerrorsj = _J.n_errors[assignment_params.j] + assignment_params.j_ex_errs;
 	    }
 	  else
 	    {//                        % Case of positive deletions
-                        j_ex_errs = 0;
-                        j_ex_errs_i = [];
-                        nerrorsj = sum( j_err_pos >= (J.align_position(1,j) + ndJ1));
+	      assignment_params.j_ex_errs = 0;
+	      assignment_params.j_ex_errs_i.clear();
+	      assignment_params.nerrorsj = sum_all_bool( j_err_pos >= (_J.align_position[assignment_params.j][0] + assignment_params.ndJ1));
 	    }//      end
                     
-	  if (no_error && nerrorsj > 0)
+	  if (_no_error && assignment_params.nerrorsj > 0)
 	    continue;
 	                      
-	  if( nerrorsj > J_max_error || nerrorsj/(J.align_length(j)-ndJ1) > 0.3)
+	  if( assignment_params.nerrorsj > assignment_params.J_max_error || ((double)assignment_params.nerrorsj)/(_J.align_length[assignment_params.j]-assignment_params.ndJ1) > 0.3)
 	    {
 	      //					disp('in the condition')
 	      continue;
 	    }
                     
                     
-	  log_perrj = nerrorsj*log_Rerror_per_sequenced_nucleotide_divided_by_3;
+	  assignment_params.log_perrj = assignment_params.nerrorsj*assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
           
 	  //%                     % Upper bound on insertions nt bias factor
-	  niVD_DJ_min = max(0, niVD_DJ0 + ndV1 + ndJ1 - D.align_length(1,d) - V.p_region_max_length(v,1 + ndV) - J.p_region_max_length(j,1 + ndJ) - p_max_Dl - p_max_Dr);
-	  log_p_max_nt_VD_DJ_dJ = (niVD_DJ_min)*log_max_model_p_nt;
+	  assignment_params.niVD_DJ_min =  assignment_params.niVD_DJ0 + assignment_params.ndV1 + assignment_params.ndJ1 - _D.align_length[assignment_params.d][0] - _V.p_region_max_length[assignment_params.v][1 + assignment_params.ndV] - _J.p_region_max_length[assignment_params.j][1 + assignment_params.ndJ] - assignment_params.p_max_Dl - assignment_params.p_max_Dr;
+	  if(assignment_params.niVD_DJ_min<0)
+	    {
+	      assignment_params.niVD_DJ_min=0;
+	    }
+	  double log_p_max_nt_VD_DJ_dJ = (assignment_params.niVD_DJ_min)*assignment_params.log_max_model_p_nt;
           
-	  log_highest_probability_GIVEN_current_J_deletions = -1000;                   
+	  assignment_params.log_highest_probability_GIVEN_current_J_deletions = -1000;                   
 	  
-	  test_proba = log_probabase + log_perrv + log_perrj + log_max_pcutVDJ_loop_d + log_max_model_pins + log_p_max_nt_VD_DJ_dJ;
+	  double test_proba = assignment_params.log_probabase + assignment_params.log_perrv + assignment_params.log_perrj + (assignment_params.log_max_pcutV_loop_v+assignment_params.log_max_pcutJ_loop_j+assignment_params.log_max_pcutD_loop_d) + assignment_params.log_max_model_pins + log_p_max_nt_VD_DJ_dJ;
 	            
-	  if( test_proba < log_probability_threshold_factor + log_highest_probability)
+	  if( test_proba < assignment_params.log_probability_threshold_factor + assignment_params.log_highest_probability)
 	    continue;
                    
                     
 	  // % Maximum possible half-lengths of palindromes, given current deletions values
-	  if (ndJ==0 || ~assume_palindrome_negative_deletions)
+	  if (assignment_params.ndJ==0 || ~assignment_params.assume_palindrome_negative_deletions)
 	    {
-	      npJ_max = min(model.max_palindrome, J.p_region_max_length(j, 1+ndJ));
-	      npJ_potential_max = npJ_max;
+	      assignment_params.npJ_max = _model.max_palindrome;
+	      if(assignment_params.npJ_max> _J.p_region_max_length[assignment_params.j][1+assignment_params.ndJ])
+		
+		assignment_params.npJ_potential_max = assignment_params.npJ_max;
 	    }
 	  else
 	    {
-              npJ_max = 0;
-	      npJ_potential_max = min(model.max_palindrome, J.p_region_max_length(j, 1+ndJ));
+              assignment_params.npJ_max = 0;
+	      assignment_params.npJ_potential_max = _model.max_palindrome; 
+	      if(assignment_params.npJ_potential_max>_J.p_region_max_length[assignment_params.j][ 1+assignment_params.ndJ])
+		assignment_params.npJ_potential_max=_J.p_region_max_length[assignment_params.j][ 1+assignment_params.ndJ];
+		
 	    }//             end
                     
-
-                    
-                    if np_start_from_max
-                        np_step = -1;
-                        npV_start = npV_max;
-                        npV_end = 0;
-                        npJ_start = npJ_max;
-                        npJ_end = 0;
-                        
-                    else
-                        np_step = 1;
-                        npV_start = 0;
-                        npV_end = npV_max;
-                        npJ_start = 0;
-                        npJ_end = npJ_max;
-                    end
-                    
-                    J_align_length = J.align_length(j) - ndJ1;
-                    
-                    
-                    % Loop over half-length of V palindrome
-				    }
+	  //-------->NOTE: the following part is need to be revised for the future-------
+             /*       
+	  if (np_start_from_max)
+	    {
+	      np_step = -1;
+	      npV_start = npV_max;
+	      npV_end = 0;
+	      npJ_start = npJ_max;
+	      npJ_end = 0;
+	    }
+	  else
+	    {
+	      np_step = 1;
+	      npV_start = 0;
+	      npV_end = npV_max;
+	      npJ_start = 0;
+	      npJ_end = npJ_max;
+	    }//       end
+	     */     
+	  assignment_params.J_align_length = _J.align_length[assignment_params.j] - assignment_params.ndJ1;                                        
+	  //% Loop over half-length of V palindrome
+	  //for now it is just a place holder for the following code
+	  //it simply return true and hopefully this will work for now.
+	  if(!assign_VJ_palindrome())
+	    {
+	      return false;
+	    }
+	}//end of J deletion loop
     }//end of V deletions loop for
-
+  
   return true;
 }//end of assign_V_deletions
 
+bool assign_VJ_palindrome()
+{
+  return true;
+}
 
 
 
