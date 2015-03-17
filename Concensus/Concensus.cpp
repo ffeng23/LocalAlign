@@ -179,10 +179,10 @@ void GenerateSequenceFile(const SequenceString* _ss, const unsigned* countOfConc
        <<"#Read_Length=-1\n"
        <<"#N_Reads="<<_numOfSeq<<"\n"
        <<"#N_Reads_Pool="<<_numOfSeq<<"\n"
-       <<"Sequence Counts\n";
+       <<"Sequence\tCounts\n";
   for(unsigned i=0;i<_numOfSeq;i++)
     {
-      ofs_p<<_ss[i].GetSequence()<<" "<<countOfConcensus[i]<<"\n";
+      ofs_p<<_ss[i].GetSequence()<<"\t"<<countOfConcensus[i]<<"\n";
     }
   //done
   ofs_p.close();

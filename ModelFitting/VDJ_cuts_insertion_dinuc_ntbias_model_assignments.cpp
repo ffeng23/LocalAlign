@@ -94,7 +94,7 @@ bool assign_VDJ_alleles
  const GenomicV* _genV, const unsigned& _numV,
  const GenomicD* _genD, const unsigned& _numD,
  const GenomicJ* _genJ, const unsigned& _numJ,
- const double& _probability_threshold_factor, const bool& _no_error,
+ /*const double& _probability_threshold_factor,*/ const bool& _no_error,
  const bool& _ignore_deep_error, const bool& _do_smoothing,
  const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
@@ -277,7 +277,7 @@ bool assign_VJ_deletions
  const GenomicV* _genV, const unsigned& _numV,
  const GenomicD* _genD, const unsigned& _numD,
  const GenomicJ* _genJ, const unsigned& _numJ,
- const double& _probability_threshold_factor, const bool& _no_error,
+ /*const double& _probability_threshold_factor,*/ const bool& _no_error,
  const bool& _ignore_deep_error, const bool& _do_smoothing,
  const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
@@ -397,7 +397,7 @@ bool assign_VJ_deletions
                     continue;
 	}
                 
-      assignment_params.V_align_length = _V.align_length[assignment_params.v] - assignment_params.ndV1 - assignment_params.READ_LENGTH_CORRECTION;
+      assignment_params.V_align_length = _V.align_length[assignment_params.v] - assignment_params.ndV1 - _READ_LENGTH_CORRECTION;
 
 
       //======now start doing j deletions loop for
@@ -520,7 +520,13 @@ bool assign_VJ_deletions
 	  //% Loop over half-length of V palindrome
 	  //for now it is just a place holder for the following code
 	  //it simply return true and hopefully this will work for now.
-	  if(!assign_VJ_palindrome())
+	  if(!assign_VJ_palindrome(_model, _seq, _V, _D, _J,
+				   _genV, _numV, _genD, _numD,
+				   _genJ, _numJ, /*_probability_threshold_factor,*/
+				   _no_error, _ignore_deep_error, _do_smoothing,
+				   _force_all_alleles, _READ_LENGTH_CORRECTION,
+				   assignment_params, _assigns)
+	     )
 	    {
 	      return false;
 	    }
@@ -530,8 +536,22 @@ bool assign_VJ_deletions
   return true;
 }//end of assign_V_deletions
 
-bool assign_VJ_palindrome()
+bool assign_VJ_palindrome
+(VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
+ const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
+ const GenomicV* _genV, const unsigned& _numV,
+ const GenomicD* _genD, const unsigned& _numD,
+ const GenomicJ* _genJ, const unsigned& _numJ,
+ /*const double& _probability_threshold_factor,*/ const bool& _no_error,
+ const bool& _ignore_deep_error, const bool& _do_smoothing,
+ const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
+ /*output, input*/VDJ_model_assignments_settings& assignment_params,
+ /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns)
 {
+
+  //in here we start doing the stats!! set things to the assigns.
+  
+  
   return true;
 }
 

@@ -17,7 +17,7 @@ struct VDJ_model_assignments_settings
   unsigned skips; //running counter of how many skips has happened
   unsigned in; //assignment number
   unsigned deep_error_limit; //50, for now we don't use this, but keep it for the future
-  unsigned READ_LENGTH_CORRECTION;//for now, it is zero.
+  //unsigned READ_LENGTH_CORRECTION;//for now, it is zero.
 
   unsigned max_J_depth;
   unsigned max_V_depth;
