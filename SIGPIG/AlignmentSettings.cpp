@@ -8,7 +8,7 @@ using namespace std;
 //this is the module defining the aligment parameters
 namespace AlignmentSettings
 {
-  unsigned N_per_file = 200;
+  unsigned N_per_file = 5000;
   //%% Settings and Initializations.
 
   unsigned J_allowed_errors= 10; //% Maximum number of errors allowed in J match
