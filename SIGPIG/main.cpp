@@ -110,19 +110,12 @@ int main(int argc, char* argv[])
     cout<<"\tFlip the input sequence read: false"<<endl;
 
   AlignmentSettings::N_per_file=numberOfSeqProcessedEach;
-
+  
   //testing the alignment string
   ScoreMatrix* sm= ScoreMatrixArr[0];
-  char c1='A', c2='T';
+  /*char c1='A', c2='T';
 
   cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore(c1,c2)<<endl;
-  
-  //testing local alignment
-  //SequenceString Seq2("seq1","AGCTAGAGACCCCAGTCTGAGGTAGA");
-  //SequenceString Seq1("seq2", "AGCTAGAGACCAGCTATCTAGAGGTAGA");
-  //SequenceString Seq1("seq1","ACCCCAG");
-  //SequenceString Seq2("seq2", "ACCAG");
-
 
   SequenceString Seq1("seq1","ATGAGGTAGA");
   SequenceString Seq2 ("seq2", "CTAGAGGTAGA");
@@ -137,18 +130,6 @@ int main(int argc, char* argv[])
   cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore('A','T')<<endl;
   
   LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 5);
-  //LocalAlignment la(&Seq1,&tempSStr,sm, gapopen, gapextension,1, 100);
-  /*cout<<"\tdone and the score is "<<la.GetScore()<<endl;
-  cout<<"\t"<<la.GetAlignment().toString()<<endl;
-
-  //testing multiple alignment
-  cout<<"Total number of local aligments:"<<la.GetNumberOfAlignments()<<endl;
-  for(unsigned int i=0;i<la.GetNumberOfAlignments();i++)
-    {
-      cout<<i<<"/"<<la.GetNumberOfAlignments()<<":"<<endl;
-      cout<<la.GetAlignmentArr()[i].toString()<<endl;
-    }
-  */
   
   //testing globalAlignment
   cout<<"Testing global alignment:"<<endl;
@@ -157,42 +138,9 @@ int main(int argc, char* argv[])
   cout<<"\tdone and the score is "<<ola.GetScore()<<endl;
   cout<<"\t********"<<ola.GetAlignment().toString()<<endl;
   
-  
-  //testing overlapAlignment
-  /*
-  cout<<"Testing overlap alignment:"<<endl;
-  OverlapAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
-  
-  //OverlapAlignment ola(&Seq1,&tempSStr,sm, gapopen, gapextension,1);
-  cout<<"\tdone and the score is "<<ola.GetScore()<<endl;
-  cout<<"\t"<<ola.GetAlignment().toString()<<endl;
-  */
+
   cout<<"done"<<endl;
-  
-
-  //testing fasta handler
-  /*vector<SequenceString> vec_seq;
-  cout<<"reading in "<<ReadFasta(inputFile1_name, vec_seq)<<endl;
-
-  cout<<"1/1000:"<<vec_seq.at(0).toString()<<endl;
-  cout<<"999/1000;"<<vec_seq.at(999).toString()<<endl;
-
-  WriteFasta("feng.fa",vec_seq);
-
-  //testing reverseComp
-  cout<<"Testing reverse comp:"<<endl;
-  SequenceString tempSString=ReverseComplement(vec_seq.at(0));
-
-  cout<<"rev comp 0/1000"<<tempSString.toString()<<endl;
-
-  cout<<"Test substr()"<<endl;
-  string tempString("feng");
-  cout<<"0,1 : "<<tempString.substr(0,1)<<endl;
-  cout<<"0,-100: "<<tempString.substr(0,100)<<endl;
-  cout<<"length is "<<tempString.length()<<endl;
-  cout<<"4,1 :" <<tempString.substr(4)<<endl;
   */
-  cout<<"writing output........."<<endl;
 
   //start doing the reading of genomic segments
   //first we need to declare the genomic segments
@@ -206,46 +154,6 @@ int main(int argc, char* argv[])
       cout<<"Error in reading genomic template files, quit"<<endl;
       exit(-1);
     }
-  /*
-  unsigned totalNumJ=  ReadGenomicJ("genomicJs_all_curated.fasta",&genJ);
-  
-  cout<<totalNumJ<<" J genomic segments are read in."<<endl; 
-  cout<<"\tshowing the J seq 1:"<<genJ[1].Get_Sequence()<<endl;
-  cout<<totalNumJ<<" J genomic segments are read in."<<endl; 
-  for(unsigned i=0;i<totalNumJ;i++)
-    {
-      cout<<i<<":"<<genJ[i].Get_Seq().toString()<<endl;
-      cout<<"\t==>geneIndex:"<<genJ[i].Get_GeneIndex()<<endl;
-      cout<<"\t==>n_allele:"<<genJ[i].Get_n_alleles()<<endl;
-      cout<<"\t==>allele:"<<genJ[i].Get_Allele()<<endl;
-    }
-
-  unsigned totalNumD=  ReadGenomicD("genomicDs.fasta",&genD);
-  /*
-  cout<<totalNumD<<" D genomic segments are read in."<<endl; 
-  for(unsigned i=0;i<totalNumD;i++)
-    {
-      cout<<i<<":"<<genD[i].Get_Seq().toString()<<endl;
-      cout<<"\t==>geneIndex:"<<genD[i].Get_GeneIndex()<<endl;
-      cout<<"\t==>n_allele:"<<genD[i].Get_n_alleles()<<endl;
-      cout<<"\t==>allele:"<<genD[i].Get_Allele()<<endl;
-    }
-  // 
-  unsigned totalNumV=  ReadGenomicV("genomicVs_alleles.fasta",&genV);
-  /*
-  cout<<totalNumV<<" V genomic segments are read in."<<endl; 
-  for(unsigned i=0;i<totalNumV;i++)
-    {
-      cout<<i<<":"<<genV[i].Get_Seq().toString()<<endl;
-      cout<<"\t==>geneIndex:"<<genV[i].Get_GeneIndex()<<endl;
-      cout<<"\t==>n_allele:"<<genV[i].Get_n_alleles()<<endl;
-      cout<<"\t==>allele:"<<genV[i].Get_Allele()<<endl;
-      }*/
-
-  /*  cout<<100<<":"<<genV[100].Get_Seq().toString()<<endl;
-  cout<<216<<":"<<genV[216].Get_Seq().toString()<<endl;
-  cout<<217<<":"<<genV[217].Get_Seq().toString()<<endl;
-  */
 
   //now testing load sequence data, reading the sequence input data
   vector<SequenceString> data_vec;
@@ -291,8 +199,8 @@ int main(int argc, char* argv[])
   SequenceString ss_new;
   ss_new.Deserialize(ifs_ss);
   cout<<"=========>testing serialize/deserialize"<<endl;
-  cout<<"\toriginal ss:"<<data_vec.at(0).toString()<<endl;
-  cout<<"\tss_new:"<<ss_new.toString()<<endl;
+  //cout<<"\toriginal ss:"<<data_vec.at(0).toString()<<endl;
+  //cout<<"\tss_new:"<<ss_new.toString()<<endl;
 
   //now we need to see whether we need to flip the input sequence.
   //sometime it is necessary depending on how the sequences are read
@@ -329,25 +237,25 @@ int main(int argc, char* argv[])
   
   //calling VDJ alignment
   unsigned max_align=100;
-  Alignment_Object J_align[1];
+  /*Alignment_Object J_align[1];
   Alignment_Object V_align[1];
   Alignment_D D_align[1];
-  bool align_ok_array[1];
-  unsigned numOfGoodAlignments=do_VDJ_alignment(all_Sequences.begin()+0, 1, genV, totalNumV,
-						genD, totalNumD, genJ, totalNumJ,
-						errorCost, sm, max_align, 
-						/*output*/ V_align, D_align, J_align, 
-						align_ok_array);
-  cout<<"successfully aligned "<<numOfGoodAlignments<<" sequences."<<endl;
+  bool align_ok_array[1];*/
+  //  unsigned numOfGoodAlignments=do_VDJ_alignment(all_Sequences.begin()+0, 1, genV, totalNumV,
+  //						genD, totalNumD, genJ, totalNumJ,
+  //						errorCost, sm, max_align, 
+  //						/*output*/ V_align, D_align, J_align, 
+  //						align_ok_array);
+  /*cout<<"successfully aligned "<<numOfGoodAlignments<<" sequences."<<endl;
   cout<<"==========================\nD_align:"
       <<D_align[0].toString()<<endl;
   cout<<"==========================\nJ_align:"
       <<J_align[0].toString()<<endl;
   
-
-  cout<<"===>Testing serialization"<<endl;
+  */
+  //cout<<"===>Testing serialization"<<endl;
   //open up a file first
-  ofstream ofs("alignment.aln", std::ios::binary);
+  /*ofstream ofs("alignment.aln", std::ios::binary);
   if(!ofs.is_open())
     {
       cout<<"******ERROR: can not open file, quit..."<<endl;
@@ -357,19 +265,20 @@ int main(int argc, char* argv[])
   //cout<<">>>>>>>>n_D_alleles:"<<J_align[0].n_D_alleles<<endl;
   ofs.close();
   cout<<"Done..........."<<endl;
-
-  cout<<"===>Testing deserialization"<<endl;
-  ifstream ifs("alignment.aln", std::ios::binary);
+  */
+  //cout<<"===>Testing deserialization"<<endl;
+  /*ifstream ifs("alignment.aln", std::ios::binary);
   if(!ifs.is_open())
     {
       cout<<"******ERROR: can not open file, quit..."<<endl;
-    }
-  Alignment_Object V_align_read;
+      }*/
+  /*Alignment_Object V_align_read;
   V_align_read.Deserialize(ifs);
-  cout<<"Printing out the object......."<<endl;
-  cout<<V_align_read.toString()<<endl;
-  ifs.close();
-
+  */
+  //cout<<"Printing out the object......."<<endl;
+  //cout<<V_align_read.toString()<<endl;
+  //ifs.close();
+  
   //if(2>1)
   //  return 0;
    /*

@@ -1087,9 +1087,11 @@ for(unsigned i=0;i<_numOfAligned;i++)
 	  p=0;
 	  still_palindrome=true;
 	  //% Upper bound on p is the length of the J match (accounting for deletions) OR the never actually possible case of sequence length to the left of J match (accounting for deletions)
-	  unsigned max_p_length=_align_length[j]-(nd-_min_deletions[j]);
-	  if(max_p_length>_align_positions[j][0]-1+nd-_min_deletions[j])
-	    max_p_length=_align_positions[j][0]-1+nd-_min_deletions[j];
+	  int max_p_length=(signed)(_align_length[j]-(nd-_min_deletions[j]));
+	  if(max_p_length>(signed)(_align_positions[j][0]-1+nd-_min_deletions[j]))
+	    max_p_length=(signed)(_align_positions[j][0]-1+nd-_min_deletions[j]);
+	  if(max_p_length<0)
+	    max_p_length=0;
 	  while( still_palindrome && p < max_p_length)
 	    {
 	      

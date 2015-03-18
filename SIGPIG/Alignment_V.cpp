@@ -35,7 +35,7 @@ void DeterminePalindromAndExcessError_V
       
       string target=_genVs[_ok_order[j]].Get_Sequence();
       //cout<<"\t*^^^^^^target:  "<<target<<endl;
-      //cout<<"\tlength:"<<_align_length[j]<<endl;
+      //cout<<"\talign_length:"<<_align_length[j]<<endl;
       //cout<<"\talign_position:"<<_align_positions[j][0]<<","<<_align_positions[j][1]<<endl;
       //cout<<"\t_min_deletion:"<<_min_deletions[j]<<endl;
 
@@ -57,14 +57,21 @@ void DeterminePalindromAndExcessError_V
 	  p=0;
 	  still_palindrome=true;
 	  //% Upper bound on p is the length of the J match (accounting for deletions) OR the never actually possible case of sequence length to the left of J match (accounting for deletions)
-	  unsigned max_p_length=_align_length[j]-(nd-_min_deletions[j]);
-	  if(max_p_length>_seq.GetLength()-(_align_positions[j][0])-_align_length[j]+nd-_min_deletions[j])
-	    max_p_length=_seq.GetLength()-(_align_positions[j][0])-_align_length[j]+nd-_min_deletions[j];
+	  int max_p_length=_align_length[j]-(nd-_min_deletions[j]);
+	  
+	  if(max_p_length>(signed)(_seq.GetLength()-(_align_positions[j][0])-_align_length[j]+nd-_min_deletions[j]))
+	    max_p_length=(signed)(_seq.GetLength()-(_align_positions[j][0])-_align_length[j]+nd-_min_deletions[j]);
 
-	  //cout<<"\t\t\tchecking while loop"<<endl;
+	  if(max_p_length<0)
+	    max_p_length=0;
+	  //cout<<"\t\t\tchecking while loop:max_p_length:"<<max_p_length<<endl;
 	  while( still_palindrome && p < max_p_length)
-	    {	      
+	    {	  
+	      //cout<<"\t\t\tstarting while......."<<endl;
+	      //cout<<"target at:"<<_align_positions[j][1] +_align_length[j] -1 - p - (nd - _min_deletions[j] )-0<<endl;
+	      //cout<<"seq at:"<<_align_positions[j][0]+ _align_length[j]-1 -(nd - _min_deletions[j])+p +1<<endl;
 	      still_palindrome = target.at(_align_positions[j][1] +_align_length[j] -1 - p - (nd - _min_deletions[j] )-0) == DnaComplement(_seq.GetSequence().at(_align_positions[j][0]+ _align_length[j]-1 -(nd - _min_deletions[j])+p +1) );
+	      //cout<<"\t\t\tafter while.........."<<endl;
 	      if (still_palindrome)
 		{
 		  p ++;
@@ -294,7 +301,7 @@ bool match_V(const SequenceString& _seq,
  //	  % sort the genomic Js in descending order of 'score' and ascending order of min_deletions
 
  //calculate the score first
-  //cout<<"***first****3"<<endl;
+ // cout<<"***first****3"<<endl;
  double* scores=new double[_numOfVSegs];
  //prepare the sorted index of the array.
  unsigned* sorted_index=new unsigned[_numOfVSegs];
