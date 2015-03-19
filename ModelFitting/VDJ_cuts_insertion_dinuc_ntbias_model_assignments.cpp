@@ -19,6 +19,7 @@ bool VDJ_model_assignments
   /*output*/ VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns
  )
 {
+  cout<<"&&&inside assignments:"<<endl;
   //start preparing for parameters
   VDJ_model_assignments_settings assignment_params;
 
@@ -26,7 +27,7 @@ bool VDJ_model_assignments
   assignment_params.log_probability_hopeless_threshold_factor=assignment_params.log_probability_threshold_factor+log(1E-6);
   assignment_params.in=0;
   assignment_params.skips=0;
- 
+  cout<<"&&&inside assignments:2"<<endl;
   assignment_params.max_J_depth=AlignmentSettings::max_J_length;
   assignment_params.max_V_depth=_seq.GetLength()+ AlignmentSettings::max_V_length;
   
@@ -34,19 +35,21 @@ bool VDJ_model_assignments
   assignment_params.D_max_error=0;
 
   assignment_params.assume_palindrome_negative_deletions=true;
-
-  assignment_params.log_max_model_p_nt_DJ=matrix_log(max(_model.RnucleotideDJ_per_nucleotideDJ_3prime,2));
-  assignment_params.log_max_model_p_nt_VD=matrix_log(max(_model.RnucleotideVD_per_nucleotideVD_5prime,2));
+cout<<"&&&inside assignments:3"<<endl;
+  assignment_params.log_max_model_p_nt_DJ=matrix_log(max(_model.RnucleotideDJ_per_nucleotideDJ_3prime,1));
+  cout<<"&&&inside assignments:3.4"<<endl;
+  assignment_params.log_max_model_p_nt_VD=matrix_log(max(_model.RnucleotideVD_per_nucleotideVD_5prime,1));
   assignment_params.log_max_model_p_nt=max(assignment_params.log_max_model_p_nt_DJ);
   double temp=max(assignment_params.log_max_model_p_nt_VD);
+  cout<<"&&&inside assignments:4"<<endl;
   if(assignment_params.log_max_model_p_nt<temp)
     {
       assignment_params.log_max_model_p_nt=temp;
     }
-
+cout<<"&&&inside assignments:5"<<endl;
   assignment_params.log_RnucleotideDJ_per_nucleotideDJ_3prime=matrix_log(_model.RnucleotideDJ_per_nucleotideDJ_3prime.m2vec());
   assignment_params.log_RnucleotideVD_per_nucleotideVD_5prime=matrix_log(_model.RnucleotideVD_per_nucleotideVD_5prime.m2vec());
-
+cout<<"&&&inside assignments:6"<<endl;
   if(_model.Rerror_per_sequenced_nucleotide>0)
     {
       assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3=
@@ -56,18 +59,19 @@ bool VDJ_model_assignments
     {
       assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3=-1000.0;
     }
-  
+cout<<"&&&inside assignments:7"<<endl;  
   assignment_params.L_err=_seq.GetLength();
   assignment_params.log_proba_Rerror_normalization=-1.0*assignment_params.L_err*log(1+_model.Rerror_per_sequenced_nucleotide);
   assignment_params.log_max_model_pcutV_given_gene=matrix_log(max(_model.PcutV_given_V,1));
   assignment_params.log_max_model_pcutJ_given_gene=matrix_log(max(_model.PcutJ_given_J,1));
+  cout<<"&&&inside assignments:8"<<endl;
   Matrix<double> temp_m=max(_model.PcutDlcutDr_given_D,2);
   assignment_params.log_max_model_pcutD_given_gene=matrix_log(max(temp_m,1));
   
   assignment_params.log_max_model_pinsVD=log(max(_model.PinsVD));
   assignment_params.log_max_model_pinsDJ=log(max(_model.PinsDJ));
   assignment_params.log_max_model_pins=assignment_params.log_max_model_pinsVD+assignment_params.log_max_model_pinsDJ;
-  
+  cout<<"&&&inside assignments:9"<<endl;
   if(_do_smoothing&&!_no_error)
     {
       assignment_params.nd_start=-1* _model.negative_excess_deletions_max;
@@ -78,10 +82,12 @@ bool VDJ_model_assignments
       assignment_params.nd_start=0;
       assignment_params.np_start_from_max=true;
     }
+  cout<<"&&&inside assignments:10"<<endl;
   assignment_params.log_highest_probability=-1000.0;
   assignment_params.best_D_align_length=0;
   //assignment_params.max_nerrorsv_1=0;
   //====VDJ alleles
+  cout<<"&&&inside assignments:VDJ allele"<<endl;
   assign_VDJ_alleles(_model, _seq, _V, _D, _J, _genV, _numV, _genD, _numD,
 		     _genJ, _numJ, _no_error, _ignore_deep_error, _do_smoothing,
 		     _force_all_alleles, _READ_LENGTH_CORRECTION,
@@ -104,6 +110,7 @@ bool assign_VDJ_alleles
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns )
 {
+  cout<<">>>>>inside VDJ:1"<<endl;
   unsigned dim_size[4]={0,0,0,0};
   unsigned deletable_errors=0;
   unsigned max_nerrorsv_1=0;
@@ -112,6 +119,7 @@ bool assign_VDJ_alleles
   //double log_max_pcutV_loop_v;
   for(unsigned v=0;v<_V.numOfAligned;v++)
     {
+      cout<<"loop v:"<<v<<endl;
       assignment_params.v=v;
       //check for validity
       if(assignment_params.skips>assignment_params.max_skips)
@@ -121,6 +129,7 @@ bool assign_VDJ_alleles
 	  assignment_params.v_break_out=true;
 	  return false;
 	}
+      cout<<"\tinside VDJ:1"<<endl;
       assignment_params.v_a=_V.alleles_all[v];
       assignment_params.v_g=_genV[assignment_params.v_a].Get_GeneIndex();
 
@@ -130,7 +139,7 @@ bool assign_VDJ_alleles
 	assignment_params.high_error_region=_model.high_error_region;
       else
 	assignment_params.high_error_region=_model.high_error_region;
-
+cout<<"\tinside VDJ:2"<<endl;
       if(v==0)//for first round, set some starting point
 	{
 	  dim_size[0]=_V.n_errors[v];
@@ -175,15 +184,17 @@ bool assign_VDJ_alleles
 	    }
 	  
 	}//end of else
+      cout<<"\tinside VDJ:3"<<endl;
       assignment_params.log_max_pcutV_loop_v=assignment_params.log_max_model_pcutV_given_gene(assignment_params.v_g);
 
       assignment_params.log_highest_probability_GIVEN_current_V_allele=-1000.0;
       assignment_params.v_break_out=false;
       assignment_params.n_assignments_v_gene=0;
-
+cout<<"\tinside VDJ:4"<<endl;
       //========loop over J alleles
       for(unsigned j=0;j<_J.numOfAligned;j++)
 	{
+	  cout<<"\tloop j:"<<j<<endl;
 	  assignment_params.j=j;
 	  if(assignment_params.skips>assignment_params.max_skips)
 	    {
@@ -192,23 +203,26 @@ bool assign_VDJ_alleles
 	      assignment_params.v_break_out=true;
 	      return false; //=====is true good here
 	    }
+	  cout<<"\tinside VDJ:j-1"<<endl;
 	  if(_J.align_length[j]<_model.min_J_align_length)
 	    continue;
 	  assignment_params.j_a=_J.alleles_all[j];
 	  assignment_params.j_g=_genJ[assignment_params.j_a].Get_GeneIndex();
 	  
 	  assignment_params.niVD_DJ0=_J.align_position[j][0] -(_V.align_position[v][0]+ _V.align_length[v]-1)-1;
+	  cout<<"\tinside VDJ:j-2"<<endl;
 	  //NOTE:::here the code is different, since the alignment of V not starting from zero. By adding _V.align_position[v][0]
 
 	  assignment_params.log_max_pcutJ_loop_j=assignment_params.log_max_model_pcutJ_given_gene(assignment_params.j_g);
-
+	  cout<<"\tinside VDJ:j-3"<<endl;
 	  assignment_params.log_highest_probability_GIVEN_current_J_allele=-1000.0;
 	  assignment_params.n_assignments_j_gene=0;
 	  assignment_params.j_break_out=false;
-
+	  cout<<"\tinside VDJ:j-4"<<endl;
 	  //=======loop over D alleles
 	  for(unsigned d_i=0;d_i<_numD;d_i++)
 	    {
+	      cout<<"loop D:"<<d_i<<endl;
 	      if(assignment_params.skips>assignment_params.max_skips)
 		{
 		  _assigns.n_assignments=assignment_params.in;
@@ -223,14 +237,21 @@ bool assign_VDJ_alleles
 
 	      assignment_params.n_assignments_d_gene=0;
 	      assignment_params.d_break_out=false;
-
+	      cout<<"\tinside VDJ:D-1"<<endl;
 	      //base probability of gene choices, multiplied by conditional probability for allele choices, given genes
 	      //J have no distinugishable alles for original code, but not for project
+	      cout<<"assignment_params.v_g:"<<assignment_params.v_g<<endl;
+	      cout<<"PV.size"<<_model.PV.size().toString()<<endl;;
 	      double probabase=_model.PV(assignment_params.v_g);
+	      cout<<"\tinside VDJ:D_1.1"<<endl;
 	      probabase=probabase*_model.PDJ(assignment_params.d_g, assignment_params.j_g);
+	      cout<<"\tinside VDJ:D_1.2"<<endl;
 	      probabase*=_model.PVallele_given_gene(assignment_params.v_g, _genV[assignment_params.v_a].Get_Allele() );
+	      cout<<"\tinside VDJ:D_1.3"<<endl;
 	      probabase*=_model.PDallele_given_gene(assignment_params.d_g, _genD[assignment_params.d_a].Get_Allele());
+	      cout<<"\tinside VDJ:D_1.4"<<endl;
 	      probabase*=_model.PJallele_given_gene( assignment_params.j_g, _genJ[assignment_params.j_a].Get_Allele());
+	      cout<<"\tinside VDJ:D_2"<<endl;
 	      //code change*****, different from matlab, since we add PJallele_given_gene. 
 	      //since we can distinguish J allele now.
 	      //unsigned dim_pos[]={AlignmentSettings::D_maximum_deletion+1,AlignmentSettings::D_maximum_deletion+1,0};
@@ -238,7 +259,7 @@ bool assign_VDJ_alleles
 	      assignment_params.p_max_Dr=max_mf2(_D.p_region_max_length_left[d],_D.numOfAligned[d],AlignmentSettings::D_maximum_deletion+1);
 	      //dim_pos[0]=j;
 	      assignment_params.p_max_J=max_mf(_J.p_region_max_length[j],AlignmentSettings::J_maximum_deletion+1);
-	      
+	      cout<<"\tinside VDJ:D_3"<<endl;
 	      //upper boun on insertion nt bias factor
 	      assignment_params.niVD_DJ_min=0;
 	      //	      dim_pos[0]=v;
@@ -246,7 +267,7 @@ bool assign_VDJ_alleles
 	      if(temp_int>0)
 		assignment_params.niVD_DJ_min=temp_int;
 	      double log_p_max_nt_VD_DJ_d_allele=assignment_params.niVD_DJ_min*assignment_params.log_max_model_p_nt;
-	      
+	      cout<<"\tinside VDJ:D_4"<<endl;
 	      assignment_params.log_max_pcutD_loop_d=assignment_params.log_max_model_pcutD_given_gene(assignment_params.d_g);
 	      //assignment_params.log_max_pcutVDJ_loop_d=assignment_params.log
 
@@ -264,7 +285,7 @@ bool assign_VDJ_alleles
 	      assignment_params.log_probabase=log(probabase);
 		
 	      assignment_params.log_highest_probability_GIVEN_current_D_allele=-1000.0;
-
+cout<<"\tinside VDJ:D_5"<<endl;
 	      //=======now loop over V deletions
 	      if(!assign_VJ_deletions(_model, _seq, _V, _D, _J,
 				      _genV, _numV, _genD, _numD, _genJ, _numJ,
@@ -323,6 +344,7 @@ bool assign_VJ_deletions
   //% ndV1 is the deviation from the no. of deletions implied by the alignment (min_deletions).
   //% Lower bound is nd_start (usually -3).
   //% Upper bound is set by maximum deletions allowed and by minimum match length required.
+  cout<<"<<<<inside DJ deletions:"<<endl;
   unsigned ndV_max=_model.max_excess_V_deletions;
   if(ndV_max>_V.align_length[assignment_params.v]-_model.min_V_length)
     {
@@ -335,6 +357,7 @@ bool assign_VJ_deletions
   //loop over V deletions
   for(assignment_params.ndV1=assignment_params.nd_start;assignment_params.ndV1<(signed)ndV_max;assignment_params.ndV1++)
     {
+      cout<<"\tloop v_deletion:"<<assignment_params.ndV1<<endl;
       if (assignment_params.skips > assignment_params.max_skips)
 	{
 	  _assigns.n_assignments = assignment_params.in;
@@ -346,6 +369,7 @@ bool assign_VJ_deletions
       //% Actual number of deletions
       assignment_params.ndV = _V.min_deletions[assignment_params.v] + assignment_params.ndV1;
 
+      cout<<"\t\tV deletion:vd_1"<<endl;
       //% This is a violation of a constraint.
       //% Happens for eg. when min_deletions is 0 and I consider 'negative' deletions.
       if( assignment_params.ndV < 0 || assignment_params.ndV > ((signed)_model.max_V_deletions))
@@ -356,20 +380,21 @@ bool assign_VJ_deletions
 	}
       //% Calculate number of errors in V section, by leaving out errors that are in deleted region for this assignment.
       //% Also leaves out errors in left most 'high_error_region'.
-                
+      cout<<"\t\tV deletion:vd_1"<<endl;          
       if( _ignore_deep_error)
 	{
 	  assignment_params.high_error_region = _model.high_error_region;//max(model.high_error_region, V.align_length(v) - ndV1 - deep_error_limit);
 	}
       else
 	assignment_params.high_error_region = _model.high_error_region;
+
       
       assignment_params.v_err_pos.clear();
       unsigned dim_size[]={_V.n_errors[assignment_params.v]};
       assignment_params.v_err_pos.initialize(1, dim_size, _V.error_positions[assignment_params.v]); //% error positions in V alignment
       dim_size[0]=3;
       Matrix<unsigned> v_err_excess_pos(1, dim_size,_V.excess_error_positions[assignment_params.v]); //% error positions in extended V alignment for 'negative' deletions, array format so far, not Matrix format yet
-       
+cout<<"\t\tV deletion:vd_1"<<endl;       
       if(assignment_params.ndV1 < 0)
 	{
 	  //% Case of 'negative' deletions
@@ -414,7 +439,8 @@ bool assign_VJ_deletions
 	    assignment_params.npV_potential_max=_V.p_region_max_length[assignment_params.v][1+assignment_params.ndV];
 	  }
 	}                
-                
+
+      cout<<"\t\tV deletion:vd_2"<<endl;
       //Upper bound on insertions nt bias factor
       assignment_params.niVD_DJ_min= assignment_params.niVD_DJ0+assignment_params.ndV1-_D.align_length[assignment_params.d][0] - assignment_params.npV_max - assignment_params.p_max_J-assignment_params.p_max_Dl-assignment_params.p_max_Dr;
       
@@ -423,9 +449,9 @@ bool assign_VJ_deletions
 	  assignment_params.niVD_DJ_min=0;
 	}
       double log_p_max_nt_VD_DJ_dV = (assignment_params.niVD_DJ_min)*assignment_params.log_max_model_p_nt;
-                
+                cout<<"\t\tV deletion:vd_3"<<endl;
       assignment_params.log_highest_probability_GIVEN_current_V_deletions = -1000;// % Highest probability so far GIVEN current V deletions AND outer loop variables {V, J, D alleles}                
-      
+      cout<<"\t\tV deletion:vd_4"<<endl;
       double test_proba = assignment_params.log_probabase + assignment_params.log_perrv + (assignment_params.log_max_pcutV_loop_v+assignment_params.log_max_pcutJ_loop_j+assignment_params.log_max_pcutD_loop_d) + assignment_params.log_max_model_pins + log_p_max_nt_VD_DJ_dV;               
                 
       if (test_proba < assignment_params.log_probability_threshold_factor + assignment_params.log_highest_probability)
@@ -435,7 +461,7 @@ bool assign_VJ_deletions
 	}
                 
       assignment_params.V_align_length = _V.align_length[assignment_params.v] - assignment_params.ndV1 - _READ_LENGTH_CORRECTION;
-
+cout<<"\t\tV deletion:vd_6"<<endl;
 
       //======now start doing j deletions loop for
       //% Loop over J right deletions.
@@ -446,6 +472,7 @@ bool assign_VJ_deletions
       unsigned ndJ_max = min_mf(temp_array, 3);
       for( assignment_params.ndJ1=assignment_params.nd_start;assignment_params.ndJ1<(signed)ndJ_max;assignment_params.ndJ1++)
 	{	//		%ndJ1=nd_start
+	  cout<<"\t\tloop j deletion"<<assignment_params.ndJ1<<endl;
 	  if (assignment_params.skips > assignment_params.max_skips)
 	    {
 	      _assigns.n_assignments = assignment_params.in;
@@ -461,17 +488,20 @@ bool assign_VJ_deletions
 	      //% Go to next iteration of loop.
 	      continue;
 	    }
-                                 
+	  cout<<"\t\t\tJ deletion:J_1"<<endl;
 	  //niVD_DJ_total_with_ps = niVD_DJ0 + ndV1 + ndJ1;
           //          % Violation of constraint. V and J overlap in this assignment. So move on until this is not true.
 	  if (assignment_params.niVD_DJ0+ assignment_params.ndV1+assignment_params.ndJ1 < 0)
 	    continue;
                                       
 	  //% Calculate number of errors in J section, by leaving out errors that are in deleted region for this assignment.
+	  cout<<"\t\t\tJ deletion:J_2"<<endl;
 	  dim_size[0]=_J.n_errors[assignment_params.j];
 	  Matrix<unsigned> j_err_pos(1, dim_size, _J.error_positions[assignment_params.j]); //% error positions in J alignment
 	  dim_size[0]=3;
+	  
 	  Matrix<unsigned> j_err_excess_pos(1, dim_size, _J.excess_error_positions[assignment_params.j]);// % error positions in extended J alignment for 'negative' deletions
+	  cout<<"\t\t\tJ deletion:J_3"<<endl;
 	  if (assignment_params.ndJ1 < 0)
 	    {
 	      //% Case of 'negative' deletions
@@ -497,7 +527,7 @@ bool assign_VJ_deletions
 	      //					disp('in the condition')
 	      continue;
 	    }
-                    
+                    cout<<"\t\t\tJ deletion:J_4"<<endl;
                     
 	  assignment_params.log_perrj = assignment_params.nerrorsj*assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
           
@@ -509,14 +539,14 @@ bool assign_VJ_deletions
 	    }
 	  double log_p_max_nt_VD_DJ_dJ = (assignment_params.niVD_DJ_min)*assignment_params.log_max_model_p_nt;
           
-	  assignment_params.log_highest_probability_GIVEN_current_J_deletions = -1000;                   
+	  assignment_params.log_highest_probability_GIVEN_current_J_deletions = -1000;                   cout<<"\t\t\tJ deletion:J_5"<<endl;
 	  
 	  double test_proba = assignment_params.log_probabase + assignment_params.log_perrv + assignment_params.log_perrj + (assignment_params.log_max_pcutV_loop_v+assignment_params.log_max_pcutJ_loop_j+assignment_params.log_max_pcutD_loop_d) + assignment_params.log_max_model_pins + log_p_max_nt_VD_DJ_dJ;
 	            
 	  if( test_proba < assignment_params.log_probability_threshold_factor + assignment_params.log_highest_probability)
 	    continue;
                    
-                    
+                    cout<<"\t\t\tJ deletion:J_6"<<endl;
 	  // % Maximum possible half-lengths of palindromes, given current deletions values
 	  if (assignment_params.ndJ==0 || ~assignment_params.assume_palindrome_negative_deletions)
 	    {
@@ -533,7 +563,7 @@ bool assign_VJ_deletions
 		assignment_params.npJ_potential_max=_J.p_region_max_length[assignment_params.j][ 1+assignment_params.ndJ];
 		
 	    }//             end
-                    
+                    cout<<"\t\t\tJ deletion:J_7"<<endl;
 	  //-------->NOTE: the following part is need to be revised for the future-------
              /*       
 	  if (np_start_from_max)
@@ -553,7 +583,8 @@ bool assign_VJ_deletions
 	      npJ_end = npJ_max;
 	    }//       end
 	     */     
-	  assignment_params.J_align_length = _J.align_length[assignment_params.j] - assignment_params.ndJ1;                                        
+	  assignment_params.J_align_length = _J.align_length[assignment_params.j] - assignment_params.ndJ1;
+	  cout<<"\t\t\tJ deletion:J_9"<<endl;
 	  //% Loop over half-length of V palindrome
 	  //for now it is just a place holder for the following code
 	  //it simply return true and hopefully this will work for now.
@@ -605,24 +636,31 @@ bool assign_VJ_palindrome
   unsigned na=0;//this is the n of aligned d seg index, pointing to the longest one for one
   //in the case of the best one is not valide we just go ahed to through it away for now
 
+  cout<<"\t\t\tvdJ palindrome:J_1"<<endl;
   //insertions <--------added by Feng
   unsigned inVD=_D.align_position_left[d][na]-
     (_V.align_position[v][0]+_V.align_length[v]-1)-assignment_params.npV-assignment_params.npDl;
+  cout<<"\t\t\tvdj palidnrome:J_1.1"<<endl;
   if((signed)inVD<0)
     inVD=0;
+  cout<<"\t\t\tvdj palidnrome:J_1.2"<<endl;
+  
   unsigned inDJ=_J.align_position[j][0]-_D.align_position_right[d][na]-assignment_params.npDr-assignment_params.npJ;
   if((signed)inDJ<0)
     {
       inDJ=0;
     }
-
-
+cout<<"\t\t\tvdj palidnrome:J_1.3"<<endl;
+ if(inVD>_model.max_insertions||inDJ>_model.max_insertions)
+   return true;//continue;
   //% Compute final probability of assignment by multiplying base probability by factors for
   //% palindromes, deletions and the number of errors.
   //% multiply probability by factor for insertions of given lengths and sequence specific factors for
   //% nucleotide bias
+ cout<<"inVD:"<<inVD<<";inDJ:"<<inDJ<<endl;
+ cout<<"PinsVD size:"<< _model.PinsVD.size().toString()<<endl;
   double log_pins = log(_model.PinsVD(inVD)*_model.PinsDJ(inDJ));//<=== be careful here, check matlab code
-                                                    
+                             cout<<"\t\t\tvdj palidnrome:J_2"<<endl;                       
   //double log_pntbias_VD = log_RnucleotideVD_per_nucleotideVD_5prime*nucleotideVD(:);
   //double log_pntbias_DJ = log_RnucleotideDJ_per_nucleotideDJ_3prime*nucleotideDJ(:);      
 
@@ -634,7 +672,7 @@ bool assign_VJ_palindrome
    else
      log_perr = nerrors*assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
    
-                                     
+                             cout<<"\t\t\tvdj palidnrome:J_3"<<endl;        
    double log_proba = assignment_params.log_probabase + log_perr + /*log_PcutVDJ +*/ 
     log_pins;// + log_pntbias_DJ + log_pntbias_VD;
                                                     
@@ -657,6 +695,7 @@ bool assign_VJ_palindrome
   if(log_proba > log_highest_probability_GIVEN_current_Dr_deletions)
     log_highest_probability_GIVEN_current_Dr_deletions = log_proba; //end;
   */
+  cout<<"\t\t\tvdj palidnrome:J_4"<<endl;
   if (assignment_params.D_align_length > assignment_params.best_D_align_length) 
     assignment_params.best_D_align_length = assignment_params.D_align_length; //end
                                                     
@@ -670,6 +709,7 @@ bool assign_VJ_palindrome
       return true;//go next round
     }//end
   unsigned ndDl1=0, ndDr1=0;
+  cout<<"\t\t\tvdj palidnrome:J_5"<<endl;
   if (~assignment_params.zeroD)
     {
       assignment_params.genic_length = 

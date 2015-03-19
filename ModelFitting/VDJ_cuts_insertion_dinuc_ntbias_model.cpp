@@ -50,6 +50,7 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   
   Rerror_per_sequenced_nucleotide(0)
 {
+  cout<<"*** in constructor:"<<endl;
   //change 3/7/2015 by using vdj_..._model_params
   //need to do things to initialize the parameters and arrays
   /*min_V_cut=-1*max_palindrome;
@@ -67,30 +68,40 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   unsigned maxGeneIndex_V=vdj_mps.number_V_genes;
   unsigned maxGeneIndex_D=vdj_mps.number_D_genes;
   unsigned maxGeneIndex_J=vdj_mps.number_J_genes;
+  cout<<"\t*** in constructor1.5:vdj_mps.number_J_genes:"<<vdj_mps.number_J_genes<<endl;
+
 
   unsigned dim_size[1]={max_insertions+1};
   PinsVD.initialize(1, dim_size, 1);
   PinsDJ.initialize(1, dim_size, 1);
-  dim_size[0]=maxGeneIndex_D;
-  PV.initialize(1, dim_size, 1);
-  unsigned dim_size2[2]={maxGeneIndex_D, maxGeneIndex_J};
-  PDJ.initialize(2, dim_size2, 1);
+  cout<<"\t*** in constructor1.6:"<<endl;
 
+  dim_size[0]=maxGeneIndex_V+1;
+  PV.initialize(1, dim_size, 1);
+  cout<<"\t*** in constructor1.7:"<<endl;
+
+  unsigned dim_size2[2]={maxGeneIndex_D+1, maxGeneIndex_J+1};
+  cout<<"PDJ:"<<PDJ.toString()<<endl;
+  cout<<"maxGeneIndex_D:"<<maxGeneIndex_D<<";maxGeneIndex_J:"<<maxGeneIndex_J<<endl;
+  PDJ.initialize(2, dim_size2, 1);
+cout<<"\t*** in constructor1.8:"<<endl;
+  
   dim_size2[1]=(unsigned)(max_V_cut-min_V_cut+1);
-  dim_size2[0]=maxGeneIndex_V;
+  dim_size2[0]=maxGeneIndex_V+1;
   PcutV_given_V.initialize(2, dim_size2,1);
 
   dim_size2[1]=(unsigned)(max_J_cut-min_J_cut+1);
-  dim_size2[0]=maxGeneIndex_J;
+  dim_size2[0]=maxGeneIndex_J+1;
   PcutJ_given_J.initialize(2,dim_size2, 1);
+cout<<"\t*** in constructor3:"<<endl;
   
-  unsigned dim_size3[3]={maxGeneIndex_D, (unsigned)(max_D_cut-min_D_cut+1), (unsigned)(max_D_cut-min_D_cut+1) };
+  unsigned dim_size3[3]={maxGeneIndex_D+1, (unsigned)(max_D_cut-min_D_cut+1), (unsigned)(max_D_cut-min_D_cut+1) };
   PcutDlcutDr_given_D.initialize(3, dim_size3, 1);
 
   //also go through to set some impossible cases impossible
   //case where cut on both side together is longer than sequence
 unsigned lseq;
-  for(unsigned d=0;d<maxGeneIndex_D;d++)
+  for(unsigned d=0;d<maxGeneIndex_D+1;d++)
     {
       lseq = _genD[d].Get_Seq().GetLength();
       for(int  cutDl=0;cutDl<=max_D_cut;cutDl++)
@@ -103,6 +114,7 @@ unsigned lseq;
 	    }// end
 	}//       end
     }//       end
+cout<<"\t*** in constructor4:"<<endl;
 
   //set up rate for what? still don't know at this point
   dim_size2[0]=4;
@@ -110,44 +122,51 @@ unsigned lseq;
   RnucleotideVD_per_nucleotideVD_5prime.initialize(2, dim_size2,1.0/4.0);
   //RnucleotideVD_per_nucleotideVD_5prime=RnucleotideVD_per_nucleotideVD_5prime/4;
   RnucleotideDJ_per_nucleotideDJ_3prime.initialize(2, dim_size2,1.0/4.0);
-
+cout<<"\t*** in constructor4.5:"<<endl;
   //% Initialize probabilities of alleles given genes, to 1/n_alleles for each gene.
   //V_genes = max([genV.gene_index]);
   //max_V_n_alleles = max_n_alleles(_genV, _numV);
-  dim_size2[0]=maxGeneIndex_V;
+  dim_size2[0]=maxGeneIndex_V+1;
   dim_size2[1]=max_V_n_alleles;
   PVallele_given_gene.initialize(2, dim_size2, 0.0);
+  cout<<"\t*** in constructor4.55:"<<endl;
   for(unsigned a=0;a<_numV;a++)
     {
       PVallele_given_gene(_genV[a].Get_GeneIndex(), _genV[a].Get_Allele()) = 
 	1.0/_genV[a].Get_n_alleles();
     }       //end
-  
+  cout<<"\t*** in constructor5:"<<endl;
+
   //D_genes = max([genD.gene_index]);
   //max_D_n_alleles = max_n_alleles(_genD, _numD);//...n_alleles]);
   //max_J_n_alleles =max_n_alleles(_genJ, _numJ);
-  dim_size2[0]=maxGeneIndex_D;
+  dim_size2[0]=maxGeneIndex_D+1;
   dim_size2[1]=max_D_n_alleles;
   PDallele_given_gene.initialize(2, dim_size2,0.0);// zeros(max_D_alleles , D_genes);
   for(unsigned a=0;a<_numD;a++)
     {
       PDallele_given_gene(_genD[a].Get_GeneIndex(), _genD[a].Get_Allele()) = 1.0/_genD[a].Get_n_alleles();
     }
+  cout<<"\t*** in constructor6:"<<endl;
+
   //J gene alleles
-  dim_size2[0]=maxGeneIndex_J;
+  dim_size2[0]=maxGeneIndex_J+1;
   dim_size2[1]=max_J_n_alleles;
   PJallele_given_gene.initialize(2, dim_size2, 0.0);
-  for(unsigned a=0;a<_numV;a++)
+  for(unsigned a=0;a<_numJ;a++)
     {
       PJallele_given_gene(_genJ[a].Get_GeneIndex(), _genJ[a].Get_Allele()) = 
 	1.0/_genJ[a].Get_n_alleles();
     }       
-  
+  cout<<"\t*** in constructor7:"<<endl;
+
 Rerror_per_sequenced_nucleotide = 1.0E-7; //% error rate
 //% Normalizes all distributions
 //doing first round of functions
   Normalize();
   CalculateAssignmentEntropies();
+  cout<<"\t*** in constructor8:"<<endl;
+
 }
 
 VDJ_cuts_insertion_dinuc_ntbias_model::~VDJ_cuts_insertion_dinuc_ntbias_model
@@ -1207,7 +1226,7 @@ if(!Update_nM_field(vdj_assigns.error_vs_position, vdj_assigns.proba, delta_coun
      cout<<"error on updating counter field mononucleotideVD"<<endl;
      exit(-1);
    }
- vdj_counter=SumCounter(vdj_counter, deltaCounter);
+ vdj_counter=SumCounter(vdj_counter, delta_counter);
     }//end of outer loop for check the valid assignmnet
   
   
@@ -1501,7 +1520,7 @@ if(!Update_nM_field(vdj_assigns.error_vs_position, vdj_assigns.proba, delta_coun
 //_model is only used to build a new Vdj counter
 
 VDJ_cuts_insertion_dinuc_ntbias_counter VDJ_cuts_insertion_dinuc_ntbias_model::SumCounter
-(const VDJ_cuts_insertion_dinuc_ntbias_counter& _c1, const VDJ_cuts_insertion_dinuc_ntbias_counter& _c2)
+(const VDJ_cuts_insertion_dinuc_ntbias_counter& _c1, const VDJ_cuts_insertion_dinuc_ntbias_counter& _c2) const
 {
   //
   VDJ_cuts_insertion_dinuc_ntbias_counter c_ret(this->model_params);
@@ -1720,7 +1739,7 @@ VDJ_cuts_insertion_dinuc_ntbias_counter VDJ_cuts_insertion_dinuc_ntbias_model::S
 //with other necessary parameter for building a vdj counter
 //_model is only used to build a new Vdj counter
 VDJ_cuts_insertion_dinuc_ntbias_counter VDJ_cuts_insertion_dinuc_ntbias_model::SumCounter
-(const VDJ_cuts_insertion_dinuc_ntbias_counter* _c, const unsigned _size) 
+(const VDJ_cuts_insertion_dinuc_ntbias_counter* _c, const unsigned _size) const
 {
   
   VDJ_cuts_insertion_dinuc_ntbias_counter c_ret(this->model_params);

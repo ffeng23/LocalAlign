@@ -1,5 +1,6 @@
 #include "genomicSegment.hpp"
-
+#include <sstream>
+using namespace std;
 Genomic_Segment::Genomic_Segment(): c_seq(),c_gene(),c_gene_index(0),c_n_alleles(0), c_allele(0)
 {
   //empty
@@ -64,4 +65,16 @@ string Genomic_Segment::Get_Gene() const
 void Genomic_Segment::Set_Gene(const string& _gene)
 {
   c_gene=_gene;
+}
+
+string Genomic_Segment::toString() const
+{
+  //showing the content
+  stringstream ss;
+  ss<<"Name:"<<c_seq.GetName()<<"\n";
+  ss<<"Seq:"<<c_seq.GetSequence()<<"\n";
+  ss<<"Gene Index:"<<c_gene_index<<"\n";
+  ss<<"Allele:"<<c_allele<<"\n";
+  ss<<"n_Allele:"<<c_n_alleles<<"\n";
+  return ss.str();
 }

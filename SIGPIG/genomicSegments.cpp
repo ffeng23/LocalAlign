@@ -415,6 +415,7 @@ unsigned ReadGenomicJ(const string& _fastaFileName, GenomicJ** _gseg)
   vector<SequenceString> seq;
   unsigned totalNumber=ReadFasta(_fastaFileName, seq, true);
   cout<<"$$$$$inside readGenomicJ function, seq 0:"<<seq[0].toString()<<endl;
+  cout<<"Total number of J seg:"<<totalNumber<<endl;
   //get pointer to array of genomic segments
   *_gseg=new GenomicJ[totalNumber];
 
@@ -764,7 +765,7 @@ vector<string> DetermineOutputFileNames(const string& _outFileNameBase, const un
   return vecFileNames;
 }
 
-unsigned max_gene_index(const Genomic_Segment* _gs, const unsigned& _num)
+unsigned max_gene_index(const GenomicV* _gs, const unsigned& _num)
 {
   
   unsigned max_gi;
@@ -773,20 +774,73 @@ unsigned max_gene_index(const Genomic_Segment* _gs, const unsigned& _num)
       cout<<"ERROR in max_gene_index: zero-length array or null array passed in as input, return zero"<<endl;
       exit(-1);
     }
+  
   max_gi=_gs[0].Get_GeneIndex();
-
+  
   for(unsigned i=1;i<_num;i++)
     {
+      
       if(max_gi<_gs[i].Get_GeneIndex())
 	{
 	  max_gi=_gs[i].Get_GeneIndex();
 	}
+      //cout<<"\tmax_gi:"<<max_gi<<endl;
     }
 
   return max_gi;
 }
 
-unsigned max_n_alleles(const Genomic_Segment* _gs, const unsigned& _num)
+unsigned max_gene_index(const GenomicJ* _gs, const unsigned& _num)
+{
+  
+  unsigned max_gi;
+  if(_num==0||_gs==NULL)
+    {
+      cout<<"ERROR in max_gene_index: zero-length array or null array passed in as input, return zero"<<endl;
+      exit(-1);
+    }
+  
+  max_gi=_gs[0].Get_GeneIndex();
+  
+  for(unsigned i=1;i<_num;i++)
+    {
+      
+      if(max_gi<_gs[i].Get_GeneIndex())
+	{
+	  max_gi=_gs[i].Get_GeneIndex();
+	}
+      //cout<<"\tmax_gi:"<<max_gi<<endl;
+    }
+
+  return max_gi;
+}
+
+unsigned max_gene_index(const GenomicD* _gs, const unsigned& _num)
+{
+  
+  unsigned max_gi;
+  if(_num==0||_gs==NULL)
+    {
+      cout<<"ERROR in max_gene_index: zero-length array or null array passed in as input, return zero"<<endl;
+      exit(-1);
+    }
+  
+  max_gi=_gs[0].Get_GeneIndex();
+  
+  for(unsigned i=1;i<_num;i++)
+    {
+      
+      if(max_gi<_gs[i].Get_GeneIndex())
+	{
+	  max_gi=_gs[i].Get_GeneIndex();
+	}
+      //cout<<"\tmax_gi:"<<max_gi<<endl;
+    }
+
+  return max_gi;
+}
+
+unsigned max_n_alleles(const GenomicV* _gs, const unsigned& _num)
 {
   
   unsigned max_gi;
@@ -808,5 +862,48 @@ unsigned max_n_alleles(const Genomic_Segment* _gs, const unsigned& _num)
   return max_gi;
 }
 
+unsigned max_n_alleles(const GenomicD* _gs, const unsigned& _num)
+{
+  
+  unsigned max_gi;
+  if(_num==0||_gs==NULL)
+    {
+      cout<<"ERROR in max_gene_index: zero-length array or null array passed in as input, return zero"<<endl;
+      exit(-1);
+    }
+  max_gi=_gs[0].Get_n_alleles();
+
+  for(unsigned i=1;i<_num;i++)
+    {
+      if(max_gi<_gs[i].Get_n_alleles())
+	{
+	  max_gi=_gs[i].Get_n_alleles();
+	}
+    }
+
+  return max_gi;
+}
+
+unsigned max_n_alleles(const GenomicJ* _gs, const unsigned& _num)
+{
+  
+  unsigned max_gi;
+  if(_num==0||_gs==NULL)
+    {
+      cout<<"ERROR in max_gene_index: zero-length array or null array passed in as input, return zero"<<endl;
+      exit(-1);
+    }
+  max_gi=_gs[0].Get_n_alleles();
+
+  for(unsigned i=1;i<_num;i++)
+    {
+      if(max_gi<_gs[i].Get_n_alleles())
+	{
+	  max_gi=_gs[i].Get_n_alleles();
+	}
+    }
+
+  return max_gi;
+}
 
 

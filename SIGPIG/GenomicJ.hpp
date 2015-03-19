@@ -16,7 +16,7 @@ public:
   //for this one, we have to have two files, but not one file name
   virtual bool ReadGenomicSegments(const string& _fastFileName, const string& _infoFileName="");
   */
-private:
-  SequenceString c_seq_untill_primer;
+  private:
+    SequenceString c_seq_untill_primer;
 };
 #endif

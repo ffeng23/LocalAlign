@@ -1,5 +1,7 @@
 #include "do_probabilistic_model_fitting.hpp"
-
+#include "VDJ_cuts_insertion_dinuc_ntbias_model_params.hpp"
+#include "Entropy.hpp"
+#include "VDJ_cuts_insertion_dinuc_ntbias_model_assignments.hpp"
 bool do_probabilistic_model_fitting
 (
  const SequenceString* _seq,
@@ -15,12 +17,34 @@ bool do_probabilistic_model_fitting
  // /*output*/ VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns
  )
 {
-  VDJ_cuts_insertion_dinuc_ntbias_model model;
+  cout<<"start the model fitting......"<<endl;
+  //define and set the parameter passing to the model
+  //
+  /*for(unsigned i=0;i<_numJ;i++)
+    {
+      cout<<_genJ[i].toString()<<endl;
+      }*/
+  VDJ_cuts_insertion_dinuc_ntbias_model_params vdj_mps
+    ( _genV, _numV, _genD, _numD, _genJ, _numJ);
+  //set the params special value instead of the default one
+  //
+  //empty for now?
+  //==========
+  /*cout<<"=======intialize model......."<<endl;
+  for(unsigned i=0;i<_numJ;i++)
+    {
+      cout<<_genJ[i].toString()<<endl;
+      }*/
+  VDJ_cuts_insertion_dinuc_ntbias_model model
+    (_genV, _numV, _genD, _numD, _genJ, _numJ, vdj_mps
+     );
   bool do_smoothing=true;
   bool force_all_alleles=false;
   //start the looping
+  cout<<"ready to do the iterations...."<<endl;
   for(unsigned iteration_no=0;iteration_no<_max_iters;iteration_no++)
     {
+      cout<<"iteration loop==>"<<iteration_no<<endl;
       if((iteration_no==1) && start_from_flat_prior)
 	{
 	  //place holder, start a new model
@@ -37,6 +61,7 @@ bool do_probabilistic_model_fitting
 	{
 	  model.max_assignments=6000;
 	}
+      cout<<"\t modeling loop 1"<<endl;
       model.high_error_region=0;
       model.min_V_length=25;
       force_all_alleles=false;
@@ -59,26 +84,36 @@ bool do_probabilistic_model_fitting
 	      model.negative_excess_deletions_max=3;//0 in matlab
 	    }
 	}
-      
+      cout<<"\t modeling loop 1"<<endl;
       bool no_error=false;
       bool ignore_deep_error=false;
       unsigned READ_LENGTH_CORRECTION=0;
       
-      VDJ_cuts_insertion_dinuc_ntbias_counter counter;
+      VDJ_cuts_insertion_dinuc_ntbias_counter counter(vdj_mps);
       model.InitializeCounter(counter);
-      VDJ_cuts_insertion_dinuc_ntbias_assigns assigns;
-      model.InitializeAssigns(assigns);
-
+      cout<<"\t modeling loop 2"<<endl;
+      VDJ_cuts_insertion_dinuc_ntbias_assigns assigns(model,counter);
+      model.InitializeAssign(assigns);
+      cout<<"\t modeling loop 3"<<endl;
       double* assignment_entropy=new double[numOfAlignments];
       double* assignment_entropy_no_errors=new double[numOfAlignments];
       //now go through the alignments
       for(unsigned k=0;k<numOfAlignments;k++)
 	{//for each alignment, do the assign
-	  
+	  cout<<"\t\t alignment loop:"<<k<<endl;
 	  bool assign_flag=VDJ_model_assignments
 	    (model, _seq[k], _V[k], _D[k], _J[k], _genV, _numV, _genD, _numD, _genJ, _numJ,
 	     probability_threshold_factor, no_error, ignore_deep_error, do_smoothing,
-	     force_all_alleles, READ_LENGTH_CORRECTION, _assigns);
+	     force_all_alleles, READ_LENGTH_CORRECTION, assigns);
+
+	  if(assign_flag)
+	    {
+	      cout<<"Assignment Done"<<endl;
+	    }
+	  else
+	    {
+	      cout<<"assignement failed with a return value of false, please check, but we assume nothing bad happend so far"<<endl;
+	    }
 	  
 	  if(assigns.n_assignments>0)
 	    {
@@ -87,7 +122,7 @@ bool do_probabilistic_model_fitting
 	      if(assigns.generation_probability>0)
 		{
 		  Matrix<double> p_gen=assigns.event_probability/assigns.generation_probability;
-		  assignment_entropy_no_errors[k]=entropy(p_gen, exp(1));
+		  assignment_entropy_no_errors[k]=Entropy(p_gen, exp(1));
 		}
 	      else
 		assignment_entropy_no_errors[k]=nan("");

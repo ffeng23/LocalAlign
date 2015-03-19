@@ -5,10 +5,11 @@
 
 struct VDJ_cuts_insertion_dinuc_ntbias_model_params
 {
-  VDJ_cuts_insertion_dinuc_ntbias_model_params(
-const GenomicV* _genV, const unsigned& _numV, 
- const GenomicD* _genD, const unsigned& _numD,
- const GenomicJ* _genJ, const unsigned& _numJ);
+  VDJ_cuts_insertion_dinuc_ntbias_model_params
+  (
+   const GenomicV* _genV, const unsigned& _numV, 
+   const GenomicD* _genD, const unsigned& _numD,
+   const GenomicJ* _genJ, const unsigned& _numJ);
   //define the members
   unsigned max_assignments; //max no. of assignments to explore during Expectation step of EM algorithm
   unsigned max_insertions;

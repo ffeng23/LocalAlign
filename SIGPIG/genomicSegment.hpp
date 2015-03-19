@@ -30,13 +30,15 @@ public:
   void Set_GeneIndex(const unsigned int& _gene_index);
   void Set_n_alleles(const unsigned int& _n_alleles);
   void Set_Allele(const unsigned int& _allele);
-  void Set_Gene(const string& _gene); 
+  void Set_Gene(const string& _gene);
+
+  string toString()const;
   /*
   //for v, we need two files, but D, J, we only need the first file containing segments
   virtual bool ReadGenomicSegments(const string& _fastaFileName, const string& _infoFileName="")=0;
   */
 //private
-private: 
+protected: 
   SequenceString c_seq;
   string c_gene;//this is the gene name without allele number
   unsigned c_gene_index;//index of the genes in the gene array, not sure where the array is now (?)

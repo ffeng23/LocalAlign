@@ -80,6 +80,10 @@ bool GenomicVCompare_bySequenceName(const GenomicV& ss1,const GenomicV& ss2);
 bool CompareDSequenceNameByString(const string& ss1, const string& ss2);
 bool CompareDGeneNameByString(const string& ss1, const string& ss2);
 
-unsigned max_gene_index(const Genomic_Segment* _gs, const unsigned& _num);
-unsigned max_n_alleles(const Genomic_Segment* _gs, const unsigned& _num);
+unsigned max_gene_index(const GenomicV* _gs, const unsigned& _num);
+unsigned max_gene_index(const GenomicD* _gs, const unsigned& _num);
+unsigned max_gene_index(const GenomicJ* _gs, const unsigned& _num);
+unsigned max_n_alleles(const GenomicV* _gs, const unsigned& _num);
+unsigned max_n_alleles(const GenomicD* _gs, const unsigned& _num);
+unsigned max_n_alleles(const GenomicJ* _gs, const unsigned& _num);
 #endif

@@ -97,11 +97,11 @@ public:
 		       const unsigned& _num_valid_assignments) const;
 
  //sum counter
-VDJ_cuts_insertion_dinuc_ntbias_counter SumCounter
-(const VDJ_cuts_insertion_dinuc_ntbias_counter& _c1, const VDJ_cuts_insertion_dinuc_ntbias_counter& _c2) ;
+  VDJ_cuts_insertion_dinuc_ntbias_counter SumCounter
+  (const VDJ_cuts_insertion_dinuc_ntbias_counter& _c1, const VDJ_cuts_insertion_dinuc_ntbias_counter& _c2) const;
 
-VDJ_cuts_insertion_dinuc_ntbias_counter SumCounter
-(const VDJ_cuts_insertion_dinuc_ntbias_counter* _c, const unsigned _size);
+  VDJ_cuts_insertion_dinuc_ntbias_counter SumCounter
+  (const VDJ_cuts_insertion_dinuc_ntbias_counter* _c, const unsigned _size) const;
 
 
   //==================================

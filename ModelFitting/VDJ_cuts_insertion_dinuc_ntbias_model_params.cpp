@@ -1,6 +1,7 @@
 #include "VDJ_cuts_insertion_dinuc_ntbias_model_params.hpp"
 #include "../SIGPIG/genomicSegments.hpp"
-
+#include <iostream>
+using namespace std;
 
 //VDJ_cuts_insertion_dinuc_ntbias_model_params vdj_mps;
 
@@ -13,7 +14,7 @@ const GenomicV* _genV, const unsigned& _numV,
 )
   :
 /*initilization list*/
-  max_assignments(6000), max_insertions(30),
+  max_assignments(6000), max_insertions(50),
   max_V_deletions(16), max_D_deletions(16), max_J_deletions(18),
   number_V_genes(0), number_D_genes(0), number_J_genes(0),
   max_V_n_alleles(0), max_D_n_alleles(0), max_J_n_alleles(0),
@@ -37,12 +38,26 @@ const GenomicV* _genV, const unsigned& _numV,
   max_D_cut=max_D_deletions;
   max_J_cut=max_J_deletions;
   //start intialize the various matrix
-  
+  //cout<<"---inside  vdj parameter:"<<number_V_genes<<endl;
   number_V_genes=max_gene_index(_genV,_numV);
+  //cout<<"---after"<<number_V_genes<<endl;
+  //cout<<"---before"<<number_D_genes<<endl;
   number_D_genes=max_gene_index(_genD,_numD);
+  //cout<<"---aafter"<<number_D_genes<<endl;
+  //cout<<"---before"<<number_J_genes<<endl;
+  /*for(unsigned i=0;i<_numJ;i++)
+    {
+      cout<<_genJ[i].toString()<<endl;
+      cout<<_genJ[i].Get_GeneIndex()<<endl;
+    }
+    cout<<"*****pointer address:"<<_genJ<<endl;*/
   number_J_genes=max_gene_index(_genJ,_numJ);
-
+  //cout<<"---after"<<number_J_genes<<endl;
   max_V_n_alleles = max_n_alleles(_genV, _numV);
   max_D_n_alleles = max_n_alleles(_genD, _numD);//...n_alleles]);
   max_J_n_alleles =max_n_alleles(_genJ, _numJ);
+  /*for(unsigned i=0;i<_numJ;i++)
+    {
+      cout<<_genJ[i].toString()<<endl;
+      }*/
 }

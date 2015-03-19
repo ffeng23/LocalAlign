@@ -31,13 +31,14 @@
 #include "../SIGPIG/GenomicD.hpp"
 #include "../SIGPIG/GenomicV.hpp"
 #include "../SIGPIG/genomicSegments.hpp"
-//#include "LoadData.hpp"
+//#include "LoadData.hpp"VD
 #include "../SIGPIG/AlignmentSettings.hpp"
 #include "../SIGPIG/Alignment.hpp"
 #include "../SIGPIG/Alignment_V.hpp"
 #include "../SIGPIG/Alignment_D.hpp"
 //#include "do_VDJ_alignment.hpp"
 #include "../SIGPIG/DataIO.hpp"
+#include "do_probabilistic_model_fitting.hpp"
 
 using namespace std;
 
@@ -102,7 +103,7 @@ if(alignmentFileName.size()==0)
       cout<<"Error in reading genomic template files, quit"<<endl;
       exit(-1);
     }
-
+  
   //==================================
   //now deserialize the alignment file
 //testing the deserialization
@@ -124,7 +125,19 @@ if(alignmentFileName.size()==0)
   cout<<"\tnumber of aligments read in:"<<total_alignment<<endl;
 
   //now we start building the model and get counter and assigns
-  
+  bool start_from_flat_prior=true;
+  bool mfit=do_probabilistic_model_fitting
+    (seq, v_align, d_align, j_align, total_alignment, genV, totalNumV,
+     genD, totalNumD, genJ, totalNumJ, start_from_flat_prior,2);
+  if(mfit)
+    {
+      cout<<"Successfully done the fitting!"<<endl;
+    }
+  else
+    {
+      cout<<"model fitting failed!"<<endl;
+    }
+     
   
   cout<<"Thanks for using our program and have a nice day!!"<<endl;
 

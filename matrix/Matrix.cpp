@@ -1378,21 +1378,26 @@ Matrix<T> Matrix<T>::m2vec() const
   unsigned dim_size[]={total};
   Matrix<T> temp_m(1,dim_size);
   unsigned* temp_index=new unsigned[total];
-  memset(temp_index, sizeof(unsigned)*total, 0);//set the default value
+  memset(temp_index, 0,sizeof(unsigned)*total);//set the default value
   //cout<<"inside m2vec, ready to test"<<endl;
   //cout<<temp_m.toString()<<endl;
-
+  //cout<<"total number is "<<total<<endl;
+  //for(unsigned i=0;i<total;i++)
+  //  {
+  //    cout<<temp_index[i]<<",";
+  //  }
+  //cout<<endl;
   //since we are following matlab style, we need to go through
   //dimension back to front
   unsigned running_block_number=1;
   unsigned running_block_size=total;
   unsigned previous_block_number=1;
-  //cout<<"this->c_dim:"<<this->c_dim<<endl;
+  cout<<"this->c_dim:"<<this->c_dim<<endl;
   
   for(unsigned i=this->c_dim-1;((signed)i)>=0;i--)
     {
-      //cout<<"==>loop i:"<<i;
-      
+      //cout<<"==>loop i:"<<i<<endl;
+      //cout<<"\t dime size:"<<c_dim_size[i]<<endl;
       previous_block_number=running_block_number;
       running_block_number*=c_dim_size[i]; //for temp_index
       running_block_size=total/running_block_number;//for temp_index
@@ -1410,18 +1415,21 @@ Matrix<T> Matrix<T>::m2vec() const
 		  temp_index[p*c_dim_size[i]*running_block_size+j*running_block_size+k]+=j*(total/(c_dim_size[i]*running_block_size));
 		  //cout<<"\tindex:"<<p*c_dim_size[1]*running_block_size+j*running_block_size+k<<"index out:"<<
 		  // j*(total/(c_dim_size[i]*running_block_size))<<endl;
+		  //cout<<"temp index"<<temp_index[p*c_dim_size[i]*running_block_size+j*running_block_size+k]<<endl;
 		}
 	    }
 	}
       
     }
-
+  //cout<<"done"<<endl;
   //now we have the index, copy over the element
   for(unsigned i=0;i<total;i++)
     {
+      //cout<<"loop i:"<<i<<";tempindex:"<<temp_index[i]<<endl;
+ 
       temp_m.c_data[i]=this->c_data[temp_index[i]];
     }
-
+  //cout<<"done"<<endl;
   delete [] temp_index;
   return temp_m;
 }

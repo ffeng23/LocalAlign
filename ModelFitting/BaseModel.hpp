@@ -41,7 +41,7 @@ public:
   virtual void InitializeAssign(Assigns& _a) const =0;
   
   //_c is output
-  virtual void UpdateCounter(const Assigns& _a, Counter& _c) const = 0;
+  virtual void UpdateCounter(Assigns& _a, Counter& _c) const = 0;
 
  
   //sum counter
