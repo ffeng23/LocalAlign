@@ -6,6 +6,8 @@
 #include "VDJ_cuts_insertion_dinuc_ntbias_counter.hpp"
 #include "VDJ_cuts_insertion_dinuc_ntbias_assigns.hpp"
 
+#include "Entropy.hpp"
+
 //NOTE: to do: do we need to add the parameter such max_assignments, max_insertions, etc
 //in the alignmentSettings (?) or some other way to specify these values!!!
 
@@ -1205,7 +1207,10 @@ if(!Update_nM_field(vdj_assigns.error_vs_position, vdj_assigns.proba, delta_coun
      cout<<"error on updating counter field mononucleotideVD"<<endl;
      exit(-1);
    }
+ vdj_counter=SumCounter(vdj_counter, deltaCounter);
     }//end of outer loop for check the valid assignmnet
+  
+  
 }
 
   //!!!here this one needs testing............===???????????????
@@ -1742,4 +1747,13 @@ VDJ_cuts_insertion_dinuc_ntbias_counter VDJ_cuts_insertion_dinuc_ntbias_model::S
 void VDJ_cuts_insertion_dinuc_ntbias_model::CalculateAssignmentEntropies()
 {
   //=========>to be implemented, for now leave it blank;
+  S_V=Entropy(PV, exp(1));
+  S_DJ=Entropy(PDJ, exp(1));
+  //unsigned dim_size[]={0,0,0,0}
+  //dim_size[0]=-1; 
+  S_D=Entropy(sum<double>(PDJ, 1), exp(1));
+  S_J=Entropy(sum<double>(PDJ, 0), exp(1));
+
+  S_gene=S_V+S_DJ;
+  
 }

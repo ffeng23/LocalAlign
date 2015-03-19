@@ -1077,7 +1077,7 @@ for(unsigned i=0;i<_numOfAligned;i++)
       if(nd<0)
 	nd=0;
       int max_nd=_J_maximum_deletion;
-      if(max_nd>_align_length[j]+_min_deletions[j])
+      if(max_nd>(signed)(_align_length[j]+_min_deletions[j]))
 	max_nd=_align_length[j]+_min_deletions[j];
       //cout<<"\t\t^^^^^second loop before, nd:"<<nd<<endl;
       for(;nd<=max_nd;nd++)
@@ -1092,7 +1092,7 @@ for(unsigned i=0;i<_numOfAligned;i++)
 	    max_p_length=(signed)(_align_positions[j][0]-1+nd-_min_deletions[j]);
 	  if(max_p_length<0)
 	    max_p_length=0;
-	  while( still_palindrome && p < max_p_length)
+	  while( still_palindrome && (signed)p < max_p_length)
 	    {
 	      
 	      still_palindrome = target.at(_align_positions[j][1] + p + (nd - _min_deletions[j] )) == DnaComplement(_seq.GetSequence().at(_align_positions[j][0] - p + nd - _min_deletions[j] - 1) );

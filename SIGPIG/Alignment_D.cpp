@@ -24,13 +24,13 @@
 
 Alignment_D::Alignment_D(): n_D_alleles(0), D_max_errors(0),
 			    numOfAligned(NULL), align_length(NULL), score(NULL),
-			    n_errors(NULL), error_positions(NULL),
-			    excess_error_positions_left(NULL),
-			    excess_error_positions_right(NULL),
+			    n_errors(NULL), error_positions(NULL),			    
 			    align_position_left(NULL), align_position_right(NULL),
 			    deletions_left(NULL), deletions_right(NULL),
 			    p_region_max_length_left(NULL),
 			    p_region_max_length_right(NULL),
+			    excess_error_positions_left(NULL),
+			    excess_error_positions_right(NULL),
 			    allele_order(NULL)
 {
   //empty one
@@ -39,13 +39,13 @@ Alignment_D::Alignment_D(): n_D_alleles(0), D_max_errors(0),
 //copy constructor, we need to do a deep copy
 Alignment_D::Alignment_D(const Alignment_D& _aod):
              numOfAligned(NULL), align_length(NULL), score(NULL),
-			    n_errors(NULL), error_positions(NULL),
-			    excess_error_positions_left(NULL),
-			    excess_error_positions_right(NULL),
-			    align_position_left(NULL), align_position_right(NULL),
-			    deletions_left(NULL), deletions_right(NULL),
-			    p_region_max_length_left(NULL),
+	     n_errors(NULL), error_positions(NULL),	     
+	     align_position_left(NULL), align_position_right(NULL),
+	     deletions_left(NULL), deletions_right(NULL),
+	     p_region_max_length_left(NULL),
 	     p_region_max_length_right(NULL),
+	     excess_error_positions_left(NULL),
+	     excess_error_positions_right(NULL),
 	     allele_order(NULL)
 {
   unsigned sizeOfUnsigned=sizeof(unsigned)/sizeof(char);
@@ -1456,7 +1456,7 @@ void DeterminePalindromAndExcessError_D
 	  if(nd<0)
 	    nd=0;
 	  int max_nd=_D_maximum_deletion;
-	  if(max_nd>_align_length[d][na]+_deletions_left[d][na])
+	  if(max_nd>(signed)(_align_length[d][na]+_deletions_left[d][na]))
 	    max_nd=_align_length[d][na]+_deletions_left[d][na];
 	  //cout<<"\t\t==???max_nd:"<<max_nd<<endl;
 	  for(;nd<=max_nd;nd++)
@@ -1514,7 +1514,7 @@ void DeterminePalindromAndExcessError_D
 	  if(nd<0)
 	    nd=0;
 	  max_nd=_D_maximum_deletion;
-	  if(max_nd>_align_length[d][na]+_deletions_right[d][na])
+	  if(max_nd>(signed)(_align_length[d][na]+_deletions_right[d][na]))
 	    max_nd=_align_length[d][na]+_deletions_right[d][na];
 	  	  
 	  for(;nd<=max_nd;nd++)
@@ -1728,7 +1728,7 @@ void Alignment_D::Deserialize(ifstream& _ifs)
   //up while we are reading the new one
   //cout<<"n_D_alleles:"<<n_D_alleles<<endl;
   unsigned original_n_D_alleles=n_D_alleles;
-  unsigned original_max_errors=D_max_errors;
+  //unsigned original_max_errors=D_max_errors;
   unsigned * original_numOfAligned;
   if((signed)original_n_D_alleles!=0)
     original_numOfAligned=new unsigned[original_n_D_alleles];

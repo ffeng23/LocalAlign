@@ -4,10 +4,11 @@
 #include <cmath>
 #include <iostream>
 #include "../matrix/Matrix.hpp"
-#include "VDJ_cuts_insertions_dinuc_ntbias_model.hpp"
+#include "VDJ_cuts_insertion_dinuc_ntbias_model.hpp"
 
-double Entropy( Matrix<double>& _p, const double& _base);
+double Entropy( const Matrix<double>& _p, const double& _base);
 
-void CalculateAssignmentEntropy(VDJ_cuts_insertions_dinuc_ntbias_model& _model);
+//int feng(int x);
+//void GetAssignmentEntropy(VDJ_cuts_insertion_dinuc_ntbias_model& _model);
 
 #endif

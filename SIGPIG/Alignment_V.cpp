@@ -46,7 +46,7 @@ void DeterminePalindromAndExcessError_V
       if(nd<0)
 	nd=0;
       int max_nd=_V_maximum_deletion;
-      if(max_nd>_align_length[j]+_min_deletions[j])
+      if(max_nd>(signed)(_align_length[j]+_min_deletions[j]))
 	max_nd=_align_length[j]+_min_deletions[j];
       //cout<<"\t\t^^^^^second loop before, nd:"<<nd<<endl;
       for(;nd<=max_nd;nd++)
@@ -65,7 +65,7 @@ void DeterminePalindromAndExcessError_V
 	  if(max_p_length<0)
 	    max_p_length=0;
 	  //cout<<"\t\t\tchecking while loop:max_p_length:"<<max_p_length<<endl;
-	  while( still_palindrome && p < max_p_length)
+	  while( still_palindrome && (signed)p < max_p_length)
 	    {	  
 	      //cout<<"\t\t\tstarting while......."<<endl;
 	      //cout<<"target at:"<<_align_positions[j][1] +_align_length[j] -1 - p - (nd - _min_deletions[j] )-0<<endl;
@@ -190,7 +190,7 @@ bool match_V(const SequenceString& _seq,
       <<"\n\t_error_cost"<<_error_cost<<endl;*/
 
   bool* v_large_deletion_flag=new bool [_numOfVSegs]; //=zeros(length(genJ),1); % Flag if deletions is too large
-  unsigned l_seq = _seq.GetLength(); //length of the input sequence
+  //unsigned l_seq = _seq.GetLength(); //length of the input sequence
   //cout<<"l_seq:"<<l_seq<<endl;
   unsigned* temp_align_length=new unsigned[_numOfVSegs];
   unsigned** temp_align_position=new unsigned*[_numOfVSegs];
@@ -257,7 +257,7 @@ bool match_V(const SequenceString& _seq,
      //_J->n_errors.push_back(temp_n_errors);
      /*
      // % Reverse the error positions to be relative to left-right orientation.
-     //********be careful here, we decide to keep the j error position relative to the END OF J CHAIN
+     // ********be careful here, we decide to keep the j error position relative to the END OF J CHAIN
      //  %%%j  error positions is relative to the end of J chain
      //vector<unsigned> temp_error_position_vec;
      if( temp_n_errors[i]>0&&temp_n_errors[i]!=((unsigned)-1))  //the second case will not possible??
@@ -912,7 +912,7 @@ unsigned align_with_constraints_fixed_left_remove_both_errors
   //   for this function, we need to go through the whole length and
   //   will take care of max_error later
   
-  bool matchFlag;
+  //bool matchFlag;
   _n_errors=0;
   //  unsigned i;
  

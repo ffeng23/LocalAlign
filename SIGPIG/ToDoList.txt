@@ -7,3 +7,16 @@
 
 6) need to rewrite the deserialize function, we should have call to reset the data before read the data into it.
 
+7) the j error position is relative to the end of the sequence (?). how should we take care of this??????????
+
+
+8) please confirm with the code for this action, in the function doing the assignment of the model, whenever there is a
+	return, we will either return a true or a false. when return a true, it is like in the original matlab code a "continue"
+	command, we return from the function/loop and go next loop/next round of function. but whenever there is false return, we 
+	we go upper to break the upper loop, and we might also need a flag to let it just out of the whole runs.
+	to make sure I understand there is 3 different call
+			continue
+			break;
+			return; 
+	in matlab. 
+	I need to be careful to distinguish in my c code all 3 levels . the stop at different scope

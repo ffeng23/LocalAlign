@@ -169,6 +169,7 @@ bool DoDeserialization
 
     //clean up
   ifs.close();
+  return true;
 }
 
 
