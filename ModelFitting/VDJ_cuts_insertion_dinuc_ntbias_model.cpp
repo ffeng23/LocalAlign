@@ -333,7 +333,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
   unsigned n_as=vdj_assigns.n_assignments;
   //cout<<vdj_counter.nPinsVD.dim();
 
-//cout<<"assigned.:"<<vdj_assigns.V.toString()<<endl;
+  //cout<<"assigned.:"<<vdj_assigns.V.toString()<<endl;
   //cout<<"vdj counter.nPDJ:"<<vdj_counter.nPDJ.toString()<<endl;
   if(n_as>0 && vdj_assigns.likelihood>0)
     {
@@ -346,18 +346,21 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
       delta_counter.N_processed=1;
 
       //normalize the probilitties of assignments
-      //cout<<"vdj_assigns.likelihood:"<<vdj_assigns.likelihood<<endl;
+      cout<<"vdj_assigns.likelihood:"<<vdj_assigns.likelihood<<endl;
       //cout<<"\t--->proba:before;"<<vdj_assigns.proba.toString()<<endl;
       vdj_assigns.proba=vdj_assigns.proba/vdj_assigns.likelihood;
       //cout<<"\t--->proba:after normailization:"<<vdj_assigns.proba.toString()<<endl;
       //now we want to update every relevant fields
       //first, nP**** fields.
-      //--nPinsVD 
+      //--nPinsVD
+      cout<<"assigns.insVD:"<< vdj_assigns.insVD.size().toString()<<";counter nPinsVD:"<<delta_counter.nPinsVD.size().toString()<<endl;
+      cout<<"assigns.insVD:"<< vdj_assigns.insVD.toString()<<";counter nPinsVD:"<<delta_counter.nPinsVD.toString()<<endl;
       if(!Update_nP_field(vdj_assigns.insVD,vdj_assigns.proba, delta_counter.nPinsVD, n_as ))
 	{
 	  cout<<"error on updating counter field insVD"<<endl;
 	  exit(-1);
 	}
+      cout<<"out 1"<<endl;
       if(!Update_nP_field(vdj_assigns.insDJ,vdj_assigns.proba, delta_counter.nPinsDJ, n_as ))
 	{
 	  cout<<"error on updating counter field insDJ"<<endl;
@@ -384,7 +387,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	}
       
       //V.initialize(1, dim_size, -1);
-      //count<<"n_as:"<<n_as<<endl;
+      cout<<"n_as:"<<n_as<<endl;
       //cout<<"proba:"<<vdj_assigns.proba.toString()<<endl;
       //cout<<"counter.nPV:"<<delta_counter.nPV.toString()<<endl;
       if(!Update_nP_field(vdj_assigns.V,vdj_assigns.proba, delta_counter.nPV, n_as ))
@@ -400,7 +403,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	  exit(-1);
 	}
       //cout<<"delta counter.nPD after updating:"<<delta_counter.nPDJ.toString()<<endl;
-      //count<<"yes, doing t2"<<endl;
+      cout<<"yes, doing t2"<<endl;
       //Vallele_given_gene.initialize(2, dim_size2, -1); //Probabilities of alleles given gene for each gene
       if(!Update_nP_field(vdj_assigns.Vallele_given_gene, vdj_assigns.proba, delta_counter.nPVallele_given_gene, n_as ))
 	{
@@ -421,7 +424,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	  cout<<"error on updating counter field Jallele_given_gene"<<endl;
 	  exit(-1);
 	}
-      //cout<<"yes, doing t3"<<endl;
+      cout<<"yes, doing t3"<<endl;
       //VD_left_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
       if(!Update_nP_field(vdj_assigns.VD_left_edge_dinucleotide, vdj_assigns.proba, delta_counter.nPVD_left_edge_dinucleotide, n_as ))
 	{
@@ -547,7 +550,7 @@ if(!Update_nP_field(vdj_assigns.DcutJ, vdj_assigns.proba, delta_counter.nPDcutJ,
 	  cout<<"error on updating counter field DcutJ"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t9.1"<<endl;
+cout<<"yes, doing t9.1"<<endl;
 //VcutJ.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_J_deletions + 1);
 if(!Update_nP_field(vdj_assigns.VcutJ, vdj_assigns.proba, delta_counter.nPVcutJ, n_as ))
 	{
@@ -620,7 +623,7 @@ if(!Update_nP_field(vdj_assigns.insVDcutDr, vdj_assigns.proba, delta_counter.nPi
 	  cout<<"error on updating counter field insVDcutDr"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t11"<<endl;
+cout<<"yes, doing t11"<<endl;
 //insDJcutDr.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
 if(!Update_nP_field(vdj_assigns.insDJcutDr, vdj_assigns.proba, delta_counter.nPinsDJcutDr, n_as ))
 	{
@@ -745,7 +748,7 @@ if(!Update_nP_field(vdj_assigns.delVinsDJ, vdj_assigns.proba, delta_counter.nPde
 	  cout<<"error on updating counter field delVinsDJ"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t16"<<endl;
+cout<<"yes, doing t16"<<endl;
 //delVdelDl.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_D_deletions +1);
 if(!Update_nP_field(vdj_assigns.delVdelDl, vdj_assigns.proba, delta_counter.nPdelVdelDl, n_as ))
 	{
@@ -760,7 +763,7 @@ if(!Update_nP_field(vdj_assigns.delVdelDr, vdj_assigns.proba, delta_counter.nPde
 	  exit(-1);
 	}
 //delVdelJ.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_J_deletions +1);
-//cout<<"yes, doing t17"<<endl;
+cout<<"yes, doing t17"<<endl;
 if(!Update_nP_field(vdj_assigns.delVdelJ, vdj_assigns.proba, delta_counter.nPdelVdelJ, n_as ))
 	{
 	  cout<<"error on updating counter field delVdelJ"<<endl;
@@ -785,7 +788,7 @@ if(!Update_nP_field(vdj_assigns.delJdelDl, vdj_assigns.proba, delta_counter.nPde
 	  cout<<"error on updating counter field delJdelDl"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t18"<<endl;
+cout<<"yes, doing t18"<<endl;
 //   delJdelDr.initialize(2, dim_size2, -1);//zeros(model.max_J_deletions +1, model.max_D_deletions +1);
 if(!Update_nP_field(vdj_assigns.delJdelDr, vdj_assigns.proba, delta_counter.nPdelJdelDr, n_as ))
 	{
@@ -805,7 +808,7 @@ if(!Update_nP_field(vdj_assigns.delDlinsDJ, vdj_assigns.proba, delta_counter.nPd
 	  cout<<"error on updating counter field delDlinsDJ"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t20"<<endl;
+cout<<"yes, doing t20"<<endl;
 //delDldelDr.initialize(2, dim_size2, -1);//zeros(model.max_D_deletions +1, model.max_D_deletions +1);
 if(!Update_nP_field(vdj_assigns.delDldelDr, vdj_assigns.proba, delta_counter.nPdelDldelDr, n_as ))
 	{
@@ -1279,7 +1282,7 @@ if(!Update_nM_field(vdj_assigns.error_vs_position, vdj_assigns.proba, delta_coun
      cout<<"error on updating counter field mononucleotideVD"<<endl;
      exit(-1);
    }
- //cout<<"\t-->sum the counter:"<<endl;
+ cout<<"\t-->sum the counter:"<<endl;
  //cout<<"delta_counter before summing:nPDJ"<<delta_counter.nPDJ.toString()<<endl;
  vdj_counter=SumCounter(vdj_counter, delta_counter);
  //cout<<"after nPDJ vdj_counter.nPDJ:"<<vdj_counter.nPDJ.toString()<<endl;
