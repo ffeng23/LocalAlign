@@ -324,28 +324,32 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::InitializeAssign(Assigns& _a) const
 
 void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& _c) const
 {
-  //cout<<"inside update counter-------------"<<endl;
+  cout<<"inside update counter-------------"<<endl;
+  
   VDJ_cuts_insertion_dinuc_ntbias_assigns& vdj_assigns=
     dynamic_cast<VDJ_cuts_insertion_dinuc_ntbias_assigns&>(_a);
   VDJ_cuts_insertion_dinuc_ntbias_counter& vdj_counter=
     dynamic_cast<VDJ_cuts_insertion_dinuc_ntbias_counter&>(_c);
   unsigned n_as=vdj_assigns.n_assignments;
-//cout<<vdj_counter.nPinsVD.dim();
+  //cout<<vdj_counter.nPinsVD.dim();
 
-//cout<<"assigned.V:"<<vdj_assigns.V.toString()<<endl;
+//cout<<"assigned.:"<<vdj_assigns.V.toString()<<endl;
+  //cout<<"vdj counter.nPDJ:"<<vdj_counter.nPDJ.toString()<<endl;
   if(n_as>0 && vdj_assigns.likelihood>0)
     {
-      //cout<<"yes, doing t"<<endl;
+      //count<<"yes, doing t"<<endl;
       //first we simply create a temporary counter
       VDJ_cuts_insertion_dinuc_ntbias_counter delta_counter(this->model_params);
-      
+      //cout<<"delta_counter nPV after create new:"<<delta_counter.nPV.toString()<<endl;
       delta_counter.logLikelihood=log(vdj_assigns.likelihood);
 
       delta_counter.N_processed=1;
 
       //normalize the probilitties of assignments
+      //cout<<"vdj_assigns.likelihood:"<<vdj_assigns.likelihood<<endl;
+      //cout<<"\t--->proba:before;"<<vdj_assigns.proba.toString()<<endl;
       vdj_assigns.proba=vdj_assigns.proba/vdj_assigns.likelihood;
-      
+      //cout<<"\t--->proba:after normailization:"<<vdj_assigns.proba.toString()<<endl;
       //now we want to update every relevant fields
       //first, nP**** fields.
       //--nPinsVD 
@@ -380,7 +384,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	}
       
       //V.initialize(1, dim_size, -1);
-      //cout<<"n_as:"<<n_as<<endl;
+      //count<<"n_as:"<<n_as<<endl;
       //cout<<"proba:"<<vdj_assigns.proba.toString()<<endl;
       //cout<<"counter.nPV:"<<delta_counter.nPV.toString()<<endl;
       if(!Update_nP_field(vdj_assigns.V,vdj_assigns.proba, delta_counter.nPV, n_as ))
@@ -388,14 +392,15 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	  cout<<"error on updating counter field V"<<endl;
 	  exit(-1);
 	}
-      //cout<<"counter.nPV:"<<delta_counter.nPV.toString()<<endl;
+      //cout<<"delta counter.nPD before updating:"<<delta_counter.nPDJ.toString()<<endl;
       //DJ.initialize(2, dim_size2, -1); //Joint P(V, D, J gene choices)
       if(!Update_nP_field(vdj_assigns.DJ,vdj_assigns.proba, delta_counter.nPDJ, n_as ))
 	{
 	  cout<<"error on updating counter field DJ"<<endl;
 	  exit(-1);
 	}
-      //cout<<"yes, doing t2"<<endl;
+      //cout<<"delta counter.nPD after updating:"<<delta_counter.nPDJ.toString()<<endl;
+      //count<<"yes, doing t2"<<endl;
       //Vallele_given_gene.initialize(2, dim_size2, -1); //Probabilities of alleles given gene for each gene
       if(!Update_nP_field(vdj_assigns.Vallele_given_gene, vdj_assigns.proba, delta_counter.nPVallele_given_gene, n_as ))
 	{
@@ -416,7 +421,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	  cout<<"error on updating counter field Jallele_given_gene"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t3"<<endl;
+      //cout<<"yes, doing t3"<<endl;
       //VD_left_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
       if(!Update_nP_field(vdj_assigns.VD_left_edge_dinucleotide, vdj_assigns.proba, delta_counter.nPVD_left_edge_dinucleotide, n_as ))
 	{
@@ -436,7 +441,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	  cout<<"error on updating counter field DJ_left_edge_dinucleotide"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t4"<<endl;
+//count<<"yes, doing t4"<<endl;
       //DJ_right_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
       if(!Update_nP_field(vdj_assigns.DJ_right_edge_dinucleotide, vdj_assigns.proba, delta_counter.nPDJ_right_edge_dinucleotide, n_as ))
 	{
@@ -456,7 +461,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	  cout<<"error on updating counter field pJmax_delJ_J"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t5"<<endl;
+//count<<"yes, doing t5"<<endl;
       //pDlmax_delDl_D.initialize(2, dim_size2, -1);// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1));
       if(!Update_nP_field(vdj_assigns.pDlmax_delDl_D, vdj_assigns.proba, delta_counter.nPpDlmax_delDl_D, n_as ))
 	{
@@ -469,7 +474,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	  cout<<"error on updating counter field pDrmax_delDr_D"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t7"<<endl;
+//count<<"yes, doing t7"<<endl;
       //VDJ.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1), size(model.PDJ,1), size(model.PDJ,2));
       if(!Update_nP_field(vdj_assigns.VDJ, vdj_assigns.proba, delta_counter.nPVDJ, n_as ))
 	{
@@ -503,7 +508,7 @@ void VDJ_cuts_insertion_dinuc_ntbias_model::UpdateCounter(Assigns& _a, Counter& 
 	  cout<<"error on updating counter field pJdelJ"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t8"<<endl;
+//count<<"yes, doing t8"<<endl;
       //VcutV.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_V_deletions + 1);
       if(!Update_nP_field(vdj_assigns.VcutV, vdj_assigns.proba, delta_counter.nPVcutV, n_as ))
 	{
@@ -529,7 +534,7 @@ if(!Update_nP_field(vdj_assigns.JcutJ, vdj_assigns.proba, delta_counter.nPJcutJ,
 	  cout<<"error on updating counter field JcutJ"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t9"<<endl;
+//count<<"yes, doing t9"<<endl;
 //DcutV.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,1),model.max_palindrome + model.max_V_deletions + 1);
 if(!Update_nP_field(vdj_assigns.DcutV, vdj_assigns.proba, delta_counter.nPDcutV, n_as ))
 	{
@@ -542,6 +547,7 @@ if(!Update_nP_field(vdj_assigns.DcutJ, vdj_assigns.proba, delta_counter.nPDcutJ,
 	  cout<<"error on updating counter field DcutJ"<<endl;
 	  exit(-1);
 	}
+//cout<<"yes, doing t9.1"<<endl;
 //VcutJ.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_J_deletions + 1);
 if(!Update_nP_field(vdj_assigns.VcutJ, vdj_assigns.proba, delta_counter.nPVcutJ, n_as ))
 	{
@@ -554,13 +560,14 @@ if(!Update_nP_field(vdj_assigns.VcutDl, vdj_assigns.proba, delta_counter.nPVcutD
 	  cout<<"error on updating counter field VcutDl"<<endl;
 	  exit(-1);
 	}
+//count<<"yes, doing t9.2"<<endl;
 //VcutDr.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1),model.max_palindrome + model.max_D_deletions + 1);
 if(!Update_nP_field(vdj_assigns.VcutDr, vdj_assigns.proba, delta_counter.nPVcutDr, n_as ))
 	{
 	  cout<<"error on updating counter field VcutDr"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t4"<<endl;
+//count<<"yes, doing t10"<<endl;
 //JcutDl.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_D_deletions + 1);
 if(!Update_nP_field(vdj_assigns.JcutDl, vdj_assigns.proba, delta_counter.nPJcutDl, n_as ))
 	{
@@ -573,6 +580,7 @@ if(!Update_nP_field(vdj_assigns.JcutDr, vdj_assigns.proba, delta_counter.nPJcutD
 	  cout<<"error on updating counter field JcutDr"<<endl;
 	  exit(-1);
 	}
+//count<<"yes, doing t9.3"<<endl;
 //JcutV.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2),model.max_palindrome + model.max_V_deletions + 1);
 if(!Update_nP_field(vdj_assigns.JcutV, vdj_assigns.proba, delta_counter.nPJcutV, n_as ))
 	{
@@ -585,7 +593,7 @@ if(!Update_nP_field(vdj_assigns.insVDcutV, vdj_assigns.proba, delta_counter.nPin
 	  cout<<"error on updating counter field insVDcutV"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t10"<<endl;
+//count<<"yes, doing t10.1"<<endl;
 //insDJcutV.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_V_deletions + 1);
 if(!Update_nP_field(vdj_assigns.insDJcutV, vdj_assigns.proba, delta_counter.nPinsDJcutV, n_as ))
 	{
@@ -598,6 +606,7 @@ if(!Update_nP_field(vdj_assigns.insVDcutDl, vdj_assigns.proba, delta_counter.nPi
 	  cout<<"error on updating counter field insVDcutDl"<<endl;
 	  exit(-1);
 	}
+//count<<"yes, doing t10.1"<<endl;
 //insDJcutDl.initialize(2, dim_size2, -1);// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_D_deletions + 1);
 if(!Update_nP_field(vdj_assigns.insDJcutDl, vdj_assigns.proba, delta_counter.nPinsDJcutDl, n_as ))
 	{
@@ -631,32 +640,38 @@ if(!Update_nP_field(vdj_assigns.insDJcutJ, vdj_assigns.proba, delta_counter.nPin
 	  cout<<"error on updating counter field insDJcutJ"<<endl;
 	  exit(-1);
 	}
-  //cout<<"yes, doing t12"<<endl;
+//count<<"yes, doing t12"<<endl;
 //V_align_length.initialize(1, dim_size, -1);// = zeros(max_V_length + 1,1);
+  //cout<<"V_align_length:"<<vdj_assigns.V_align_length.size().toString()<<";nPV_align:"<<delta_counter.nPV_align_length.size().toString()<<endl;
+  //count<<"show v_align_length:"<<vdj_assigns.V_align_length.toString()<<endl;
 if(!Update_nP_field(vdj_assigns.V_align_length, vdj_assigns.proba, delta_counter.nPV_align_length, n_as ))
 	{
 	  cout<<"error on updating counter field V_align_length"<<endl;
 	  exit(-1);
 	}
+//count<<"yes, doing t12.2"<<endl;
 //D_align_length.initialize(1, dim_size, -1);// = zeros(max_D_length + 1,1);
+//count<<"D_align_length:"<<vdj_assigns.D_align_length.toString()<<endl;
 if(!Update_nP_field(vdj_assigns.D_align_length, vdj_assigns.proba, delta_counter.nPD_align_length, n_as ))
 	{
 	  cout<<"error on updating counter field D_align_length"<<endl;
 	  exit(-1);
 	}
 //J_align_length.initialize(1, dim_size, -1);// = zeros(max_J_length + 1,1);
+//count<<"yes, doing t12.3"<<endl;
 if(!Update_nP_field(vdj_assigns.J_align_length, vdj_assigns.proba, delta_counter.nPJ_align_length, n_as ))
 	{
 	  cout<<"error on updating counter field J_align_length"<<endl;
 	  exit(-1);
 	}
-
+//count<<"yes, doing t12.5"<<endl;
 //JJ_align_length.initialize(2, dim_size2, -1);// = zeros(size(model.PDJ,2), 1 + max_J_length);
 if(!Update_nP_field(vdj_assigns.JJ_align_length, vdj_assigns.proba, delta_counter.nPJJ_align_length, n_as ))
 	{
 	  cout<<"error on updating counter field JJ_align_length"<<endl;
 	  exit(-1);
 	}
+
 //   VV_align_length.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1), 1 + max_V_length);
 if(!Update_nP_field(vdj_assigns.VV_align_length, vdj_assigns.proba, delta_counter.nPVV_align_length, n_as ))
 	{
@@ -664,7 +679,7 @@ if(!Update_nP_field(vdj_assigns.VV_align_length, vdj_assigns.proba, delta_counte
 	  exit(-1);
 	}
 
-//cout<<"yes, doing t13"<<endl;
+//count<<"yes, doing t13"<<endl;
 //insDJ_D_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_D_length + 1);
 if(!Update_nP_field(vdj_assigns.insDJ_D_align_length, vdj_assigns.proba, delta_counter.nPinsDJ_D_align_length, n_as ))
 	{
@@ -677,7 +692,7 @@ if(!Update_nP_field(vdj_assigns.insVD_D_align_length, vdj_assigns.proba, delta_c
 	  cout<<"error on updating counter field insVD_D_align_length"<<endl;
 	  exit(-1);
 	}
-
+ 
 //   insDJ_J_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_J_length + 1);
 if(!Update_nP_field(vdj_assigns.insDJ_J_align_length, vdj_assigns.proba, delta_counter.nPinsDJ_J_align_length, n_as ))
 	{
@@ -691,7 +706,7 @@ if(!Update_nP_field(vdj_assigns.insVD_J_align_length, vdj_assigns.proba, delta_c
 	  cout<<"error on updating counter field insVD_J_align_length"<<endl;
 	  exit(-1);
 	}
-//cout<<"yes, doing t14"<<endl;
+//count<<"yes, doing t14"<<endl;
 //  insDJ_V_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_V_length + 1);
 if(!Update_nP_field(vdj_assigns.insDJ_V_align_length, vdj_assigns.proba, delta_counter.nPinsDJ_V_align_length, n_as ))
 	{
@@ -700,23 +715,24 @@ if(!Update_nP_field(vdj_assigns.insDJ_V_align_length, vdj_assigns.proba, delta_c
 	}
 
 //insVD_V_align_length.initialize(2, dim_size2, -1);// = zeros(model.max_insertions +1, max_V_length + 1);
-
+ //count<<"yes, ading t14.5"<<endl;
 if(!Update_nP_field(vdj_assigns.insVD_V_align_length, vdj_assigns.proba, delta_counter.nPinsVD_V_align_length, n_as ))
 	{
 	  cout<<"error on updating counter field insVD_V_align_length"<<endl;
 	  exit(-1);
 	}
-
-//Dallele_D_align_length.initialize(2, dim_size2, -1);// = zeros(3, max_D_length + 1);
-// cout<<"Dallele_D_align_length size:"<<vdj_assigns.Dallele_D_align_length.size().toString()<<";nP size:"<<delta_counter.nPDallele_D_align_length.size().toString()<<endl;
-//cout<<"assign allele_D_align length:"<<vdj_assigns.Dallele_D_align_length.toString()<<endl;
+ //count<<"yes, ading t14.6"<<endl;
+ //Dallele_D_align_length.initialize(2, dim_size2, -1);// = zeros(3, max_D_length + 1);
+ //cout<<"Dallele_D_align_length size:"<<vdj_assigns.Dallele_D_align_length.size().toString()<<";nP size:"<<delta_counter.nPDallele_D_align_length.size().toString()<<endl;
+ //cout<<"assign allele_D_align length:"<<vdj_assigns.Dallele_D_align_length.toString()<<endl;
+ 
 if(!Update_nP_field(vdj_assigns.Dallele_D_align_length, vdj_assigns.proba, delta_counter.nPDallele_D_align_length, n_as ))
 	{
 	  cout<<"error on updating counter field Dallele_D_align_length"<<endl;
 	  exit(-1);
 	}
 
-//cout<<"yes, doing t15"<<endl;
+//count<<"yes, doing t15"<<endl;
 //delVinsVD.initialize(2, dim_size2, -1);// = zeros(model.max_V_deletions +1, model.max_insertions +1);
 if(!Update_nP_field(vdj_assigns.delVinsVD, vdj_assigns.proba, delta_counter.nPdelVinsVD, n_as ))
 	{
@@ -1263,9 +1279,10 @@ if(!Update_nM_field(vdj_assigns.error_vs_position, vdj_assigns.proba, delta_coun
      cout<<"error on updating counter field mononucleotideVD"<<endl;
      exit(-1);
    }
- //cout<<"sum the counter:"<<endl;
+ //cout<<"\t-->sum the counter:"<<endl;
+ //cout<<"delta_counter before summing:nPDJ"<<delta_counter.nPDJ.toString()<<endl;
  vdj_counter=SumCounter(vdj_counter, delta_counter);
- //cout<<"vdj_counter.nPV:"<<vdj_counter.nPV.toString()<<endl;
+ //cout<<"after nPDJ vdj_counter.nPDJ:"<<vdj_counter.nPDJ.toString()<<endl;
     }//end of outer loop for check the valid assignmnet
   
   
@@ -1413,7 +1430,14 @@ if(!Update_nM_field(vdj_assigns.error_vs_position, vdj_assigns.proba, delta_coun
 		  
 		}
 	      //now we got position, let's up 
-	      _field_c(position_field_c,_field_c.dim() )+=_prob_field_a(k_all_good_assigns[i])/totalProb;
+	      if(totalProb>0)
+		{
+		  _field_c(position_field_c,_field_c.dim() )+=_prob_field_a(k_all_good_assigns[i])/totalProb;
+		}
+	      else //totalProb=0
+		{
+		  _field_c(position_field_c,_field_c.dim() )+=0;
+		}
 	      //}
 	    }//end of else
 	}//end of for updating

@@ -45,7 +45,8 @@ Matrix<T>::Matrix(const unsigned& _dim, const unsigned _dim_size[], const T& _da
 	  this->c_dim=-1;
 	  delete[] c_dim_size;
 	  c_dim_size=NULL;
-	  cerr<<"constructing an empty/unintialized matrix"<<endl;
+	  cerr<<"constructing an empty/unintialized matrix, constructor regular"<<endl;
+	  //cout<<"constructing an empty/unintialized matrix, constructor regular"<<endl;
 	  return;
 	}
       c_dim_size[i]=_dim_size[i];
@@ -81,7 +82,8 @@ Matrix<T>::Matrix(const unsigned& _dim, const unsigned* _dim_size, const T* _dat
 	  this->c_dim=-1;
 	  delete[] c_dim_size;
 	  c_dim_size=NULL;
-	  cerr<<"constructing an empty/unintialized matrix"<<endl;
+	  cerr<<"constructing an empty/unintialized matrix, regu construct"<<endl;
+	  //cout<<"constructing an empty/unintialized matrix, regu construct"<<endl;
 	  return;
 	}
       c_dim_size[i]=_dim_size[i];
@@ -112,6 +114,11 @@ template<class T>
 Matrix<T>::~Matrix()
 {
   //cout<<"*******calling destructor*********"<<endl;
+  if(((signed)this->c_dim)==-1)
+    {
+      c_dim_size=NULL;
+      c_data=NULL;
+    }
   if(c_dim_size!=NULL)
     {
       delete[] c_dim_size;
@@ -552,7 +559,7 @@ Matrix<T> Matrix<T>::operator /(const Matrix<T>& _m)const
   //check for compatibility
   if(this->c_dim!=_m.c_dim)
     {
-     cout<<"the dimensions are not equal in CopyValidElements request"<<endl;
+      //cout<<"the dimensions are not equal in CopyValidElements request"<<endl;
      cerr<<"the dimensions are not equal in CopyValidElements request"<<endl;
      throw std::runtime_error("incompatible matrix (dimension)");
     }
@@ -562,7 +569,7 @@ Matrix<T> Matrix<T>::operator /(const Matrix<T>& _m)const
       total*=this->c_dim_size[i];
       if(this->c_dim_size[i]!=_m.c_dim_size[i])
 	{
-	  cout<<"the dimensions are not equal in CopyValidElements request"<<endl;
+	  //cout<<"the dimensions are not equal in CopyValidElements request"<<endl;
 	  cerr<<"the dimensions are not equal in CopyValidElements request"<<endl;
 	  throw std::runtime_error("incompatible matrix (dimension)");
 	}
@@ -1042,7 +1049,8 @@ void Matrix<T>::initialize(const unsigned& _dim, const unsigned _dim_size[], con
 	  this->c_dim=-1;
 	  delete[] c_dim_size;
 	  c_dim_size=NULL;
-	  cerr<<"constructing an empty/unintialized matrix"<<endl;
+	  cerr<<"constructing an empty/unintialized matrix, initialize"<<endl;
+	  //cout<<"constructing an empty/unintialized matrix, initialize"<<endl;
 	  return;
 	}
       c_dim_size[i]=_dim_size[i];
@@ -1097,7 +1105,9 @@ void Matrix<T>::initialize(const unsigned& _dim, const unsigned _dim_size[], con
 	  this->c_dim=-1;
 	  delete[] c_dim_size;
 	  c_dim_size=NULL;
-	  cerr<<"constructing an empty/unintialized matrix"<<endl;
+	  cerr<<"constructing an empty/unintialized matrix, intialize"<<endl;
+	  //cout<<"constructing an empty/unintialized matrix, initialize"<<endl;
+	  
 	  return;
 	}
       c_dim_size[i]=_dim_size[i];

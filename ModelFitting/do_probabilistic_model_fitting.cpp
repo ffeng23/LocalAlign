@@ -1,3 +1,4 @@
+
 #include "do_probabilistic_model_fitting.hpp"
 #include "VDJ_cuts_insertion_dinuc_ntbias_model_params.hpp"
 #include "Entropy.hpp"
@@ -100,7 +101,7 @@ bool do_probabilistic_model_fitting
       //now go through the alignments
       for(unsigned k=0;k<numOfAlignments;k++)
 	{//for each alignment, do the assign
-	  //cout<<"\t\t alignment loop:"<<k<<endl;
+	  cout<<"\t\t alignment loop:"<<k<<endl;
 	  bool assign_flag=VDJ_model_assignments
 	    (model, _seq[k], _V[k], _D[k], _J[k], _genV, _numV, _genD, _numD, _genJ, _numJ,
 	     probability_threshold_factor, no_error, ignore_deep_error, do_smoothing,
@@ -118,7 +119,8 @@ bool do_probabilistic_model_fitting
 	  cout<<" assignment likelihood:"<<assigns.likelihood<<endl;
 	  if(assigns.n_assignments>0)
 	    {
-	      //cout<<"inside updateingggggg block............"<<endl;
+	      cout<<"inside updateingggggg block............"<<endl;
+	      //cout<<"assign proba:"<<assigns.proba.toString()<<endl;
 	      Matrix<double> p_ass=assigns.proba/assigns.likelihood;
 	      model.assignment_entropy[k]=Entropy(p_ass, exp(1));
 	      if(assigns.generation_probability>0)
@@ -128,24 +130,27 @@ bool do_probabilistic_model_fitting
 		}
 	      else
 		model.assignment_entropy_no_errors[k]=nan("");
-	      
+	      //cout<<"assign.DJ:"<<assigns.DJ.toString()<<endl;
+	      //cout<<"counter.DJ:"<<counter.nPDJ.toString()<<endl;
 	      if(assigns.likelihood>0)
 		{
 		  //cout<<"---------->update counter"<<endl;
 		  model.UpdateCounter(assigns, counter);
 		}
-	      
+	      //cout<<"outside update counter-----------"<<endl;
+	      //cout<<"counter.DJ:"<<counter.nPDJ.toString()<<endl;
+	      cout<<"end of upding block"<<endl;
 	    }//end of if n_assignment >0 loop
 	  
 	  
 	}//end of alignment
-      //cout<<"PV:"<<model.PV.toString()<<endl;
+      //cout<<"PDJ:"<<model.PDJ.toString()<<endl;
       //done with one round of all alignment/iteration, need to update the model
       cout<<"Done with one iteration, up date model......"<<endl;
-      cout<<"counter.nPV:"<<counter.nPV.toString()<<endl;
-      cout<<"counter.nPinsVD:"<<counter.nPinsVD.toString()<<endl;
+      //cout<<"counter.nPV:"<<counter.nPV.toString()<<endl;
+      //cout<<"counter.nPDJ:"<<counter.nPDJ.toString()<<endl;
       model.GetModelFromCounter(counter);
-      //cout<<"PV:"<<model.PV.toString()<<endl;
+      //cout<<"PDJ:"<<model.PDJ.toString()<<endl;
       model.CalculateAssignmentEntropies();
       cout<<"finish one iteration"<<endl;
       //cout<<"PV:"<<model.PV.toString()<<endl;
