@@ -850,8 +850,8 @@ bool assign_VJ_palindrome
   _assigns.Dallele_given_gene(in,0) =assignment_params.d_g;_assigns.Dallele_given_gene(in,1)= _genD[assignment_params.d_a].Get_Allele();
   //_assigns.cutV_given_V(in,:) = [ 1 - model.min_V_cut + ncutV, v_g];
   //assigns.cutJ_given_J(in,:) = [1 - model.min_J_cut + ncutJ, j_g];
-  _assigns.insVD(in)=1 + inVD;// % insertions, niVD in matlab
-  _assigns.insDJ(in)=1 + inDJ;// niDJ in matlab
+  _assigns.insVD(in)=inVD;// % insertions, niVD in matlab
+  _assigns.insDJ(in)=inDJ;// niDJ in matlab
   //assigns.nucleotideVD(in,:,:) = nucleotideVD;
   //assigns.nucleotideVD_5prime(in,:,:) = nucleotideVD_5prime;
   //assigns.nucleotideDJ(in,:,:) = nucleotideDJ;
