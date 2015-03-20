@@ -196,14 +196,14 @@ bool DoGenomicTemplateReading
     }
   */
   _totalNumD=  ReadGenomicD(_genomicDFileName, _genD);
-  
+  /*
   cout<<_totalNumD<<" D genomic segments are read in."<<endl; 
-  /*for(unsigned i=0;i<totalNumD;i++)
+  for(unsigned i=0;i<_totalNumD;i++)
     {
-      cout<<i<<":"<<genD[i].Get_Seq().toString()<<endl;
-      cout<<"\t==>geneIndex:"<<genD[i].Get_GeneIndex()<<endl;
-      cout<<"\t==>n_allele:"<<genD[i].Get_n_alleles()<<endl;
-      cout<<"\t==>allele:"<<genD[i].Get_Allele()<<endl;
+      cout<<i<<":"<<(*_genD)[i].Get_Seq().toString()<<endl;
+      cout<<"\t==>geneIndex:"<<(*_genD)[i].Get_GeneIndex()<<endl;
+      cout<<"\t==>n_allele:"<<(*_genD)[i].Get_n_alleles()<<endl;
+      cout<<"\t==>allele:"<<(*_genD[i]).Get_Allele()<<endl;
     }
   */
   _totalNumV=  ReadGenomicV(_genomicVFileName ,_genV);

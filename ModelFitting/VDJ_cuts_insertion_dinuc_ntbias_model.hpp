@@ -103,6 +103,7 @@ public:
   VDJ_cuts_insertion_dinuc_ntbias_counter SumCounter
   (const VDJ_cuts_insertion_dinuc_ntbias_counter* _c, const unsigned _size) const;
 
+  void output(const unsigned& numOfAlignments);
 
   //==================================
   //define the members
@@ -146,6 +147,7 @@ public:
   double S_J;
   double S_insVD;
   double S_insDJ;
+  double S_ins;
   double S_insVD_length;
   double S_insDJ_length;
   double S_insVD_nt;
@@ -154,7 +156,8 @@ public:
   double S_delD;
   double S_delJ;
   double S_delDJ;
-
+  double* assignment_entropy;
+  double* assignment_entropy_no_errors;
   unsigned negative_excess_deletions_max;
 
   //when considering more deletions than implied by alignment,

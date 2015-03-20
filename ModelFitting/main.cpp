@@ -76,7 +76,8 @@ if(alignmentFileName.size()==0)
       exit(-1);
       //printUsage(argc, argv);
     }
-
+// unsigned dim
+//Maxtrix<double> x(2,
   if(outputFileNameBase.size()==0)
     {
       outputFileNameBase=alignmentFileName;
@@ -90,7 +91,7 @@ if(alignmentFileName.size()==0)
   //cout<<"\tThe error cost: "<<errorCost<<"\n";
   //cout<<"\tThe number of sequences processed for each file: "<<numberOfSeqProcessedEach<<"\n";
   //start testing
-
+  cout<<"printing...........-1"<<(unsigned)-1<<endl;
   //first open up the files============================
   //first we need to declare the genomic segments
   GenomicV* genV=NULL;
@@ -103,7 +104,11 @@ if(alignmentFileName.size()==0)
       cout<<"Error in reading genomic template files, quit"<<endl;
       exit(-1);
     }
-  
+  for(unsigned i=0;i<totalNumD;i++)
+    {
+      cout<<genD[i].toString()<<endl;//Get_n_alleles()<<",";
+    }
+  cout<<endl;
   //==================================
   //now deserialize the alignment file
 //testing the deserialization
@@ -128,7 +133,7 @@ if(alignmentFileName.size()==0)
   bool start_from_flat_prior=true;
   bool mfit=do_probabilistic_model_fitting
     (seq, v_align, d_align, j_align, total_alignment, genV, totalNumV,
-     genD, totalNumD, genJ, totalNumJ, start_from_flat_prior,2);
+     genD, totalNumD, genJ, totalNumJ, start_from_flat_prior,20);
   if(mfit)
     {
       cout<<"Successfully done the fitting!"<<endl;

@@ -1392,7 +1392,7 @@ Matrix<T> Matrix<T>::m2vec() const
   unsigned running_block_number=1;
   unsigned running_block_size=total;
   unsigned previous_block_number=1;
-  cout<<"this->c_dim:"<<this->c_dim<<endl;
+  //cout<<"this->c_dim:"<<this->c_dim<<endl;
   
   for(unsigned i=this->c_dim-1;((signed)i)>=0;i--)
     {

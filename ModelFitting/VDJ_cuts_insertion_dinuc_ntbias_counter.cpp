@@ -216,7 +216,7 @@ VDJ_cuts_insertion_dinuc_ntbias_counter::VDJ_cuts_insertion_dinuc_ntbias_counter
   nMcoverage()//1, _model.read_length)//zeros(model.read_length,1);
 {
   //here we will correctly initialize the matrices
-  unsigned dim_size1[]={_model_ps.max_insertions+1};
+  unsigned dim_size1[]={_model_ps.max_insertions};
   nPinsVD.initialize(1, dim_size1, 0.0);
   nPinsDJ.initialize(1, dim_size1, 0.0);
   
@@ -269,8 +269,11 @@ VDJ_cuts_insertion_dinuc_ntbias_counter::VDJ_cuts_insertion_dinuc_ntbias_counter
   nPDJ_left_edge_dinucleotide.initialize(2, dim_size2,0.0);// = zeros(4,4),
   nPDJ_right_edge_dinucleotide.initialize(2, dim_size2,0.0);// = zeros(4,4),
 
-  nMtrinucleotideVD.initialize(2, dim_size2,0.0);// = zeros(4,4,4),
-  nMtrinucleotideDJ.initialize(2, dim_size2,0.0);// = zeros(4,4,4),
+  dim_size3[0]=4;
+  dim_size3[1]=4;
+  dim_size3[2]=4;
+  nMtrinucleotideVD.initialize(3, dim_size3,0.0);// = zeros(4,4,4),
+  nMtrinucleotideDJ.initialize(3, dim_size3,0.0);// = zeros(4,4,4),
   
   dim_size3[0]=_model_ps.number_V_genes;
   dim_size3[1]=_model_ps.max_palindrome+1;
@@ -411,7 +414,7 @@ VDJ_cuts_insertion_dinuc_ntbias_counter::VDJ_cuts_insertion_dinuc_ntbias_counter
   dim_size2[1]=max_V_length+1;
   nPinsVD_V_align_length.initialize(2, dim_size2,0.0);// = zeros(model.max_insertions +1, max_V_length + 1),
 
-  dim_size2[0]=_model_ps.max_D_n_alleles;
+  dim_size2[0]=_model_ps.number_D_genes;
   dim_size2[1]=max_D_length+1;
   nPDallele_D_align_length.initialize(2, dim_size2,0.0);// = zeros(3, max_D_length + 1),
 

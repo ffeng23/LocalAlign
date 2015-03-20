@@ -39,10 +39,10 @@ const GenomicV* _genV, const unsigned& _numV,
   max_J_cut=max_J_deletions;
   //start intialize the various matrix
   //cout<<"---inside  vdj parameter:"<<number_V_genes<<endl;
-  number_V_genes=max_gene_index(_genV,_numV);
+  number_V_genes=max_gene_index(_genV,_numV)+1;
   //cout<<"---after"<<number_V_genes<<endl;
   //cout<<"---before"<<number_D_genes<<endl;
-  number_D_genes=max_gene_index(_genD,_numD);
+  number_D_genes=max_gene_index(_genD,_numD)+1;
   //cout<<"---aafter"<<number_D_genes<<endl;
   //cout<<"---before"<<number_J_genes<<endl;
   /*for(unsigned i=0;i<_numJ;i++)
@@ -51,7 +51,7 @@ const GenomicV* _genV, const unsigned& _numV,
       cout<<_genJ[i].Get_GeneIndex()<<endl;
     }
     cout<<"*****pointer address:"<<_genJ<<endl;*/
-  number_J_genes=max_gene_index(_genJ,_numJ);
+  number_J_genes=max_gene_index(_genJ,_numJ)+1;
   //cout<<"---after"<<number_J_genes<<endl;
   max_V_n_alleles = max_n_alleles(_genV, _numV);
   max_D_n_alleles = max_n_alleles(_genD, _numD);//...n_alleles]);

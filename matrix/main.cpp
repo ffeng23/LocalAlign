@@ -91,11 +91,13 @@ int main(int argc, char* argv[])
   cout<<"m1:"<<m1.toString()<<endl;
 
   //now we try to initialize it
-  unsigned dim_size[]={2,3,4};
+  unsigned dim_size[]={2,3,2};
   unsigned data[]={1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11,12};
   m1.initialize(3, dim_size, data);
-  m1=m1-3;
+  m1=m1-1;
   cout<<"after initializeation"<<endl;
+  cout<<"m1:\n"<<m1.toString()<<endl;
+  m1(0,0,0)+=100;
   cout<<"m1:\n"<<m1.toString()<<endl;
 
   //create another one

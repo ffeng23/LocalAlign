@@ -258,7 +258,7 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
    pDrmax_delDr_D.initialize(2, dim_size2, -1);// = zeros(model.max_palindrome + 1, model.max_D_deletions + 1, size(model.PDJ,1));
 
    VDJ.initialize(2, dim_size2, -1);// = zeros(size(model.PV,1), size(model.PDJ,1), size(model.PDJ,2));
-   dim_size[1]=2;
+   dim_size2[1]=2;
    pVdelV.initialize(2, dim_size2, -1);// = zeros( model.max_palindrome + 1, model.max_V_deletions + 1);
    pDldelDl.initialize(2, dim_size2, -1);// = zeros( model.max_palindrome + 1, model.max_D_deletions + 1);
    pDrdelDr.initialize(2, dim_size2, -1);// = zeros( model.max_palindrome + 1, model.max_D_deletions + 1);
@@ -424,7 +424,7 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
   
   zeroD.initialize(1, dim_size, 0.0) ;
   dim_size3[1]=4;
-  dim_size3[1]=4;
+  dim_size3[2]=4;
   nucleotideVD.initialize(3, dim_size3, 0.0); nucleotideVD_5prime.initialize(3, dim_size3, 0.0);//nucleotide distr's
   nucleotideDJ.initialize(3, dim_size3, 0.0); nucleotideDJ_3prime.initialize(3, dim_size3, 0.0);
 
