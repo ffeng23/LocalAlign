@@ -41,11 +41,13 @@ bool do_probabilistic_model_fitting
      );
   bool do_smoothing=true;
   bool force_all_alleles=false;
+  cout<<"===>before doing looping show some parameters:"<<endl;
+  cout<<"PV:"<<model.PV.toString()<<endl;
   //start the looping
-  cout<<"ready to do the iterations...."<<endl;
+  cout<<"ready to do the iterations...max_iters:"<<_max_iters<<"."<<endl;
   for(unsigned iteration_no=0;iteration_no<_max_iters;iteration_no++)
     {
-      cout<<"iteration loop==>"<<iteration_no<<endl;
+      cout<<"==========******iteration loop==>"<<iteration_no<<endl;
       if((iteration_no==1) && start_from_flat_prior)
 	{
 	  //place holder, start a new model
@@ -93,8 +95,8 @@ bool do_probabilistic_model_fitting
       VDJ_cuts_insertion_dinuc_ntbias_counter counter(vdj_mps);
       model.InitializeCounter(counter);
       //cout<<"\t modeling loop 2"<<endl;
-      VDJ_cuts_insertion_dinuc_ntbias_assigns assigns(model,counter);
-      model.InitializeAssign(assigns);
+      //VDJ_cuts_insertion_dinuc_ntbias_assigns assigns(model,counter);
+      //model.InitializeAssign(assigns);
       //cout<<"\t modeling loop 3"<<endl;
       model.assignment_entropy=new double[numOfAlignments];
       model.assignment_entropy_no_errors=new double[numOfAlignments];
@@ -102,6 +104,13 @@ bool do_probabilistic_model_fitting
       for(unsigned k=0;k<numOfAlignments;k++)
 	{//for each alignment, do the assign
 	  cout<<"\t\t alignment loop:"<<k<<endl;
+	  //initialize new assign for different alignment
+	  //VDJ_cuts_insertion_dinuc_ntbias_counter counter(vdj_mps);
+	  //model.InitializeCounter(counter);
+	  //cout<<"\t modeling loop 2"<<endl;
+	  VDJ_cuts_insertion_dinuc_ntbias_assigns assigns(model,counter);
+	  model.InitializeAssign(assigns);
+
 	  bool assign_flag=VDJ_model_assignments
 	    (model, _seq[k], _V[k], _D[k], _J[k], _genV, _numV, _genD, _numD, _genJ, _numJ,
 	     probability_threshold_factor, no_error, ignore_deep_error, do_smoothing,
@@ -117,6 +126,7 @@ bool do_probabilistic_model_fitting
 	    }
 	  cout<<"n of assigned:"<<assigns.n_assignments<<endl;
 	  cout<<" assignment likelihood:"<<assigns.likelihood<<endl;
+	  cout<<"assignment V:"<<assigns.V.toString()<<endl;
 	  if(assigns.n_assignments>0)
 	    {
 	      cout<<"inside updateingggggg block............"<<endl;
@@ -134,11 +144,11 @@ bool do_probabilistic_model_fitting
 	      //cout<<"counter.DJ:"<<counter.nPDJ.toString()<<endl;
 	      if(assigns.likelihood>0)
 		{
-		  //cout<<"---------->update counter"<<endl;
+		  cout<<"---------->update counter"<<endl;
 		  model.UpdateCounter(assigns, counter);
 		}
 	      //cout<<"outside update counter-----------"<<endl;
-	      //cout<<"counter.DJ:"<<counter.nPDJ.toString()<<endl;
+	      cout<<"counter.nV:"<<counter.nPV.toString()<<endl;
 	      cout<<"end of upding block"<<endl;
 	    }//end of if n_assignment >0 loop
 	  

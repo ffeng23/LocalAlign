@@ -1,6 +1,6 @@
 #include <iostream>
 #include "FileManipulator.hpp"
-
+#include <stdlib.h>
 
 using namespace std;
 //the caller need to declare, but don't initialize, since we don't know how many,

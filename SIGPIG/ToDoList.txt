@@ -20,3 +20,7 @@
 			return; 
 	in matlab. 
 	I need to be careful to distinguish in my c code all 3 levels . the stop at different scope
+
+9) need take care of the cases where the number of errors are too more than the best one so far.
+
+10)

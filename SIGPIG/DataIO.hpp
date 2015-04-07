@@ -56,6 +56,17 @@ bool DoSerialization
 //       when doing deserialization.
 //
 
+//=========>serialization of alignment datas
+//this method is used to only select first "_numOfAlignments" of aligns from
+//the original file.
+bool DoSerialization
+(const Alignment_Object * _v_align_arrays,
+ const Alignment_D * _d_align_arrays, const Alignment_Object * _j_align_arrays,
+ const SequenceString* _seq , const unsigned& _totalNumOfAligns,
+ const string& _fileName,
+ const unsigned& _numOfAlignments
+ );
+
 
 //=========>deserialization of alignment datas
 //reading the alignment from the disk, 

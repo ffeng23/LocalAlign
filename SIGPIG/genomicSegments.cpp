@@ -369,7 +369,7 @@ string ParseSequenceNameD(const string& _seqName)
 {
   //we strip off the '> '
   string ret=_seqName;
-  return ret.replace(0,2,"");
+  return ret.replace(0,1,"");
   //return buffer[1];//return second field 
 }
 

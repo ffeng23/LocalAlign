@@ -161,7 +161,8 @@ unsigned lseq;
     }       
   //cout<<"\t*** in constructor7:"<<endl;
 
-Rerror_per_sequenced_nucleotide = 1.0E-7; //% error rate
+Rerror_per_sequenced_nucleotide = 1.0E-3; //% error rate, originally we 1E-7,
+     //this one in this case including somatic mutation.
 //% Normalizes all distributions
 //doing first round of functions
   Normalize();

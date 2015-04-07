@@ -4,6 +4,50 @@
 #include <fstream>
 static string  version("0.1"); //for serialization
 
+//static method to write the version information
+static void WriteVersionInfo(const string& _version, ofstream& _ofs)
+{ 
+  if(!_ofs.is_open())
+    {
+      cout<<"******ERROR: can not open file, quit..."<<endl;
+      cerr<<"*****error: can not open file, quit..."<<endl;
+      //return false;
+      exit(-1);
+    }
+//start serialize the version number
+  unsigned len=_version.length()+1;
+  const char* p_char=(char*)&len;
+  _ofs.write(p_char, sizeof(unsigned));
+  p_char=version.c_str();
+  _ofs.write(p_char, version.length()+1);
+} 
+static void DoSerilizationStep(const Alignment_Object& _v_align, 
+			       const Alignment_D& _d_align, 
+			       const Alignment_Object& _j_align,
+			       const SequenceString& _seq, const unsigned& _step,
+			       ofstream& _ofs)
+{
+  if(!_ofs.is_open())
+    {
+      cout<<"******ERROR: can not open file, quit..."<<endl;
+      cerr<<"******ERROR: can not open file, quit..."<<endl;
+      exit(-1);
+      //return false;
+    }
+  const char* p_char;
+  //serialize sequence
+  _seq.Serialize(_ofs);
+  //serialize V
+  _v_align.Serialize(_ofs);
+
+  //serialize D
+  _d_align.Serialize(_ofs);
+  //serialize J
+  _j_align.Serialize(_ofs);
+  //serialize number of written so far
+  p_char=(char*)&_step;
+  _ofs.write(p_char, sizeof(unsigned));
+}
 //=========>serialization of alignment datas
 bool DoSerialization
 (bool const* const* _vdj_align_ok_arrays, Alignment_Object const* const* _v_align_arrays,
@@ -32,12 +76,13 @@ bool DoSerialization
     }
   const char* p_char;//pointer used to direct tht writing to the file stream
   //start serialize the version number
-  unsigned len=version.length()+1;
+  /*unsigned len=version.length()+1;
   p_char=(char*)&len;
   ofs.write(p_char, sizeof(unsigned));
   p_char=version.c_str();
   ofs.write(p_char, version.length()+1);
-  
+  */
+  WriteVersionInfo(version, ofs);
   //start serialize the total number of alignment sets
   //start getting the totalNumber of align ok
   unsigned alignedTotal1=0, alignedTotal2=0;
@@ -69,6 +114,7 @@ bool DoSerialization
 	  if(_vdj_align_ok_arrays[i][j])
 	    {
 	      runningCount++;
+	      /*
 	      //serialize sequence
 	      (*_it_arrays[i]).Serialize(ofs);
 	      //serialize V
@@ -81,7 +127,10 @@ bool DoSerialization
 	      //serialize number of written so far
 	      p_char=(char*)&runningCount;
 	      ofs.write(p_char, sizeof(unsigned));
-
+	      */
+	      DoSerilizationStep(_v_align_arrays[i][j], _d_align_arrays[i][j],
+				 _j_align_arrays[i][j], *_it_arrays[i],
+				 runningCount, ofs);
 	    }//a ok align, do writing, end of if block
 	  _it_arrays[i]++;
 	}//end of each alignment of each thread, for loop
@@ -93,6 +142,52 @@ bool DoSerialization
   ofs.close();
   return true;
 
+}
+
+
+
+//this method is used to only select first "_numOfAlignments" of aligns from
+//the original file.
+bool DoSerialization
+(const Alignment_Object * _v_align_arrays,
+ const Alignment_D * _d_align_arrays, const Alignment_Object * _j_align_arrays,
+ const SequenceString* _seq , const unsigned& _totalNumOfAligns,
+ const string& _fileName,
+ const unsigned& _numOfAlignments
+ )
+{
+  //open up a file first
+  ofstream ofs(_fileName.c_str(), std::ios::binary);
+  if(!ofs.is_open())
+    {
+      cout<<"******ERROR: can not open file, quit..."<<endl;
+      return false;
+    }
+  const char* p_char;//pointer used to direct tht writing to the file stream
+  
+  WriteVersionInfo(version, ofs);
+
+  //start doing the serilization
+  //check to make sure we are deal with the correct numbers
+  unsigned num=_numOfAlignments;
+  if(_numOfAlignments>_totalNumOfAligns)
+    {
+      num=_totalNumOfAligns;
+    }
+
+  p_char=(char*)&num;
+  ofs.write(p_char, sizeof(unsigned));  
+
+  
+  //for loop
+  for(unsigned i=0;i<num;i++)
+    {
+      DoSerilizationStep(_v_align_arrays[i], _d_align_arrays[i], _j_align_arrays[i],
+			 _seq[i], i+1, ofs);
+    }
+  
+  ofs.close();
+  return true;
 }
 
 //=========>deserialization of alignment datas

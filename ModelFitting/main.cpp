@@ -133,7 +133,7 @@ if(alignmentFileName.size()==0)
   bool start_from_flat_prior=true;
   bool mfit=do_probabilistic_model_fitting
     (seq, v_align, d_align, j_align, total_alignment, genV, totalNumV,
-     genD, totalNumD, genJ, totalNumJ, start_from_flat_prior,30);
+     genD, totalNumD, genJ, totalNumJ, start_from_flat_prior,25);
   if(mfit)
     {
       cout<<"Successfully done the fitting!"<<endl;

@@ -120,9 +120,10 @@ bool assign_VDJ_alleles
   unsigned min_nerrorsv, max_nerrorsv;
 
   //double log_max_pcutV_loop_v;
+  cout<<"_V.numOfAligned:"<<_V.numOfAligned<<endl;
   for(unsigned v=0;v<_V.numOfAligned;v++)
     {
-      //count<<"loop v:"<<v<<endl;
+      //cout<<"---->>>>loop v :"<<v<<endl;
       assignment_params.v=v;
       //check for validity
       if(assignment_params.skips>assignment_params.max_skips)
@@ -145,7 +146,7 @@ bool assign_VDJ_alleles
 //count<<"\tinside VDJ:2"<<endl;
       if(v==0)//for first round, set some starting point
 	{
-	  //cout<<"in v=0"<<endl;
+	  cout<<"in v=0"<<endl;
 	  dim_size[0]=_V.n_errors[v];
 	  if(_V.n_errors[v]==0) //no errors
 	    {
@@ -166,6 +167,7 @@ bool assign_VDJ_alleles
 	  if(_no_error && min_nerrorsv>0)
 	    {
 	      //we don't allow errors , but do have errors in here, so do next
+	      cout<<"Quit here for the v==0 case;no_error"<<_no_error<<", min_nerrorsv:"<<min_nerrorsv<<endl; 
 	      continue;
 	    }
 	  //cout<<"v=0,1"<<endl;
@@ -192,19 +194,22 @@ bool assign_VDJ_alleles
 	  //since we don't have high error region
 	  if(_no_error && min_nerrorsv>0)
 	    {
+	      cout<<"Quit here for the v==0 case;no_error"<<_no_error<<", min_nerrorsv:"<<min_nerrorsv<<endl; 
 	      //we don't allow errors , but do have errors in here, so do next
 	      continue;
 	    }
 	  //check for too many more errors compared with best V
-	  double log_min_diff_perrv=(max_nerrorsv-max_nerrorsv_1) * assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
+	  double log_min_diff_perrv=(max_nerrorsv-max_nerrorsv_1) *assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
 	  if(log_min_diff_perrv<assignment_params.log_probability_threshold_factor)
 	    {
 	      assignment_params.skips+=1;
+	      //cout<<"too many errors compared with the best V"<<endl;
+	      //cout<<"max_nerrorsv:"<<max_nerrorsv<<";max_nerrorsv_1:"<<max_nerrorsv_1<<endl;
 	      continue;//why did not count skips in the above no_error position
 	    }
 	  
 	}//end of else
-      //count<<"\tinside VDJ:3"<<endl;
+      //cout<<"\tinside VDJ:3"<<endl;
       assignment_params.log_max_pcutV_loop_v=assignment_params.log_max_model_pcutV_given_gene(assignment_params.v_g);
 
       assignment_params.log_highest_probability_GIVEN_current_V_allele=-1000.0;
@@ -214,7 +219,7 @@ bool assign_VDJ_alleles
       //========loop over J alleles
       for(unsigned j=0;j<_J.numOfAligned;j++)
 	{
-	  //count<<"\tloop j:"<<j<<endl;
+	  //cout<<"\tloop j:"<<j<<endl;
 	  assignment_params.j=j;
 	  if(assignment_params.skips>assignment_params.max_skips)
 	    {
@@ -242,7 +247,7 @@ bool assign_VDJ_alleles
 	  //=======loop over D alleles
 	  for(unsigned d_i=0;d_i<_numD;d_i++)
 	    {
-	      //count<<"\tloop D:"<<d_i<<endl;
+	      //cout<<"\t\tloop D:"<<d_i<<endl;
 	      if(assignment_params.skips>assignment_params.max_skips)
 		{
 		  _assigns.n_assignments=assignment_params.in;
@@ -257,7 +262,7 @@ bool assign_VDJ_alleles
 
 	      assignment_params.n_assignments_d_gene=0;
 	      assignment_params.d_break_out=false;
-	      //count<<"\tinside VDJ:D-1"<<endl;
+	      //cout<<"\t\tinside VDJ:D-1"<<endl;
 	      //base probability of gene choices, multiplied by conditional probability for allele choices, given genes
 	      //J have no distinugishable alles for original code, but not for project
 	      //cout<<"assignment_params.v_g:"<<assignment_params.v_g<<endl;
@@ -290,7 +295,9 @@ bool assign_VDJ_alleles
 	      if(temp_int>0)
 		assignment_params.niVD_DJ_min=temp_int;
 	      double log_p_max_nt_VD_DJ_d_allele=assignment_params.niVD_DJ_min*assignment_params.log_max_model_p_nt;
-	      //cout<<"\tinside VDJ:D_4"<<endl;
+	      //cout<<"\t\tinside VDJ:D_4"<<endl;
+	      //cout<<"log_probabase:"<<log(probabase)<<endl;
+	      //cout<<"log_highest_probability:"<<assignment_params.log_highest_probability<<endl;
 	      assignment_params.log_max_pcutD_loop_d=assignment_params.log_max_model_pcutD_given_gene(assignment_params.d_g);
 	      //assignment_params.log_max_pcutVDJ_loop_d=assignment_params.log
 
@@ -302,13 +309,14 @@ bool assign_VDJ_alleles
 		 (assignment_params.log_highest_probability
 		  +assignment_params.log_probability_threshold_factor))
 		{
+		  
 		  assignment_params.skips+=1;
 		  continue;
 		}
 	      assignment_params.log_probabase=log(probabase);
 		
 	      assignment_params.log_highest_probability_GIVEN_current_D_allele=-1000.0;
-//count<<"\tinside VDJ:D_5"<<endl;
+	      //cout<<"\t\tinside VDJ:D_5"<<endl;
 	      //=======now loop over V deletions
 	      if(!assign_VJ_deletions(_model, _seq, _V, _D, _J,
 				      _genV, _numV, _genD, _numD, _genJ, _numJ,
@@ -383,7 +391,7 @@ bool assign_VJ_deletions
   //loop over V deletions
   for(assignment_params.ndV1=assignment_params.nd_start;assignment_params.ndV1<(signed)ndV_max;assignment_params.ndV1++)
     {
-      //count<<"\tloop v_deletion:"<<assignment_params.ndV1<<endl;
+      //cout<<"\t\t\tloop v_deletion:"<<assignment_params.ndV1<<endl;
       if (assignment_params.skips > assignment_params.max_skips)
 	{
 	  _assigns.n_assignments = assignment_params.in;
