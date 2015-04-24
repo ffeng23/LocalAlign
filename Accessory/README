@@ -1,0 +1,3 @@
+1)Distribution class is intended to define a template, but currently we don't use since we have to think more about how to define a decent interface, for example taking care of continuous vs discrete.
+
+2)
