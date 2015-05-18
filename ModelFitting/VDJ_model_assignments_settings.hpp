@@ -79,7 +79,7 @@ struct VDJ_model_assignments_settings
   unsigned n_assignments_j_gene;
   
   unsigned niVD_DJ0; //first insertion between VD and DJ
-  unsigned niVD_DJ_min;
+  //unsigned niVD_DJ_min;
   unsigned nerrorsv;
   unsigned v_ex_errs;
   Matrix<bool> v_ex_errs_i;
@@ -112,6 +112,14 @@ struct VDJ_model_assignments_settings
   unsigned npJ_max;
   unsigned npJ_potential_max;
 
+  //cut variable
+  double log_PcutV;
+  double log_PcutJ;
+  //==> double log_max_pcutVDJ_loop_pJ; we don't remember this since it is
+  // the sum of  assignment_params.log_PcutV+
+  // assignment_params.log_PcutJ+assignment_params.log_max_pcutD_loop_d;
+  //and log_max_pcutD_loop_d is the expected model.log_max_model_pcutD_given_gene(d);
+
   //j deletions
   int ndJ1;
   int ndJ;
@@ -130,6 +138,11 @@ struct VDJ_model_assignments_settings
   unsigned nerrorsd;
   bool zeroD;
   unsigned genic_length;
+  
+  //for D alignment 
+  unsigned n_D_aligns;
+  unsigned start_n_D_aligns;
+  unsigned end_n_D_aligns;
 };
 
 //NOTE: p is palindrome

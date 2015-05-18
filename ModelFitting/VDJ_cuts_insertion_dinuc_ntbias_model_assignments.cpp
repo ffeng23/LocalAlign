@@ -93,9 +93,7 @@ bool VDJ_model_assignments
 		     _force_all_alleles, _READ_LENGTH_CORRECTION,
 		     assignment_params, _assigns
 		     );
-
-  
-  
+    
   return true;
 
 }
@@ -359,6 +357,8 @@ bool assign_VDJ_alleles
   return true;//return true or false doesn't matter
 }//end of function of assign VDJ alleles
 
+//-----------------------------------------------------
+//************************************************
 //return false if something not right, like too many skips and so we
 //want the outer caller finish too. just stop doing this alignment.
 bool assign_VJ_deletions
@@ -461,9 +461,9 @@ bool assign_VJ_deletions
       if (assignment_params.ndV==0 || ~assignment_params.assume_palindrome_negative_deletions)
 	{
 	  assignment_params.npV_max = _model.max_palindrome;
-	  if(assignment_params.npV_max > _V.p_region_max_length[assignment_params.v][ 1+assignment_params.ndV] )
+	  if(assignment_params.npV_max > _V.p_region_max_length[assignment_params.v][ assignment_params.ndV] ) //<---here we change the code it was assignment_params.ndV+1 in the second index
 	    {
-	      assignment_params.npV_max=_V.p_region_max_length[assignment_params.v][ 1+assignment_params.ndV]; 
+	      assignment_params.npV_max=_V.p_region_max_length[assignment_params.v][ assignment_params.ndV]; //<---here we change the code it was assignment_params.ndV+1 in the second index
 	    }
 	  assignment_params.npV_potential_max = assignment_params.npV_max;
 	}
@@ -471,9 +471,9 @@ bool assign_VJ_deletions
 	{
 	  assignment_params.npV_max = 0;
 	  assignment_params.npV_potential_max = _model.max_palindrome;
-	  if(assignment_params.npV_potential_max> _V.p_region_max_length[assignment_params.v] [1+assignment_params.ndV]);
+	  if(assignment_params.npV_potential_max> _V.p_region_max_length[assignment_params.v] [assignment_params.ndV]);//<---here we change the code it was assignment_params.ndV+1 in the second index
 	  {
-	    assignment_params.npV_potential_max=_V.p_region_max_length[assignment_params.v][1+assignment_params.ndV];
+	    assignment_params.npV_potential_max=_V.p_region_max_length[assignment_params.v][assignment_params.ndV]; //<---here we change the code it was assignment_params.ndV+1 in the second index
 	  }
 	}                
 
@@ -602,7 +602,7 @@ bool assign_VJ_deletions
 	  if (assignment_params.ndJ==0 || ~assignment_params.assume_palindrome_negative_deletions)
 	    {
 	      assignment_params.npJ_max = _model.max_palindrome;
-	      if(assignment_params.npJ_max> _J.p_region_max_length[assignment_params.j][1+assignment_params.ndJ])
+	      if(assignment_params.npJ_max> _J.p_region_max_length[assignment_params.j][assignment_params.ndJ])  //<---here we change the code it was assignment_params.ndj+1 in the second index
 		
 		assignment_params.npJ_potential_max = assignment_params.npJ_max;
 	    }
@@ -610,30 +610,12 @@ bool assign_VJ_deletions
 	    {
               assignment_params.npJ_max = 0;
 	      assignment_params.npJ_potential_max = _model.max_palindrome; 
-	      if(assignment_params.npJ_potential_max>_J.p_region_max_length[assignment_params.j][ 1+assignment_params.ndJ])
-		assignment_params.npJ_potential_max=_J.p_region_max_length[assignment_params.j][ 1+assignment_params.ndJ];
+	      if(assignment_params.npJ_potential_max>_J.p_region_max_length[assignment_params.j][ assignment_params.ndJ]) //<---here we change the code it was assignment_params.ndj+1 in the second index
+		assignment_params.npJ_potential_max=_J.p_region_max_length[assignment_params.j][ assignment_params.ndJ]; //<---here we change the code it was assignment_params.ndj+1 in the second index
 		
 		}//             end*/
 	  //        cout<<"\t\t\tJ deletion:J_7"<<endl;
-	  //-------->NOTE: the following part is need to be revised for the future-------
-             /*       
-	  if (np_start_from_max)
-	    {
-	      np_step = -1;
-	      npV_start = npV_max;
-	      npV_end = 0;
-	      npJ_start = npJ_max;
-	      npJ_end = 0;
-	    }
-	  else
-	    {
-	      np_step = 1;
-	      npV_start = 0;
-	      npV_end = npV_max;
-	      npJ_start = 0;
-	      npJ_end = npJ_max;
-	    }//       end
-	     */     
+	  
 	  assignment_params.J_align_length = _J.align_length[assignment_params.j] - assignment_params.ndJ1;
 	  //cout<<"\t\t\tJ deletion:J_9"<<endl;
 	  //% Loop over half-length of V palindrome
@@ -657,12 +639,15 @@ bool assign_VJ_deletions
 		}
 	      //return false;
 	      }
+
 	}//end of J deletion loop
     }//end of V deletions loop for
   
   return true;
 }//end of assign_V_deletions
 
+//=======================================
+//***************************************
 bool assign_VJ_palindrome
 (VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
@@ -675,7 +660,221 @@ bool assign_VJ_palindrome
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns)
 {
+  //set the direction for VJ_palindrome search, IS THIS REALLY NECESSARY or IMPORTANT???
+  //do it anyway for now
+  //assignment_params.nd_start=0;
+  assignment_params.np_start_from_max=true;
+  int np_step, npV_start, npV_end;
+  int npJ_start, npJ_end;
+  if (assignment_params.np_start_from_max)
+    {
+      np_step = -1;
+      npV_start = assignment_params.npV_max;
+      npV_end = 0;
+      npJ_start = assignment_params.npJ_max;
+      npJ_end = 0;
+    }
+  else
+    {
+      np_step = 1;
+      npV_start = 0;
+      npV_end = assignment_params.npV_max;
+      npJ_start = 0;
+      npJ_end = assignment_params.npJ_max;
+    }//       end
+    
+  //now looping the possible cases of npV first
+  for(npV=npV_start;;npV+=np_step)
+    {
+      if(assignment_params.np_start_from_max&&npV>npV_end)
+	{
+	  break; //we are done
+	}
+      if(!assignment_params.np_start_from_max&&npV<npV_end)
+	{
+	  break;//we are done.
+	}
+      
+      if (assignment_params.skips > assignment_params.max_skips)
+	{
+	  _assigns.n_assignments = assignment_params.in;
+	  _assigns.skips =  assignment_params.skips;
+	  assignment_params.v_break_out=true;//===in this case, we want to jump all out.
+	  return false;
+	}//       end
+      
+      int v_end=_V.align_positions(assignment_params.v, 0)+_V.align_length(assignment_params.v)-1-assignment_params.ndV1+npV;
+      if(v_end>=_J.align_position(assignment_params.j, 0)+assignment_params.ndj1)
+	//V with palindrome overlaps with J, not possible
+	{
+	  continue;
+	}
 
+      //now start doing the cut variable, Note: cut variable is the observed deletion since P_nt often is confused with negative deletions.
+      int ncutV=assignment_params.ndV-npV;
+      int PcutV=_model.PcutV_given_V(assignment_params.v_g, ncutV-_model.min_V_cut);
+      if(PcutV==0)
+	{
+	  assignment_params.skips++;
+	  continue;
+	}
+      assignment_params.log_PcutV=log(PcutV);
+      double log_max_pcutVDJ_loop_pV=log_PcutV+log_max_pcutD_loop_d+log_max_pcutJ_loop_j;
+      
+      //upper bound on insertions nt bias factor
+      int niVD_DJ_min=(signed)(assignment_params.niVD_DJ0)+assignment_params.ndV1+assignment_params.ndJ1-_D.align_length(d,0)-npV-_J.p_region_max_length(j, ndJ)-assignment_params.p_maxDl-assignment_params.p_maxDr;
+      if( niVD_DJ_min<0)
+	{
+	  niVD_D=0;
+	}
+      double log_p_max_nt_VD_DJ_pV=niVD_DJ_min*assignment_params.log_max_model_p_nt;
+      
+      assignment_params.test_proba=
+	assignment_params.log_probabase + assignment_params.log_perrorj
+	+ assignment_params.log_perrorv+ log_max_pcutVDJ_loop_pV+
+	assignment_params.log_max_model_pins + log_p_max_nt_VD_DJ_pV;
+      if(assignment_params.test_proba< assignment_params.log_probability_threshold_factor+
+	 log_highest_probability)
+	{
+	  assignment_params.skips++;
+	  continue;
+	}
+	 
+      //next start doing the loop over half-length of J palindrome
+      for(npJ=npJ_start;;npJ+=np_step)
+	{
+	  if(assignment_params.np_start_from_max&&npJ>npJ_end)
+	    {
+	      break; //we are done
+	    }
+	  if(!assignment_params.np_start_from_max&&npJ<npJ_end)
+	    {
+	      break;//we are done.
+	    }
+	  
+	  if (assignment_params.skips > assignment_params.max_skips)
+	    {
+	      _assigns.n_assignments = assignment_params.in;
+	      _assigns.skips =  assignment_params.skips;
+	      assignment_params.v_break_out=true;//===in this case, we want to jump all out.
+	      return false;
+	    }//       end
+	  
+	  int J_start=_J.align_position(assignment_params.j,0)+assignment_params.ndJ1-npJ;
+
+	  if(v_end>=J_start)
+	    //V with palindrome overlaps with J, not possible
+	    {
+	      continue;
+	    }
+	  
+	  //now cut variable from J side
+	  int ncutJ=assignment_params.ndJ-npJ;
+	  double PcutJ=_model.PcutJ_given_J(assignment_params.j_g, ncutJ-_model.min_J_cut);
+	  if(PcutV==0)
+	    {
+	      assignment_params.skips++;
+	      continue;
+	    }
+	  assignment_params.log_PcutJ=log(PcutJ);
+	  double log_max_pcutVDJ_loop_pJ=
+	    assignment_params.log_PcutV+
+	    assignment_params.log_PcutJ+assignment_params.log_max_pcutD_loop_d;
+      
+	  //start doing something new here for D 
+	  //check for the valid D length and valid cut
+	  assignment_params.n_D_aligns=_D.n_alignments(assignment_params.d);
+	  assignment_params.start_n_D_aligns=0;
+	  
+	  //find the first completely valid alignment
+	  bool completely_valid_na=false;
+	  unsigned c_na=0;
+
+	  while(!completely_valid&&c_na<assignment_params.n_D_aligns)
+	    {
+	      completely_valid_na=_D.align_position_lef(assignment_params.d, c_na)>V_end 
+		&&_D.align_position_right(assignment_params.d, c_na)<J_start;
+	      c_na++;
+	    }//end of while for completely_valid_na;
+	  unsigned first_valid_length=0;
+
+	  if(completely_valid_na)
+	    {
+	      first_valid_length=_D.align_length(d, c_na_)
+	    }
+	  else
+	    {
+	      //find the first partly valid alignment
+	      bool partly_valid_na=false;
+	      unsigned p_na=0;
+	      while(~partly_valid_na&&p_na<assignment_params.n_D_aligns)
+		{
+		  partly_valid_na=_D.align_position_left(d, p_na)<J_start 
+		    || _D.align_position_right(d, p_na)>V_end;
+		  p_na++;
+		}//end of partly_valid_na while loop
+
+	      if(partly_valid_na)
+		{
+		  int p_valid_start=((J_start-1)>(_D.align_position_right(d, p_na)))?_D.align_position_right(d, p_na):(J_start-1);
+		  int p_valid_end=((V_end+1)>_D.align_position_left(d, p_na))?(V_end+1):_D.align_position_left(d,p_na);
+		  first_valid_length=p_valid_start-p_valid_end+1;
+		  
+		  assignment_params.start_n_D_aligns=p_na;
+		}
+	      else //no partially valid alignment
+		{
+		  first_valid_length=0;
+		  //do only zero D. no even partly valid alignment.
+		  assignment_params.start_n_D_aligns=assignment_params.n_D_aligns+1;
+		}//end of partly valid else case;
+
+	    }//end of completely_valid_na else case
+	  
+	  if(assignment_params.best_D_align_length<first_valid_length)
+	    {
+	      assignment_params.best_D_align_length=first_valid_length;
+	    }
+	  if(assignment_params.best_D_align_length<=8)
+	    {
+	      assignment_params.end_n_D_aligns=assignment_params.n_D_aligns+1;
+	    }
+	  else
+	    {
+	      assignment_params.end_n_D_aligns=assignment_params.n_D_aligns;
+	    }
+
+	  //NDN length
+	  assignment_params.niVD_DJ_total=J_start-V_end-1;
+	  //upper bound for nt bias factor
+	  int niVD_DJ_min= (signed)niVD_D_total-frist_valid_length-
+	    _D.p_region_max_length_left(d, assignment_params.start_n_D_aligns, _D.deletions_left(d, assignment_params.start_n_D_aligns))-
+	    _D.p_region_max_length_right(d, assignment_params.start_n_D_aligns, _D.deletions_right(d, assignment_params.start_n_D_aligns));
+	  if(niVD_DJ_min<0)
+	    niVD_DJ_min=0;
+			
+	  double log_p_max_nt_VD_DJ_pJ=niVD_DJ_min*assignment_params.log_max_model_p_nt;
+	  
+	  assignment_params.test_proba=assigmnent_params.log_probabase+
+	    assigmnent_params.log_perrv+log_max_pcutVDJ_loop_pJ+
+	    assigmnent_params.log_max_model_pins+log_p_max_nt_VD_DJ_pJ;
+	  
+	  if(assignment_params.test_proba< assignment_params.log_probability_threshold_factor+
+	     log_highest_probability)
+	    {
+	      assignment_params.skips++;
+	      continue;
+	    } 
+	  
+	  //---------> start doing d alignment from here
+
+	}//end of npJ loop 
+      
+    }//end of npV loop palindrome
+  //Note for myself, we probably we include the blow code inside the above blocks of for loops
+  
+  //***************************
+  //===========>Good code below from previous version, need to be carefully
   //in here we start doing the stats!! set things to the assigns.
 
   //Increment valid assignment number

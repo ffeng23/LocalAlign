@@ -18,12 +18,13 @@ struct VDJ_cuts_insertion_dinuc_ntbias_model_params
   unsigned max_D_deletions;
   unsigned max_J_deletions;
 
-  //here, the _numV/D/J are the number of gene alleles,
-  //but not distinct genes
+  //here, the _numV/D/J are the number of distinct genes,
+  //not toal number of alleles of genes
   unsigned number_V_genes;
   unsigned number_D_genes;
   unsigned number_J_genes;
 
+  //this is for the maxi number of alleles across all the genes
   unsigned max_V_n_alleles;
   unsigned max_D_n_alleles;
   unsigned max_J_n_alleles;

@@ -115,12 +115,13 @@ public:
   unsigned max_D_deletions;
   unsigned max_J_deletions;
 
-  //here, the _numV/D/J are the number of gene alleles,
-  //but not distinct genes
+  //here, the _numV/D/J are the number of distinct genes,
+  //distinct genes
   unsigned number_V_genes;
   unsigned number_D_genes;
   unsigned number_J_genes;
 
+  //the max number of alleles across all the genes.
   unsigned max_V_n_alleles;
   unsigned max_D_n_alleles;
   unsigned max_J_n_alleles;

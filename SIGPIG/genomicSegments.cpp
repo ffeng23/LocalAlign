@@ -764,7 +764,8 @@ vector<string> DetermineOutputFileNames(const string& _outFileNameBase, const un
     }
   return vecFileNames;
 }
-
+//this return the max index of gene, which is one less than the max
+//number of distrinct genes.
 unsigned max_gene_index(const GenomicV* _gs, const unsigned& _num)
 {
   
@@ -840,6 +841,10 @@ unsigned max_gene_index(const GenomicD* _gs, const unsigned& _num)
   return max_gi;
 }
 
+//get maximum number of alleles through all the genes.
+//eg. gene1 has 5 alleles
+//    gene2 has 4 alleles
+//this funciton will return 5 then.
 unsigned max_n_alleles(const GenomicV* _gs, const unsigned& _num)
 {
   

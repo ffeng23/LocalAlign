@@ -80,9 +80,16 @@ bool GenomicVCompare_bySequenceName(const GenomicV& ss1,const GenomicV& ss2);
 bool CompareDSequenceNameByString(const string& ss1, const string& ss2);
 bool CompareDGeneNameByString(const string& ss1, const string& ss2);
 
+//get the maximum gene index, which is one less than the max mumber of
+//genes
 unsigned max_gene_index(const GenomicV* _gs, const unsigned& _num);
 unsigned max_gene_index(const GenomicD* _gs, const unsigned& _num);
 unsigned max_gene_index(const GenomicJ* _gs, const unsigned& _num);
+//get the maximum number of alleles
+////get maximum number of alleles through all the genes.
+//eg. gene1 has 5 alleles
+//    gene2 has 4 alleles
+//this funciton will return 5 then.
 unsigned max_n_alleles(const GenomicV* _gs, const unsigned& _num);
 unsigned max_n_alleles(const GenomicD* _gs, const unsigned& _num);
 unsigned max_n_alleles(const GenomicJ* _gs, const unsigned& _num);
