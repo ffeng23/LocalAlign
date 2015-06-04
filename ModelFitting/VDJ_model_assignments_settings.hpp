@@ -138,14 +138,38 @@ struct VDJ_model_assignments_settings
   unsigned nerrorsd;
   bool zeroD;
   unsigned genic_length;
-  
+
+  //===>no nerrors define here, since it is simply the sum of all v d j errors
+  //same thing as log_perr;
+  int V_end, J_start;  
+
   //for D alignment 
   unsigned n_D_aligns;
   unsigned start_n_D_aligns;
   unsigned end_n_D_aligns;
+
+  int ndDl, ndDl1;
+  int ndDr, ndDr1;
+
+  unsigned npDl_potential_max;
+  unsigned npDr_potential_max;
+
+  Matrix<bool> d_ex_errs_left_i;
+  //not for d_err_excess_pos_left, we simply don't record in here, but instead do it on the fly, since it is basically pointing to the positions.
+  unsigned d_ex_errs_left;
+
+  Maxtrix<bool> d_errs_i;
+  unsigned d_errs;
+
+  Matrix<bool> d_ex_errs_right_i;
+  unsigned d_ex_errs_right;
+
+  double log_highest_probability_GIVEN_current_Dl_deletions;
+  double log_highest_probability_GIVEN_current_Dr_deletions;
 };
 
 //NOTE: p is palindrome
 //     P is probability
 
 #endif
+

@@ -26,3 +26,6 @@
 
 10) n_assignment_v_gene, n_assignment_j_gene, n_assignment_d_gene,
     how to update this and what to do with them?
+
+11) need to add code in "../ModelFitting/VDJ_model_assignments_seetings.hpp cpp" modual to initialize all the matrix variables. at this point only some of the maxtrix variables have been initialized. 
+    also related to this, we might need to be careful about initialization of all member variables in this modual.

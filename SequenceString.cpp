@@ -118,3 +118,36 @@ void SequenceString::Deserialize(ifstream& _ifs)
   c_seq=string(p_char);
   delete[] p_char;
 }
+
+SequenceString SequenceString::Sub(const unsigned& _start, const unsigned & _end=-1)
+{
+  SequenceString ret();
+
+  //get the sub string
+  ret.c_name=c_name;
+  if(_start>c_seq.size())
+    {
+      _start=c_seq.size();
+    }
+  if(_end==(unsigned)-1)
+    {
+      _end=c_seq.size();
+    }
+  ret.c_seq=c_seq.substr(_start, _end-_start+1);
+  return ret;
+}
+
+unsigned SequenceString::GetLetterCount(const char& _c) const
+{
+  //we need to itera through the string to get the count
+  unsigned count=0;
+  for(unsigned i=0;i<c_seq.size();i++)
+    {
+      if(c_seq.at(i)==_c)
+	{
+	  count++;
+	}
+    }
+
+  return count;
+}
