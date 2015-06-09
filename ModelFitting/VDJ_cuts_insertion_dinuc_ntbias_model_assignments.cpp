@@ -456,7 +456,7 @@ bool assign_VJ_deletions
       if( _no_error && assignment_params.nerrorsv > 0)
                     continue;
                            
-      assignment_params.log_perrv = assignment_params.nerrorsv*assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
+      double log_perrv = assignment_params.nerrorsv*assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
                 
       if (assignment_params.ndV==0 || ~assignment_params.assume_palindrome_negative_deletions)
 	{
@@ -489,7 +489,7 @@ bool assign_VJ_deletions
                 //cout<<"\t\tV deletion:vd_3"<<endl;
       assignment_params.log_highest_probability_GIVEN_current_V_deletions = -1000;// % Highest probability so far GIVEN current V deletions AND outer loop variables {V, J, D alleles}                
       //cout<<"\t\tV deletion:vd_4"<<endl;
-      double test_proba = assignment_params.log_probabase + assignment_params.log_perrv + (assignment_params.log_max_pcutV_loop_v+assignment_params.log_max_pcutJ_loop_j+assignment_params.log_max_pcutD_loop_d) + assignment_params.log_max_model_pins + log_p_max_nt_VD_DJ_dV;               
+      double test_proba = assignment_params.log_probabase + log_perrv + (assignment_params.log_max_pcutV_loop_v+assignment_params.log_max_pcutJ_loop_j+assignment_params.log_max_pcutD_loop_d) + assignment_params.log_max_model_pins + log_p_max_nt_VD_DJ_dV;               
                 
       if (test_proba < assignment_params.log_probability_threshold_factor + assignment_params.log_highest_probability)
 	{
@@ -580,7 +580,7 @@ bool assign_VJ_deletions
 	    }
                     //count<<"\t\t\tJ deletion:J_4"<<endl;
                     
-	  assignment_params.log_perrj = assignment_params.nerrorsj*assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
+	  double log_perrj = assignment_params.nerrorsj*assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
           
 	  //%                     % Upper bound on insertions nt bias factor
 	  assignment_params.niVD_DJ_min =  assignment_params.niVD_DJ0 + assignment_params.ndV1 + assignment_params.ndJ1 - _D.align_length[assignment_params.d][0] - _V.p_region_max_length[assignment_params.v][1 + assignment_params.ndV] - _J.p_region_max_length[assignment_params.j][1 + assignment_params.ndJ] - assignment_params.p_max_Dl - assignment_params.p_max_Dr;
@@ -592,7 +592,7 @@ bool assign_VJ_deletions
           
 	  assignment_params.log_highest_probability_GIVEN_current_J_deletions = -1000;                   //cout<<"\t\t\tJ deletion:J_5"<<endl;
 	  
-	  double test_proba = assignment_params.log_probabase + assignment_params.log_perrv + assignment_params.log_perrj + (assignment_params.log_max_pcutV_loop_v+assignment_params.log_max_pcutJ_loop_j+assignment_params.log_max_pcutD_loop_d) + assignment_params.log_max_model_pins + log_p_max_nt_VD_DJ_dJ;
+	  double test_proba = assignment_params.log_probabase + log_perrv + log_perrj + (assignment_params.log_max_pcutV_loop_v+assignment_params.log_max_pcutJ_loop_j+assignment_params.log_max_pcutD_loop_d) + assignment_params.log_max_model_pins + log_p_max_nt_VD_DJ_dJ;
 	            
 	  if( test_proba < assignment_params.log_probability_threshold_factor + assignment_params.log_highest_probability)
 	    continue;
@@ -729,11 +729,13 @@ bool assign_VJ_palindrome
 	}
       double log_p_max_nt_VD_DJ_pV=niVD_DJ_min*assignment_params.log_max_model_p_nt;
       
-      assignment_params.test_proba=
-	assignment_params.log_probabase + assignment_params.log_perrorj
-	+ assignment_params.log_perrorv+ log_max_pcutVDJ_loop_pV+
+      double log_perrj=assignment_params.nerrorsj* assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
+      double log_perrv=assignment_params.nerrorsv* assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
+      double test_proba=
+	assignment_params.log_probabase + log_perrj
+	+ log_perrv+ log_max_pcutVDJ_loop_pV+
 	assignment_params.log_max_model_pins + log_p_max_nt_VD_DJ_pV;
-      if(assignment_params.test_proba< assignment_params.log_probability_threshold_factor+
+      if(test_proba< assignment_params.log_probability_threshold_factor+
 	 log_highest_probability)
 	{
 	  assignment_params.skips++;
@@ -855,11 +857,11 @@ bool assign_VJ_palindrome
 			
 	  double log_p_max_nt_VD_DJ_pJ=niVD_DJ_min*assignment_params.log_max_model_p_nt;
 	  
-	  assignment_params.test_proba=assigmnent_params.log_probabase+
-	    assigmnent_params.log_perrv+log_max_pcutVDJ_loop_pJ+
+	  test_proba=assigmnent_params.log_probabase+
+	    log_perrv+log_perrj+log_max_pcutVDJ_loop_pJ+
 	    assigmnent_params.log_max_model_pins+log_p_max_nt_VD_DJ_pJ;
 	  
-	  if(assignment_params.test_proba< assignment_params.log_probability_threshold_factor+
+	  if(test_proba< assignment_params.log_probability_threshold_factor+
 	     log_highest_probability)
 	    {
 	      assignment_params.skips++;
@@ -1313,7 +1315,7 @@ bool assign_D
  const bool& _ignore_deep_error, const bool& _do_smoothing,
  const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
- ///*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns
+ /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns
  )
 {
   //start looping all the D alignments
@@ -1526,7 +1528,7 @@ bool assign_D
 		}//end of non-zeroD case, for nt distribution 
 	      else
 		{
-		  niVD_DJ_min=niVD_DJ_total;
+		  niVD_DJ_min=assignment_params.niVD_DJ_total;
 		  log_p_max_nt_VD_DJ_na_loop_Dr=niVD_DJ_min*assignment_params.log_max_model_p_nt;
 		  log_max_pins_loop_dDr=log_max_model_pins;
 
@@ -1580,9 +1582,280 @@ bool assign_D
 		  log_perr=nerrors*assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3;
 		}
 
-	      double test_proba=assignment_params.log_probabase+log_perr
-		+assignment_params.
+	    double log_max_pcutVDJ_loop_pJ=   assignment_params.log_PcutV+
+	    assignment_params.log_PcutJ+assignment_params.log_max_pcutD_loop_d;
 
+	    double test_proba=assignment_params.log_probabase+log_perr+
+	      log_max_pcutVDJ_loop_pJ+log_max_pins_loop_dDr+log_p_max_nt_VD_DJ_na_loop_Dr;
+
+	    if( (test_proba<log_probability_threshold_factor+log_highest_probability)||
+		(test_proba<log_probability_hopeless_threshold_factor+log_highest_probability))
+	      {
+		assignment_params.skips++;
+		continue;
+	      }
+	    
+	    //from this point on we are doing panlindrom
+	    //define the loop iterator direction and steps
+	    int npDl_start, npDl_end, npDr_start, npDr_end, np_step;
+	    if(assignment_params.np_start_from_max)
+	      {
+		np_step=-1;
+		npDl_start=npDl_max;
+		npDl_end=0;
+		npDr_start=npDr_max;
+		npDr_end=0;
+	      }
+	    else
+	      {
+		np_step=-1;
+		npDl_start=0;
+		npDl_end=npDl_max;
+		npDr_start=0;
+		npDr_end=npDr_max;
+	      }
+	    SequenceString insVD_nseq_min_looppDl();
+	    SequenceString insVD_nseq_min_looppDr();
+	    double log_p_max_nt_VD_loop_pDl, log_p_max_nt_VD_loop_pDr;
+	    double log_p_max_nt_VD_DJ_na_loop_pDr;
+	    //start the looping, over half-length of D left palindrome
+	    for(assignment_params.npDl=npDl_start; ;assignment_params.npDl=+np_step)
+	      {
+		//check for the end of the loop
+		if(assignment_params.np_start_from_max)//from big to small
+		  {
+		    if(assignment_params.npDl<npDl_end)
+		      break;
+		  }
+		else //from small to big
+		  {
+		    if(assignment_params.npDl>npDl_end)
+		      break;
+		  }
+
+		if(assignment_params.skips>assignment_params.max_skips)
+		  {
+		    _assigns.n_assignments = assignment_params.in;
+		    _assigns.skips =  assignment_params.skips;
+		    assignment_params.v_break_out=true;//===in this case, we want to jump all out.
+		    return false;
+		  }
+		
+		//start doing the loop 
+		if(!zeroD)
+		  {
+		    if(assignment_params.V_end>=(_D.align_position_left[assignment_params.d][na]+assignment_params.ndDl1-npDl))
+		      {
+			//V with aplindrome overlaps .
+			continue;
+		      }
+		    insVD_nseq_min_looppDl=
+		      _seq.Sub(assignment_params.V_end+1, 
+			       _D.align_position_left[assignment_params.d][na]+assignment_params.ndDl1-npDl-1);
+		    if(insVD_nseq_min_looppDl.GetLength()>_model.max_insertions)
+		      {
+			continue;
+		      }
+		    //get sum stats for mono nts
+
+		    log_p_max_nt_VD_loop_pDl=(insVD_nseq_min_looppDl.GetLetterCount('A')+insVD_nseq_min_looppDl('a'))*assignment_params.log_max_model_p_nt_VD[0];
+		    log_p_max_nt_VD_loop_pDl+=(insVD_nseq_min_looppDl.GetLetterCount('C')+insVD_nseq_min_looppDl('c'))*assignment_params.log_max_model_p_nt_VD[1];
+		    log_p_max_nt_VD_loop_pDl+=(insVD_nseq_min_looppDl.GetLetterCount('G')+insVD_nseq_min_looppDl('g'))*assignment_params.log_max_model_p_nt_VD[2];
+		    log_p_max_nt_VD_loop_pDl+=(insVD_nseq_min_looppDl.GetLetterCount('T')+insVD_nseq_min_looppDl('t'))*assignment_params.log_max_model_p_nt_VD[3];
+	 
+		  }//zeroD case for the first loop 
+		else //first zeroD case of else loop
+		  {
+		    log_p_max_nt_VD_loop_pDl=0;
+		  }//end of first zeroD case of else loop
+		
+		//now loop over half-length of D right palindrome
+		for(npDr=npDr_start; ; npDr+=np_step)
+		  {
+		    //check for the end of the loop
+		    if(assignment_params.np_start_from_max)//from big to small
+		      {
+			if(assignment_params.npDr<npDr_end)
+			  break;
+		      }
+		    else //from small to big
+		      {
+			if(assignment_params.npDr>npDr_end)
+			  break;
+		      }
+		    //===>this following condition will not be used ever, need to remove later
+		    //since this codition was checked above and there no update on skips in
+		    //between till now.
+		    if(assignment_params.skips>assignment_params.max_skips)
+		      {
+			_assigns.n_assignments = assignment_params.in;
+			_assigns.skips =  assignment_params.skips;
+			assignment_params.v_break_out=true;//===in this case, we want to jump all out.
+			return false;
+		      }
+
+		    //if deletions is >0 and palindromes > 0 skip
+		    if(!zeroD)
+		      {
+			if(assignment_params.J_start<=(_D.align_position_right[assignment_params.d][na]-assignment_params.ndDr1+npDr))
+			  {
+			    //J with palindrome overlaps D.
+			    continue;
+			  }
+			
+			//now doing the stats of mono-nt on DJ gap
+			insVD_nseq_min_looppDr=
+			  _seq.Sub(_D.align_position_right[assignment_params.d][na]-assignment_params.ndDr1+npDr+1, assignment_params.J_start-1);
+			if(insVD_nseq_min_looppDr.GetLength()>_model.max_insertions)
+			  {
+			    continue;
+			  }
+			//get sum stats for mono nts
+			
+			log_p_max_nt_VD_loop_pDr=(insVD_nseq_min_looppDr.GetLetterCount('A')+insVD_nseq_min_looppDr('a'))*assignment_params.log_max_model_p_nt_DJ[0];
+			log_p_max_nt_VD_loop_pDr+=(insVD_nseq_min_looppDr.GetLetterCount('C')+insVD_nseq_min_looppDr('c'))*assignment_params.log_max_model_p_nt_DJ[1];
+			log_p_max_nt_VD_loop_pDr+=(insVD_nseq_min_looppDr.GetLetterCount('G')+insVD_nseq_min_looppDr('g'))*assignment_params.log_max_model_p_nt_DJ[2];
+			log_p_max_nt_VD_loop_pDr+=(insVD_nseq_min_looppDr.GetLetterCount('T')+insVD_nseq_min_looppDr('t'))*assignment_params.log_max_model_p_nt_DJ[3];
+			log_p_max_nt_VD_DJ_na_loop_pDr=log_p_max_nt_VD_loop_pDl+log_p_max_nt_DJ_loop_pDr;
+		      }//npDr zeroD case 
+		    else
+		      {
+			unsigned niVD_DJ_min=assignment_params.niVD_DJ_total;
+			log_p_max_nt_VD_DJ_na_loop_pDr=niVD_DJ_min*assignment_params.log_max_model_p_nt;
+		      }//npDr zeroD else case
+		
+		    //now start to figuring out the insertion on each side of D
+		    //for this one, we need to consider the zeroD case, since it is more
+		    //complicated. for the non-zero case, it is simple, because everything is 
+		    //fixed. But zeroD case, we can allow one to vary, but the total is fixed
+		    unsigned niVD_min, niVD_max;
+		    unsigned niVD_nonzero=-1, niDJ_nonzero=-1;
+		    
+		    if(zeroD)
+		      {//for zero D, we convolute over VD and DJ insertions
+			if(niVD_DJ_total>2*_model.max_insertions)
+			  {
+			    continue;
+			  }
+			if(do_smoothing)
+			  {
+			    niVD_min=0;
+			    if(assignment_params.niVD_DJ_total>_model.max_insertions)
+			      {
+				niVD_min=assignment_params.niVD_DJ_total-_model.max_insertions;
+			      }
+			    niVD_max=_model.max_insertions;
+			    if(assignment_params.niVD_DJ_total<_model.max_insertions)
+			      {
+				niVD_max=assignment_params.niVD_DJ_total;
+			      }
+			    
+			    //check for sick cases
+			    if(niVD_min>_model.max_insertions || 
+			       ((unsigned)(assignment_params.niVD_DJ_total-niVD_max))>_model.max_insertions)
+			      {
+				continue;
+			      }
+			  }
+			else //do smoothing else loop
+			  {
+			    //for strawman, we just split into two
+			    niVD_min=assignment_params.niVD_DJ_total/2;
+			    niVD_max=niVD_min;
+			    //check for sick cases
+			    if(niVD_min>_model.max_insertions || 
+			       ((unsigned)(assignment_params.niVD_DJ_total-niVD_max))>_model.max_insertions)
+			      {
+				continue;
+			      }
+			  }//end of do smoothing else loop
+			//doing stats
+			log_max_pins_loop_pDr=-10000000;
+			for(unsigned i=niVD_min;i<=niVD_max;i++)
+			  {
+			    if(log_max_pins_loop_pDr<log(_model.PinsVD[i]*_model.PinsDJ[niVD_DJ_total-i]))
+			      {
+				log_max_pins_loop_pDr=log(_model.PinsVD[i]*_model.PinsDJ[niVD_DJ_total-i]);
+				
+			      }
+			  }//for loop
+			    
+		      }
+		    else //zero D else loop for insertion convolutions.
+		      {
+			niVD_nonzero=_D.align_position_left[assignment_params.d][na]+assignment_params.ndDl1-npDl-assignment_params.V_end-1;
+			niDJ_nonzero=assignment_params.J_start -(_D.align_position_right[assignment_params.d][na]-assignment_params.ndDr1+npDr)-1;
+			niVD_min=niVD_nonzero;
+			niDD_max=niVD_nonzero;
+
+			if(niVD_nonzero>_model.max_insertions || niDJ_nonzero> _model.max_insertions)
+			  {
+			    continue;
+			  }
+			
+			log_max_pins_loop_pDr=log(_model.PinsDJ[niDJ_nonzero]*_model.PinsVD[niVD_nonzero]);
+						
+		      }//end zero d else loop for insertion convolutions
+		    
+		    //start doing cut variables
+		    assignment_params.ncutDl=assignment_params.ndDl-assignment_params.npDl;
+		    assignment_params.ncutDr=assignment_params.ndDr-assignment_params.npDr;
+		    //D deletions probability
+		    double PcutDlDr=
+		      _model.PcutDlcutDr_given_D[assignment_params.d][ncutDl-_model.min_D_cut][ncutDr-_model.min_D_cut];
+		    
+		    if(PcutDlDr==0)
+		      {
+			assignment_params.skips++;
+			continue;
+		      }
+		    
+		    assignment_params.log_PcutVDJ=
+		      log(PcutDlDr)+assignment_params.log_PcutV
+		      +assignment_params.log_PcutJ;
+		    double log_perr=nerrors*_model.log_Rerror_per_sequenced_nucleotide_divided_by_3;
+		    test_proba=assignment_params.log_probabase+
+		      log_perr+assignment_params.log_PcutVDJ+
+		      log_max_pins_loop_pDr+log_p_max_nt_VD_DJ_na_loop_pDr;
+
+		    if((test_proba<log_probability_threshold_factor+log_higest_probability)||(test_proba<log_probability_hopeless_threshold_factor+log_highest_probability))
+		      {
+			assignment_params.skips++;
+			continue;
+		      }
+		      
+		    //loop over niVD for zero D case.
+		    //for nonzero D, this is single instance loop
+		    for(assignment_params.niVD=niVD_min;assignment_params.niVD<=niVD_max;assignment_params.niVD++)
+		      {
+
+			if(zeroD)
+			  {
+			    assignment_params.niDJ=assignment_params.niVD_DJ_total-assignment_params.niVD;
+			  }
+			else
+			  {
+			    assignment_params.niDJ=niDJ_nonzero;
+			  }
+
+			//check for other constraints
+			//for instace, insertions can become negative 
+			//with 'negative' deletions and palindromes together
+			if((assignment_params.niDJ>_model.max_insertions)||
+			   (assignment_params.niVD>_model.max_insertions))
+			  {
+			    continue;
+			  }
+
+			//nucleotide frequenciest in insertion sequences, 
+			//not including palindromes
+			
+
+		      }//for loop of niVD for zeroD cases, nonzeroD case is single loop
+			  
+		  }//half-length of D right palindrome
+	       		
+	      }//half-length of D left palindrome
 
 	    }//right deletions
 

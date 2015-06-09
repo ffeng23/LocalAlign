@@ -25,7 +25,7 @@ struct VDJ_model_assignments_settings
   unsigned J_max_error;
   unsigned D_max_error;
 
-  bool assume_palindrome_negative_deletions;
+  bool assume_palindrom_negative_deletions;
 
   Matrix<double> log_max_model_p_nt_DJ;
   Matrix<double> log_max_model_p_nt_VD;
@@ -80,7 +80,9 @@ struct VDJ_model_assignments_settings
   
   unsigned niVD_DJ0; //first insertion between VD and DJ
   //unsigned niVD_DJ_min;
+  unsigned niVD_DJ_total;
   unsigned nerrorsv;
+  //==>log_perrv is not recorded since it is the nerrorsv * p
   unsigned v_ex_errs;
   Matrix<bool> v_ex_errs_i;
 
@@ -103,8 +105,9 @@ struct VDJ_model_assignments_settings
 
   //v deletions
   int ndV; int ndV1;
-  double log_perrv;
+  //double log_perrv;
   double log_highest_probability_GIVEN_current_V_deletions;
+
 
   //palidrome
   unsigned npV_max;
@@ -127,7 +130,7 @@ struct VDJ_model_assignments_settings
   Matrix<bool> j_ex_errs_i;
   unsigned j_ex_errs;
   unsigned nerrorsj;
-  double log_perrj;
+  //==>double log_perrj; is not recorded since it is simple nerrorsj*p
   double log_highest_probability_GIVEN_current_J_deletions;
 
   unsigned npV;
@@ -166,6 +169,14 @@ struct VDJ_model_assignments_settings
 
   double log_highest_probability_GIVEN_current_Dl_deletions;
   double log_highest_probability_GIVEN_current_Dr_deletions;
+
+  int npDl, npDr;
+
+  unsigned ncutDl, ncutDr;
+  //===>here we don't record log_PcutDlDr or log_PcutVDJ
+  double log_PcutVDJ;
+
+  unsigned niVD, niDJ;
 };
 
 //NOTE: p is palindrome
