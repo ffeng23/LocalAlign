@@ -408,8 +408,8 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
   //%------nM*** fields
    dim_size2[1]=4;
    mononucleotideVD.initialize(2, dim_size2, 0.0);// zeros(4,1);
-  mononucleotideDJ.initialize(2, dim_size2, 0.0);// = zeros(4,1);
-  insertionVD.initialize(2, dim_size2, 0.0);// = zeros(4,1);what this is?? is this insertion or nucleotide dist'n among insertion??
+   mononucleotideDJ.initialize(2, dim_size2, 0.0);// = zeros(4,1);
+   insertionVD.initialize(2, dim_size2, 0.0);// = zeros(4,1);what this is?? is this insertion or nucleotide dist'n among insertion??
   insertionDJ.initialize(2, dim_size2, 0.0);// = zeros(4,1);
 
   unsigned dim_size4[4]={_model.max_assignments, 4, 4, 4};

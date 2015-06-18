@@ -1444,6 +1444,95 @@ Matrix<T> Matrix<T>::m2vec() const
   return temp_m;
 }
 
+//Set submatrix
+  //this is the special case for set up the submatrix with one-d array.
+  //we made this to make the data initalization easier
+  //_d, is the first dimension position for the sub matrix to go. in this 
+  //    case the target matrix to be set the submatrix must have dimension of 2
+  //_size, the size of input _matrix, also equals to the size of 
+  //     dimension 2 of target matrix
+  //_matrix, array of input
+template<class T>
+void Matrix<T>::SetSubMatrix(const unsigned& _d, const unsigned _size, const T _matrix[])
+{
+  //security check for correct input
+  if(c_dim!=2)
+    {
+      cout<<"error/exception thrown in SetSubMatrix():the dimension is not 2; out of range!!"<<endl;
+      cerr<<"error/exception thrown in SetSubMatrix():the dimension is not 2; out of range!!"<<endl;
+      throw std::runtime_error("error/exception thrown in SetSubMatrix():the dimension is not 2; out of range!!"); 
+    }
+  if(c_dim_size[1]!=_size)
+    {
+      cout<<"error/exception thrown in SetSubMatrix():the dimension between input and target matrix do not match!!"<<endl;
+      cerr<<"error/exception thrown in SetSubMatrix():the dimension between input and target matrix do not match!!"<<endl;
+      throw std::runtime_error("error/exception thrown in SetSubMatrix():the dimension between input and target matrix do not match!!"); 
+    }
+  
+  //here we simple copy over the
+  if(_matrix==NULL || c_data==NULL)
+    {
+      //data not initialized, error
+      cout<<"error/exception thrown in SetSubMatrix():data unitialized error, please check!!"<<endl;
+      cerr<<"error/exception thrown in SetSubMatrix():data unitialized error, please check!!"<<endl;
+      throw std::runtime_error("error/exception thrown in SetSubMatrix():data unitialized error, please check!!"); 
+    }
+  memcpy(c_data+_d*_size, _matrix, _size*sizeof(T));//  for(unsigned i=0;i<_size;i++)
+  //{
+  //    c_data[_d*_size+i]=_matrix
+  //  }
+}
+  //this is generic set submatrix function
+  //currently it only allows the first dimention to be specified for submatrix
+  //so the target matrix and input matrix have only one dimension difference
+  //for example, target matrix of dimension 3, then input dimension has to be 2
+  //     we specified where in terms of first dimension position for which the 
+  //     input dimesion can be set
+  //input
+  // _d, demsion 1 position to set the submatrix
+  //_matrix, submatrix of input, need to have identical dimension
+  //        to the dimension 2 and above of the target dimentsion
+template<class T>
+void Matrix<T>::SetSubMatrix(const unsigned& _d, const Matrix<T>& _matrix)
+  {
+    //security check for correct input
+  if(this->c_dim!=_matrix.c_dim+1)
+    {
+      cout<<"error/exception thrown in SetSubMatrix():the dimension is not one more than the input matrix dimension!!"<<endl;
+      cerr<<"error/exception thrown in SetSubMatrix():the dimension is not one more than the input matrix dimension!!"<<endl;
+      throw std::runtime_error("error/exception thrown in SetSubMatrix():the dimension is not one more than the input matrix dimension!!"); 
+    }
+  if(this->c_dim<2)
+    {
+      cout<<"error/exception thrown in SetSubMatrix():the dimension is smaller than 2; out of range!!"<<endl;
+      cerr<<"error/exception thrown in SetSubMatrix():the dimension is smaller than 2; out of range!!"<<endl;
+      throw std::runtime_error("error/exception thrown in SetSubMatrix():the dimension is smaller than 2; out of range!!"); 
+    }
+  //unsigned size=1;
+  for(unsigned i=1;i < this->c_dim;i++)
+    {
+      if(this->c_dim_size[i]!=_matrix.c_dim_size[i-1])
+	{
+	  cout<<"error/exception thrown in SetSubMatrix():the dimension between input and target matrix do not match!!"<<endl;
+	  cerr<<"error/exception thrown in SetSubMatrix():the dimension between input and target matrix do not match!!"<<endl;
+	  throw std::runtime_error("error/exception thrown in SetSubMatrix():the dimension between input and target matrix do not match!!"); 
+	}
+      
+    }
+  //here we simple copy over the
+  if(_matrix.c_data==NULL || this->c_data==NULL)
+    {
+      //data not initialized, error
+      cout<<"error/exception thrown in SetSubMatrix():data unitialized error, please check!!"<<endl;
+      cerr<<"error/exception thrown in SetSubMatrix():data unitialized error, please check!!"<<endl;
+      throw std::runtime_error("error/exception thrown in SetSubMatrix():data unitialized error, please check!!"); 
+    }
+  memcpy(this->c_data+_d*_matrix.nTotal(), _matrix.c_data, _matrix.nTotal()*sizeof(T));//  for(unsigned i=0;i<_size;i++)
+    
+  }
+//---------end of Matrix<T> class
+
+//----------------------------dividing line---------
 //c++ equivalent to Matlab sum(A), return
 //the sum of the elements of A along the first array 
 //dimension whose size does not equal 1:
@@ -1783,6 +1872,36 @@ Matrix<T> matrix_log(const Matrix<T>& _m)
   return temp_m;
 }
 
+//multiplication 1D equal size
+template<class T>
+double matrix_multiply_1D(const Matrix<double>& _m1, const Matrix<T>& _m2)
+{
+  double temp=0;
+  
+  //security check
+  if(_m1.c_dim!=1||_m2.c_dim!=1)
+    {
+      cout<<"Error in dimension, only 1D supported in this function multiply_1D"<<endl;
+      cerr<<"Error in dimension, only 1D supported in this function multiply_1D"<<endl;
+      
+      throw runtime_error("Error in dimension, only 1D supported in this function multiply_1D");
+    }
+  if(_m1.nTotal()!=_m2.nTotal())
+    {
+      cout<<"Error in size, two matrices have unequal size"<<endl;
+      cerr<<"Error in size, two matrices have unequal size"<<endl;
+      throw runtime_error("Error in size, two matrices have unequal size");
+    }
+  unsigned size=_m1.nTotal();
+  for(unsigned i=0;i<size;i++)
+    {
+      temp+=_m1.c_data[i]*_m2.c_data[i];
+    }
+
+  return temp;
+
+}
+
 //======template instantiation
 //class
 template class Matrix<int>;
@@ -1821,3 +1940,5 @@ template Matrix<unsigned> max(const Matrix<unsigned>& _m, const unsigned& _dim);
 template Matrix<double> max(const Matrix<double>& _m, const unsigned& _dim);
 
 template Matrix<double> matrix_log(const Matrix<double>& _m);
+
+template double matrix_multiply_1D(const Matrix<double>& _m1, const Matrix<unsigned>& _m2);

@@ -50,6 +50,7 @@ struct VDJ_cuts_insertion_dinuc_ntbias_model_params
   bool use_no_D_match_seqs;//(true),
 
   unsigned read_length;
+  unsigned maximum_read_length;
 };
 //extern VDJ_cuts_insertion_dinuc_ntbias_model_params vdj_mps;
 #endif

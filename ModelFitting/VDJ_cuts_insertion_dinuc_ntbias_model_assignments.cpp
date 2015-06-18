@@ -28,8 +28,11 @@ bool VDJ_model_assignments
   assignment_params.in=0;
   assignment_params.skips=0;
   //cout<<"&&&inside assignments:2"<<endl;
+  
+  //here for setting up the max_depth, we using maximum possible length of each 
+  //gene segments. this is different from Matlab code.
   assignment_params.max_J_depth=AlignmentSettings::max_J_length;
-  assignment_params.max_V_depth=_seq.GetLength()+ AlignmentSettings::max_V_length;
+  assignment_params.max_V_depth=AlignmentSettings::max_V_length;
   
   assignment_params.J_max_error=0;
   assignment_params.D_max_error=0;
@@ -213,7 +216,7 @@ bool assign_VDJ_alleles
       assignment_params.log_highest_probability_GIVEN_current_V_allele=-1000.0;
       assignment_params.v_break_out=false;
       assignment_params.n_assignments_v_gene=0;
-//cout<<"\tinside VDJ:4"<<endl;
+      //cout<<"\tinside VDJ:4"<<endl;
       //========loop over J alleles
       for(unsigned j=0;j<_J.numOfAligned;j++)
 	{
@@ -703,8 +706,8 @@ bool assign_VJ_palindrome
 	  return false;
 	}//       end
       
-      assignment_params.V_end=_V.align_positions(assignment_params.v, 0)+_V.align_length(assignment_params.v)-1-assignment_params.ndV1+npV;
-      if(assignment_params.V_end>=_J.align_position(assignment_params.j, 0)+assignment_params.ndj1)
+      assignment_params.V_end=_V.align_positions[assignment_params.v][0]+_V.align_length[assignment_params.v]-1-assignment_params.ndV1+npV;
+      if(assignment_params.V_end>=_J.align_position[assignment_params.j][0]+assignment_params.ndJ1)
 	//V with palindrome overlaps with J, not possible
 	{
 	  continue;
@@ -1323,6 +1326,7 @@ bool assign_D
       na++)
     {
       bool zeroD=na>assignment_params.n_D_aligns;
+      assignment_params.na=na;
       if(!zeroD && _D.align_length(assignment_params.d, na)<assignment_params.best_D_align_length-8)
 	return true;//???? this is same as break, since it is inside the outer most loop
 
@@ -1445,10 +1449,10 @@ bool assign_D
 		  continue;
 		}
 	      //now get the statistics
-	      log_p_max_nt_VD_loop_Dl=(insVD_nseq_min_loopdDl.GetLetterCount('A')+insVD_nseq_min_loopdDl('a'))*assignment_params.log_max_model_p_nt_VD[0];
-	      log_p_max_nt_VD_loop_Dl+=(insVD_nseq_min_loopdDl.GetLetterCount('C')+insVD_nseq_min_loopdDl('c'))*assignment_params.log_max_model_p_nt_VD[1];
-	      log_p_max_nt_VD_loop_Dl+=(insVD_nseq_min_loopdDl.GetLetterCount('G')+insVD_nseq_min_loopdDl('g'))*assignment_params.log_max_model_p_nt_VD[2];
-	      log_p_max_nt_VD_loop_Dl+=(insVD_nseq_min_loopdDl.GetLetterCount('T')+insVD_nseq_min_loopdDl('t'))*assignment_params.log_max_model_p_nt_VD[3];
+	      log_p_max_nt_VD_loop_Dl=(insVD_nseq_min_loopdDl.GetLetterCount('A')+insVD_nseq_min_loopdDl.GetLetterCount('a'))*assignment_params.log_max_model_p_nt_VD[0];
+	      log_p_max_nt_VD_loop_Dl+=(insVD_nseq_min_loopdDl.GetLetterCount('C')+insVD_nseq_min_loopdDl.GetLetterCount('c'))*assignment_params.log_max_model_p_nt_VD[1];
+	      log_p_max_nt_VD_loop_Dl+=(insVD_nseq_min_loopdDl.GetLetterCount('G')+insVD_nseq_min_loopdDl.GetLetterCount('g'))*assignment_params.log_max_model_p_nt_VD[2];
+	      log_p_max_nt_VD_loop_Dl+=(insVD_nseq_min_loopdDl.GetLetterCount('T')+insVD_nseq_min_loopdDl.GetLetterCount('t'))*assignment_params.log_max_model_p_nt_VD[3];
 	      
 	    }//end zeroD cases if loop
 	  else
@@ -1507,10 +1511,10 @@ bool assign_D
 		      continue;
 		    }
 		  //now get the statistics
-		  log_p_max_nt_DJ_loop_Dr=(insDJ_nseq_min_loopdDr.GetLetterCount('A')+insDJ_nseq_min_loopdDr('a'))*assignment_params.log_max_model_p_nt_DJ[0];
-		  log_p_max_nt_DJ_loop_Dr+=(insDJ_nseq_min_loopdDr.GetLetterCount('C')+insDJ_nseq_min_loopdDr('c'))*assignment_params.log_max_model_p_nt_DJ[1];
-		  log_p_max_nt_DJ_loop_Dr+=(insDJ_nseq_min_loopdDr.GetLetterCount('G')+insDJ_nseq_min_loopdDr('g'))*assignment_params.log_max_model_p_nt_DJ[2];
-		  log_p_max_nt_DJ_loop_Dr+=(insDJ_nseq_min_loopdDr.GetLetterCount('T')+insDJ_nseq_min_loopdDr('t'))*assignment_params.log_max_model_p_nt_DJ[3];
+		  log_p_max_nt_DJ_loop_Dr=(insDJ_nseq_min_loopdDr.GetLetterCount('A')+insDJ_nseq_min_loopdDr.GetLetterCount('a'))*assignment_params.log_max_model_p_nt_DJ[0];
+		  log_p_max_nt_DJ_loop_Dr+=(insDJ_nseq_min_loopdDr.GetLetterCount('C')+insDJ_nseq_min_loopdDr.GetLetterCount('c'))*assignment_params.log_max_model_p_nt_DJ[1];
+		  log_p_max_nt_DJ_loop_Dr+=(insDJ_nseq_min_loopdDr.GetLetterCount('G')+insDJ_nseq_min_loopdDr.GetLetterCount('g'))*assignment_params.log_max_model_p_nt_DJ[2];
+		  log_p_max_nt_DJ_loop_Dr+=(insDJ_nseq_min_loopdDr.GetLetterCount('T')+insDJ_nseq_min_loopdDr.GetLetterCount('t'))*assignment_params.log_max_model_p_nt_DJ[3];
 	 
 		  log_p_max_nt_VD_DJ_na_loop_Dr=log_p_max_nt_DJ_loop_Dr+log_p_max_nt_VD_loop_Dl;
 
@@ -1658,10 +1662,10 @@ bool assign_D
 		      }
 		    //get sum stats for mono nts
 
-		    log_p_max_nt_VD_loop_pDl=(insVD_nseq_min_looppDl.GetLetterCount('A')+insVD_nseq_min_looppDl('a'))*assignment_params.log_max_model_p_nt_VD[0];
-		    log_p_max_nt_VD_loop_pDl+=(insVD_nseq_min_looppDl.GetLetterCount('C')+insVD_nseq_min_looppDl('c'))*assignment_params.log_max_model_p_nt_VD[1];
-		    log_p_max_nt_VD_loop_pDl+=(insVD_nseq_min_looppDl.GetLetterCount('G')+insVD_nseq_min_looppDl('g'))*assignment_params.log_max_model_p_nt_VD[2];
-		    log_p_max_nt_VD_loop_pDl+=(insVD_nseq_min_looppDl.GetLetterCount('T')+insVD_nseq_min_looppDl('t'))*assignment_params.log_max_model_p_nt_VD[3];
+		    log_p_max_nt_VD_loop_pDl=(insVD_nseq_min_looppDl.GetLetterCount('A')+insVD_nseq_min_looppDl('a').GetLetterCount)*assignment_params.log_max_model_p_nt_VD[0];
+		    log_p_max_nt_VD_loop_pDl+=(insVD_nseq_min_looppDl.GetLetterCount('C')+insVD_nseq_min_looppDl('c').GetLetterCount)*assignment_params.log_max_model_p_nt_VD[1];
+		    log_p_max_nt_VD_loop_pDl+=(insVD_nseq_min_looppDl.GetLetterCount('G')+insVD_nseq_min_looppDl('g').GetLetterCount)*assignment_params.log_max_model_p_nt_VD[2];
+		    log_p_max_nt_VD_loop_pDl+=(insVD_nseq_min_looppDl.GetLetterCount('T')+insVD_nseq_min_looppDl('t').GetLetterCount)*assignment_params.log_max_model_p_nt_VD[3];
 	 
 		  }//zeroD case for the first loop 
 		else //first zeroD case of else loop
@@ -1712,10 +1716,10 @@ bool assign_D
 			  }
 			//get sum stats for mono nts
 			
-			log_p_max_nt_VD_loop_pDr=(insVD_nseq_min_looppDr.GetLetterCount('A')+insVD_nseq_min_looppDr('a'))*assignment_params.log_max_model_p_nt_DJ[0];
-			log_p_max_nt_VD_loop_pDr+=(insVD_nseq_min_looppDr.GetLetterCount('C')+insVD_nseq_min_looppDr('c'))*assignment_params.log_max_model_p_nt_DJ[1];
-			log_p_max_nt_VD_loop_pDr+=(insVD_nseq_min_looppDr.GetLetterCount('G')+insVD_nseq_min_looppDr('g'))*assignment_params.log_max_model_p_nt_DJ[2];
-			log_p_max_nt_VD_loop_pDr+=(insVD_nseq_min_looppDr.GetLetterCount('T')+insVD_nseq_min_looppDr('t'))*assignment_params.log_max_model_p_nt_DJ[3];
+			log_p_max_nt_VD_loop_pDr=(insVD_nseq_min_looppDr.GetLetterCount('A')+insVD_nseq_min_looppDr.GetLetterCount('a'))*assignment_params.log_max_model_p_nt_DJ[0];
+			log_p_max_nt_VD_loop_pDr+=(insVD_nseq_min_looppDr.GetLetterCount('C')+insVD_nseq_min_looppDr.GetLetterCount('c'))*assignment_params.log_max_model_p_nt_DJ[1];
+			log_p_max_nt_VD_loop_pDr+=(insVD_nseq_min_looppDr.GetLetterCount('G')+insVD_nseq_min_looppDr.GetLetterCount('g'))*assignment_params.log_max_model_p_nt_DJ[2];
+			log_p_max_nt_VD_loop_pDr+=(insVD_nseq_min_looppDr.GetLetterCount('T')+insVD_nseq_min_looppDr.GetLetterCount('t'))*assignment_params.log_max_model_p_nt_DJ[3];
 			log_p_max_nt_VD_DJ_na_loop_pDr=log_p_max_nt_VD_loop_pDl+log_p_max_nt_DJ_loop_pDr;
 		      }//npDr zeroD case 
 		    else
@@ -1846,6 +1850,9 @@ bool assign_D
 			  {
 			    continue;
 			  }
+			assignment_params.zeroD=zeroD;
+			====>>>>>>>from this point one, we generating all the stats
+				     and ready to put them into assigns
 
 			//nucleotide frequenciest in insertion sequences, 
 			//not including palindromes
@@ -1866,4 +1873,902 @@ bool assign_D
   return true;
 }//end of assign_D function
 
+//start doing assignment with D seg on both sides
+bool run_stats_for_assignment
+(VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
+ const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
+ const GenomicV* _genV, const unsigned& _numV,
+ const GenomicD* _genD, const unsigned& _numD,
+ const GenomicJ* _genJ, const unsigned& _numJ,
+ /*const double& _probability_threshold_factor,*/ const bool& _no_error,
+ const bool& _ignore_deep_error, const bool& _do_smoothing,
+ const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
+ /*output, input*/VDJ_model_assignments_settings& assignment_params,
+ /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns
+ )
+{
+  //first thing here is run stats for nt distribution
+  SequenceString insVD_nseq=_seq.Sub(assignment_params.V_end+1, assignment_params.V_end+assignment_params.niVD);
+  SequenceString insDJ_nseq=_seq.Sub(assignment_params.J_start-assignment_params.niDJ, assignment_params.J_start-1);
 
+  SequenceString insVD_nseq_5prime_shift=_seq.Sub(assignment_params.V_end, assignment_params.V_end+assignment_params.niVD-1);
+  SequenceString insDJ_nseq_3prime_shift=_seq.Sub(assignment_params.J_start-assignment_params.niDJ+1, assignment_params.J_start);
+
+  //now doing mono nt distr first
+  unsigned mononucleotideVD[]={0,0,0,0};
+  unsigned mononucleotideDJ[]={0,0,0,0};
+
+  mononucleotideVD[0]=insVD_nseq.GetLetterCount('A')+insVD_nseq.GetLetterCount('a');
+  mononucleotideVD[1]=insVD_nseq.GetLetterCount('C')+insVD_nseq.GetLetterCount('c');
+  mononucleotideVD[2]=insVD_nseq.GetLetterCount('G')+insVD_nseq.GetLetterCount('g');
+  mononucleotideVD[3]=insVD_nseq.GetLetterCount('T')+insVD_nseq.GetLetterCount('t');
+  
+  mononucleotideDJ[0]=insDJ_nseq.GetLetterCount('A')+insDJ_nseq.GetLetterCount('a');
+  mononucleotideDJ[1]=insDJ_nseq.GetLetterCount('C')+insDJ_nseq.GetLetterCount('c');
+  mononucleotideDJ[2]=insDJ_nseq.GetLetterCount('G')+insDJ_nseq.GetLetterCount('g');
+  mononucleotideDJ[3]=insDJ_nseq.GetLetterCount('T')+insDJ_nseq.GetLetterCount('t');
+  
+  //next the dinucleotide distribution
+  unsigned matrix_dim[]={4,4,1,1}; //dimension of 4, but not necessarily all used, could be
+  //only first say 2 to be used
+  Matrix<unsigned> nucleotideVD(2, matrix_dim,0);
+  Matrix<unsigned> nucleotideDJ(2, matrix_dim, 0);
+  
+  unsigned cor_x, cor_y;
+  //for VD
+  for(unsigned nt_VD=0; nt_VD<assignment_params.niVD;nt_VD++)
+    {
+      switch (insVD_nseq.GetSequence().at(nt_VD))
+	{
+	case 'A':
+	case 'a':
+	  cor_x=0;
+	  break;
+	case 'C':
+	case 'c':
+	  cor_x=1;
+	  break;
+	 
+	case 'G':
+	case 'g':
+	  cor_x=2;
+	  break;
+	case 'T':
+	case 't':
+	  cor_x=3;
+	  break;
+	default:
+	  cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");
+	}
+      
+      switch (insVD_nseq_5prime_shift.GetSequence().at(nt_VD))
+	{
+	case 'A':
+	case 'a':
+	  cor_y=0;
+	  break;
+	case 'C':
+	case 'c':
+	  cor_y=1;
+	  break;
+	 
+	case 'G':
+	case 'g':
+	  cor_y=2;
+	  break;
+	case 'T':
+	case 't':
+	  cor_y=3;
+	  break;
+	default:
+	  cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");
+	}
+      
+      nucleotideVD(cor_x, cor_y)=nucleotideVD(cor_x, cor_y)+1;
+    }//end of vd di nucleotide for loop
+  
+    //for DJ
+  for(unsigned nt_DJ=0; nt_VD<assignment_params.niDJ;nt_DJ++)
+    {
+      switch (insDJ_nseq.GetSequence().at(nt_DJ))
+	{
+	case 'A':
+	case 'a':
+	  cor_x=0;
+	  break;
+	case 'C':
+	case 'c':
+	  cor_x=1;
+	  break;
+	 
+	case 'G':
+	case 'g':
+	  cor_x=2;
+	  break;
+	case 'T':
+	case 't':
+	  cor_x=3;
+	  break;
+	default:
+	  cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");
+	}
+      
+      switch (insDJ_nseq_3prime_shift.GetSequence().at(nt_DJ))
+	{
+	case 'A':
+	case 'a':
+	  cor_y=0;
+	  break;
+	case 'C':
+	case 'c':
+	  cor_y=1;
+	  break;
+	 
+	case 'G':
+	case 'g':
+	  cor_y=2;
+	  break;
+	case 'T':
+	case 't':
+	  cor_y=3;
+	  break;
+	default:
+	  cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");
+	}
+      nucleotideDJ(cor_x, cor_y)=nucleotideDJ(cor_x, cor_y)+1;
+    }//end of vd di nucleotide for loop
+
+  //% Compute final probability of assignment by multiplying base probability by factors for
+  //% palindromes, deletions and the number of errors.
+  //% multiply probability by factor for insertions of given lengths and sequence specific factors for
+  //% nucleotide bias
+  double log_pins=log(_model.PinsVD(assignment_params.niVD))*log(_model.PinsDJ(assignment_params.niDJ));
+	
+  double log_pntbias_VD=
+    matrix_multiply_1D(assignment_params.log_RnucleotideVD_per_nucleotideVd_5prime,nucleotideVD.m2vec());
+  double log_pntbias_DJ=
+    matrix_multiply_1D(assignment_params.log_RnucleotideDJ_per_nucleotideVd_3prime,nucleotideDJ.m2vec());
+
+  double log_proba=assignment_params.log_probabase+
+    (assignment_params.nerrorsv+assignment_params.nerrorsj+assignment_params.nerrorsd)*assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3+
+    assignment_params.log_PcutVDJ+log_pins+log_pntbias_DJ+log_pntbias_DJ;
+
+  //update all highest probability so far values, if necessary.
+  if(log_proba>assignment_params.log_highest_probability_GIVEN_V_allele)
+    {
+      assignment_params.log_highest_probability_GIVEN_V_allele=log_proba;
+    }
+  if(log_proba>assignment_params.log_highest_probability_GIVEN_J_allele)
+    {
+      assignment_params.log_highest_probability_GIVEN_J_allele=log_proba;
+    }
+  if(log_proba>assignment_params.log_highest_probability_GIVEN_D_allele)
+    {
+      assignment_params.log_highest_probability_GIVEN_D_allele=log_proba;
+    }
+  if(log_proba>assignment_params.log_highest_probability_GIVEN_V_deletions)
+    {
+      assignment_params.log_highest_probability_GIVEN_V_deletions=log_proba;
+    }
+  if(log_proba>assignment_params.log_highest_probability_GIVEN_J_deletions)
+    {
+      assignment_params.log_highest_probability_GIVEN_J_deletions=log_proba;
+    }
+  if(log_proba>assignment_params.log_highest_probability_GIVEN_Dl_deletions)
+    {
+      assignment_params.log_highest_probability_GIVEN_Dl_deletions=log_proba;
+    }
+  if(log_proba>assignment_params.log_highest_probability_GIVEN_Dr_deletions)
+    {
+      assignment_params.log_highest_probability_GIVEN_Dr_deletions=log_proba;
+    }
+  
+  //update the best align length
+  if(assignment_params.D_align_length> assignment_params.best_align_length)
+    {
+      assignment_params.best_align_length=assignment_params.D_align_length;
+    }
+
+  //% if D length isvery short (<3) I let it count low prob events because the total prob of D short
+  //% is spread out over many choices of D deletions. So if I skip them,
+  //%if (~do_zeroD && (log_proba < log_probability_threshold_factor + log_highest_probability)) || (log_proba < log_probability_hopeless_threshold_factor + log_highest_probability)
+  if ((log_proba < assignment_params.log_probability_threshold_factor + assignment_params.log_highest_probability) || (log_proba < assignment_params.log_probability_hopeless_threshold_factor + assignment_params.log_highest_probability))
+    {
+      assignment_params.skips = assignment_params.skips + 1;
+      return true;//continue; here, we skip the function. it is more like to skip the for loop
+    }
+  
+  //dinucleotide???
+  Matrix<double> nucleotideVD_5prime(2, matrix_dim,0);
+  Matrix<double> nucleotideDJ_3prime(2, matrix_dim,0);
+  
+  Matrix<double> sum_row=sum(nucleotideVD,0); //sum along the first dimension. get second dimension reserved
+  nucleotide_5prime.SetSubMatrix(0,sum_row);
+  nucleotide_5prime.SetSubMatrix(1,sum_row);
+  nucleotide_5prime.SetSubMatrix(2,sum_row);
+  nucleotide_5prime.SetSubMatrix(3,sum_row);
+  
+  Matrix<double> sum_row2=sum(nucleotideDJ,0);
+  nucleotide_3prime.SetSubMatrix(0,sum_row2);
+  nucleotide_3prime.SetSubMatrix(1,sum_row2);
+  nucleotide_3prime.SetSubMatrix(2,sum_row2);
+  nucleotide_3prime.SetSubMatrix(3,sum_row2);
+  
+  sum_row.clear();
+  sum_row2.clear();
+  
+  //edge dinucleotide distribution
+  matrix_dim[0]=4;matrix_dim[1]=4;
+  Matrix<unsigned> VD_left_edge_dinucleotide(2,matrix_dim,0);
+  Matrix<unsigned> VD_right_edge_dinucleotide(2,matrix_dim,0);
+  
+  Matrix<unsigned> DJ_left_edge_dinucleotide(2,matrix_dim,0);
+  Matrix<unsigned> DJ_right_edge_dinucleotide(2,matrix_dim,0);
+  
+  if(assignment_params.niVD >0)
+    {
+      switch (_seq.GetSequence().at(assignment_params.V_end))
+	{
+	case 'A':
+	case 'a':
+	  cor_x=0;
+	  break;
+	case 'C':
+	case 'c':
+	  cor_x=1;
+	  break;
+	case 'G':
+	case 'g':
+	  cor_x=2;
+	  break;
+	case 'T':
+	case 't':
+	  cor_x=3;
+	  break;
+	default:
+	  cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	}
+      switch (_seq.GetSequence().at(assignment_params.V_end+1))
+	{
+	case 'A':
+	case 'a':
+	  cor_y=0;
+	  break;
+	case 'C':
+	case 'c':
+	  cor_y=1;
+	  break;
+	case 'G':
+	case 'g':
+	  cor_y=2;
+	  break;
+	case 'T':
+	case 't':
+	  cor_y=3;
+	  break;
+	default:
+	  cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	}
+      VD_left_edge_dinucleotide(cor_x, cor_y)++;
+      //now the right edge
+      if(!assignment_params.zeroD)
+	{
+	  unsigned D_left_start=_D.align_position_left(assignment_params.d, assignment_params.na)+assignment_params.ndDl1-assignment_params.npDl;
+
+	  switch (_seq.GetSequence().at(D_left_start-1))
+	    {
+	    case 'A':
+	    case 'a':
+	      cor_x=0;
+	      break;
+	    case 'C':
+	    case 'c':
+	      cor_x=1;
+	      break;
+	    case 'G':
+	    case 'g':
+	      cor_x=2;
+	      break;
+	    case 'T':
+	    case 't':
+	      cor_x=3;
+	      break;
+	    default:
+	      cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	    }
+	  switch (_seq.GetSequence().at(D_left_start))
+	    {
+	    case 'A':
+	    case 'a':
+	      cor_y=0;
+	      break;
+	    case 'C':
+	    case 'c':
+	      cor_y=1;
+	      break;
+	    case 'G':
+	    case 'g':
+	      cor_y=2;
+	      break;
+	    case 'T':
+	    case 't':
+	      cor_y=3;
+	      break;
+	    default:
+	      cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	    }
+	  VD_right_edge_dinucleotide(cor_x, cor_y)++;
+	}//if loop, zeroD case for right edge VD
+
+    }//niVD not zero if loop
+
+  //now doing dj part
+  if(assignment_params.niDJ>0)
+    {
+      
+      switch (_seq.GetSequence().at(assignment_params.J_start-1))
+	{
+	case 'A':
+	case 'a':
+	  cor_x=0;
+	  break;
+	case 'C':
+	case 'c':
+	  cor_x=1;
+	  break;
+	case 'G':
+	case 'g':
+	  cor_x=2;
+	  break;
+	case 'T':
+	case 't':
+	  cor_x=3;
+	  break;
+	default:
+	  cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	}
+      switch (_seq.GetSequence().at(assignment_params.J_start))
+	{
+	case 'A':
+	case 'a':
+	  cor_y=0;
+	  break;
+	case 'C':
+	case 'c':
+	  cor_y=1;
+	  break;
+	case 'G':
+	case 'g':
+	  cor_y=2;
+	  break;
+	case 'T':
+	case 't':
+	  cor_y=3;
+	  break;
+	default:
+	  cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	  throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	}
+      DJ_right_edge_dinucleotide(cor_x, cor_y)++;
+      //now the right edge
+      if(!assignment_params.zeroD)
+	{
+	  unsigned D_right_end=_D.align_position_right(assignment_params.d, assignment_params.na)-assignment_params.ndDr1+assignment_params.npDr;
+
+	  switch (_seq.GetSequence().at(D_right_end))
+	    {
+	    case 'A':
+	    case 'a':
+	      cor_x=0;
+	      break;
+	    case 'C':
+	    case 'c':
+	      cor_x=1;
+	      break;
+	    case 'G':
+	    case 'g':
+	      cor_x=2;
+	      break;
+	    case 'T':
+	    case 't':
+	      cor_x=3;
+	      break;
+	    default:
+	      cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	    }
+	  switch (_seq.GetSequence().at(D_right_end))
+	    {
+	    case 'A':
+	    case 'a':
+	      cor_y=0;
+	      break;
+	    case 'C':
+	    case 'c':
+	      cor_y=1;
+	      break;
+	    case 'G':
+	    case 'g':
+	      cor_y=2;
+	      break;
+	    case 'T':
+	    case 't':
+	      cor_y=3;
+	      break;
+	    default:
+	      cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	    }
+	  DJ_left_edge_dinucleotide(cor_x, cor_y)++;
+	}//if loop, zeroD case for right edge VD
+      
+    }//if loop, niDJ not zero
+
+  //now start doing the tri-nucleotide
+  matrix_dim[2]=4;
+  Matrix<unsigned> trinucleotideVD(3,matrix_dim, 0);
+  Matrix<unsigned> trinucleotideDJ(3,matrix_dim, 0);
+
+  unsigned cor_z;
+
+  for(signed nt_VD=0;nt_VD<((signed)assignment_params.niVD-2);ni_VD++)
+    {
+      switch (insVD_nseq.GetSequence().at(nt_VD))
+	    {
+	    case 'A':
+	    case 'a':
+	      cor_x=0;
+	      break;
+	    case 'C':
+	    case 'c':
+	      cor_x=1;
+	      break;
+	    case 'G':
+	    case 'g':
+	      cor_x=2;
+	      break;
+	    case 'T':
+	    case 't':
+	      cor_x=3;
+	      break;
+	    default:
+	      cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	    }
+	  switch (insVD_nseq.GetSequence().at(nt_VD+1))
+	    {
+	    case 'A':
+	    case 'a':
+	      cor_y=0;
+	      break;
+	    case 'C':
+	    case 'c':
+	      cor_y=1;
+	      break;
+	    case 'G':
+	    case 'g':
+	      cor_y=2;
+	      break;
+	    case 'T':
+	    case 't':
+	      cor_y=3;
+	      break;
+	    default:
+	      cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	    }
+	  switch (insVD_nseq.GetSequence().at(nt_VD+2))
+	    {
+	    case 'A':
+	    case 'a':
+	      cor_z=0;
+	      break;
+	    case 'C':
+	    case 'c':
+	      cor_z=1;
+	      break;
+	    case 'G':
+	    case 'g':
+	      cor_z=2;
+	      break;
+	    case 'T':
+	    case 't':
+	      cor_z=3;
+	      break;
+	    default:
+	      cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	    }
+	  trinucleotideV(cor_x, cor_y, cor_z)++;
+    }//for loop for nt_VD trinucleotide;
+  
+  for(signed nt_DJ=0;nt_DJ<((signed)assignment_params.niDJ-2);ni_DJ++)
+    {
+      switch (insDJ_nseq.GetSequence().at(nt_DJ))
+	    {
+	    case 'A':
+	    case 'a':
+	      cor_x=0;
+	      break;
+	    case 'C':
+	    case 'c':
+	      cor_x=1;
+	      break;
+	    case 'G':
+	    case 'g':
+	      cor_x=2;
+	      break;
+	    case 'T':
+	    case 't':
+	      cor_x=3;
+	      break;
+	    default:
+	      cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	    }
+	  switch (insDJ_nseq.GetSequence().at(nt_DJ+1))
+	    {
+	    case 'A':
+	    case 'a':
+	      cor_y=0;
+	      break;
+	    case 'C':
+	    case 'c':
+	      cor_y=1;
+	      break;
+	    case 'G':
+	    case 'g':
+	      cor_y=2;
+	      break;
+	    case 'T':
+	    case 't':
+	      cor_y=3;
+	      break;
+	    default:
+	      cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	    }
+	  switch (insDJ_nseq.GetSequence().at(nt_DJ+2))
+	    {
+	    case 'A':
+	    case 'a':
+	      cor_z=0;
+	      break;
+	    case 'C':
+	    case 'c':
+	      cor_z=1;
+	      break;
+	    case 'G':
+	    case 'g':
+	      cor_z=2;
+	      break;
+	    case 'T':
+	    case 't':
+	      cor_z=3;
+	      break;
+	    default:
+	      cout<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
+	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
+	    }
+	  trinucleotideDJ(cor_x, cor_y, cor_z)++;
+    }//for loop for nt_DJ trinucleotide;
+  
+  //start doing errors, this need to be reversed to starting from the end of J chain
+  unsigned* error_vs_position=new unsigned[_model.model_params.maximum_read_length];
+  memset(error_vs_position, 0, sizeof(unsigned)*assignment_params.maximum_read_length);
+  //to store positions with errors for this assignment
+  
+  //total nucleotides that are assigned to either V, D or J in this assignment
+  //
+  unsigned genic_length;
+  genic_length=_V.align_length[assignment_params.v]+_J.align_length[assignment_params.j]
+    +assignment_params.npV+assignment_params.npJ-assignment_params.ndV1 - 
+    assignment_params.ndJ1;
+  if(!assignment_params.zeroD)
+    {
+      genic_length=genic_length
+	+_D.align_length[assignment_params.d][assignment_params.na]
+	+assignment_params.npDl+assignment_params.npDr-assignment_params.ndDl1-
+	assignment_params.ndDr1;	
+    }
+  //in case of zeroD, the genic_length is good by now.
+  
+  //here as in the matlab code, we skip some code for very short genic length. check matlab
+
+  //store all positions that have been assigned to either v, d, or j.
+  //this is used to estimate error rate vs psotion by dividing errors in a position by coverage
+  unsigned coverage[]=new unsigned[_model.model_params.maximum_read_length];
+  memset(coverage, 0, sizeof(unsigned)*assignment_params.maximum_read_length);
+  unsigned V_start=_V.align_position[assignment_params.v][0];
+  unsigned V_end=assignment_params.V_end;
+  unsigned J_start=assignment_params.J_start;
+  unsigned J_end=_J.align_position[assignment_params.j][0]+(_genJ[assignment_params.j_a].Get_Sequence().size()-_J.align_position[assignment_params.j][1])-1;
+  
+  unsigned starting_position=J_end;
+  V_start=starting_position-V_start;
+  V_end=starting_postion-V_end;
+
+  J_start=starting_position-J_start;
+  J_end=starting_position-J_end;
+
+  unsigned D_start, D_end;
+
+  //set v segments to 1, reverse order
+  for(unsigned i=V_end;i>=V_start;i++)
+    {
+      coverage[i]=1;
+    }
+  //set j segments to 1, reverse order
+  for(unsigned i=J_end;i>=J_start;i++)
+    {
+      coverage[i]=1;
+    }
+
+
+  if(!assignment_zeroD)
+    {
+      D_start=_D.align_position_left[assignment_params.d][assignment_params.na]+
+	assignment_params.ndDl1-assignment_params.npDl;
+      D_end=_D.align_position_right[assignment_params.d][assignment_params.na]-
+	assignment_params.ndDr1+assignment_params.npDr;
+      
+      D_start=starting_position-D_start;
+      D_end=starting_position-D_end;
+
+      for(unsigned i=D_end;i>=D_start;i++)
+	{
+	  coverage[i]=1;
+	}
+    }
+
+  //store potential pal that is consistent with assignment.
+  if(assignment_params.npV_potential_max >(assignment_params.niVD+assignment_params.npV))
+    {
+      assignment_params.npV_potential_max=assignment_params.niVD+assignment_params.npV;
+    }
+  if(assignment_params.npJ_potential_max >(assignment_params.niDJ+assignment_params.npJ))
+    {
+      assignment_params.npJ_potential_max=assignment_params.niDJ+assignment_params.npJ;
+    }
+
+  if(~assignment_params.zeroD)
+    {
+      if(assignment_params.npDl_potential_max>assignment_params.niVD+assignment_params.npDl)
+	{
+	  assignment_params.npDl_potential_max=assignment_params.niVD+assignment_params.npDl;
+	}
+
+      if(assignment_params.npDr_potential_max>assignment_params.niDJ+assignment_params.npDr)
+	{
+	  assignment_params.npDr_potential_max=assignment_params.niDJ+assignment_params.npDr;
+	}
+    }
+  else
+    {
+      assignment_params.npDl_potential_max=0;
+      assignment_params.npDr_potential_max=0;
+    }
+  
+  //increment valid assignment number
+  assignment_params.in++;
+  assignment_params.n_assignments_v_gene++;
+  assignment_params.n_assignments_d_gene++;
+  assignment_params.n_assignments_j_gene++;
+  
+  //doing errors now
+  unsigned v_err_pos_rel[]=new unsigned[assignment_params.max_V_depth];
+  memset(v_err_pos_rel, 0, sizeof(unsigned)*assignment_params.max_V_depth);
+  unsigned j_err_pos_rel[]=new unsigned[assignment_params.max_J_depth];
+  memset(j_err_pos_rel, 0, sizeof(unsigned)*assignment_params.max_J_depth);
+  //
+  if(!no_error)
+    {
+      matrix_dim[0]=3;
+      Matrix<unsigned> v_err_excess_pos(1, matrix_dim,_V.excess_error_positions[assignment_params.v]); //% error positions in extended V alignment for 'negative' deleti
+      matrix_dim[0]=_V.n_errors[assignment_params.v];
+      Matrix<unsigned> v_err_pos(1, matrix_dim, _V.error_positions[assignment_params.v]);
+      
+      Matrix<unsigned> v_err_excess_pos_ok;
+      Matrix<unsigned> v_err_pos_ok;
+      unsigned pos;
+      if(assignment_params.nerrorsv>0)
+	{
+	  if(assignments_params.ndV1<0)//negative V deletions case
+	    {
+	      if(assignment_params.v_ex_errs>0)//that means we have negative errors, but can ONLY
+		//be 1.
+		{
+		  v_err_excess_pos_ok=v_err_excess_pos.GetElements(assignment_params.v_ex_errs_i);
+		  //so v_err_excess_pos_ok contains positions that we want to set to be in the error_vs_position array, this is contribution from negative case, but considered as a error in the sequences
+		  //use for loop to set it
+		  for(unsigned i=0;i<v_err_excess_pos_ok.size(0);i++)
+		    {
+		      pos=v_err_excess_pos_ok(i);
+		      pos=starting_position-pos; //revers it from the j end;
+		      error_vs_position[pos]=1;
+		    }
+		}//end of non zero negative v deletions case
+	      v_err_pos_ok=v_err_pos;
+	      for(unsigned i=0;i<v_err_pos_ok.size(0);i++)
+		{
+		  pos=v_err_pos_ok(i);
+		  pos=starting_position-pos; //revers it from the j end;
+		  error_vs_position[pos]=1;
+		}
+	    }
+	  else //positive V deletions case
+	    {
+	      Maxtrix<bool> v_err_pos_ok_i= v_err_pos < assignment_params.V_end-assignment_params.npV+1; //this is equivalent to the matlab code, the idea is to remove npV in the end and only count the aligned errors
+	      v_err_pos_ok=v_err_pos.GetElements(v_err_pos_ok_i);
+	      for(unsigned i=0;i<v_err_pos_ok.size(0);i++)
+		{
+		  pos=v_err_pos_ok(i);
+		  pos=starting_position-pos; //revers it from the j end;
+		  error_vs_position[pos]=1;
+		}	      
+	    }//end of else loop that is positive V deletion case
+
+	  //get relative err pos for v
+	  for(unsigned i=0;i<_V.align_length[assignment_params.v];i++)
+	    {
+	      pos=i+assignment_params.ndV;
+	      pos=starting_position-pos;
+	      v_err_pos_rel[i+assignment_params.ndV]=error_vs_position[pos];
+	    }
+	}//end of nerrorsv if case
+
+      //set positions of errors in J to accounting for deletions
+      matrix_dim[0]=3;
+      Matrix<unsigned> j_err_excess_pos(1, matrix_dim,_J.excess_error_positions[assignment_params.j]); //% error positions in extended V alignment for 'negative' deleti
+      matrix_dim[0]=_J.n_errors[assignment_params.j];
+      Matrix<unsigned> j_err_pos(1, matrix_dim, _J.error_positions[assignment_params.j]);
+      
+      Matrix<unsigned> j_err_excess_pos_ok;
+      Matrix<unsigned> j_err_pos_ok;
+      if(assignment_params.nerrorsj>0)
+	{
+	  if(assignments_params.ndJ1<0)//negative V deletions case
+	    {
+	      if(assignment_params.j_ex_errs>0)//that means we have negative errors, but can ONLY
+		//be 1.
+		{
+		  j_err_excess_pos_ok=j_err_excess_pos.GetElements(assignment_params.j_ex_errs_i);
+		  //so j_err_excess_pos_ok contains positions that we want to set to be in the error_vs_position array, this is contribution from negative case, but considered as a error in the sequences
+		  //use for loop to set it
+		  for(unsigned i=0;i<j_err_excess_pos_ok.size(0);i++)
+		    {
+		      pos=j_err_excess_pos_ok(i);
+		      pos=starting_position-pos; //revers it from the j end;
+		      error_vs_position[pos]=1;
+		    }
+		}//end of non zero negative v deletions case
+	      j_err_pos_ok=j_err_pos;
+	      for(unsigned i=0;i<v_err_pos_ok.size(0);i++)
+		{
+		  pos=j_err_pos_ok(i);
+		  pos=starting_position-pos; //revers it from the j end;
+		  error_vs_position[pos]=1;
+		}
+	    }
+	  else //positive V deletions case
+	    {
+	      Maxtrix<bool> j_err_pos_ok_i= j_err_pos > assignment_params.J_start+assignment_params.npJ-1; //this is equivalent to the matlab code, the idea is to remove npV in the end and only count the aligned errors
+	      j_err_pos_ok=j_err_pos.GetElements(j_err_pos_ok_i);
+	      for(unsigned i=0;i<j_err_pos_ok.size(0);i++)
+		{
+		  pos=j_err_pos_ok(i);
+		  pos=starting_position-pos; //revers it from the j end;
+		  error_vs_position[pos]=1;
+		}	      
+	    }//end of else loop that is positive V deletion case
+
+	  //get relative err pos for v
+	  for(unsigned i=0;i<_J.align_length[assignment_params.j];i++)
+	    {
+	      pos=i+assignment_params.ndJ;
+	      pos=starting_position-pos;
+	      v_err_pos_rel[i+assignment_params.ndJ]=error_vs_position[pos];
+	    }
+	  
+	}//end of nerrorsj if case
+
+    }//end of if no error loop
+
+  //now set up positions of errors in D to 1. all of these
+  //come from 'negative' deleteions since D alignments do not allow error
+  //the above is from Matlab, and it is true even in Matlab.
+  //so be careful
+  if(!assignment_params.zeroD&& (assignment_params.nerrorsd>0))
+    {
+      matrix_dim[0]=3;
+      Matrix<unsigned> d_err_excess_pos_left(1, matrix_dim, _D.excess_error_positions_left[assignment_params.d][assignment_params.na]);
+      Matrix<unsigned> d_err_excess_pos_right(1, matrix_dim, _D.excess_error_positions_right[assignment_params.d][assignment_params.na]);
+
+      Matrix<unsigned> d_err_excess_pos_left_ok;
+      Matrix<unsigned> d_err_excess_pos_right_ok;
+      //for left
+      if(assignment_params.ndDl1<0&&assignment_params.d_ex_errs_left>0)
+	{
+	  d_err_excess_pos_left_ok=d_err_excess_pos_left.GetElements(assignment_params.d_ex_errs_left_i);
+	  for(unsigned i=0;i<d_err_excess_pos_left_ok.size(0);i++)
+	    {
+	      pos=d_err_excess_pos_left_ok[i];
+	      pos=starting_position-pos;
+	      error_vs_position[pos]=1;
+	    }
+	}
+
+      //for right
+      if(assignment_params.ndDr1<0&&assignment_params.d_ex_errs_right>0)
+	{
+	  d_err_excess_pos_right_ok=d_err_excess_pos_right.GetElements(assignment_params.d_ex_errs_right_i);
+	  for(unsigned i=0;i<d_err_excess_pos_right_ok.size(0);i++)
+	    {
+	      pos=d_err_excess_pos_right_ok[i];
+	      pos=starting_position-pos;
+	      error_vs_position[pos]=1;
+	    }
+	}
+      
+      //for middle one according to 
+      if(assignment_params.d_errs>0)
+	{
+	  Matrix<unsigned> d_err_pos=_D.error_positions[assignment_params.d][assignment_params.na];
+      
+	  Matrix<unsigned> d_err_pos_ok=d_err_pos.GetElements(assignment_params.d_errs_i);
+	  for(unsigned i=0;i<d_err_pos_ok.size(0);i++)
+	    {
+	      pos=d_err_pos_ok[i];
+	      pos=starting_position-pos;
+	      error_vs_position[pos]=1;
+	    }
+	}
+    }//D error set up
+  //finally we are done with assignments, next put things into assigns variable.
+
+  //store everything in assigns. each variable in counter that begins
+  //with an 'nP' or 'nM' must be found in assigns without the 'nP' or 'nM'
+
+  //first set is about model variables
+  _assigns.V(assignment_params.in-1)=assignment_params.v_g; //one d
+
+  _assigns.DJ(assignment_params.in-1, 0)=assignment_params.j_g;//DJ, 2D
+  _assigns.DJ(assignment_params.in-1, 1)=assignment_params.d_g;
+  
+  _assigns.
+  
+
+  //clean up
+  delete[] v_err_pos_rel;
+  delete[] j_err_pos_rel;
+  delete[] error_vs_position;
+  delete[] coverage;
+  return true;
+}

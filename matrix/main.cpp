@@ -239,6 +239,34 @@ int main(int argc, char* argv[])
   cout<<"m4 >0 elements"<<m4.GetElements(m4Big0&(m4<0)).toString()<<endl;
   cout<<"m4:\n"<<m4.toString()<<endl;
   cout<<"Thanks for using our program and have a nice day!!"<<endl;
+
+  int dimSub[]={0,-1,-1,-1};
+  Matrix<double> m4Sub=m4.SubMatrix(4, dimSub);
+  cout<<"m4Sub (0):"<<m4Sub.toString()<<endl;
+
+  m4.SetSubMatrix(1, m4Sub);
+  cout<<"m4:\n"<<m4.toString()<<endl;
+  dimSub[2]=1;
+  Matrix<double> m4Sub2D=m4.SubMatrix(4, dimSub);
+  cout<<"m4Sub2D (0,1):"<<m4Sub2D.toString()<<endl;
+
+  double inputArr[]={0,0,1,1.1,-1000};
+  m4Sub2D.SetSubMatrix(1,5,inputArr);
+  cout<<"m4Sub2D (0,1):"<<m4Sub2D.toString()<<endl;
+  
+  //1d multiplication
+  dim_size_vec[0]=2;
+  Matrix<double> multi_m1(1,dim_size_vec, 1);
+  Matrix<unsigned> multi_m2(1, dim_size_vec, 2);
+  cout<<"1d multiplication:"<<matrix_multiply_1D<unsigned>(multi_m1, multi_m2)<<endl;
+  
+  Matrix<double> m4SubSum=sum(m4Sub2D,0);
+  cout<<"sum:"<<m4SubSum.toString()<<endl;
+
+  cout<<"....=====>comparing signed vs. unsigned integer"<<endl;
+  signed sx=5; unsigned sy=-1;
+  cout<<"comparing 5 unsigned vs -1 signed :"<< ((sx-1) > (sy-1)) <<endl;
+
   return 0;
 }
 

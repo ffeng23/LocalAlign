@@ -150,6 +150,7 @@ struct VDJ_model_assignments_settings
   unsigned n_D_aligns;
   unsigned start_n_D_aligns;
   unsigned end_n_D_aligns;
+  unsigned na; //remember which D this is in the alignment
 
   int ndDl, ndDl1;
   int ndDr, ndDr1;
@@ -177,6 +178,13 @@ struct VDJ_model_assignments_settings
   double log_PcutVDJ;
 
   unsigned niVD, niDJ;
+
+  //variable for stats
+  unsigned n_assignments_v_gene;
+  unsigned n_assignments_d_gene;
+  unsigned n_assignments_j_gene;
+  
+  
 };
 
 //NOTE: p is palindrome

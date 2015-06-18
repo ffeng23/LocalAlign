@@ -29,3 +29,13 @@
 
 11) need to add code in "../ModelFitting/VDJ_model_assignments_seetings.hpp cpp" modual to initialize all the matrix variables. at this point only some of the maxtrix variables have been initialized. 
     also related to this, we might need to be careful about initialization of all member variables in this modual.
+
+====>>
+note::
+1,for nucleotide distribution, the order is A=0, C=1, G=2, T=3!!!
+2,for error_vs_position, we want to align this from the end. normally, our sequences are 5'-3' with Leader->V->D->J->constant.
+      while for determine the error position, we want to anchor the starting position at the end of J chain.
+      The way we determine it is to get the J align-position + J chain length. and then use that as the starting position for 
+      reversing the positions.
+      for example J align_position on seq is 254, J align-position on J is 2, J length is 25, then the end of J chain on seq is 254+(25-2)=277.
+      	  so if one error is at 253, then its final coordinate is 277-253=24 (including 0).

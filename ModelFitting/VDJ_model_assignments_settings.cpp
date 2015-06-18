@@ -11,7 +11,7 @@ VDJ_model_assignments_settings::VDJ_model_assignments_settings()
   log_max_model_p_nt(),
   log_RnucleotideDJ_per_nucleotideDJ_3prime(),
   log_RnucleotideVD_per_nucleotideVD_5prime(),
-log_max_model_pcutV_given_gene(),
+  log_max_model_pcutV_given_gene(),
   log_max_model_pcutJ_given_gene(),
   log_max_model_pcutD_given_gene(),
   np_start_from_max(true)

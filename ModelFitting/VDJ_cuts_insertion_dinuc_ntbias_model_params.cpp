@@ -27,7 +27,8 @@ const GenomicV* _genV, const unsigned& _numV,
   min_V_length(20)/*originally in matlab code is 15*/,
   high_error_region(15) /*we PROBABLY will NOT use this one*/,
   use_no_D_match_seqs(true),
-  read_length(101)//???????????????is this good???
+  read_length(101),//???????????????is this good??? was 101 previous
+  maximum_read_length(500)
 {
   //empty
   min_V_cut=-1*max_palindrome;

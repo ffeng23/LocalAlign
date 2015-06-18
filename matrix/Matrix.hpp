@@ -110,6 +110,30 @@ public:
   //       it could be 0~some valid indecies or -1. -1 mean in that dimension take all
   Matrix<T> SubMatrix(const unsigned& _n, const int _dim_pos[]) const;
 
+  //Set submatrix
+  //this is the special case for set up the submatrix with one-d array.
+  //we made this to make the data initalization easier
+  //_d, is the first dimension position for the sub matrix to go. in this 
+  //    case the target matrix to be set the submatrix must have dimension of 2
+  //_size, the size of input _matrix, also equals to the size of 
+  //     dimension 2 of target matrix
+  //_matrix, array of input
+  void SetSubMatrix(const unsigned& _d, const unsigned _size, const T _matrix[]); 
+
+  //this is generic set submatrix function
+  //currently it only allows the first dimention to be specified for submatrix
+  //so the target matrix and input matrix have only one dimension difference
+  //for example, target matrix of dimension 3, then input dimension has to be 2
+  //     we specified where in terms of first dimension position for which the 
+  //     input dimesion can be set
+  //input
+  // _d, demsion 1 position to set the submatrix
+  //_matrix, submatrix of input, need to have identical dimension
+  //        to the dimension 2 and above of the target dimentsion
+  void SetSubMatrix(const unsigned& _d, const Matrix<T>& _matrix);
+
+  //===>PENDING issues, need to add function to take care more dimension cases
+  //    currently only support set sub at dimension one. need to take care more later
   //get submatrix
   //Matrix<T> SubMatrix(const unsigned& _n, const int (&_dim_pos)[]) const;
 
@@ -170,12 +194,25 @@ public:
   template<class U>
   friend Matrix<U> matrix_log(const Matrix<U>& _m);
 
+  //do multiplication for 2 matrices
+  template<class U>
+  friend double matrix_multiply_1D(const Matrix<double>& _m1, const Matrix<U>& _m2);
+
   //==================
 protected:
   unsigned c_dim;
   unsigned* c_dim_size;
 
   T* c_data; //the real data container, is allocated in one d
+  //in this internal data block, we arranged data in blocks. The block order is
+  //different from Matlab, the last dimension got positioned together
+  //.......then the first dimenstion is the outer most block
+  //for eg, 2D, d0 is x(3) and d1 is y(2)
+  // y0y1, y0y1, y0y1
+
+  //it is like the order x0y0 x0y1 x1y0 x1y1 x2y0 x2y1.
+  //to access it, we need xi yj
+  //i*dim_y+j
 
 };
 
@@ -216,6 +253,9 @@ T max(const Matrix<T>& _m);
 template<class T>
 Matrix<T> matrix_log(const Matrix<T>& _m);
 
+//multiplication 1D equal size
+template<class T>
+double matrix_multiply_1D(const Matrix<double>& _m1, const Matrix<T>& _m2);
 
 
 #endif
