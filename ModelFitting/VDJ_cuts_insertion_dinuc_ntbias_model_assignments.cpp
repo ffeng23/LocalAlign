@@ -5,6 +5,7 @@
 #include "VDJ_model_assignments_settings.hpp"
 #include "../SIGPIG/AlignmentSettings.hpp"
 
+//always return true;
 bool VDJ_model_assignments
 (
  VDJ_cuts_insertion_dinuc_ntbias_model& _model,
@@ -25,17 +26,20 @@ bool VDJ_model_assignments
 
   assignment_params.log_probability_threshold_factor=log(_probability_threshold_factor);
   assignment_params.log_probability_hopeless_threshold_factor=assignment_params.log_probability_threshold_factor+log(1E-6);
+
+  assignment_params.max_skips=300000;
   assignment_params.in=0;
   assignment_params.skips=0;
+  assignment_params.deep_error_limit=50;//will not use it.???
   //cout<<"&&&inside assignments:2"<<endl;
-  
+    
   //here for setting up the max_depth, we using maximum possible length of each 
   //gene segments. this is different from Matlab code.
   assignment_params.max_J_depth=AlignmentSettings::max_J_length;
   assignment_params.max_V_depth=AlignmentSettings::max_V_length;
   
-  assignment_params.J_max_error=0;
-  assignment_params.D_max_error=0;
+  assignment_params.J_max_error=5;
+  assignment_params.D_max_error=1;
 
   assignment_params.assume_palindrome_negative_deletions=true;
 //cout<<"&&&inside assignments:3"<<endl;
@@ -62,8 +66,8 @@ bool VDJ_model_assignments
     {
       assignment_params.log_Rerror_per_sequenced_nucleotide_divided_by_3=-1000.0;
     }
-//cout<<"&&&inside assignments:7"<<endl;  
-  assignment_params.L_err=_seq.GetLength();
+  //cout<<"&&&inside assignments:7"<<endl;  
+  assignment_params.L_err=_seq.GetLength()-_model.high_error_region;
   assignment_params.log_proba_Rerror_normalization=-1.0*assignment_params.L_err*log(1+_model.Rerror_per_sequenced_nucleotide);
   assignment_params.log_max_model_pcutV_given_gene=matrix_log(max(_model.PcutV_given_V,1));
   assignment_params.log_max_model_pcutJ_given_gene=matrix_log(max(_model.PcutJ_given_J,1));
@@ -328,31 +332,31 @@ bool assign_VDJ_alleles
 				      )
 		 )
 		{
-		  if(assignment_params.v_break_out)//||assignment_param.j_break_out||assignment_param.d_break.out)
+		  /*if(assignment_params.v_break_out)//||assignment_param.j_break_out||assignment_param.d_break.out)
 		    {
 		      return false;
 		    }
 		  else
 		    {
 		      break;
-		    }
-		  //return false;
+		      }*/
+		  return false;
 		  
-		  }
-	      if(assignment_params.v_break_out||assignment_params.j_break_out||assignment_params.d_break_out)
+		}
+	      if(assignment_params.v_break_out||assignment_params.j_break_out/*||assignment_params.d_break_out*/)
 		{
 		  break;
 		}
 	    }//end of d loop ====
-	  if(assignment_params.v_break_out||assignment_params.j_break_out)
+	  if(assignment_params.v_break_out/*||assignment_params.j_break_out*/)
 	    {
 	      break;
 	    }
 	}//end of j loop =====
-      if(assignment_params.v_break_out)
+      /*if(assignment_params.v_break_out)
 	{
 	  break;
-	}
+	  }*/
     }//end of for outer for v loop  ========
   cout<<"n_assign:"<<assignment_params.in<<endl;
   _assigns.n_assignments=assignment_params.in;
@@ -364,6 +368,12 @@ bool assign_VDJ_alleles
 //************************************************
 //return false if something not right, like too many skips and so we
 //want the outer caller finish too. just stop doing this alignment.
+/*    only 3 cases, a false value will be returned. 1) skips and assigments is too large
+ *    at V deletions, 2)same thing for J deletions; 3)false from inner function call.
+ *    other cases are all giving out true; for the third case above, it is basically the 
+ *    covers the similar cases, all for skips and assignments for the inner function calls
+ *
+ */
 bool assign_VJ_deletions
 (VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
@@ -501,10 +511,15 @@ bool assign_VJ_deletions
 	}
                 
       assignment_params.V_align_length = _V.align_length[assignment_params.v] - assignment_params.ndV1 - _READ_LENGTH_CORRECTION;
-      if(assignment_params.V_align_length>=300)
+      //this is an extra checking to make sure the alignment is not too long,
+      //this is not in the original matlab code. it is based on the possible
+      //V segment length
+      if(assignment_params.V_align_length>=350)
 	{
 	  assignment_params.v_break_out=true;
-	  return false;
+	  continue; //do the next one, this one is not right
+	  //return true; //we return true here, since we have set up the v_breakout
+	  //here we just need to jump out to next V_allele and don't do this 
 	}
 //cout<<"\t\tV deletion:vd_6"<<endl;
 
@@ -616,7 +631,7 @@ bool assign_VJ_deletions
 	      if(assignment_params.npJ_potential_max>_J.p_region_max_length[assignment_params.j][ assignment_params.ndJ]) //<---here we change the code it was assignment_params.ndj+1 in the second index
 		assignment_params.npJ_potential_max=_J.p_region_max_length[assignment_params.j][ assignment_params.ndJ]; //<---here we change the code it was assignment_params.ndj+1 in the second index
 		
-		}//             end*/
+	    }//             end*/
 	  //        cout<<"\t\t\tJ deletion:J_7"<<endl;
 	  
 	  assignment_params.J_align_length = _J.align_length[assignment_params.j] - assignment_params.ndJ1;
@@ -627,23 +642,32 @@ bool assign_VJ_deletions
 	  if(!assign_VJ_palindrome(_model, _seq, _V, _D, _J,
 				   _genV, _numV, _genD, _numD,
 				   _genJ, _numJ,
-				   _no_error, _ignore_deep_error, _do_smoothing,
+				   _no_error, /*_ignore_deep_error,*/ _do_smoothing,
 				   _force_all_alleles, _READ_LENGTH_CORRECTION,
 				   assignment_params, _assigns)
 	     )
 	    {
-	      if(assignment_params.v_break_out||assignment_params.j_break_out||assignment_params.d_break_out)
+	      /*if(assignment_params.v_break_out||assignment_params.j_break_out||assignment_params.d_break_out)
 		{
 		  return false;
 		}
 	      else
 		{
 		  break;
-		}
-	      //return false;
-	      }
+		  }*/
+	      return false;
+	    }
+	  if(assignment_params.v_break_out||assignment_params.j_break_out||assignment_params.d_break_out)
+	    {
+	      break;
+	    }
 
 	}//end of J deletion loop
+      if(assignment_params.v_break_out||assignment_params.j_break_out||assignment_params.d_break_out)
+	{
+	  break;
+	  //return false;
+	}
     }//end of V deletions loop for
   
   return true;
@@ -651,6 +675,12 @@ bool assign_VJ_deletions
 
 //=======================================
 //***************************************
+/*output:
+ *     returning false for 3 cases, 1) npV and 2)npJ for maximum skips and assignments
+ *         3) for returning false from inner function of D_alignment
+ *       upon these cases, we will return false to upper.
+ *     other cases, we will return true;
+ */
 bool assign_VJ_palindrome
 (VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
@@ -658,7 +688,7 @@ bool assign_VJ_palindrome
  const GenomicD* _genD, const unsigned& _numD,
  const GenomicJ* _genJ, const unsigned& _numJ,
  /*const double& _probability_threshold_factor,*/ const bool& _no_error,
- const bool& _ignore_deep_error, const bool& _do_smoothing,
+ /*const bool& _ignore_deep_error,*/ const bool& _do_smoothing,
  const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns)
@@ -687,13 +717,13 @@ bool assign_VJ_palindrome
     }//       end
     
   //now looping the possible cases of npV first
-  for(npV=npV_start;;npV+=np_step)
+  for(assignment_params.npV=npV_start;;assignment_params.npV+=np_step)
     {
-      if(assignment_params.np_start_from_max&&npV>npV_end)
+      if(assignment_params.np_start_from_max&&assignment_params.npV>npV_end)
 	{
 	  break; //we are done
 	}
-      if(!assignment_params.np_start_from_max&&npV<npV_end)
+      if(!assignment_params.np_start_from_max&&assignment_params.npV<npV_end)
 	{
 	  break;//we are done.
 	}
@@ -706,7 +736,7 @@ bool assign_VJ_palindrome
 	  return false;
 	}//       end
       
-      assignment_params.V_end=_V.align_positions[assignment_params.v][0]+_V.align_length[assignment_params.v]-1-assignment_params.ndV1+npV;
+      assignment_params.V_end=_V.align_positions[assignment_params.v][0]+_V.align_length[assignment_params.v]-1-assignment_params.ndV1+assignment_params.npV;
       if(assignment_params.V_end>=_J.align_position[assignment_params.j][0]+assignment_params.ndJ1)
 	//V with palindrome overlaps with J, not possible
 	{
@@ -714,7 +744,7 @@ bool assign_VJ_palindrome
 	}
 
       //now start doing the cut variable, Note: cut variable is the observed deletion since P_nt often is confused with negative deletions.
-      int ncutV=assignment_params.ndV-npV;
+      int ncutV=assignment_params.ndV-assignment_params.npV; //ncutV could be negative, that is why below, we need to add min_V_cut (which is negative value) to make sure it is positive.  the ncutV will never be smaller than -min_V_cut, which is negative model_max_palindrome (-6)
       int PcutV=_model.PcutV_given_V(assignment_params.v_g, ncutV-_model.min_V_cut);
       if(PcutV==0)
 	{
@@ -725,7 +755,7 @@ bool assign_VJ_palindrome
       double log_max_pcutVDJ_loop_pV=log_PcutV+log_max_pcutD_loop_d+log_max_pcutJ_loop_j;
       
       //upper bound on insertions nt bias factor
-      int niVD_DJ_min=(signed)(assignment_params.niVD_DJ0)+assignment_params.ndV1+assignment_params.ndJ1-_D.align_length(d,0)-npV-_J.p_region_max_length(j, ndJ)-assignment_params.p_maxDl-assignment_params.p_maxDr;
+      int niVD_DJ_min=(signed)(assignment_params.niVD_DJ0)+assignment_params.ndV1+assignment_params.ndJ1-_D.align_length[d][0]-assignment_params.npV-_J.p_region_max_length[j][ndJ]-assignment_params.p_maxDl-assignment_params.p_maxDr;
       if( niVD_DJ_min<0)
 	{
 	  niVD_D=0;
@@ -746,13 +776,13 @@ bool assign_VJ_palindrome
 	}
 	 
       //next start doing the loop over half-length of J palindrome
-      for(npJ=npJ_start;;npJ+=np_step)
+      for(assignment_params.npJ=npJ_start;;npJ+=np_step)
 	{
-	  if(assignment_params.np_start_from_max&&npJ>npJ_end)
+	  if(assignment_params.np_start_from_max&&assignment_param.npJ>npJ_end)
 	    {
 	      break; //we are done
 	    }
-	  if(!assignment_params.np_start_from_max&&npJ<npJ_end)
+	  if(!assignment_params.np_start_from_max&&assignment_params.npJ<npJ_end)
 	    {
 	      break;//we are done.
 	    }
@@ -765,7 +795,7 @@ bool assign_VJ_palindrome
 	      return false;
 	    }//       end
 	  
-	  assignment_params.J_start=_J.align_position(assignment_params.j,0)+assignment_params.ndJ1-npJ;
+	  assignment_params.J_start=_J.align_position(assignment_params.j,0)+assignment_params.ndJ1-assignment_params.npJ;
 
 	  if(assignment_params.V_end>=assignment_params.J_start)
 	    //V with palindrome overlaps with J, not possible
@@ -774,7 +804,7 @@ bool assign_VJ_palindrome
 	    }
 	  
 	  //now cut variable from J side
-	  int ncutJ=assignment_params.ndJ-npJ;
+	  int ncutJ=assignment_params.ndJ-assignment_params.npJ;
 	  double PcutJ=_model.PcutJ_given_J(assignment_params.j_g, ncutJ-_model.min_J_cut);
 	  if(PcutV==0)
 	    {
@@ -870,14 +900,36 @@ bool assign_VJ_palindrome
 	      assignment_params.skips++;
 	      continue;
 	    } 
-	  
+	  //===========here is page 12 on matlab code print out.
 	  //---------> start doing d alignment from here
-====>will add the function to do the D alignment here
+	  //====>will add the function to do the D alignment here
+	  if(!assign_D(_model, _seq, _V, _D, _J, _genV, _numV, _genD, _numD, _genJ, 
+		      _numJ, /*const double& _probability_threshold_factor,*/ _no_error,
+		      /*const bool& _ignore_deep_error,*/ _do_smoothing, 
+		      _force_all_alleles, _READ_LENGTH_CORRECTION,
+		      /*output, input*/assignment_params,
+		      /*output*/_assigns)
+	     )
+	    {
+	      return false;//because in the case of returning false from assign_D
+	      //we want to finish whatever we have for all loopings and don't
+	      //do anything. this is the inner most level. the deeper level than
+	      //this is the run_stat functions, where we don't do this checking (skips/assignments;
+	    }
+	  
+	  
+	  if(assignment_params.v_break_out||assignment_params.d_break_out||assignment_params.j_break_out)
+	    {
+	      break;
+	    }
 	}//end of npJ loop 
-      
+      if(assignment_params.v_break_out||assignment_params.d_break_out||assignment_params.j_break_out)
+	{
+	  break;
+	}
     }//end of npV loop palindrome
 
-
+  /*
   ===>>  //Note for myself, we probably we include the blow code inside the above blocks of for loops
   
   //***************************
@@ -886,7 +938,7 @@ bool assign_VJ_palindrome
 
   //Increment valid assignment number
   //assignment_params.in+=1;//disp(['assignment=', num2str(in)]) <==========here we move the increment to the end,
-  assignment_params.zeroD=false;
+  //assignment_params.zeroD=false;
   unsigned v=assignment_params.v;
   unsigned j=assignment_params.j;
   unsigned d=assignment_params.d;
@@ -942,7 +994,7 @@ bool assign_VJ_palindrome
    
                              ////cout<<"\t\t\tvdj palidnrome:J_3"<<endl;
    cout<<"log_probabase:"<<assignment_params.log_probabase<<";log_perr:"<< log_perr <<";log_pins:"<<    log_pins<<endl;        
-   double log_proba = assignment_params.log_probabase + log_perr + /*log_PcutVDJ +*/ 
+   double log_proba = assignment_params.log_probabase + log_perr + /*log_PcutVDJ +* / 
     log_pins;// + log_pntbias_DJ + log_pntbias_VD;
                                                     
                                                     
@@ -963,7 +1015,7 @@ bool assign_VJ_palindrome
     log_highest_probability_GIVEN_current_Dl_deletions = log_proba; //end;
   if(log_proba > log_highest_probability_GIVEN_current_Dr_deletions)
     log_highest_probability_GIVEN_current_Dr_deletions = log_proba; //end;
-  */
+  * /
   //cout<<"\t\t\tvdj palidnrome:J_4"<<endl;
   //cout<<"log_proba"<<log_proba<<";log_probability_threshold_factor:"<<assignment_params.log_probability_threshold_factor<<";log_highest_probability:"<<assignment_params.log_highest_probability<<endl;
   if (assignment_params.D_align_length > assignment_params.best_D_align_length) 
@@ -998,16 +1050,7 @@ bool assign_VJ_palindrome
 	 assignment_params.high_error_region - _READ_LENGTH_CORRECTION);
     }//end
   assignment_params.D_align_length=_D.align_length[d][na]-ndDl1-ndDr1;
-  if((signed)assignment_params.D_align_length<0)
-    {
-      assignment_params.D_align_length=0;
-    }
-  if((signed)assignment_params.genic_length<0)
-    {
-      //assignment_params.zeroD=true;
-      //jump out this case;
-      return true; //but don't affect the next case.
-    }
+  
   //cout<<"vdj palindrome "<<endl;
   assignment_params.n_assignments_v_gene ++;//  1; 
   assignment_params.n_assignments_d_gene ++;//= n_assignments_d_gene + 1;
@@ -1047,267 +1090,20 @@ bool assign_VJ_palindrome
 	    
 	    if d_errs > 0
 			  error_vs_position(d_err_pos(d_errs_i)) = 1;
-			  end*/
+			  end * /
 	}//end
 							  
     }//  end of _no_error if blaock
   
-  //% Store everything in assigns.
-  //% Each variable in counter that begins with an 'nP' or 'nM' must be
-  //% found in assigns without the 'nP' or 'nM'.
-  //count<<"\t start updating >>>>>>>>>>>>"<<endl;
-  //%%% The following are model variables
-  unsigned in=assignment_params.in;                                                  
-  _assigns.V(in) = assignment_params.v_g; //in-1, since we have incremented the 
-  _assigns.DJ(in,0)=assignment_params.d_g;_assigns.DJ(in,1)=assignment_params.j_g; //% gene choices
-  _assigns.Vallele_given_gene(in,0) =assignment_params.v_g;_assigns.Vallele_given_gene(in,1)= _genV[assignment_params.v_a].Get_Allele(); //% allele choice given gene
-  _assigns.Dallele_given_gene(in,0) =assignment_params.d_g;_assigns.Dallele_given_gene(in,1)= _genD[assignment_params.d_a].Get_Allele();
-  //_assigns.cutV_given_V(in,:) = [ 1 - model.min_V_cut + ncutV, v_g];
-  //assigns.cutJ_given_J(in,:) = [1 - model.min_J_cut + ncutJ, j_g];
-  _assigns.insVD(in)=inVD;// % insertions, niVD in matlab
-  _assigns.insDJ(in)=inDJ;// niDJ in matlab
-  //assigns.nucleotideVD(in,:,:) = nucleotideVD;
-  //assigns.nucleotideVD_5prime(in,:,:) = nucleotideVD_5prime;
-  //assigns.nucleotideDJ(in,:,:) = nucleotideDJ;
-  //assigns.nucleotideDJ_3prime(in,:,:) = nucleotideDJ_3prime;
-  
-  _assigns.error(in) = nerrors;//assignment_params.nerrorsv+assignment_params.nerrorsj+assignment_params.nerrorsd; //% numerator for error rate estimate
-  //nerrors=_assigns.error(in);
-  _assigns.sequenced_nucleotide(in) = assignment_params.genic_length; //% denominator for error rate estimate
-  //% For tracking                                                  
-  //% numbers of A,C,G and T in insertions: numerator for probabilities of A,C,G,T insertions
-  //assigns.mononucleotideVD(in,:) = mononucleotideVD;
-  //assigns.insertionVD(in,:) = [ niVD , niVD, niVD, niVD]; //% denominator for probabilities of A,C,G,T insertions.
-  //assigns.mononucleotideDJ(in,:) = mononucleotideDJ;
-  //assigns.insertionDJ(in,:) = [niDJ , niDJ, niDJ, niDJ]; % denominator for probabilities of A,C,G,T insertions.
-                                                    
-  //assigns.VD_left_edge_dinucleotide(in,:) = VD_left_edge_dinucleotide;
-  //assigns.VD_right_edge_dinucleotide(in,:) = VD_right_edge_dinucleotide;
-                                                    
-  //assigns.DJ_left_edge_dinucleotide(in,:) = DJ_left_edge_dinucleotide;
-  //assigns.DJ_right_edge_dinucleotide(in,:) = DJ_right_edge_dinucleotide;
-                                                    
-  //assigns.trinucleotideVD(in,:,:,:) = trinucleotideVD;
-  //assigns.trinucleotideDJ(in,:,:,:) = trinucleotideDJ;
-  //????????????????iiiii                                             
-  //assigns.VV_err_pos(in,v_g,:) = v_err_pos_rel;
-  _assigns.VV_align_length(in,0) = assignment_params.v_g;
-  _assigns.VV_align_length(in,1) =assignment_params.V_align_length; //no need to be 1+V_align_length
-                                                    
-  //_assigns.JJ_err_pos(in,j_g,:) = j_err_pos_rel;
-  _assigns.JJ_align_length(in,0) = assignment_params.j_g;
-  _assigns.JJ_align_length(in,1)=assignment_params.J_align_length; //no need to be 1+J_align_length
-                                                    
-  
-  //assigns.pVmax_delV_V(in,:) = [1 + npV_potential_max, 1+ ndV, v_g];
-  //assigns.pJmax_delJ_J(in,:) = [1 + npJ_potential_max, 1+ ndJ, j_g];
-                                                    
-                                                    
-  //assigns.pDlmax_delDl_D(in,:) = [1 + npDl_potential_max, 1+ ndDl, d_g];
-  //assigns.pDrmax_delDr_D(in,:) = [1 + npDr_potential_max, 1+ ndDr, d_g];
-                                                    
-  _assigns.zeroD(in) = assignment_params.zeroD;
-  _assigns.V_align_length(in) = assignment_params.V_align_length;
-  _assigns.D_align_length(in) = assignment_params.D_align_length;
-  _assigns.J_align_length(in) = assignment_params.J_align_length;
-  _assigns.VDJ(in,0)=assignment_params.v_g;
-  _assigns.VDJ(in,1)=assignment_params.d_g;
-  _assigns.VDJ(in,2)=assignment_params.j_g; //% gene choices
-  //assigns.pVdelV(in,:)=[ 1 + npV , 1 + ndV]; % palindromes and deletions
-  //assigns.pJdelJ(in,:)=[ 1 + npJ , 1 + ndJ];
-  _assigns.delVinsVD(in,0) = assignment_params.ndV; _assigns.delVinsVD(in,1)= inVD;//in matlab it niVD
-  _assigns.delVinsDJ(in,0) = assignment_params.ndV; _assigns.delVinsDJ(in,1)=  inDJ;//in matlab it is niDJ
-  _assigns.delVdelJ(in,0) =  assignment_params.ndV; _assigns.delVdelJ(in, 1)= assignment_params.ndJ;
-  _assigns.delJinsVD(in,0) = assignment_params.ndJ; _assigns.delJinsVD(in,1)=  inVD;//in matlab it is niVD
-  _assigns.delJinsDJ(in,0) = assignment_params.ndJ; _assigns.delJinsDJ(in, 1)=  inDJ;//in matlab it is niDJ
-                                                    
-  _assigns.insVDinsDJ(in,0) =  inVD; _assigns.insVDinsDJ(in,1)= inDJ;//ni DJ in matlab
-  
-  _assigns.insDJ_D_align_length(in,0) =  inDJ; //niDJ in matlab
-  _assigns.insDJ_D_align_length(in,1)= assignment_params.D_align_length;
-  
-  _assigns.insVD_D_align_length(in,0) = inVD;//niVD in matlab
-  _assigns.insVD_D_align_length(in,1)= assignment_params.D_align_length;
-                                                    
-  _assigns.insDJ_J_align_length(in,0) =  inDJ;//ni in matlab
-  _assigns.insDJ_J_align_length(in,1)= assignment_params.J_align_length;
-  
-  _assigns.insVD_J_align_length(in,0) = inVD; //niVD in matlab
-  _assigns.insVD_J_align_length(in,1)= assignment_params.J_align_length;
-                                                    
-  _assigns.insDJ_V_align_length(in,0) = inDJ;//niDJ in matlab
-  _assigns.insDJ_V_align_length(in,1) = assignment_params.V_align_length;
-  
-  _assigns.insVD_V_align_length(in,0) = inVD; //niVD in matlab
-  _assigns.insVD_V_align_length(in, 1)= assignment_params.V_align_length;
-                                                    
-  _assigns.Dallele_D_align_length(in,0) = assignment_params.d_g;_assigns.Dallele_D_align_length(in, 1)=  assignment_params.D_align_length;
-  //count<<"vdj palindrome 56"<<endl;                                                                          
-  _assigns.VdelV(in,0) = assignment_params.v_g; _assigns.VdelV(in,1)=assignment_params.ndV ;
-  _assigns.JdelJ(in,0) = assignment_params.j_g;_assigns.JdelJ(in,1)=assignment_params.ndJ;
-  _assigns.VinsVD(in,0) =assignment_params.v_g; _assigns.VinsVD(in,1)= inVD;//niVd in matlab
-  _assigns.DinsVD(in,0) = assignment_params.d_g; _assigns.DinsVD(in,1)=inVD;//niVD in matlab
-  _assigns.DinsDJ(in,0) = assignment_params.d_g; _assigns.DinsDJ(in,1)= inDJ;//niDJ in matlab
-  _assigns.JinsDJ(in,0) = assignment_params.j_g; _assigns.JinsDJ(in, 1)= inDJ;//niDJ in matlab
-  _assigns.VdelJ(in,0) = assignment_params.v_g; _assigns.VdelJ(in,1)= assignment_params.ndJ;
-  _assigns.JdelV(in,0) = assignment_params.j_g; _assigns.JdelJ(in,1)=assignment_params.ndV;
-                                                    
-  _assigns.DdelV(in,0) = assignment_params.d_g; _assigns.DdelV(in, 1)= assignment_params.ndV;
-  _assigns.DdelJ(in,0) = assignment_params.d_g; _assigns.DdelJ(in,1)= assignment_params.ndJ;
-  _assigns.VinsDJ(in,0) = assignment_params.v_g;_assigns.VinsDJ(in,1)= inDJ;//niDJ in matlab
-  _assigns.JinsVD(in,0) = assignment_params.j_g;_assigns.JinsVD(in,1)= inVD;//niVD in matlab
-  
-  //assigns.pVinsVD(in,:) = [1 + npV, 1 + niVD];
-  //assigns.pVinsDJ(in,:) = [1 + npV, 1 + niDJ];
-  //assigns.pVdelJ(in,:) = [1 + npV, 1 + ndJ];
-  //assigns.VpV(in,:) = [v_g, 1 + npV];
-  //assigns.JpV(in,:) = [j_g, 1 + npV];
-  /*assigns.DpV(in,:) = [d_g, 1 + npV];
-    
-                                                    assigns.pJinsVD(in,:) = [1 + npJ, 1 + niVD];
-                                                    assigns.pJinsDJ(in,:) = [1 + npJ, 1 + niDJ];
-                                                    assigns.pJdelV(in,:) = [1 + npJ, 1 + ndV];
-                                                    assigns.VpJ(in,:) = [v_g, 1 + npJ];
-                                                    assigns.JpJ(in,:) = [j_g, 1 + npJ];
-                                                    assigns.DpJ(in,:) = [d_g, 1 + npJ];
-                                                    assigns.pVpJ(in,:)  = [1 + npV, 1+ npJ];
-                                                    assigns.VcutV(in,:) = [ v_g, 1 - model.min_V_cut + ncutV];
-                                                    assigns.JcutJ(in,:) = [ j_g, 1 - model.min_J_cut + ncutJ];
-                                                    assigns.DcutV(in,:) = [ d_g, 1 - model.min_V_cut + ncutV];
-                                                    assigns.DcutJ(in,:) = [ d_g, 1 - model.min_J_cut + ncutJ];
-                                                    assigns.VcutJ(in,:) = [ v_g, 1 - model.min_J_cut + ncutJ];
-                                                    assigns.JcutV(in,:) = [ j_g, 1 - model.min_V_cut + ncutV];
-                                                    assigns.insVDcutV(in,:) = [ 1 + niVD, 1 - model.min_V_cut + ncutV];
-                                                    assigns.insDJcutV(in,:) = [ 1 + niDJ, 1 - model.min_V_cut + ncutV];
-                                                    assigns.insVDcutJ(in,:) = [ 1 + niVD, 1 - model.min_J_cut + ncutJ];
-                                                    assigns.insDJcutJ(in,:) = [ 1 + niDJ, 1 - model.min_J_cut + ncutJ];
-                                                    
-                                                    assigns.cutDlcutDr_given_D(in,:) = [ 1 - model.min_D_cut + ncutDl, 1 - model.min_D_cut + ncutDr, d_g];
-  */                                                
-  //% All possible pairwise joint distributions, just for tracking.
-  /*                                                
-                                                    assigns.pDldelDl(in,:)=[ 1 + npDl , 1 + ndDl];
-                                                    assigns.pDrdelDr(in,:)=[ 1 + npDr , 1 + ndDr];
-                                                    assigns.delVdelDl(in,:) = [1 + ndV, 1 + ndDl];
-                                                    assigns.delVdelDr(in,:) = [1 + ndV, 1 + ndDr];
-                                                    
-                                                    assigns.delJdelDl(in,:) = [1 + ndJ, 1 + ndDl];
-                                                    assigns.delJdelDr(in,:) = [1 + ndJ, 1 + ndDr];
-                                                    assigns.delDlinsVD(in,:) = [1 + ndDl, 1 + niVD];
-                                                    assigns.delDlinsDJ(in,:) = [1 + ndDl, 1 + niDJ];
-                                                    assigns.delDldelDr(in,:) = [1 + ndDl, 1 + ndDr];
-                                                    assigns.delDrinsVD(in,:) = [1 + ndDr, 1 + niVD];
-                                                    assigns.delDrinsDJ(in,:) = [1 + ndDr, 1 + niDJ];
-                                                    assigns.DdelDl(in,:) = [d_g, 1 + ndDl];
-                                                    assigns.DdelDr(in,:) = [d_g, 1 + ndDr ];
-
-                                                    assigns.VdelDl(in,:) = [v_g, 1 + ndDl];
-                                                    assigns.VdelDr(in,:) = [v_g, 1 + ndDr];
-                                                    assigns.JdelDl(in,:) = [j_g, 1 + ndDl];
-                                                    assigns.JdelDr(in,:) = [j_g, 1 + ndDr];
-                                                    assigns.pVdelDl(in,:) = [1 + npV, 1 + ndDl];
-                                                    assigns.pVdelDr(in,:) = [1 + npV, 1 + ndDr];
-                                                    assigns.pJdelDl(in,:) = [1 + npJ, 1 + ndDl];
-                                                    assigns.pJdelDr(in,:) = [1 + npJ, 1 + ndDr];
-                                                    assigns.pDlinsVD(in,:) = [1 + npDl, 1+niVD];
-                                                    assigns.pDlinsDJ(in,:) = [1 + npDl, 1+niDJ];
-                                                    assigns.pDldelV(in,:) = [1 + npDl, 1+ndV];
-                                                    assigns.pDldelJ(in,:)  = [1 + npDl, 1+ndJ];
-                                                    assigns.pDldelDr(in,:) = [1 + npDl, 1+ndDr];
-                                                    assigns.VpDl(in,:) = [v_g, 1+ npDl];
-                                                    assigns.JpDl(in,:) = [j_g, 1+ npDl];
-                                                    assigns.DpDl(in,:) = [d_g, 1+ npDl];
-                                                    
-                                                    assigns.pDrinsVD(in,:) = [1 + npDr, 1 + niVD];
-                                                    assigns.pDrinsDJ(in,:) = [1 + npDr, 1 + niDJ];
-                                                    assigns.pDrdelV(in,:)=  [1 + npDr, 1 + ndV];
-                                                    assigns.pDrdelJ(in,:)=  [1 + npDr, 1 + ndJ];
-                                                    assigns.pDrdelDl(in,:) = [1 + npDr, 1 + ndDl];
-                                                    assigns.VpDr(in,:) = [v_g, 1 + npDr];
-                                                    assigns.JpDr(in,:) = [j_g, 1 + npDr];
-                                                    assigns.DpDr(in,:) = [d_g, 1 + npDr];
-                                                    
-                                                    assigns.pVpDl(in,:)  = [1 + npV, 1+ npDl];
-                                                    assigns.pVpDr(in,:)  = [1 + npV, 1+ npDr];
-                                                    assigns.pDlpDr(in,:) = [1 + npDl, 1+ npDr];
-                                                    assigns.pDlpJ(in,:) = [1 + npDl, 1+ npJ];
-                                                    assigns.pDrpJ(in,:) = [1 + npDr, 1+ npJ];
-                                                    
-                                                    assigns.DcutDl(in,:) = [ d_g, 1 - model.min_D_cut + ncutDl];
-                                                    assigns.DcutDr(in,:) = [ d_g, 1 - model.min_D_cut + ncutDr];
-                                                    assigns.VcutDl(in,:) = [ v_g, 1 - model.min_D_cut + ncutDl];
-                                                    assigns.VcutDr(in,:) = [ v_g, 1 - model.min_D_cut + ncutDr];
-                                                    assigns.JcutDl(in,:) = [ j_g, 1 - model.min_D_cut + ncutDl];
-                                                    assigns.JcutDr(in,:) = [ j_g, 1 - model.min_D_cut + ncutDr];
-                                                    assigns.insVDcutDl(in,:) = [1 + niVD,  1 - model.min_D_cut + ncutDl];
-                                                    assigns.insDJcutDl(in,:) = [1 + niDJ,  1 - model.min_D_cut + ncutDl];
-                                                    assigns.insVDcutDr(in,:) = [1 + niVD,  1 - model.min_D_cut + ncutDr];
-                                                    assigns.insDJcutDr(in,:) = [1 + niDJ,  1 - model.min_D_cut + ncutDr];
-  */                                                
-  //_assigns.error_vs_position(in) = error_vs_position;
-  //assigns.coverage(in,:) = coverage;
-  
-  //%%% probability of this assignment
-  cout<<"log_proba:"<<log_proba<<";log_proba_Rerror_normalization:"<<assignment_params.log_proba_Rerror_normalization<<endl;
-_assigns.proba(in)=exp(log_proba + assignment_params.log_proba_Rerror_normalization);
-                                                    
-  if (nerrors==0)
-    {
-      _assigns.event_probability(in) = exp(log_proba);
-    }
-  else
-    _assigns.event_probability(in) = 0;
-  
-  cout<<"assigns.likelihood:"<<_assigns.likelihood<<endl;
-  _assigns.generation_probability = _assigns.generation_probability + _assigns.event_probability(in);
-  _assigns.likelihood = _assigns.likelihood + _assigns.proba(in);
-  cout<<"assigns.likelihood:"<<_assigns.likelihood<<endl;
-  in++;
-  assignment_params.in=in;
-  //_assigns.n_assignments=in;
-  
-  
-  //% If maximum number of valid assignments is reached, stop.
-  //% If we are not smoothing, stop after 1 assignment
-  //% Usually, we don't reach maximum number of assignments because we break out
-  //% of all the loops due to the various thresholds below.
-  if (in > _model.max_assignments || (~_do_smoothing && in>1))
-    {
-      _assigns.n_assignments = in-1;
-      _assigns.skips = assignment_params.skips;
-      
-      assignment_params.v_break_out=true;//we add this because we are done with the assignment
-      //need to jump all out.
-      return false; //here we are done with overall assignment, 
-    }//end
-                                                    
-if( _force_all_alleles && assignment_params.n_assignments_v_gene > ((double)_model.max_assignments)/_V.numOfAligned)
-    {
-      assignment_params.v_break_out = true;
-      //break;<--break out since there are too many assignments for this segments
-      return false;
-    }
-  //end
-//cout<<"end here"<<endl;
-if (_force_all_alleles && assignment_params.n_assignments_j_gene > ((double)_model.max_assignments)/_J.numOfAligned)
-    {
-      assignment_params.j_break_out = true;
-      //break; <+++in matlab code this is break, but break is not working here, so we change it to return. 
-      return false;
-    }//end
-//cout<<"in the middel"<<endl;
- if (_force_all_alleles && assignment_params.n_assignments_d_gene > ((double)_model.max_assignments)/_D.n_D_alleles)
-    {
-      assignment_params.d_break_out = true;
-      //break; see above block
-      return false;
-    }//end
-                                                    
- cout<<"exiting funcgtion"<<endl;
+*/  
   return true;
 }
 
 //start doing assignment with D seg on both sides
+//output: only two places that will give out false. 1)npDl and 2)npDr checking for 
+//        maximum skips or maximum assignments
+//        all other cases are returning true;
+
 bool assign_D
 (VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
@@ -1315,18 +1111,23 @@ bool assign_D
  const GenomicD* _genD, const unsigned& _numD,
  const GenomicJ* _genJ, const unsigned& _numJ,
  /*const double& _probability_threshold_factor,*/ const bool& _no_error,
- const bool& _ignore_deep_error, const bool& _do_smoothing,
+ /*const bool& _ignore_deep_error,*/ const bool& _do_smoothing,
  const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns
  )
 {
+  
   //start looping all the D alignments
   for(unsigned na=assignment_params.start_n_D_aligns;na<=assignment_params.end_n_D_aligns;
       na++)
     {
       bool zeroD=na>assignment_params.n_D_aligns;
       assignment_params.na=na;
+      //this d_errs_interanal_max is a local variable used to set up break condistion
+      //at the end of dr and dl deletions
+      unsigned d_errs_internal_max=_D.n_errors[assignment_params.d][na];
+      
       if(!zeroD && _D.align_length(assignment_params.d, na)<assignment_params.best_D_align_length-8)
 	return true;//???? this is same as break, since it is inside the outer most loop
 
@@ -1443,7 +1244,7 @@ bool assign_D
 	      ndDr_max+=_D.deletions_right[assignment_params.d][na];
 
 	      //we need to do insertion nt calculation
-	      insVD_nseq_min_loopdDl=_seq.Sub(assignment_params.V_end+1, _D.align_position_left[assignment_params.d][na]+ndDl1-npDl_max-1);
+	      insVD_nseq_min_loopdDl=_seq.Sub(assignment_params.V_end+1, _D.align_position_left[assignment_params.d][na]+assignment_params.ndDl1-npDl_max-1);
 	      if(insVD_nseq_min_loopdDl.GetLength()>_model.max_insertions)
 		{
 		  continue;
@@ -1457,7 +1258,7 @@ bool assign_D
 	    }//end zeroD cases if loop
 	  else
 	    {
-	      ndDr_min=_genD[assignment_params.d_a].Get_Seq().GetLength()-ndDl;
+	      ndDr_min=_genD[assignment_params.d_a].Get_Seq().GetLength()-assignment_params.ndDl;
 	      ndDr_max=ndDr_min;
 	      log_p_max_nt_VD_loop_Dl=0;
 	      
@@ -1475,9 +1276,9 @@ bool assign_D
 	      if(!zeroD)
 		{
 		  assignment_params.npDr_potential_max=_model.max_palindrome;
-		  if(assignment_params.npDr_potential_max<_D.p_region_max_length_right[assignment_params.d][na][ndDr])
+		  if(assignment_params.npDr_potential_max<_D.p_region_max_length_right[assignment_params.d][na][assignment_params.ndDr])
 		    {
-		      assignment_params.npDr_potential_max=_D.p_region_max_length_right[assignment_params.d][na][ndDr];
+		      assignment_params.npDr_potential_max=_D.p_region_max_length_right[assignment_params.d][na][assignment_params.ndDr];
 		    }
 		}
 	      else
@@ -1485,7 +1286,7 @@ bool assign_D
 		  assignment_params.npDr_potential_max=0;
 		}
 
-	      if(ndDr==0)
+	      if(assignment_params.ndDr==0)
 		{
 		  npDr_max=assignment_params.npDr_potential_max;
 		}
@@ -1505,7 +1306,7 @@ bool assign_D
 		    _D.align_length[assignment_params.d][na]-assignment_params.ndDl1
 		    -assignment_params.ndDr1;
 
-		  insDJ_nseq_min_loopdDr=_seq.Sub(_D.align_position_right[assignment_params.d][na]-ndDr1+npDr_max+1, assignment_params.J_start-1);
+		  insDJ_nseq_min_loopdDr=_seq.Sub(_D.align_position_right[assignment_params.d][na]-assignment_params.ndDr1+npDr_max+1, assignment_params.J_start-1);
 		  if(insDJ_nseq_min_loopdDr.GetLength()>_model.max_insertions)
 		    {
 		      continue;
@@ -1525,8 +1326,8 @@ bool assign_D
 		  Matrix<unsigned> d_err_pos 
 		    (1, dim_size, _D.error_positions[assignment_params.d][na]);
 		  assignment_params.d_errs.i=
-		    (d_err_pos>=_D.alignment_position_left[assignment_params.d][na]+ndDl1)&
-		    (d_err_pos<=_D.alignment_position_right[assignment_params.d][na]-ndDr1);
+		    (d_err_pos>=_D.alignment_position_left[assignment_params.d][na]+assignment_params.ndDl1)&
+		    (d_err_pos<=_D.alignment_position_right[assignment_params.d][na]-assignment_params.ndDr1);
 
 		  assignment_param.d_errs=sum_all_bool(d_errs_i);
 		}//end of non-zeroD case, for nt distribution 
@@ -1550,7 +1351,7 @@ bool assign_D
 		  //are stored in d_err_excess_pos_right
 		  //now get them for each 
 		  assignment_params.d_ex_errs_right_i=
-		    d_err_excess_pos_right>0&d_err_excess_pos_right<=(_D.align_position_right[assignment_params.d][na]-assignment_params-ndDr1);
+		    d_err_excess_pos_right>0&d_err_excess_pos_right<=(_D.align_position_right[assignment_params.d][na]-assignment_params-assignment_params.ndDr1);
 		  assignment_params.d_ex_errs_right=sum_all_bool(assignment_params.d_ex_errs_right_i);
 		  if(assignment_params.d_ex_errs_right>1)
 		    {
@@ -1851,29 +1652,93 @@ bool assign_D
 			    continue;
 			  }
 			assignment_params.zeroD=zeroD;
-			====>>>>>>>from this point one, we generating all the stats
-				     and ready to put them into assigns
-
-			//nucleotide frequenciest in insertion sequences, 
-			//not including palindromes
-			
-
+			//====>>>>>>>from this point one, we generating all the stats
+			//	     and ready to put them into assigns
+			//by calling the function run_stats
+			if(! run_stats_for_assignment(_model, _seq, _V, _D, _J,
+						      _genV, _numV, _genD, _numD,
+						      _genJ, _numJ, _no_error,
+						      /*_ignore_deep_error,*/ _do_smoothing,
+						      _force_all_alleles, _READ_LENGTH_CORRECTION,
+						      assignment_params,/*output*/_assigns)
+			   )
+			  {
+			    break;//because in matlab code it does this jump out too
+			  }
+			     
 		      }//for loop of niVD for zeroD cases, nonzeroD case is single loop
-			  
+		    if(assignment_params.v_break_out||assignment_params.j_break_out||assignment_params.d_break_out)
+		      {
+			break;
+		      }
 		  }//half-length of D right palindrome
-	       		
+	       	if(assignment_params.v_break_out||assignment_params.j_break_out||assignment_params.d_break_out)
+		  {
+		    break;
+		  }
 	      }//half-length of D left palindrome
-
-	    }//right deletions
-
-	}//left deletions
-      
+	    
+	    //here in ending the right deletions, we need to check for exit/breakingup cases
+	    //==>unsigned d_errs_internal_max=_D.n_errors[assignment_params.d][na];
+	    //here we define this as a local variable 
+	    if(!zeroD && 
+	       assignment_params.log_highest_probability_GIVEN_current_Dr_deletions>-900  &&
+	       ( ( (assignment_params.ndDr1>2 && d_errs_internal_max==0)&&(assignment_params.log_highest_probability_GIVEN_current_Dr_deletions < (assignment_highest_probability+assignment_probability_threshold_factor))
+		  )
+		||
+		 ( (assignment_params.ndDr1>0 && d_errs_internal_max==0)&&(assignment_params.log_highest_probability_GIVEN_current_Dr_deletions < (assignment_highest_probability+assignment_probability_hopeless_threshold_factor))
+		  )
+	       )
+	      )
+	      {
+		break;
+	      }
+	    if(assignment_params.v_break_out||assignment_params.j_break_out||assignment_params.d_break_out)
+	      {
+		break;
+	      }
+	    
+	    }//D right deletions, ndDr1
+	  
+	  //here in ending the right deletions, we need to check for exit/breakingup cases
+	  
+	  //here we define this as a local variable 
+	  if(!zeroD && 
+	     assignment_params.log_highest_probability_GIVEN_current_Dl_deletions>-900  &&
+	     ( ( (assignment_params.ndDl1>2 && d_errs_internal_max==0)&&(assignment_params.log_highest_probability_GIVEN_current_Dl_deletions < (assignment_highest_probability+assignment_probability_threshold_factor))
+		 )
+	       ||
+	       ( (assignment_params.ndDl1>0 && d_errs_internal_max==0)&&(assignment_params.log_highest_probability_GIVEN_current_Dl_deletions < (assignment_highest_probability+assignment_probability_hopeless_threshold_factor))
+		 )
+	       )
+	     )
+	    {
+	      break;
+	    }
+	  if(assignment_params.v_break_out||assignment_params.j_break_out||assignment_params.d_break_out)
+	    {
+	      break;
+	    }
+	}//D left deletions, ndDl1
+      if(assignment_params.v_break_out||assignment_params.d_break_out||assignment_params.j_break_out)
+	{
+	  break;
+	}
     }//end of loop of D_alginments, out most.
-  
+     
   return true;
 }//end of assign_D function
 
 //start doing assignment with D seg on both sides
+/*output: there is only one case under which we will get a false return
+ *        it is in the very end of this function, we check for n_assignment_v/d/j
+ *        so we will take care this on the outer loops for v/d/j_breakout
+ *        Also, I think it is correct to set up to check for v/d/j_breakout at every loop
+ *        because as I figured out, v/d/j_breakout is really jump_out_to_next_v/d/j_allele
+ *        so in this sense it is jump to v/d/j loops.
+ *     All other cases, a true is returned.
+ */
+
 bool run_stats_for_assignment
 (VDJ_cuts_insertion_dinuc_ntbias_model& _model, const SequenceString& _seq,
  const Alignment_Object& _V, const Alignment_D& _D, const Alignment_Object& _J,
@@ -1881,7 +1746,7 @@ bool run_stats_for_assignment
  const GenomicD* _genD, const unsigned& _numD,
  const GenomicJ* _genJ, const unsigned& _numJ,
  /*const double& _probability_threshold_factor,*/ const bool& _no_error,
- const bool& _ignore_deep_error, const bool& _do_smoothing,
+ /*const bool& _ignore_deep_error,*/ const bool& _do_smoothing,
  const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns
@@ -2069,6 +1934,14 @@ bool run_stats_for_assignment
   if(log_proba>assignment_params.log_highest_probability_GIVEN_Dr_deletions)
     {
       assignment_params.log_highest_probability_GIVEN_Dr_deletions=log_proba;
+    }
+
+//the following two if statements are doing extra checks
+  //==========> but probably unnecessary, since we have check similar conditions in above.
+  //we have them here for now. might remove them in the future, 6/21/1015.
+  if((signed)assignment_params.D_align_length<0)
+    {
+      assignment_params.D_align_length=0;
     }
   
   //update the best align length
@@ -2487,29 +2360,44 @@ bool run_stats_for_assignment
   
   //total nucleotides that are assigned to either V, D or J in this assignment
   //
-  unsigned genic_length;
-  genic_length=_V.align_length[assignment_params.v]+_J.align_length[assignment_params.j]
+  //unsigned genic_length;
+  assignment_params.genic_length=_V.align_length[assignment_params.v]+_J.align_length[assignment_params.j]
     +assignment_params.npV+assignment_params.npJ-assignment_params.ndV1 - 
     assignment_params.ndJ1;
   if(!assignment_params.zeroD)
     {
-      genic_length=genic_length
+      assignment_params.genic_length=genic_length
 	+_D.align_length[assignment_params.d][assignment_params.na]
 	+assignment_params.npDl+assignment_params.npDr-assignment_params.ndDl1-
 	assignment_params.ndDr1;	
     }
   //in case of zeroD, the genic_length is good by now.
+
+//the following two if statements are doing extra checks
+  //==========> but probably unnecessary, since we have check similar conditions in above.
+  //we have them here for now. might remove them in the future, 6/21/1015.  
+  if((signed)assignment_params.genic_length<0)
+    {
+      //assignment_params.zeroD=true;
+      //jump out this case;
+      return true; //but don't affect the next case.
+    }
   
   //here as in the matlab code, we skip some code for very short genic length. check matlab
 
   //store all positions that have been assigned to either v, d, or j.
   //this is used to estimate error rate vs psotion by dividing errors in a position by coverage
+  unsigned v=assignment_params.v;
+  unsigned j=assignment_params.j;
+  unsigned d=assignment_params.d;
+  unsigned na=assignment_params.na;
+
   unsigned coverage[]=new unsigned[_model.model_params.maximum_read_length];
   memset(coverage, 0, sizeof(unsigned)*assignment_params.maximum_read_length);
-  unsigned V_start=_V.align_position[assignment_params.v][0];
+  unsigned V_start=_V.align_position[v][0];
   unsigned V_end=assignment_params.V_end;
   unsigned J_start=assignment_params.J_start;
-  unsigned J_end=_J.align_position[assignment_params.j][0]+(_genJ[assignment_params.j_a].Get_Sequence().size()-_J.align_position[assignment_params.j][1])-1;
+  unsigned J_end=_J.align_position[j][0]+(_genJ[assignment_params.j_a].Get_Sequence().size()-_J.align_position[j][1])-1;
   
   unsigned starting_position=J_end;
   V_start=starting_position-V_start;
@@ -2534,9 +2422,9 @@ bool run_stats_for_assignment
 
   if(!assignment_zeroD)
     {
-      D_start=_D.align_position_left[assignment_params.d][assignment_params.na]+
+      D_start=_D.align_position_left[d][na]+
 	assignment_params.ndDl1-assignment_params.npDl;
-      D_end=_D.align_position_right[assignment_params.d][assignment_params.na]-
+      D_end=_D.align_position_right[d][na]-
 	assignment_params.ndDr1+assignment_params.npDr;
       
       D_start=starting_position-D_start;
@@ -2558,7 +2446,7 @@ bool run_stats_for_assignment
       assignment_params.npJ_potential_max=assignment_params.niDJ+assignment_params.npJ;
     }
 
-  if(~assignment_params.zeroD)
+  if(!assignment_params.zeroD)
     {
       if(assignment_params.npDl_potential_max>assignment_params.niVD+assignment_params.npDl)
 	{
@@ -2576,12 +2464,14 @@ bool run_stats_for_assignment
       assignment_params.npDr_potential_max=0;
     }
   
+  //===========important node, this following incremental code are in the Matlab code.
+  // we moved them to the end of the updating section for c++ code. be careful.
   //increment valid assignment number
-  assignment_params.in++;
+  /*assignment_params.in++;
   assignment_params.n_assignments_v_gene++;
   assignment_params.n_assignments_d_gene++;
   assignment_params.n_assignments_j_gene++;
-  
+  */
   //doing errors now
   unsigned v_err_pos_rel[]=new unsigned[assignment_params.max_V_depth];
   memset(v_err_pos_rel, 0, sizeof(unsigned)*assignment_params.max_V_depth);
@@ -2591,9 +2481,9 @@ bool run_stats_for_assignment
   if(!no_error)
     {
       matrix_dim[0]=3;
-      Matrix<unsigned> v_err_excess_pos(1, matrix_dim,_V.excess_error_positions[assignment_params.v]); //% error positions in extended V alignment for 'negative' deleti
-      matrix_dim[0]=_V.n_errors[assignment_params.v];
-      Matrix<unsigned> v_err_pos(1, matrix_dim, _V.error_positions[assignment_params.v]);
+      Matrix<unsigned> v_err_excess_pos(1, matrix_dim,_V.excess_error_positions[v]); //% error positions in extended V alignment for 'negative' deleti
+      matrix_dim[0]=_V.n_errors[v];
+      Matrix<unsigned> v_err_pos(1, matrix_dim, _V.error_positions[v]);
       
       Matrix<unsigned> v_err_excess_pos_ok;
       Matrix<unsigned> v_err_pos_ok;
@@ -2636,7 +2526,7 @@ bool run_stats_for_assignment
 	    }//end of else loop that is positive V deletion case
 
 	  //get relative err pos for v
-	  for(unsigned i=0;i<_V.align_length[assignment_params.v];i++)
+	  for(unsigned i=0;i<_V.align_length[v];i++)
 	    {
 	      pos=i+assignment_params.ndV;
 	      pos=starting_position-pos;
@@ -2646,9 +2536,9 @@ bool run_stats_for_assignment
 
       //set positions of errors in J to accounting for deletions
       matrix_dim[0]=3;
-      Matrix<unsigned> j_err_excess_pos(1, matrix_dim,_J.excess_error_positions[assignment_params.j]); //% error positions in extended V alignment for 'negative' deleti
-      matrix_dim[0]=_J.n_errors[assignment_params.j];
-      Matrix<unsigned> j_err_pos(1, matrix_dim, _J.error_positions[assignment_params.j]);
+      Matrix<unsigned> j_err_excess_pos(1, matrix_dim,_J.excess_error_positions[j]); //% error positions in extended V alignment for 'negative' deleti
+      matrix_dim[0]=_J.n_errors[j];
+      Matrix<unsigned> j_err_pos(1, matrix_dim, _J.error_positions[j]);
       
       Matrix<unsigned> j_err_excess_pos_ok;
       Matrix<unsigned> j_err_pos_ok;
@@ -2690,7 +2580,7 @@ bool run_stats_for_assignment
 	    }//end of else loop that is positive V deletion case
 
 	  //get relative err pos for v
-	  for(unsigned i=0;i<_J.align_length[assignment_params.j];i++)
+	  for(unsigned i=0;i<_J.align_length[j];i++)
 	    {
 	      pos=i+assignment_params.ndJ;
 	      pos=starting_position-pos;
@@ -2708,8 +2598,8 @@ bool run_stats_for_assignment
   if(!assignment_params.zeroD&& (assignment_params.nerrorsd>0))
     {
       matrix_dim[0]=3;
-      Matrix<unsigned> d_err_excess_pos_left(1, matrix_dim, _D.excess_error_positions_left[assignment_params.d][assignment_params.na]);
-      Matrix<unsigned> d_err_excess_pos_right(1, matrix_dim, _D.excess_error_positions_right[assignment_params.d][assignment_params.na]);
+      Matrix<unsigned> d_err_excess_pos_left(1, matrix_dim, _D.excess_error_positions_left[d][na]);
+      Matrix<unsigned> d_err_excess_pos_right(1, matrix_dim, _D.excess_error_positions_right[d][na]);
 
       Matrix<unsigned> d_err_excess_pos_left_ok;
       Matrix<unsigned> d_err_excess_pos_right_ok;
@@ -2740,7 +2630,7 @@ bool run_stats_for_assignment
       //for middle one according to 
       if(assignment_params.d_errs>0)
 	{
-	  Matrix<unsigned> d_err_pos=_D.error_positions[assignment_params.d][assignment_params.na];
+	  Matrix<unsigned> d_err_pos=_D.error_positions[d][na];
       
 	  Matrix<unsigned> d_err_pos_ok=d_err_pos.GetElements(assignment_params.d_errs_i);
 	  for(unsigned i=0;i<d_err_pos_ok.size(0);i++)
@@ -2752,23 +2642,314 @@ bool run_stats_for_assignment
 	}
     }//D error set up
   //finally we are done with assignments, next put things into assigns variable.
-
-  //store everything in assigns. each variable in counter that begins
-  //with an 'nP' or 'nM' must be found in assigns without the 'nP' or 'nM'
-
-  //first set is about model variables
-  _assigns.V(assignment_params.in-1)=assignment_params.v_g; //one d
-
-  _assigns.DJ(assignment_params.in-1, 0)=assignment_params.j_g;//DJ, 2D
-  _assigns.DJ(assignment_params.in-1, 1)=assignment_params.d_g;
   
-  _assigns.
+  //=========================
+  //% Store everything in assigns.
+  //% Each variable in counter that begins with an 'nP' or 'nM' must be
+  //% found in assigns without the 'nP' or 'nM'.
+  //count<<"\t start updating >>>>>>>>>>>>"<<endl;
+  //%%% The following are model variables
+  unsigned in=assignment_params.in;                                                  
+  _assigns.V(in) = assignment_params.v_g; //in-1, since we have incremented the 
+  _assigns.DJ(in,0)=assignment_params.d_g;
+  _assigns.DJ(in,1)=assignment_params.j_g; //% gene choices
+
+  _assigns.Vallele_given_gene(in,0) =assignment_params.v_g;_assigns.Vallele_given_gene(in,1)= _genV[assignment_params.v_a].Get_Allele(); //% allele choice given gene
+  _assigns.Dallele_given_gene(in,0) =assignment_params.d_g;_assigns.Dallele_given_gene(in,1)= _genD[assignment_params.d_a].Get_Allele();
+
+  _assigns.cutV_given_V(in,0) = assignment_params.v_g;_assigns.cutV_given_V(in,1)= (assignment_params.ndV-assignment_params.npV)- _model.min_V_cut;
+  _assigns.cutJ_given_J(in,0) = assignment_params.j_g; _assigns.cutJ_given_J(in,1) =(assignment_params.ndJ-assignment_params.npJ) - model.min_J_cut ;
+  _assigns.insVD(in)=assignment_params.niVD;// % insertions, niVD in matlab
+  _assigns.insDJ(in)=assignment_params.niDJ;// niDJ in matlab
+
+  _assigns.nucleotideVD.SetSubMatrix(in, nucleotideVD);
+  _assigns.nucleotideVD_5prime.SetSubMatrix(in, nucleotideVD_5prime);
+  _assigns.nucleotideDJ.SetSubMatrix(in,nucleotideDJ);
+  _assigns.nucleotideDJ_3prime.SetSubMatrix(in,nucleotideDJ_3prime);
   
+  _assigns.error(in) = assignment_params.nerrorsv+
+    assignment_params.nerrorsd+ assignment_params.nerrorsj;//nerrors;//assignment_params.nerrorsv+assignment_params.nerrorsj+assignment_params.nerrorsd; //% numerator for error rate estimate
+  //nerrors=_assigns.error(in);
+  _assigns.sequenced_nucleotide(in) = assignment_params.genic_length; //% denominator for error rate estimate
+  //end of model variables........
+  
+  //% For tracking                                                  
+  //% numbers of A,C,G and T in insertions: numerator for probabilities of A,C,G,T insertions
+  _assigns.mononucleotideVD(in,0) = mononucleotideVD[0];
+  _assigns.mononucleotideVD(in,1) = mononucleotideVD[1];
+  _assigns.mononucleotideVD(in,2) = mononucleotideVD[2];
+  _assigns.mononucleotideVD(in,3) = mononucleotideVD[3];
+
+  _assigns.insertionVD(in,0) =  assignment_params.niVD;
+  _assigns.insertionVD(in,1) =  assignment_params.niVD;
+  _assigns.insertionVD(in,2) =  assignment_params.niVD;
+  _assigns.insertionVD(in,3) =  assignment_params.niVD;
+  //, niVD, niVD, niVD]; //% denominator for probabilities of A,C,G,T insertions.
+  _assigns.mononucleotideDJ(in,0) = mononucleotideDJ[0];
+  _assigns.mononucleotideDJ(in,1) = mononucleotideDJ[1];
+  _assigns.mononucleotideDJ(in,2) = mononucleotideDJ[2];
+  _assigns.mononucleotideDJ(in,3) = mononucleotideDJ[3];
+
+  _assigns.insertionDJ(in,0) = assignment_params.niDJ; 
+  _assigns.insertionDJ(in,1) = assignment_params.niDJ;
+  _assigns.insertionDJ(in,2) = assignment_params.niDJ;
+  _assigns.insertionDJ(in,3) = assignment_params.niDJ; 
+  //, niDJ, niDJ, niDJ]; //% denominator for probabilities of A,C,G,T insertions.
+                                                    
+  _assigns.VD_left_edge_dinucleotide.SetSubMatrix(in, VD_left_edge_dinucleotide);
+  _assigns.VD_right_edge_dinucleotide.SetSubMatrix(in, VD_right_edge_dinucleotide);
+                                                    
+  _assigns.DJ_left_edge_dinucleotide.SetSubMatrix(in, DJ_left_edge_dinucleotide);
+  _assigns.DJ_right_edge_dinucleotide.SetSubMatrix(in, DJ_right_edge_dinucleotide);
+                                                    
+  _assigns.trinucleotideVD.SetSubMatrix(in,trinucleotideVD);
+  _assigns.trinucleotideDJ.SetSubMatrix(in,trinucleotideDJ);
+
+  //                                             
+  _assigns.VV_err_pos.SetSubMatrix(in,assignment_params.v_g, assignment_params.max_V_depth, v_err_pos_rel);
+  _assigns.VV_align_length(in,0) = assignment_params.v_g;
+  _assigns.VV_align_length(in,1) =assignment_params.V_align_length; //no need to be 1+V_align_length
+                                                    
+  _assigns.JJ_err_pos.SetSubMatrix(in,assignment_params.j_g, assignment_params.max_J_depth, j_err_pos_rel);
+  _assigns.JJ_align_length(in,0) = assignment_params.j_g;
+  _assigns.JJ_align_length(in,1)=assignment_params.J_align_length; //no need to be 1+J_align_length
+                                                    
+  _assigns.pVmax_delV_V(in,0) =assignment_params.v_g;
+  _assigns.pVmax_delV_V(in,1) =assignment_params.ndV;
+  _assigns.pVmax_delV_V(in,2) =assignment_params.npV_potential_max;
+  //[1 + npV_potential_max, 1+ ndV, v_g];
+  _assigns.pJmax_delJ_J(in,0) =assignment_params.j_g;
+  _assigns.pJmax_delJ_J(in,1) =assignment_params.ndJ;
+  _assigns.pJmax_delJ_J(in,2) =assignment_params.npJ_potential_max;
+  //[1 + npJ_potential_max, 1+ ndJ, j_g];
+                                                        
+  _assigns.pDlmax_delDl_D(in,0) = assignment_params.d_g;
+  _assigns.pDlmax_delDl_D(in,1) = assignment_params.ndDl;
+  _assigns.pDlmax_delDl_D(in,2) = assignment_params.npDl_potential_max;
+  //[1 + npDl_potential_max, 1+ ndDl, d_g];
+  _assigns.pDrmax_delDr_D(in,0) = assignment_params.d_g;
+  _assigns.pDrmax_delDr_D(in,1) = assignment_params.ndDr;
+  _assigns.pDrmax_delDr_D(in,2) = assignment_params.npDr_potential_max;
+  //[1 + npDr_potential_max, 1+ ndDr, d_g];
+                                                    
+  _assigns.zeroD(in) = assignment_params.zeroD;
+  _assigns.V_align_length(in) = assignment_params.V_align_length;
+  _assigns.D_align_length(in) = assignment_params.D_align_length;
+  _assigns.J_align_length(in) = assignment_params.J_align_length;
+  _assigns.VDJ(in,0)=assignment_params.v_g;
+  _assigns.VDJ(in,1)=assignment_params.d_g;
+  _assigns.VDJ(in,2)=assignment_params.j_g; //% gene choices
+  
+  _assigns.pVdelV(in,0)=assignment_params.npV;
+  _assigns.pVdelV(in,1)=assignment_params.ndV; //% palindromes and deletions
+  _assigns.pJdelJ(in,0)=assignment_params.npJ;
+  _assigns.pJdelJ(in,1)=assignment_params.ndJ;
+  
+  _assigns.delVinsVD(in,0) = assignment_params.ndV; _assigns.delVinsVD(in,1)= assignment_params.niVD;//in matlab it niVD
+  _assigns.delVinsDJ(in,0) = assignment_params.ndV; _assigns.delVinsDJ(in,1)= assignment_params.niDJ;//in matlab it is niDJ
+  _assigns.delVdelJ(in,0) =  assignment_params.ndV; _assigns.delVdelJ(in, 1)= assignment_params.ndJ;
+
+  _assigns.delJinsVD(in,0) = assignment_params.ndJ; _assigns.delJinsVD(in,1)= assignment_params.niVD;//in matlab it is niVD
+  _assigns.delJinsDJ(in,0) = assignment_params.ndJ; _assigns.delJinsDJ(in, 1)=assignment_params.niDJ;//in matlab it is niDJ
+                                                    
+  _assigns.insVDinsDJ(in,0) = assignment_params.niVD; _assigns.insVDinsDJ(in,1)= assignment_params.niDJ;//ni DJ in matlab
+  
+  _assigns.insDJ_D_align_length(in,0) = assignment_params.niDJ; //niDJ in matlab
+  _assigns.insDJ_D_align_length(in,1)= assignment_params.D_align_length;
+  
+  _assigns.insVD_D_align_length(in,0) = assignment_params.niVD;//niVD in matlab
+  _assigns.insVD_D_align_length(in,1)= assignment_params.D_align_length;
+                                                    
+  _assigns.insDJ_J_align_length(in,0) = assignment_params.niDJ;//ni in matlab
+  _assigns.insDJ_J_align_length(in,1)= assignment_params.J_align_length;
+  
+  _assigns.insVD_J_align_length(in,0) = assignment_params.niVD; //niVD in matlab
+  _assigns.insVD_J_align_length(in,1)= assignment_params.J_align_length;
+                                                    
+  _assigns.insDJ_V_align_length(in,0) = assignment_params.niDJ;//niDJ in matlab
+  _assigns.insDJ_V_align_length(in,1) = assignment_params.V_align_length;
+  
+  _assigns.insVD_V_align_length(in,0) = assignment_params.niVD; //niVD in matlab
+  _assigns.insVD_V_align_length(in, 1)= assignment_params.V_align_length;
+                                                    
+  _assigns.Dallele_D_align_length(in,0) = assignment_params.d_g;_assigns.Dallele_D_align_length(in, 1)=  assignment_params.D_align_length;
+  //count<<"vdj palindrome 56"<<endl;                                                                          
+  _assigns.VdelV(in,0) = assignment_params.v_g; _assigns.VdelV(in,1)=assignment_params.ndV ;
+  _assigns.JdelJ(in,0) = assignment_params.j_g;_assigns.JdelJ(in,1)=assignment_params.ndJ;
+  _assigns.VinsVD(in,0) =assignment_params.v_g; _assigns.VinsVD(in,1)=assignment_params.niVD;//niVd in matlab
+  _assigns.DinsVD(in,0) = assignment_params.d_g; _assigns.DinsVD(in,1)=assignment_params.niVD;//niVD in matlab
+  _assigns.DinsDJ(in,0) = assignment_params.d_g; _assigns.DinsDJ(in,1)= assignment_params.niDJ;//niDJ in matlab
+  _assigns.JinsDJ(in,0) = assignment_params.j_g; _assigns.JinsDJ(in, 1)=assignment_params.niDJ;//niDJ in matlab
+  _assigns.VdelJ(in,0) = assignment_params.v_g; _assigns.VdelJ(in,1)= assignment_params.ndJ;
+  _assigns.JdelV(in,0) = assignment_params.j_g; _assigns.JdelJ(in,1)=assignment_params.ndV;
+                                                    
+  _assigns.DdelV(in,0) = assignment_params.d_g; _assigns.DdelV(in, 1)= assignment_params.ndV;
+  _assigns.DdelJ(in,0) = assignment_params.d_g; _assigns.DdelJ(in,1)= assignment_params.ndJ;
+  _assigns.VinsDJ(in,0) = assignment_params.v_g;_assigns.VinsDJ(in,1)=assignment_params.niDJ;//niDJ in matlab
+  _assigns.JinsVD(in,0) = assignment_params.j_g;_assigns.JinsVD(in,1)= assignment_params.niVD;//niVD in matlab
+  
+  _assigns.pVinsVD(in,0) = assignment_params.npV; _assigns.pVinsVD(in,1) = assignment_params.niVD;
+  _assigns.pVinsDJ(in,0) = assignment_params.npV; _assigns.pVinsDJ(in,1) = assignment_params.niDJ;
+  _assigns.pVdelJ(in,0) = assignment_params.npV; _assigns.pVdelJ(in, 1)= assignment_params.ndJ;
+  _assigns.VpV(in,0) = assignment_params.v_g; _assigns.VpV(in,1)=assignment_params.npV;
+  _assigns.JpV(in,0) = assignment_params.j_g; _assigns.JpV(in,1) = assignment_params.npV;
+  _assigns.DpV(in,0) = assignment_params.d_g; _assigns.DpV(in,1)= assignment_params.npV;
+    
+  _assigns.pJinsVD(in,0) = assignment_params.npJ;_assigns.pJinsVD(in,1)= assignment_params.niVD;
+  _assigns.pJinsDJ(in,0) = assignment_params.npJ; _assigns.pJinsDJ(in,1) = assignment_params.niDJ;
+  _assigns.pJdelV(in,0) = assignment_params.npJ; _assigns.pJdelV(in,1) = assignment_params.ndV;
+  _assigns.VpJ(in,0) = assignment_params.v_g; _assigns.VpJ(in,1) = assignment_params.npJ;
+  _assigns.JpJ(in,0) = assignment_params.j_g; _assigns.JpJ(in,1)=assignment_params.npJ;
+  _assigns.DpJ(in,0) = assignment_params.d_g; _assigns.DpJ(in,1)=assignment_params.npJ;
+  _assigns.pVpJ(in,0)  = assignment_params.npV; _assigns.pVpJ(in,1)=assignment_params.npJ;
+  _assigns.VcutV(in,0) = assignment_params.v_g; _assigns.VcutV(in,1)=assignment_params.ndV-assignment_params.npV-_model.min_V_cut;//this is same as cutV_given_V;!!!
+  
+  _assigns.JcutJ(in,0) = assignment_params.j_g; _assigns.JcutJ(in,1)=assignment_params.ndJ-assignment_params.npJ-_model.min_J_cut;
+  _assigns.DcutV(in,0) = assignment_params.d_g; _assigns.DcutV(in,1)=assignment_params.ndV-assignment_params.npV - _model.min_V_cut;
+  _assigns.DcutJ(in,0) = assignment_params.d_g; _assigns.DcutJ(in,1) = assignment_params.ndJ-assignment_params.npJ - _model.min_J_cut ;
+  _assigns.VcutJ(in,0) = assignment_params.v_g; _assigns.VcutJ(in, 1)= assignment_params.ndJ-assignment_params.npJ -_model.min_J_cut;
+  _assigns.JcutV(in,0) = assignment_params.j_g; _assigns.JcutV(in,1)=assignment_params.ndV-assignment_params.npV - _model.min_V_cut;
+  _assigns.insVDcutV(in,0) = assignment_params.niVD; _assigns.insVDcutV(in,1)=assignment_params.ndV-assignment_params.npV -_model.min_V_cut;
+  _assigns.insDJcutV(in,0) = assignment_params.niDJ; _assigns.insDJcutV(in,1)=assignment_params.ndV-assignment_params.npV - _model.min_V_cut;
+  _assigns.insVDcutJ(in,0) = assignment_params.niVD; _assigns.insVDcutJ(in,1)=assignment_params.ndJ-assignment_params.npJ - _model.min_J_cut;
+  _assigns.insDJcutJ(in,0) = assignment_params.niDJ; _assigns.insDJcutJ(in,1)=assignment_params.ndJ-assignment_params.npJ - _model.min_J_cut;
+                                                    
+  _assigns.cutDlcutDr_given_D(in,0) =assignment_params.d_g;_assigns.cutDlcutDr_given_D(in,1)= assignment_params.ndDl-assignment_params.npdl -_model.min_D_cut; _assigns.cutDlcutDr_given_D(in,2)=assignment_params.ndDr-assignment_params.npDr  -_model.min_D_cut;
+               
+  //***need to be careful about above or overall assignment. Do I really need to change the matrix orientation to make it fit the p1_given_p2. is it necessary?                                   
+  //% All possible pairwise joint distributions, just for tracking.
+  
+  _assigns.pDldelDl(in,0)=assignment_params.npDl; _assigns.pDldelDl(in,1)= assignment_params.ndDl;
+  _assigns.pDrdelDr(in,0)=assignment_params.npDr; _assigns.pDrdelDr(in,1)=assignment_params.ndDr;
+  _assigns.delVdelDl(in,0) = assignment_params.ndV;_assigns.delVdelDl(in,1) = assignment_params.ndDl;
+  _assigns.delVdelDr(in,0) = assignment_params.ndV; _assigns.delVdelDr(in,1) = assignment_params.ndDr;
+                                                    
+  _assigns.delJdelDl(in,0) = assignment_params.ndJ; _assigns.delJdelDl(in,1) = assignment_params.ndDl;
+  _assigns.delJdelDr(in,0) = assignment_params.ndJ; _assigns.delJdelDr(in,1) = assignment_params.ndDr;
+  _assigns.delDlinsVD(in,0) = assignment_params.ndDl; _assigns.delDlinsVD(in,1) = assignment_params.niVD;
+  _assigns.delDlinsDJ(in,0) = assignment_params.ndDl; _assigns.delDlinsDJ(in,1) = assignment_params.niDJ;
+  _assigns.delDldelDr(in,0) = assignment_params.ndDl; _assigns.delDldelDr(in,1) = assignment_params.ndDr;
+  _assigns.delDrinsVD(in,0) = assignment_params.ndDr; _assigns.delDrinsVD(in,1) = assignment_params.niVD;
+  _assigns.delDrinsDJ(in,0) = assignment_params.ndDr; _assigns.delDrinsDJ(in,1)=assignment_params.niDJ;
+  _assigns.DdelDl(in,0) = assignment_params.d_g; _assigns.DdelDl(in,1) = assignment_params.ndDl;
+  _assigns.DdelDr(in,0) = assignment_params.d_g; _assigns.DdelDr(in,1) = assignment_params.ndDr ;
+
+  _assigns.VdelDl(in,0) = assignment_params.v_g; _assigns.VdelDl(in,1) = assignment_params.ndDl;
+  _assigns.VdelDr(in,0) = assignment_params.v_g; _assigns.VdelDr(in,1) = assignment_params.ndDr;
+  _assigns.JdelDl(in,0) = assignment_params.j_g; _assigns.JdelDl(in,1) = assignment_params.ndDl;
+  _assigns.JdelDr(in,0) = assignment_params.j_g; _assigns.JdelDr(in,1) = assignment_params.ndDr;
+  _assigns.pVdelDl(in,0) = assignment_params.npV; _assigns.pVdelDl(in,1) = assignment_params.ndDl;
+  _assigns.pVdelDr(in,0) = assignment_params.npV; _assigns.pVdelDr(in,1) = assignment_params.ndDr;
+  _assigns.pJdelDl(in,0) = assignment_params.npJ;  _assigns.pJdelDl(in,1) = assignment_params.ndDl;
+  _assigns.pJdelDr(in,0) = assignment_params.npJ; _assigns.pJdelDr(in,1) = assignment_params.ndDr;
+  _assigns.pDlinsVD(in,0) = assignment_params.npDl;  _assigns.pDlinsVD(in,1) = assignment_params.niVD;
+  _assigns.pDlinsDJ(in,0) = assignment_params.npDl; _assigns.pDlinsDJ(in,1) = assignment_params.niDJ;
+  _assigns.pDldelV(in,0) = assignment_params.npDl; _assigns.pDldelV(in,1) = assignment_params.ndV;
+  _assigns.pDldelJ(in,0)  = assignment_params.npDl; _assigns.pDldelJ(in,1)  = assignment_params.ndJ;
+  _assigns.pDldelDr(in,0) = assignment_params.npDl; _assigns.pDldelDr(in,1) = assignment_params.ndDr;
+  _assigns.VpDl(in,0) = assignment_params.v_g; _assigns.VpDl(in,1) = assignment_params.npDl;
+  _assigns.JpDl(in,0) = assignment_params.j_g; _assigns.JpDl(in,1) = assignment_params.npDl;
+  _assigns.DpDl(in,0) = assignment_params.d_g; _assigns.DpDl(in,1)=assignment_params.npDl;
+                                                    
+  _assigns.pDrinsVD(in,0) = assignment_params.npDr; _assigns.pDrinsVD(in,1) =assignment_params.niVD;
+  _assigns.pDrinsDJ(in,0) = assignment_params.npDr; _assigns.pDrinsDJ(in,1) = assignment_params.niDJ;
+  _assigns.pDrdelV(in,0)=  assignment_params.npDr; _assigns.pDrdelV(in,1)=  assignment_params.ndV;
+  _assigns.pDrdelJ(in,0)=  assignment_params.npDr; _assigns.pDrdelJ(in,1)=  assignment_params.ndJ;
+  _assigns.pDrdelDl(in,0) = assignment_params.npDr;  _assigns.pDrdelDl(in,1) = assignment_params.ndDl;
+  _assigns.VpDr(in,0) = assignment_params.v_g; _assigns.VpDr(in,1) = assignment_params.npDr;
+  _assigns.JpDr(in,0) = assignment_params.j_g; _assigns.JpDr(in,1) = assignment_params.npDr;
+  _assigns.DpDr(in,0) = assignment_params.d_g; _assigns.DpDr(in,1) = assignment_params.npDr;
+                                                    
+  _assigns.pVpDl(in,0)  = assignment_params.npV; _assigns.pVpDl(in,1)  = assignment_params.npDl;
+  _assigns.pVpDr(in,0)  = assignment_params.npV; _assigns.pVpDr(in,1)  = assignment_params.npDr;
+  _assigns.pDlpDr(in,0) = assignment_params.npDl; _assigns.pDlpDr(in,1) = assignment_params.npDr;
+  _assigns.pDlpJ(in,0) = assignment_params.npDl; _assigns.pDlpJ(in,1) = assignment_params.npJ;
+  _assigns.pDrpJ(in,0) = assignment_params.npDr;  _assigns.pDrpJ(in,1) = assignment_params.npJ;
+                                                    
+  _assigns.DcutDl(in,0) = assignment_params.d_g; _assigns.DcutDl(in,1) = assignment_params.ndDl-assignment_params.npDl-_model.min_D_cut;
+  _assigns.DcutDr(in,0) = assignment_params.d_g; _assigns.DcutDr(in,1) = assignment_params.ndDr-assignment_params.npDr - _model.min_D_cut;
+  _assigns.VcutDl(in,0) = assignment_params.v_g; _assigns.VcutDl(in,1) = assignment_params.ndDl-assignment_params.npDl-_model.min_D_cut;
+  _assigns.VcutDr(in,0) = assignment_params.v_g; _assigns.VcutDr(in,1) = assignment_params.ndDr-assignment_params.npDr - _model.min_D_cut;
+  _assigns.JcutDl(in,0) = assignment_params.j_g; _assigns.JcutDl(in,1) = assignment_params.ndDl-assignment_params.npDl - _model.min_D_cut;
+  _assigns.JcutDr(in,0) = assignment_params.j_g; _assigns.JcutDr(in,1) = assignment_params.ndDr-assignment_params.npDr - _model.min_D_cut;
+  _assigns.insVDcutDl(in,0) = assignment_params.niVD;_assigns.insVDcutDl(in,1) = assignment_params.ndDl-assignment_params.npdl -_model.min_D_cut ;
+  _assigns.insDJcutDl(in,0) = assignment_params.niDJ;  _assigns.insDJcutDl(in,1) = assignment_params.ndDl-assignment_params.npDl - _model.min_D_cut ;
+  _assigns.insVDcutDr(in,0) = assignment_params.niVD;  _assigns.insVDcutDr(in,1) = assignment_params.ndDr - assignment_params.npDr - _model.min_D_cut;
+  _assigns.insDJcutDr(in,0) = assignment_param.niDJ;  _assigns.insDJcutDr(in,0) = assignment_param.ndDr - assignment_params.npDr - _model.min_D_cut ;
+                                                  
+  _assigns.error_vs_position.SetSubMatrix(in, _model.model_params.maximum_read_length, error_vs_position);
+  _assigns.coverage.SetSubMatrix(in,_model.model_params.maximum_read_length,  coverage);
+  
+  //%%% probability of this assignment
+  cout<<"log_proba:"<<log_proba<<";log_proba_Rerror_normalization:"<<assignment_params.log_proba_Rerror_normalization<<endl;
+  _assigns.proba(in)=exp(log_proba + assignment_params.log_proba_Rerror_normalization);
+                                                    
+  if (nerrors==0)
+    {
+      _assigns.event_probability(in) = exp(log_proba);
+    }
+  else
+    _assigns.event_probability(in) = 0;
+  
+  cout<<"assigns.likelihood:"<<_assigns.likelihood<<endl;
+  _assigns.generation_probability = _assigns.generation_probability + _assigns.event_probability(in);
+  _assigns.likelihood = _assigns.likelihood + _assigns.proba(in);
+  cout<<"assigns.likelihood:"<<_assigns.likelihood<<endl;
+  
+  //this following section for incrementing the counters were originally in Matlab somewhere
+  //above, we moved them here to make it compatible for c++ code.
+  in++;
+  assignment_params.n_assignments_v_gene++;
+  assignment_params.n_assignments_d_gene++;
+  assignment_params.n_assignments_j_gene++;
+  //in++;
+  assignment_params.in=in;
+  //?????need to check whether this is correct//_assigns.n_assignments=in; <==where we can set this????? ANSWER: we will set this up at the outermost loop, V loop
 
   //clean up
   delete[] v_err_pos_rel;
   delete[] j_err_pos_rel;
   delete[] error_vs_position;
-  delete[] coverage;
+  delete[] coverage;  
+  
+  //% If maximum number of valid assignments is reached, stop.
+  //% If we are not smoothing, stop after 1 assignment
+  //% Usually, we don't reach maximum number of assignments because we break out
+  //% of all the loops due to the various thresholds below.
+  if (in > _model.max_assignments || (~_do_smoothing && in>1))
+    {
+      _assigns.n_assignments = in;
+      _assigns.skips = assignment_params.skips;
+      
+      assignment_params.v_break_out=true;//we add this because we are done with the assignment
+      //need to jump all out.
+      return false; //here we are done with overall assignment, 
+    }//end
+                                                    
+if( _force_all_alleles && assignment_params.n_assignments_v_gene > ((double)_model.max_assignments)/_V.numOfAligned)
+    {
+      assignment_params.v_break_out = true;
+      //break;<--break out since there are too many assignments for this segments
+      return false;
+    }
+  //end
+//cout<<"end here"<<endl;
+if (_force_all_alleles && assignment_params.n_assignments_j_gene > ((double)_model.max_assignments)/_J.numOfAligned)
+    {
+      assignment_params.j_break_out = true;
+      //break; <+++in matlab code this is break, but break is not working here, so we change it to return. 
+      return false;
+    }//end
+//cout<<"in the middel"<<endl;
+ if (_force_all_alleles && assignment_params.n_assignments_d_gene > ((double)_model.max_assignments)/_D.n_D_alleles)
+    {
+      assignment_params.d_break_out = true;
+      //break; see above block
+      return false;
+    }//end
+                                                    
+ cout<<"exiting funcgtion"<<endl;
+
+
   return true;
 }

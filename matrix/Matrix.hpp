@@ -132,8 +132,28 @@ public:
   //        to the dimension 2 and above of the target dimentsion
   void SetSubMatrix(const unsigned& _d, const Matrix<T>& _matrix);
 
+  //this is generic set submatrix function, overloade method
+  //it only allows the first and second dimention to be specified for submatrix
+  //so the target matrix and input matrix have 2 dimension difference
+  //for example, target matrix of dimension 3, then input dimension has to be 1
+  //     we specified where in terms of first and second dimension position for which the 
+  //     input dimesion can be set
+  //input
+  // _d1, dimension 1 position to set the submatrix
+  // _d2, dimension 2 position to set the submatrix
+  //_size, the size of input _matrix, also equals to the size of 
+  //     dimension 3 of target matrix
+  //_matrix, array of input
+  
+  void SetSubMatrix(const unsigned& _d1, const unsigned& _d2, 
+		    const unsigned _size, const T _matrix[]);
+
+
+
   //===>PENDING issues, need to add function to take care more dimension cases
   //    currently only support set sub at dimension one. need to take care more later
+
+
   //get submatrix
   //Matrix<T> SubMatrix(const unsigned& _n, const int (&_dim_pos)[]) const;
 

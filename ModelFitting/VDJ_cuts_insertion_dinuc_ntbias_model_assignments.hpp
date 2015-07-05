@@ -54,7 +54,7 @@ bool assign_VJ_palindrome
  const GenomicD* _genD, const unsigned& _numD,
  const GenomicJ* _genJ, const unsigned& _numJ,
  /*const double& _probability_threshold_factor,*/ const bool& _no_error,
- const bool& _ignore_deep_error, const bool& _do_smoothing,
+ /*const bool& _ignore_deep_error,*/ const bool& _do_smoothing,
  const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns);
@@ -67,7 +67,7 @@ bool assign_D
  const GenomicD* _genD, const unsigned& _numD,
  const GenomicJ* _genJ, const unsigned& _numJ,
  /*const double& _probability_threshold_factor,*/ const bool& _no_error,
- const bool& _ignore_deep_error, const bool& _do_smoothing,
+ /*const bool& _ignore_deep_error,*/ const bool& _do_smoothing,
  const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns
@@ -81,7 +81,7 @@ bool run_stats_for_assignment
  const GenomicD* _genD, const unsigned& _numD,
  const GenomicJ* _genJ, const unsigned& _numJ,
  /*const double& _probability_threshold_factor,*/ const bool& _no_error,
- const bool& _ignore_deep_error, const bool& _do_smoothing,
+ /*const bool& _ignore_deep_error,*/ const bool& _do_smoothing,
  const bool& _force_all_alleles, const unsigned& _READ_LENGTH_CORRECTION,
  /*output, input*/VDJ_model_assignments_settings& assignment_params,
  /*output*/VDJ_cuts_insertion_dinuc_ntbias_assigns& _assigns

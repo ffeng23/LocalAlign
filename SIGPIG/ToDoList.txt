@@ -30,6 +30,8 @@
 11) need to add code in "../ModelFitting/VDJ_model_assignments_seetings.hpp cpp" modual to initialize all the matrix variables. at this point only some of the maxtrix variables have been initialized. 
     also related to this, we might need to be careful about initialization of all member variables in this modual.
 
+12)//***need to be careful about above or overall assignment. Do I really need to change the matrix orientation to make it fit the p1_given_p2. is it necessary?                           
+
 ====>>
 note::
 1,for nucleotide distribution, the order is A=0, C=1, G=2, T=3!!!
@@ -39,3 +41,25 @@ note::
       reversing the positions.
       for example J align_position on seq is 254, J align-position on J is 2, J length is 25, then the end of J chain on seq is 254+(25-2)=277.
       	  so if one error is at 253, then its final coordinate is 277-253=24 (including 0).
+3, for returning whether true or false from functions doing the assignments. We kind of want to do returning false only for a limited cases. Please specify them here later??????
+
+4, Notes about RnucleotideVD_per_nucleotide_5prime or RnucleotideDJ_per_nucleotide_3prime,
+   first, and very importantly, this is not conditional prob P(nucleotideVD|nucleotide_5prime) or P(nucleotideDJ|nucleotide_3prime). I guess the reason is that we don't know marginal prob
+   P(nucleotide_5prime), since to get the conditional P we need P(x|y)=p(x,y)/p(y). or at least it is not easy to calculate. Bear this in mind, again this is not conditional prob.
+   The way to express this is, _per_ not _given_. 
+   In the matlab code, it is expressed as a matrix of 4x4. and it is summed to 1 for each 5 prime nucleotide
+      A	  T	 C     G
+   A  X1  Y1	 Z1    K1
+   T  X2  Y2	 Z2    K2
+   C  X3  Y3	 Z3    K3
+   G  X4  Y4	 Z4    K4
+
+   here, X1+X2+X3+X4=1. same things for Y, Z and K.
+
+   Again, when use it, since it is not a conditional P. We can not do marginal P=Sum(P(X|Y)) for all possible Y, since it is NOT conditional p;  
+   
+   Now, when we use it instead of using marginal of conditional p, we use the maximum one for each P(x) across the column. Assume that the best possible one in this case.
+
+   To calculate RnucleotideVD_per_nucleotide_5prime, we first sum the matrix over the rows. Get the total sum for each 5prime nucleotides. and then use the matrix to divide the sum of each 5 prime nucleotide. this is how we get the Rnucleotide VD_per_nucleotide_5prime or the other one for DJ 3prime.
+
+   This RnucleotideVD_per_nucleotide_5prime is called rate instead of conditional Prob, because it is more like a P(xy), but conditional P(x|y) is P(xy)/P(y), but we don't simply know P(y). Of course, for this rate, we scale/normalize to make sum_over_x(P(x|y))=1;

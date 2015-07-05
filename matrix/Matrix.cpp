@@ -1530,6 +1530,52 @@ void Matrix<T>::SetSubMatrix(const unsigned& _d, const Matrix<T>& _matrix)
   memcpy(this->c_data+_d*_matrix.nTotal(), _matrix.c_data, _matrix.nTotal()*sizeof(T));//  for(unsigned i=0;i<_size;i++)
     
   }
+
+//this is generic set submatrix function, overloade method
+  //it only allows the first and second dimention to be specified for submatrix
+  //so the target matrix and input matrix have 2 dimension difference
+  //for example, target matrix of dimension 3, then input dimension has to be 1
+  //     we specified where in terms of first and second dimension position for which the 
+  //     input dimesion can be set
+  //input
+  // _d1, dimension 1 position to set the submatrix
+  // _d2, dimension 2 position to set the submatrix
+  //_size, the size of input _matrix, also equals to the size of 
+  //     dimension 3 of target matrix
+  //_matrix, array of input
+template<class T>  
+void Matrix<T>::SetSubMatrix(const unsigned& _d1, const unsigned& _d2, 
+		  const unsigned _size, const T _matrix[])
+{
+  //security check for correct input
+  if(c_dim!=3)
+    {
+      cout<<"error/exception thrown in SetSubMatrix():the dimension is not 3; out of range!!"<<endl;
+      cerr<<"error/exception thrown in SetSubMatrix():the dimension is not 3; out of range!!"<<endl;
+      throw std::runtime_error("error/exception thrown in SetSubMatrix():the dimension is not 3; out of range!!"); 
+    }
+  if(c_dim_size[2]!=_size)
+    {
+      cout<<"error/exception thrown in SetSubMatrix():the dimension between input and target matrix do not match!!"<<endl;
+      cerr<<"error/exception thrown in SetSubMatrix():the dimension between input and target matrix do not match!!"<<endl;
+      throw std::runtime_error("error/exception thrown in SetSubMatrix():the dimension between input and target matrix do not match!!"); 
+    }
+  
+  //here we simple copy over the
+  if(_matrix==NULL || c_data==NULL)
+    {
+      //data not initialized, error
+      cout<<"error/exception thrown in SetSubMatrix():data unitialized error, please check!!"<<endl;
+      cerr<<"error/exception thrown in SetSubMatrix():data unitialized error, please check!!"<<endl;
+      throw std::runtime_error("error/exception thrown in SetSubMatrix():data unitialized error, please check!!"); 
+    }
+  memcpy(c_data+_d1*(c_dim_size[1]*_size)+_d2*_size, _matrix, _size*sizeof(T));//  for(unsigned i=0;i<_size;i++)
+  //{
+  //    c_data[_d*_size+i]=_matrix
+  //  }
+}
+
+
 //---------end of Matrix<T> class
 
 //----------------------------dividing line---------

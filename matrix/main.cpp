@@ -263,9 +263,16 @@ int main(int argc, char* argv[])
   Matrix<double> m4SubSum=sum(m4Sub2D,0);
   cout<<"sum:"<<m4SubSum.toString()<<endl;
 
+  cout<<"m4Sub: this is 3D\n"<<m4Sub.toString()<<endl;
+  double zeroArr[]={0,0,0,0,0};
+  m4Sub.SetSubMatrix(1,1,5,zeroArr);
+  cout<<"m4Sub: after setting zeros:"<<m4Sub.toString()<<endl;
+
   cout<<"....=====>comparing signed vs. unsigned integer"<<endl;
   signed sx=5; unsigned sy=-1;
-  cout<<"comparing 5 unsigned vs -1 signed :"<< ((sx-1) > (sy-1)) <<endl;
+  cout<<"comparing 5 unsigned vs -1 signed :"<< ((signed)(sx-1) > (signed)(sy-1)) <<endl;
+
+  cout<<"unsigned int 5 subtracting negative number -1:"<<sx-sy<<endl;
 
   return 0;
 }

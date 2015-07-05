@@ -4,6 +4,10 @@
 #include "../matrix/Matrix.hpp"
 
 //holding the params to pass around doing the assignment of model
+//here in this class, all the parameters are initialized and 
+//we don't care about whether they are set correctly in this class.
+//as long as they are initialized correctly, we are fine
+//we will set them correctly in the assignment class.
 struct VDJ_model_assignments_settings
 {
   //constructor
