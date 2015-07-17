@@ -22,7 +22,7 @@ public:
   //this is the function to get the sub string of the current one,
   //by default _end is the end of the current one
   //return an object not by reference
-  SequenceString Sub(const unsigned& _start, const unsigned & _end=-1);
+  SequenceString Sub(const unsigned& _start, const unsigned & _end=-1) const;
 
   const string GetName()const;
   const string GetSequence()const;

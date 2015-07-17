@@ -1453,7 +1453,7 @@ Matrix<T> Matrix<T>::m2vec() const
   //     dimension 2 of target matrix
   //_matrix, array of input
 template<class T>
-void Matrix<T>::SetSubMatrix(const unsigned& _d, const unsigned _size, const T _matrix[])
+void Matrix<T>::SetSubMatrix(const unsigned& _d, const unsigned& _size, const T _matrix[])
 {
   //security check for correct input
   if(c_dim!=2)
@@ -1545,7 +1545,7 @@ void Matrix<T>::SetSubMatrix(const unsigned& _d, const Matrix<T>& _matrix)
   //_matrix, array of input
 template<class T>  
 void Matrix<T>::SetSubMatrix(const unsigned& _d1, const unsigned& _d2, 
-		  const unsigned _size, const T _matrix[])
+		  const unsigned& _size, const T _matrix[])
 {
   //security check for correct input
   if(c_dim!=3)
@@ -1946,6 +1946,18 @@ double matrix_multiply_1D(const Matrix<double>& _m1, const Matrix<T>& _m2)
 
   return temp;
 
+}
+
+Matrix<double> matrix_multiply_by_scalar(Matrix<unsigned>& _m, const double& _s)
+{
+  
+  Matrix<double> ret (_m.c_dim, _m.c_dim_size);
+  for(unsigned i=0;i<ret.nTotal();i++)
+    {
+      ret.c_data[i]=_m.c_data[i]*_s;
+    }
+
+  return ret;
 }
 
 //======template instantiation

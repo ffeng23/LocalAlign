@@ -86,14 +86,14 @@ public:
   //
   //return false if the input matrix is not what they should , such as the dimensions
   //    or the size are not appropriate
-  bool Update_nM_field(Matrix<double> _count_field_a, Matrix<double> _prob_field_a, 
-		       Matrix<double> _fields_c,
+  bool Update_nM_field(Matrix<unsigned>& _count_field_a, Matrix<double>& _prob_field_a, 
+		       Matrix<double>& _fields_c,
 		       const unsigned& _num_valid_assignments) const;
 
   //another version of above one. for the case where nM field is a vector and 
   //    counter field is a scalar
-  bool Update_nM_field(Matrix<double> _count_field_a, Matrix<double> _prob_field_a, 
-		       double _fields_c,
+  bool Update_nM_field(Matrix<unsigned>& _count_field_a, Matrix<double>& _prob_field_a, 
+		       double& _fields_c,
 		       const unsigned& _num_valid_assignments) const;
 
  //sum counter

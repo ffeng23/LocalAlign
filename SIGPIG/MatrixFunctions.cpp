@@ -238,6 +238,29 @@ unsigned min_mf(const unsigned* _m, const unsigned& _len)
   return temp;
 }
 
+int min_mf(const int* _m, const unsigned& _len)
+{
+  
+  int temp=0;
+  if(_len>0)
+    {
+      temp=_m[0];
+      for(unsigned int i=1;i<_len;i++)
+	{
+	  if(_m[i]<temp)
+	    {
+	      temp=_m[i];
+	    }
+	}
+    }
+  else
+    {
+      cout<<"WARNING: zero lengthed array , no maximum returned"<<endl;
+    }
+  return temp;
+}
+
+
 /**
  * Quicksort.
  * @param a - The array to be sorted.

@@ -37,6 +37,7 @@ double min_mf(const double*  _m, const unsigned& _len);
 unsigned min_mf(const vector<unsigned>& _m);
 unsigned min_mf(const unsigned* _m, const unsigned& _len);
 
+int min_mf(const int* _m, const unsigned& _len);
 //sort in ascending order
 //void sort_mf(const double* _m, const unsigned& _len)
 //Quick sort, _a is the array to be sorted,

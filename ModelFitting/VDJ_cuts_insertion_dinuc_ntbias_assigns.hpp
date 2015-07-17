@@ -203,27 +203,27 @@ public:
   
   //%------nM*** fields
     
-  Matrix<double> mononucleotideVD;// zeros(4,1);
-  Matrix<double> mononucleotideDJ;// = zeros(4,1);
-  Matrix<double> insertionVD;// = zeros(4,1);
-  Matrix<double> insertionDJ;// = zeros(4,1);
+  Matrix<unsigned> mononucleotideVD;// zeros(4,1);
+  Matrix<unsigned> mononucleotideDJ;// = zeros(4,1);
+  Matrix<unsigned> insertionVD;// = zeros(4,1);
+  Matrix<unsigned> insertionDJ;// = zeros(4,1);
 
   
-  Matrix<double> trinucleotideVD;// = zeros(4,4,4);
-  Matrix<double> trinucleotideDJ;// = zeros(4,4,4);
+  Matrix<unsigned> trinucleotideVD;// = zeros(4,4,4);
+  Matrix<unsigned> trinucleotideDJ;// = zeros(4,4,4);
 
-  Matrix<double> VV_err_pos;// = zeros(size(model.PV,1), max_V_length + model.max_V_deletions);
-  Matrix<double> JJ_err_pos;// = zeros(size(model.PDJ,2), max_J_length);
+  Matrix<unsigned> VV_err_pos;// = zeros(size(model.PV,1), max_V_length + model.max_V_deletions);
+  Matrix<unsigned> JJ_err_pos;// = zeros(size(model.PDJ,2), max_J_length);
 
-  Matrix<double> zeroD ;
-  Matrix<double> nucleotideVD; Matrix<double> nucleotideVD_5prime;//nucleotide distr's
-  Matrix<double> nucleotideDJ; Matrix<double> nucleotideDJ_3prime;
+  Matrix<unsigned> zeroD ;
+  Matrix<unsigned> nucleotideVD; Matrix<unsigned> nucleotideVD_5prime;//nucleotide distr's
+  Matrix<unsigned> nucleotideDJ; Matrix<unsigned> nucleotideDJ_3prime;
 
-  Matrix<double> error; Matrix<double> sequenced_nucleotide ;//error rate, will be 
+  Matrix<unsigned> error; Matrix<unsigned> sequenced_nucleotide ;//error rate, will be 
 
 
-  Matrix<double> error_vs_position;//!!this is nM zeros(model.read_length,1);
-  Matrix<double> coverage;//zeros(model.read_length,1);
+  Matrix<unsigned> error_vs_position;//!!this is nM zeros(model.read_length,1);
+  Matrix<unsigned> coverage;//zeros(model.read_length,1);
   
 };
 

@@ -269,10 +269,24 @@ int main(int argc, char* argv[])
   cout<<"m4Sub: after setting zeros:"<<m4Sub.toString()<<endl;
 
   cout<<"....=====>comparing signed vs. unsigned integer"<<endl;
-  signed sx=5; unsigned sy=-1;
+  int sx=5; unsigned sy=-1;
   cout<<"comparing 5 unsigned vs -1 signed :"<< ((signed)(sx-1) > (signed)(sy-1)) <<endl;
 
   cout<<"unsigned int 5 subtracting negative number -1:"<<sx-sy<<endl;
+
+  unsigned usx=5;
+  cout<<"unsigned int 5 subtracting negative number -1:"<<(unsigned)usx-(unsigned)sy<<endl;
+
+  unsigned z=10, zz=11;
+  int zk=z-zz;
+  cout<<"unsigned ints subtracting to get negative resulte:"<< zk<<endl;
+
+
+  //testing point and new allocation
+  int* array1=new int[z];
+  array1[0]=1;
+  cout<<"the array zero eelement is:"<<array1[0]<<endl;
+  delete [] array1;
 
   return 0;
 }

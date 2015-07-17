@@ -119,19 +119,22 @@ void SequenceString::Deserialize(ifstream& _ifs)
   delete[] p_char;
 }
 
-SequenceString SequenceString::Sub(const unsigned& _start, const unsigned & _end=-1)
+SequenceString SequenceString::Sub(const unsigned& _start, const unsigned & _end) const
 {
-  SequenceString ret();
+  SequenceString ret;
 
   //get the sub string
   ret.c_name=c_name;
-  if(_start>c_seq.size())
+  unsigned temp_start, temp_end;
+  temp_start=_start;
+  temp_end=_end;
+  if(temp_start>c_seq.size())
     {
-      _start=c_seq.size();
+      temp_start=c_seq.size();
     }
-  if(_end==(unsigned)-1)
+  if(temp_end==(unsigned)-1)
     {
-      _end=c_seq.size();
+      temp_end=c_seq.size();
     }
   ret.c_seq=c_seq.substr(_start, _end-_start+1);
   return ret;

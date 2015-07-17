@@ -430,7 +430,7 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
 
   error.initialize(1, dim_size,0.0); sequenced_nucleotide.initialize(1,dim_size, 0.0);//error rate, will be 
   
-  dim_size2[1]=_model.read_length;
+  dim_size2[1]=_model.model_params.maximum_read_length;
   error_vs_position.initialize(2,dim_size2,0.0);//!!this is nM zeros(model.read_length,1);
   coverage.initialize(2,dim_size2,0.0);//zeros(model.read_length,1);
 }

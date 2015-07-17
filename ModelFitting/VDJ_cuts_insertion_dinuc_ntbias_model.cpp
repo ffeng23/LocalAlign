@@ -1468,8 +1468,8 @@ if(!Update_nM_field(vdj_assigns.error_vs_position, vdj_assigns.proba, delta_coun
   //return false if the input matrix is not what they should , such as the dimensions
   //    or the size are not appropriate
   bool VDJ_cuts_insertion_dinuc_ntbias_model::Update_nM_field
-    (Matrix<double> _count_field_a, Matrix<double> _prob_field_a, 
-     Matrix<double> _field_c, const unsigned& _num_valid_assignments) const
+    (Matrix<unsigned>& _count_field_a, Matrix<double>& _prob_field_a, 
+     Matrix<double>& _field_c, const unsigned& _num_valid_assignments) const
   {
     bool flag=true;
     //first check for the validity of the input
@@ -1517,6 +1517,8 @@ if(!Update_nM_field(vdj_assigns.error_vs_position, vdj_assigns.proba, delta_coun
 	      return false;
 	    }
 	}
+
+
       //now we are good, start doing the updating
       //now go through each element of field of each assignment/here it is a "block"
       //unsigned blockSize=_field_c.nTotal();//total number of elements in the counter field
@@ -1532,23 +1534,24 @@ if(!Update_nM_field(vdj_assigns.error_vs_position, vdj_assigns.proba, delta_coun
 	  //plus all -1 (take all ) for the rest
 	  dim_array[0]=i;
 	  
-	  Matrix<double> subM=_count_field_a.SubMatrix(_count_field_a.dim(), dim_array);
+	  Matrix<unsigned> subM=_count_field_a.SubMatrix(_count_field_a.dim(), dim_array);
 	  
 	  //we got the subMatrix holding the counts
 	  //then get the weighted counter by probability of this assignment
-	  subM=subM*_prob_field_a(i);
+	  Matrix<double> subM_p=matrix_multiply_by_scalar(subM,_prob_field_a(i));
 	  //add to the counter
-	  _field_c=_field_c+subM;
+	  _field_c=_field_c+subM_p;
 	}
 
       //done
+      delete [] dim_array;
       return flag;
   }//end of function
 
 //another version of above one. for the case where nM field is a vector and 
   //    counter field is a scalar
-  bool VDJ_cuts_insertion_dinuc_ntbias_model::Update_nM_field(Matrix<double> _count_field_a, Matrix<double> _prob_field_a, 
-		       double _fields_c,
+  bool VDJ_cuts_insertion_dinuc_ntbias_model::Update_nM_field(Matrix<unsigned>& _count_field_a, Matrix<double>& _prob_field_a, 
+		       double& _fields_c,
 		       const unsigned& _num_valid_assignments) const
   {
     bool flag=true;

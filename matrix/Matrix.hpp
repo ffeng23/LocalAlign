@@ -118,7 +118,7 @@ public:
   //_size, the size of input _matrix, also equals to the size of 
   //     dimension 2 of target matrix
   //_matrix, array of input
-  void SetSubMatrix(const unsigned& _d, const unsigned _size, const T _matrix[]); 
+  void SetSubMatrix(const unsigned& _d, const unsigned& _size, const T _matrix[]); 
 
   //this is generic set submatrix function
   //currently it only allows the first dimention to be specified for submatrix
@@ -146,7 +146,7 @@ public:
   //_matrix, array of input
   
   void SetSubMatrix(const unsigned& _d1, const unsigned& _d2, 
-		    const unsigned _size, const T _matrix[]);
+		    const unsigned& _size, const T _matrix[]);
 
 
 
@@ -218,6 +218,7 @@ public:
   template<class U>
   friend double matrix_multiply_1D(const Matrix<double>& _m1, const Matrix<U>& _m2);
 
+  friend Matrix<double> matrix_multiply_by_scalar(Matrix<unsigned>& _m, const double& _s);
   //==================
 protected:
   unsigned c_dim;
@@ -277,5 +278,6 @@ Matrix<T> matrix_log(const Matrix<T>& _m);
 template<class T>
 double matrix_multiply_1D(const Matrix<double>& _m1, const Matrix<T>& _m2);
 
+Matrix<double> matrix_multiply_by_scalar(Matrix<unsigned>& _m, const double& _s);
 
 #endif

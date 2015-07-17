@@ -29,7 +29,7 @@ struct VDJ_model_assignments_settings
   unsigned J_max_error;
   unsigned D_max_error;
 
-  bool assume_palindrom_negative_deletions;
+  bool assume_palindrome_negative_deletions;
 
   Matrix<double> log_max_model_p_nt_DJ;
   Matrix<double> log_max_model_p_nt_VD;
@@ -166,7 +166,7 @@ struct VDJ_model_assignments_settings
   //not for d_err_excess_pos_left, we simply don't record in here, but instead do it on the fly, since it is basically pointing to the positions.
   unsigned d_ex_errs_left;
 
-  Maxtrix<bool> d_errs_i;
+  Matrix<bool> d_errs_i;
   unsigned d_errs;
 
   Matrix<bool> d_ex_errs_right_i;
@@ -175,7 +175,7 @@ struct VDJ_model_assignments_settings
   double log_highest_probability_GIVEN_current_Dl_deletions;
   double log_highest_probability_GIVEN_current_Dr_deletions;
 
-  int npDl, npDr;
+  //int npDl, npDr;
 
   unsigned ncutDl, ncutDr;
   //===>here we don't record log_PcutDlDr or log_PcutVDJ
@@ -184,9 +184,9 @@ struct VDJ_model_assignments_settings
   unsigned niVD, niDJ;
 
   //variable for stats
-  unsigned n_assignments_v_gene;
-  unsigned n_assignments_d_gene;
-  unsigned n_assignments_j_gene;
+  //unsigned n_assignments_v_gene;
+  //unsigned n_assignments_d_gene;
+  //unsigned n_assignments_j_gene;
   
   
 };

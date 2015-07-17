@@ -21,8 +21,8 @@ VDJ_model_assignments_settings::VDJ_model_assignments_settings()
   j_ex_errs_i(),
   d_ex_errs_left_i(),
   d_errs_i(),
-  d_ex_errs_right_i(),
-  d_errs_i()
+  d_ex_errs_right_i()
+  //d_errs_i()
 {
   //initialize everything?
 
