@@ -177,7 +177,7 @@ public:
   //Read length in data set, usually set by main model fitting script
   //we don't use this as a fixed param, but instead, we MIGHT use
   //it as a cutoff value ?????
-  unsigned read_length;
+  //unsigned read_length;
 
   //model parameters
   Matrix<double> PinsVD; //P(insertion)

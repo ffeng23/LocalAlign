@@ -87,7 +87,7 @@ class Alignment_Object
   unsigned* alleles_all;//size of numOfAligned. contains the index to the position of genomic template
   unsigned* alleles_from_distinct_genes;//unique version Cof the above alleles_all
 
-  string toString();
+  string toString() const;
   
 };
 

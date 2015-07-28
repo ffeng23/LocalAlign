@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include "VDJ_cuts_insertion_dinuc_ntbias_counter.hpp"
-#include "../SIGPIG/AlignmentSettings.hpp"
-
+//#include "../SIGPIG/AlignmentSettings.hpp"
+#include "VDJ_cuts_insertion_dinuc_ntbias_model_params.hpp"
 //NOTE: to do:
 //model read length ??? what is the value, what is the purpose
 //max_V/D/J_length in the alignmentSettings???
@@ -98,9 +98,9 @@ VDJ_cuts_insertion_dinuc_ntbias_counter::VDJ_cuts_insertion_dinuc_ntbias_counter
   nPinsDJcutJ(),// = zeros(model.max_insertions + 1,model.max_palindrome + model.max_J_deletions + 1),
 
 
-  max_V_length(AlignmentSettings::max_V_length),//max v_region length = model.read_length,
-  max_D_length(AlignmentSettings::max_D_length),// = 16, max d region length
-  max_J_length(AlignmentSettings::max_J_length),// = 18, max j region length
+  max_V_length(0/*AlignmentSettings::max_V_length*/),//max v_region length = model.read_length,
+  max_D_length(0/*AlignmentSettings::max_D_length*/),// = 16, max d region length
+  max_J_length(0/*AlignmentSettings::max_J_length*/),// = 18, max j region length
 
   nPV_align_length(),// = zeros(max_V_length + 1,1),
   nPD_align_length(),// = zeros(max_D_length + 1,1),
@@ -215,6 +215,11 @@ VDJ_cuts_insertion_dinuc_ntbias_counter::VDJ_cuts_insertion_dinuc_ntbias_counter
   nMerror_vs_position(),//1,_model.read_length),//zeros(model.read_length,1),
   nMcoverage()//1, _model.read_length)//zeros(model.read_length,1);
 {
+  //get parameters first, 
+  max_V_length=_model_ps.max_V_depth;
+  max_D_length=_model_ps.max_D_depth;
+  max_J_length=_model_ps.max_J_depth;
+
   //here we will correctly initialize the matrices
   unsigned dim_size1[]={_model_ps.max_insertions};
   nPinsVD.initialize(1, dim_size1, 0.0);
@@ -637,7 +642,7 @@ VDJ_cuts_insertion_dinuc_ntbias_counter::VDJ_cuts_insertion_dinuc_ntbias_counter
   dim_size2[0]=_model_ps.max_palindrome+1;
   dim_size2[1]=_model_ps.max_palindrome+1;
   nPpDrpJ.initialize(2, dim_size2,0.0);//zeros(model.max_palindrome + 1, model.max_palindrome + 1),
-  dim_size[0]=_model_ps.read_length;
+  dim_size[0]=_model_ps.maximum_read_length;
   nMerror_vs_position.initialize(1, dim_size,0.0);//1,_model_ps.read_length),//zeros(model.read_length,1),
   
   nMcoverage.initialize(1, dim_size,0.0);//1, _model_ps.read_length)//zeros(model.read_length,1);

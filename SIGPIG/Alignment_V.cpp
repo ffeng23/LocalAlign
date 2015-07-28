@@ -616,14 +616,16 @@ unsigned align_with_constraints_fast_no_fix
   string current_seq, current_target;
   unsigned align_position_start=0;
   unsigned curr_l_seq, curr_l_target;
-  //cout<<"param:maximum_errors:"<<_maximum_errors<<";cost:"<<_error_cost<<endl;
+  cout<<"param:maximum_errors:"<<_maximum_errors<<";cost:"<<_cost
+      <<"minimum_align_length:"<<_minimum_align_length
+      <<endl;
   //looping through the positions of sequence not to force  the left side  to align 
   //here start at -l_target+1 since they have to be overlap otherwise no way to
   //align. Same here for l_seq-1, we need them to be overlap at least with one nucleotide
   //the total aligned position is l_seq+l_target-2.
   for(signed int i=-1*(l_target-1);i<=((signed)(l_seq-1));i++)  //this i is the length, not index; so the index =i-1?
     {
-      //cout<<"\t4*************doing loop "<<i<<endl;
+      cout<<"\t4*************doing loop "<<i<<endl;
       target_start=0;
       seq_start=0;
 
@@ -647,7 +649,7 @@ unsigned align_with_constraints_fast_no_fix
 	{
 	  max_length=curr_l_target;
 	}
-      //cout<<"\t4 max_length:"<<max_length<<": seq_start:"<<seq_start<<"; target start:"<<target_start<<endl;
+      cout<<"\t4 max_length:"<<max_length<<": seq_start:"<<seq_start<<"; target start:"<<target_start<<endl;
       //can not be better, this is for i>0, in the middle of seq with whole target case
       if(i>0&&max_length<score)
 	{
@@ -655,10 +657,12 @@ unsigned align_with_constraints_fast_no_fix
 	}
       if(i>0&&max_length< _minimum_align_length)
 	{
+	  cout<<"===>breaking........"<<endl;
 	  break;
 	}
       if(i<0&&max_length< _minimum_align_length)
 	{
+	  cout<<"--->continue"<<endl;
 	  continue;//don't do this one.
 	}
       current_seq=_seq.substr(seq_start, max_length);
@@ -676,7 +680,7 @@ unsigned align_with_constraints_fast_no_fix
 	continue;
       
       current_score=CalculateScore(current_align_length, current_error_positions, current_n_errors, _cost);
-      //cout<<"\tcurrent_score:"<<current_score<<";current_align_length:"<<current_align_length<<endl;
+      cout<<"\tcurrent_score:"<<current_score<<";current_align_length:"<<current_align_length<<endl;
       //cout<<"\tbest score so far:"<<score<<endl;
       //we got a better one or got an identical score, but long, we are good
       if(current_score>score||

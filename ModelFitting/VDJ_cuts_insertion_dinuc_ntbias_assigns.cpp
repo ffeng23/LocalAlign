@@ -245,11 +245,6 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
    Dallele_given_gene.initialize(2, dim_size2, -1);
    Jallele_given_gene.initialize(2, dim_size2, -1);
 
-   VD_left_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
-   VD_right_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
-   DJ_left_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
-   DJ_right_edge_dinucleotide.initialize(2, dim_size2, -1);// = zeros(4,4);
-
    dim_size2[1]=3;
    pVmax_delV_V.initialize(2, dim_size2, -1);// =  zeros(model.max_palindrome + 1, model.max_V_deletions + 1, size(model.PV,1));
    pJmax_delJ_J.initialize(2, dim_size2, -1);// = zeros(model.max_palindrome + 1, model.max_J_deletions + 1, size(model.PDJ,2));
@@ -412,7 +407,14 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
    insertionVD.initialize(2, dim_size2, 0.0);// = zeros(4,1);what this is?? is this insertion or nucleotide dist'n among insertion??
   insertionDJ.initialize(2, dim_size2, 0.0);// = zeros(4,1);
 
+
   unsigned dim_size4[4]={_model.max_assignments, 4, 4, 4};
+
+  VD_left_edge_dinucleotide.initialize(3, dim_size4, 0.0);// = zeros(4,4);
+   VD_right_edge_dinucleotide.initialize(3, dim_size4, 0.0);// = zeros(4,4);
+   DJ_left_edge_dinucleotide.initialize(3, dim_size4, 0.0);// = zeros(4,4);
+   DJ_right_edge_dinucleotide.initialize(3, dim_size4, 0.0);// = zeros(4,4);
+  
   trinucleotideVD.initialize(4, dim_size4, 0.0);// = zeros(4,4,4);
   trinucleotideDJ.initialize(4, dim_size4, 0.0);// = zeros(4,4,4);
   unsigned dim_size3[3]={_model.max_assignments, _model.number_V_genes, _counter.max_V_length+_model.max_V_deletions};

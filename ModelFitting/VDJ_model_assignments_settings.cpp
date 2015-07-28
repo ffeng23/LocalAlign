@@ -25,6 +25,6 @@ VDJ_model_assignments_settings::VDJ_model_assignments_settings()
   //d_errs_i()
 {
   //initialize everything?
-
+  
 
 }

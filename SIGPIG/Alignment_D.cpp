@@ -790,7 +790,7 @@ Alignment_D::~Alignment_D()
   //cout<<"done!!!"<<endl;
 }
 //for printing/debugging purpose
-string Alignment_D::toString()
+string Alignment_D::toString() const
 {
   stringstream ss;
   //unsigned sizeOfUnsigned=sizeof(unsigned)/sizeof(char);

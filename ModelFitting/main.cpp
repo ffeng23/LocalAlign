@@ -32,7 +32,7 @@
 #include "../SIGPIG/GenomicV.hpp"
 #include "../SIGPIG/genomicSegments.hpp"
 //#include "LoadData.hpp"VD
-#include "../SIGPIG/AlignmentSettings.hpp"
+//#include "../SIGPIG/AlignmentSettings.hpp"
 #include "../SIGPIG/Alignment.hpp"
 #include "../SIGPIG/Alignment_V.hpp"
 #include "../SIGPIG/Alignment_D.hpp"
@@ -131,9 +131,10 @@ if(alignmentFileName.size()==0)
 
   //now we start building the model and get counter and assigns
   bool start_from_flat_prior=true;
+  unsigned numOfIters=1;
   bool mfit=do_probabilistic_model_fitting
     (seq, v_align, d_align, j_align, total_alignment, genV, totalNumV,
-     genD, totalNumD, genJ, totalNumJ, start_from_flat_prior,25);
+     genD, totalNumD, genJ, totalNumJ, start_from_flat_prior,numOfIters);
   if(mfit)
     {
       cout<<"Successfully done the fitting!"<<endl;

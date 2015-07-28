@@ -21,7 +21,7 @@ public:
   virtual ~Alignment_D();
   void ResetData();
 
-  string toString();
+  string toString() const;
   
   /*initialize the array elements before doing the alignment
    *at this point, we still don't know the numOfAligned in each

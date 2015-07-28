@@ -52,9 +52,9 @@ namespace AlignmentSettings
   
   unsigned max_length_D_genes=37;
 
-  unsigned max_V_length=300;
-  unsigned max_J_length=100;
-  unsigned max_D_length=66;
+  unsigned max_V_length=350;
+  unsigned max_J_length=63;
+  unsigned max_D_length=31;
   AlignmentSettings::AlignmentSettings()
   {
     //default one

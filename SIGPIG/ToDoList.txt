@@ -5,12 +5,13 @@
 4)DONE====>deserialize, need to check for the error flag, in case of reach the end of file buffer. or other errors
 5)DONE===>delete allocated variables in alignment.cpp alignment_D.cpp deserialize
 
-6) need to rewrite the deserialize function, we should have call to reset the data before read the data into it.
+6) Done====>need to rewrite the deserialize function, we should have call to reset the data before read the data into it.
+   but need to carefully debug it.
 
-7) the j error position is relative to the end of the sequence (?). how should we take care of this??????????
+7)Started, but need to work more===============> the j error position is relative to the end of the sequence (?). how should we take care of this??????????
 
 
-8) please confirm with the code for this action, in the function doing the assignment of the model, whenever there is a
+8) Done=====>please confirm with the code for this action, in the function doing the assignment of the model, whenever there is a
 	return, we will either return a true or a false. when return a true, it is like in the original matlab code a "continue"
 	command, we return from the function/loop and go next loop/next round of function. but whenever there is false return, we 
 	we go upper to break the upper loop, and we might also need a flag to let it just out of the whole runs.
@@ -21,18 +22,35 @@
 	in matlab. 
 	I need to be careful to distinguish in my c code all 3 levels . the stop at different scope
 
+	-------->thought, here we most of the time using same thing when a "continue" in Matlab. When there is break in Matlab, we do
+	 		  break too. Only thing that we need to be careful is "return" in Matlab. We need to propogate this
+			  return to the up most level.In this case, in each funtion, we return false, and the upper function
+			  check for this case and propogate accordingly.
+
 9) need take care of the cases where the number of errors are too more than the best one so far.
    *thought: need to use possion distribution
 
-10) n_assignment_v_gene, n_assignment_j_gene, n_assignment_d_gene,
+10)Done===> n_assignment_v_gene, n_assignment_j_gene, n_assignment_d_gene,
     how to update this and what to do with them?
 
-11) need to add code in "../ModelFitting/VDJ_model_assignments_seetings.hpp cpp" modual to initialize all the matrix variables. at this point only some of the maxtrix variables have been initialized. 
+11) Done=====>    need to add code in "../ModelFitting/VDJ_model_assignments_seetings.hpp cpp" modual to initialize all the matrix variables. at this point only some of the maxtrix variables have been initialized. 
     also related to this, we might need to be careful about initialization of all member variables in this modual.
+    
 
-12)//***need to be careful about above or overall assignment. Do I really need to change the matrix orientation to make it fit the p1_given_p2. is it necessary?                           
+12)//***need to be careful about above or overall assignment. Do I really need to change the matrix orientation to make it fit the p1_given_p2. is it necessary?
+	     for example, in Matlab code, it has P1_given_P2, then in the matrix, it has P1 as the first dimension, but P2 as the second dimension, such as 
+	     assigns.cutV_given_V. In matlab code, it put V in the 2nd dimension, and then cutV in 1st dimension. In c++ code, I put V in first and cutV in second.
+	     I guess, this is OK. as long as we know which is in what dimension!!!
+	     but it need more thoughts and tests in the future.<------------                           
 
-====>>
+13/*******need to look up to see whether we have buffer leaking. basically need to check to see whether we have deallocate the memeories.
+	       this is a continuous efforts. have to be done regularly.
+
+====>>***********************************************************************
+**********************************************************************************
+******************* NOTE ********************************************
+**********************************************************************
+***********************************************************************
 note::
 1,for nucleotide distribution, the order is A=0, C=1, G=2, T=3!!!
 2,for error_vs_position, we want to align this from the end. normally, our sequences are 5'-3' with Leader->V->D->J->constant.
@@ -41,6 +59,9 @@ note::
       reversing the positions.
       for example J align_position on seq is 254, J align-position on J is 2, J length is 25, then the end of J chain on seq is 254+(25-2)=277.
       	  so if one error is at 253, then its final coordinate is 277-253=24 (including 0).
+
+	  ============> also one relate note is about J alignment error positions, it is relative to the end of the J 3' end!!!!!!
+
 3, for returning whether true or false from functions doing the assignments. We kind of want to do returning false only for a limited cases. Please specify them here later??????
 
 4, Notes about RnucleotideVD_per_nucleotide_5prime or RnucleotideDJ_per_nucleotide_3prime,
@@ -63,3 +84,22 @@ note::
    To calculate RnucleotideVD_per_nucleotide_5prime, we first sum the matrix over the rows. Get the total sum for each 5prime nucleotides. and then use the matrix to divide the sum of each 5 prime nucleotide. this is how we get the Rnucleotide VD_per_nucleotide_5prime or the other one for DJ 3prime.
 
    This RnucleotideVD_per_nucleotide_5prime is called rate instead of conditional Prob, because it is more like a P(xy), but conditional P(x|y) is P(xy)/P(y), but we don't simply know P(y). Of course, for this rate, we scale/normalize to make sum_over_x(P(x|y))=1;
+
+
+5 NOtes about setting parameters:<=============  ../SIGPIG/AlignmentSettings.hpp/cpp and ../ModelFitting/VDJ_cuts_insertion_dinuc_ntbias_model_params.hpp/cpp
+  this is very important. Here in both Alignment(SIGPIG folder) and assignment (ModelFitting folder) are setting params file. We keep one for alignment and the
+  other for assignment (or rather for model fitting). It is critical to make things clear about which is for which. Of course in some way they share components
+  (meaningly params). So it is essential to keep the shared components only one copy to make the furture referencing correctly.
+  IN this note, we try to note which is which and how the relate to each other. We limit the information exchange in these two files, but not other file in
+  both folders. In this way, it is easy to manage things.
+  
+  1) first note, in ModelFitting folder, we do reference AlignmentSetting objects in the "BaseModel" class, we did not actually use it yet. 20150721 feng.
+  2) 
+
+
+6  in ModelFitting folder, this are two files defining the params or settings, "VDJ_model_assignment_settings.hpp/cpp" and "VDJ_cuts_insertion_dinuc_ntbias_model_assignments.hpp/cpp". The first is a struct/object to group all the variables in the assignment determining functions so as to pass those variables around different functions. It is not defining any "settings/consants". In this sense, the second one is used to define the params/constants used in the program. It is also where we draw information from the AlignmentSettings in the ../SIGPIG module.
+
+7  for "cut" variable, cut variable is defined to be deleteion(due to the alignment)-half_palindrome. so I am not sure what is this "cut" biologically. The real deletion is still
+   the deletion based on the alignment. why do we care about cut???
+   also related to this, the min_cut equals to the maximum half palindrome. since when there minimum deletion is zero, in this case 0-half_palindrome=-1*max_palindrome. 
+   that is how we get the min_cut

@@ -194,6 +194,13 @@ bool DoSerialization
 //reading the alignment from the disk, 
 //the caller DON'T initialize the output arrays, but only declare it.
 //also the caller need to delete/clean up the memory.
+//
+//Note: for the outside caller, please please make sure that 
+//the passed in input variable (*_v_align, *_d_align and *_j_align)
+//    is null; that means those variable don't point to any memory. 
+//    or most importantly there is no memory leak. The caller has
+//    deallocated the memory those variable pointed to previously
+//******************************************************
 bool DoDeserialization
 (const string& _fileName, unsigned& _numOfAligned,
  Alignment_Object** _v_align, Alignment_D** _d_align, Alignment_Object** _j_align,
@@ -234,6 +241,22 @@ bool DoDeserialization
       cout<<"impossible number of alignment object store, quit ("<<_numOfAligned<<")"<<endl;
       return false;
     }
+  if(*_seq!=NULL)
+    {
+      delete [] *_seq;
+    }
+  if(*_v_align!=NULL)
+    {
+      delete[] *_v_align;
+    }
+  if(*_d_align!=NULL)
+    {
+      delete[] *_d_align;
+    }
+  if(*_j_align!=NULL)
+    {
+      delete[] *_j_align;
+    }
   
   //initialize memory
   *_seq=new SequenceString[_numOfAligned];
@@ -267,7 +290,7 @@ bool DoDeserialization
   return true;
 }
 
-
+//read in the genomic segments from the files into variables.
 bool DoGenomicTemplateReading
 (const string& _genomicVFileName,
  const string& _genomicDFileName,

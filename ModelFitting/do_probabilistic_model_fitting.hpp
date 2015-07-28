@@ -7,7 +7,7 @@
 #include "../SIGPIG/GenomicV.hpp"
 #include "../SIGPIG/genomicSegments.hpp"
 //#include "LoadData.hpp"VD
-#include "../SIGPIG/AlignmentSettings.hpp"
+//#include "../SIGPIG/AlignmentSettings.hpp"
 #include "../SIGPIG/Alignment.hpp"
 #include "../SIGPIG/Alignment_V.hpp"
 #include "../SIGPIG/Alignment_D.hpp"
@@ -19,7 +19,7 @@ bool do_probabilistic_model_fitting
 (
  const SequenceString* _seq,
  const Alignment_Object* _V, const Alignment_D* _D, const Alignment_Object* _J,
- const unsigned numOfAlignments,
+ const unsigned _numOfAlignments,
  const GenomicV* _genV, const unsigned& _numV,
  const GenomicD* _genD, const unsigned& _numD,
  const GenomicJ* _genJ, const unsigned& _numJ,

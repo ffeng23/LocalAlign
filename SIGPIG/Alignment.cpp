@@ -229,7 +229,7 @@ Alignment_Object::~Alignment_Object()
 }
 /*define the text output of the alignment object
  */
-string Alignment_Object::toString()
+string Alignment_Object::toString() const
 {
   stringstream ss;
   ss<<">>Alignment object:\n";

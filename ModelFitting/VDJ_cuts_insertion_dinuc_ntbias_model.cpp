@@ -40,7 +40,7 @@ VDJ_cuts_insertion_dinuc_ntbias_model::VDJ_cuts_insertion_dinuc_ntbias_model
   min_V_length(vdj_mps.min_V_length)/*originally in matlab code is 15*/,
   high_error_region(vdj_mps.high_error_region) /*we PROBABLY will NOT use this one*/,
   use_no_D_match_seqs(vdj_mps.use_no_D_match_seqs),
-  read_length(vdj_mps.read_length)/*the minmum read length has to be 101nts, is this good*/,
+  //read_length(vdj_mps.read_length)/*the minmum read length has to be 101nts, is this good*/,
 
   /*model parameters*/
   PinsVD(), PinsDJ(),

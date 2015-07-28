@@ -2,7 +2,7 @@
 #define VDJ_CUTS_INSERTION_DINUC_NTBIAS_MODEL_PARAMS_HPP
 
 #include "../SIGPIG/genomicSegments.hpp"
-
+//this is defining the global variables
 struct VDJ_cuts_insertion_dinuc_ntbias_model_params
 {
   VDJ_cuts_insertion_dinuc_ntbias_model_params
@@ -49,7 +49,12 @@ struct VDJ_cuts_insertion_dinuc_ntbias_model_params
   unsigned high_error_region;//(15) /*we PROBABLY will NOT use this one*/,
   bool use_no_D_match_seqs;//(true),
 
-  unsigned read_length;
+  //these below are the maximum possible read length of the 
+  unsigned max_J_depth;
+  unsigned max_V_depth;
+  unsigned max_D_depth;
+
+  //unsigned read_length;
   unsigned maximum_read_length;
 };
 //extern VDJ_cuts_insertion_dinuc_ntbias_model_params vdj_mps;

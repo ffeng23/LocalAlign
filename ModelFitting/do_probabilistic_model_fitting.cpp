@@ -7,7 +7,7 @@ bool do_probabilistic_model_fitting
 (
  const SequenceString* _seq,
  const Alignment_Object* _V, const Alignment_D* _D, const Alignment_Object* _J,
- const unsigned numOfAlignments,
+ const unsigned _numOfAlignments,
  const GenomicV* _genV, const unsigned& _numV,
  const GenomicD* _genD, const unsigned& _numD,
  const GenomicJ* _genJ, const unsigned& _numJ,
@@ -66,25 +66,28 @@ bool do_probabilistic_model_fitting
 	}
       //cout<<"\t modeling loop 1"<<endl;
       model.high_error_region=0;
-      model.min_V_length=25;
+      //====> model.min_V_length=25; //here we don't have to change it.<==
       force_all_alleles=false;
       double probability_threshold_factor;
       if(iteration_no==1&&start_from_flat_prior)
 	{
 	  probability_threshold_factor=0.01;
-	  model.negative_excess_deletions_max=3;//0 in matlab
+	  //===>model.negative_excess_deletions_max=3;//0 in matlab
+	  //we set this as 3 in the model parameters.
 	}
       else
 	{
 	  if(iteration_no<5)
 	    {
 	      probability_threshold_factor=0.005;
-	      model.negative_excess_deletions_max=3;//0 in matlab
+	      //==>model.negative_excess_deletions_max=3;//0 in matlab
+	      //we set this as 3 in the model parameters.
 	    }
 	  else
 	    {
 	      probability_threshold_factor=0.001;
-	      model.negative_excess_deletions_max=3;//0 in matlab
+	      //==>model.negative_excess_deletions_max=3;//0 in matlab
+	      //we set this as 3 in the model parameters.
 	    }
 	}
       //cout<<"\t modeling loop 1"<<endl;
@@ -98,10 +101,10 @@ bool do_probabilistic_model_fitting
       //VDJ_cuts_insertion_dinuc_ntbias_assigns assigns(model,counter);
       //model.InitializeAssign(assigns);
       //cout<<"\t modeling loop 3"<<endl;
-      model.assignment_entropy=new double[numOfAlignments];
-      model.assignment_entropy_no_errors=new double[numOfAlignments];
+      model.assignment_entropy=new double[_numOfAlignments];
+      model.assignment_entropy_no_errors=new double[_numOfAlignments];
       //now go through the alignments
-      for(unsigned k=0;k<numOfAlignments;k++)
+      for(unsigned k=0;k<1/*_numOfAlignments*/;k++)
 	{//for each alignment, do the assign
 	  cout<<"\t\t alignment loop:"<<k<<endl;
 	  //initialize new assign for different alignment
@@ -167,7 +170,7 @@ bool do_probabilistic_model_fitting
       //save model!!!
     }//end of iteration
   cout<<"writing the model data to disk, \"vdj_model_output.txt\"......."<<endl;
-  model.output(numOfAlignments);
+  model.output(_numOfAlignments);
 
   return true;
 }				  
