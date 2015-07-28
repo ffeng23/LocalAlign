@@ -2880,7 +2880,7 @@ bool run_stats_for_assignment
   _assigns.JJ_err_pos.SetSubMatrix(in,assignment_params.j_g, assignment_params.max_J_depth, j_err_pos_rel);
   _assigns.JJ_align_length(in,0) = assignment_params.j_g;
   _assigns.JJ_align_length(in,1)=assignment_params.J_align_length; //no need to be 1+J_align_length
-                                                    
+  cout<<"check point, L2883"<<endl;                                                  
   _assigns.pVmax_delV_V(in,0) =assignment_params.v_g;
   _assigns.pVmax_delV_V(in,1) =assignment_params.ndV;
   _assigns.pVmax_delV_V(in,2) =assignment_params.npV_potential_max;
