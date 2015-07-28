@@ -417,9 +417,9 @@ VDJ_cuts_insertion_dinuc_ntbias_assigns::VDJ_cuts_insertion_dinuc_ntbias_assigns
   
   trinucleotideVD.initialize(4, dim_size4, 0.0);// = zeros(4,4,4);
   trinucleotideDJ.initialize(4, dim_size4, 0.0);// = zeros(4,4,4);
-  unsigned dim_size3[3]={_model.max_assignments, _model.number_V_genes, _counter.max_V_length+_model.max_V_deletions};
+  unsigned dim_size3[3]={_model.max_assignments, _model.number_V_genes, _model.model_params.max_V_depth};
   VV_err_pos.initialize(3, dim_size3, 0.0);// = zeros(size(model.PV,1), max_V_length + model.max_V_deletions);
-  dim_size3[2]=_counter.max_J_length;
+  dim_size3[2]=_model.model_params.max_J_depth;
   dim_size3[1]=_model.number_J_genes;
   JJ_err_pos.initialize(3, dim_size3, 0.0);// = zeros(size(model.PDJ,2), max_J_length);
 

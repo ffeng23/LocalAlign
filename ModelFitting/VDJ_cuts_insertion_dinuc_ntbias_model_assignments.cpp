@@ -36,8 +36,8 @@ bool VDJ_model_assignments
     
   //here for setting up the max_depth, we using maximum possible length of each 
   //gene segments. this is different from Matlab code.
-  assignment_params.max_J_depth=AlignmentSettings::max_J_length;
-  assignment_params.max_V_depth=AlignmentSettings::max_V_length;
+  assignment_params.max_J_depth=_model.model_params.max_J_depth;
+  assignment_params.max_V_depth=_model.model_params.max_V_depth;
   
   assignment_params.J_max_error=6;
   assignment_params.D_max_error=3;
@@ -2872,11 +2872,14 @@ bool run_stats_for_assignment
   _assigns.trinucleotideDJ.SetSubMatrix(in,trinucleotideDJ);
 
   cout<<"check point, L2871"<<endl;
-  //                                             
+  //
+  cout<<"size of 1:"<<_assigns.VD_left_edge_dinucleotide.dim()<<"dimension:"<<_assigns.VV_err_pos.size().toString()<<endl;
+  //cout<<"size of 2:"<<VD_left_edge_dinucleotide.dim()<<"dimension:"<<v_err_pos_rel.size().toString()<<endl;
+  cout<<"dim of second one: max_V_depth:"<<assignment_params.max_V_depth<<endl;
   _assigns.VV_err_pos.SetSubMatrix(in,assignment_params.v_g, assignment_params.max_V_depth, v_err_pos_rel);
   _assigns.VV_align_length(in,0) = assignment_params.v_g;
   _assigns.VV_align_length(in,1) =assignment_params.V_align_length; //no need to be 1+V_align_length
-                                                    
+  cout<<"check point 2882"<<endl;
   _assigns.JJ_err_pos.SetSubMatrix(in,assignment_params.j_g, assignment_params.max_J_depth, j_err_pos_rel);
   _assigns.JJ_align_length(in,0) = assignment_params.j_g;
   _assigns.JJ_align_length(in,1)=assignment_params.J_align_length; //no need to be 1+J_align_length
