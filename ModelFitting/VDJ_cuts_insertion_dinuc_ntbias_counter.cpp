@@ -384,10 +384,10 @@ VDJ_cuts_insertion_dinuc_ntbias_counter::VDJ_cuts_insertion_dinuc_ntbias_counter
   nPJ_align_length.initialize(1, dim_size,0.0);// = zeros(max_J_length + 1,1),
 
   dim_size2[0]=_model_ps.number_V_genes;
-  dim_size2[1]=max_V_length+_model_ps.max_V_deletions;
+  dim_size2[1]=_model_ps.max_V_depth;//+_model_ps.max_V_deletions;
   nMVV_err_pos.initialize(2, dim_size2,0.0);// = zeros(size(model.PV,1), max_V_length + model.max_V_deletions),
   dim_size2[0]=_model_ps.number_J_genes;
-  dim_size2[1]=max_J_length;
+  dim_size2[1]=_model_ps.max_J_depth;
   nMJJ_err_pos.initialize(2, dim_size2,0.0);// = zeros(size(model.PDJ,2), max_J_length),
   //Note:: WHY this is different from above V case, not adding max_V_deletions
 

@@ -2134,12 +2134,12 @@ bool run_stats_for_assignment
   sum_row2.clear();
   
   //edge dinucleotide distribution
-  matrix_dim[0]=4;matrix_dim[1]=4;
-  Matrix<unsigned> VD_left_edge_dinucleotide(2,matrix_dim,(unsigned)0);
-  Matrix<unsigned> VD_right_edge_dinucleotide(2,matrix_dim,(unsigned)0);
+  matrix_dim[0]=2;matrix_dim[1]=4;
+  Matrix<unsigned> VD_left_edge_dinucleotide(1,matrix_dim,(unsigned)0);
+  Matrix<unsigned> VD_right_edge_dinucleotide(1,matrix_dim,(unsigned)0);
   
-  Matrix<unsigned> DJ_left_edge_dinucleotide(2,matrix_dim, (unsigned)0);
-  Matrix<unsigned> DJ_right_edge_dinucleotide(2,matrix_dim, (unsigned)0);
+  Matrix<unsigned> DJ_left_edge_dinucleotide(1,matrix_dim, (unsigned)0);
+  Matrix<unsigned> DJ_right_edge_dinucleotide(1,matrix_dim, (unsigned)0);
   
   if(assignment_params.niVD >0)
     {
@@ -2189,7 +2189,7 @@ bool run_stats_for_assignment
 	  cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
 	  throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
 	}
-      VD_left_edge_dinucleotide(cor_x, cor_y)++;
+      VD_left_edge_dinucleotide(0)=cor_x; VD_left_edge_dinucleotide(1)=cor_y;
       //now the right edge
       if(!assignment_params.zeroD)
 	{
@@ -2241,7 +2241,7 @@ bool run_stats_for_assignment
 	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
 	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
 	    }
-	  VD_right_edge_dinucleotide(cor_x, cor_y)++;
+	  VD_right_edge_dinucleotide(0)=cor_x; VD_right_edge_dinucleotide(1)=cor_y;
 	}//if loop, zeroD case for right edge VD
 
     }//niVD not zero if loop
@@ -2296,7 +2296,7 @@ bool run_stats_for_assignment
 	  cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
 	  throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
 	}
-      DJ_right_edge_dinucleotide(cor_x, cor_y)++;
+      DJ_right_edge_dinucleotide(0)=cor_x; DJ_right_edge_dinucleotide(1)=cor_y;
       //now the dj left edge
       if(!assignment_params.zeroD)
 	{
@@ -2348,13 +2348,13 @@ bool run_stats_for_assignment
 	      cerr<<"unknown character in the sequence. please check in 'run stat()function in vdj model assignment";
 	      throw runtime_error ("unknown character in the sequence. please check in 'run stat()function in vdj model assignment");	  
 	    }
-	  DJ_left_edge_dinucleotide(cor_x, cor_y)++;
+	  DJ_left_edge_dinucleotide(0)=cor_x;DJ_left_edge_dinucleotide(1)= cor_y;
 	}//if loop, zeroD case for right edge VD
       
     }//if loop, niDJ not zero
 
   //now start doing the tri-nucleotide
-  matrix_dim[2]=4;
+  matrix_dim[0]=4; matrix_dim[1]=4;matrix_dim[2]=4;
   Matrix<unsigned> trinucleotideVD(3,matrix_dim, (unsigned)0);
   Matrix<unsigned> trinucleotideDJ(3,matrix_dim, (unsigned)0);
 
