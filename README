@@ -40,3 +40,10 @@ add code to take the processing/mapping of Deepsequencing data
 change NGSMapping.cpp to NGSMapping_Adaptor_main.cpp
        and executable to NGSMapping_Adaptor
        2014 04 10, add functions to output results by isotypes, so far only IgG and IgM
+
+
+##############update 5/25/2018
+1)modify NGSMapping_Constant_main.cpp to remove unused options, no adaptor and barcode (-a and -b)
+	 no trim and isotype (-t and -i)
+2)add new module mapping_isotype_main.cpp to identify the isotypes of sequences. this is similar but with the intension for new illumina data
+      it is more following cutadapt format. We will work on the design of IgSeq, pairend data. We will try to work on joined data as well as read 2 data
