@@ -48,4 +48,5 @@ extern ScoreMatrix blosum50;
 extern ScoreMatrix tsm1;
 extern ScoreMatrix tsm2;
 extern ScoreMatrix nuc44HP;
+extern ScoreMatrix nuc44DM1;//this is newly added to do isotype mapping with degenerate nts for isotype/adapter. following cutadapt format
 #endif

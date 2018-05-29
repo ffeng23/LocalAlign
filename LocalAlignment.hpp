@@ -46,7 +46,8 @@ protected:
   //this is the array holding numOfAlignments requested
   //the one defined by base class only holds the optimal one
   unsigned int c_numOfAlignments;
-  AlignmentString* c_alignmentArr;
+  AlignmentString* c_alignmentArr; //in this array, we hold the best a few of alignments. the number of best ones are defined by input.
+  //Note: c_alignment holds the best alignment.
   double* c_scoreArr;
   //in this class we define the alignmentstring and score string and
   //then delete it upon destruction. so the outside caller need to take care(copy)

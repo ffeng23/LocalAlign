@@ -1,3 +1,4 @@
+
 #include "SequenceHandler.hpp"
 #include "FastaHandler.hpp"
 #include <fstream>
@@ -514,7 +515,7 @@ void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString
 			p_vec_map=&vec_mapReverse;
 		      }
 		      else
-			p_vec_map=&vec_mapReverse;
+			p_vec_map=&vec_mapNone;
 		  }
 	      }
 	  }
