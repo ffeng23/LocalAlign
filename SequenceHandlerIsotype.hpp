@@ -8,13 +8,13 @@
 
 using namespace std;
 
-enum mapType{ 5prime, 3prime};
+enum mapType{ FivePrime, ThreePrime};
 //IN this function, we take care to do the isotype identification
 void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence data that we want to find isotypes*/
 		     vector<SequenceString>& _vecIsotype, /*this is the isotype sequences*/
 		     const mapType& type, /*indicating whether it is 5'prime or 3' prime*/
 		     ScoreMatrix* _sm, const double& _gapOpen, const double& _gapExtension,
-		     const double& _mismatchRateThreshold, const unsigned _minmumOverlapLength,
+		     const double& _mismatchRateThreshold, const unsigned _minimumOverlapLength,
 		     const unsigned int& _offset, 
 		     const string& _map_fname,
 		       const string& _unmap_fname//,

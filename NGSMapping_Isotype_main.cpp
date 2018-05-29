@@ -21,10 +21,9 @@ static void parseArguments(int argc, char **argv, const char *opts);
 static int lookUpScoreMatrix(const string* _scoreMatrixNameArray,const int& len, const string& scoreMatrixName);
 
 //all file are in fasta format
-//static string adaptorFile_name("454_adaptors.fa"); //the input file for adaptor
-//static string barcodeFile_name("454_barcodes.fa");//input ifle for barcode
-static string IsotypeFile_name("HumanIGConstant_Lib.fas");//input ifle for forward constant 
-//static string reverseFile_name("primers_Nested_UPM_Reverse");//input ifle for reverse UPM
+
+static string isotypeFile_name("HumanIGConstant_Lib.fas");//input ifle for forward constant 
+
 static string sequenceFile_name;//input file for sequence data
 
 static double MismatchRateThreshold=0.75; //not too many mismatch 
@@ -32,7 +31,6 @@ static unsigned int MinimumOverlapLength=10;//not too short
 
 //how far we allow the alignment to be away from the ends. can not be too far, since they are supposed to be aligned on the ends.
 unsigned int Offset=15;//###10 might too big????
-//unsigned int OffsetReverse=10;//
 
 static string scoreMatrixName="nuc44DM1"; //name as an input for specifing the name of the score matrix. for example nuc44
 
@@ -57,7 +55,7 @@ int main(int argc, char* argv[])
   //b: the input file name barcode  <----not used in this code
   //f: the input file name forward primer
   //r: the input file name reverse primer
-
+  //d: the mapping type, either FivePrime or ThreePrime
   //g: gap open
   //e: gap extension
   //m: score matrix
@@ -85,17 +83,11 @@ int main(int argc, char* argv[])
   
   //*********get output files
   string outputFileMap_name=(sequenceFile_name+".mapped.fasta"); //the output file for mapped both files
-  //string outputFileForward_name=(sequenceFile_name+".mapForward.fasta");//map forward
-  //string outputFileReverse_name=(sequenceFile_name+".mapReverse.fasta");//map reverse
   string outputFileNone_name=(sequenceFile_name+".mapNone.fasta");//map none
-
-  //string outputTrimmedFile_name(sequenceFile_name+".trim.fasta");
 
   cout<<"***Input parameters Summary:\n";
   cout<<"\tIsotype file name:\""<<isotypeFile_name<<"\".\n";
-  //cout<<"\treverse primer file name:\""<<reverseFile_name<<"\".\n";
   cout<<"\tsequence data file name:\""<<sequenceFile_name<<"\".\n";
-  
   cout<<"\tThe output file name : \""<<outputFileMap_name<<"\",\""
       <<outputFileNone_name<<"\";\n"
       <<"\tmapEnd:"<<mapEnd<<"\n"
@@ -117,8 +109,8 @@ int main(int argc, char* argv[])
       <<"\tgap open penalty:"<<gapopen<<"\n"
       <<"\tgap extension penalty:"<<gapextension<<"\n"
       
-      <<"\toffset on forward end:"<<OffsetForward<<"\n"
-    //<<"\toffset on reverse end:"<<OffsetReverse<<"\n"
+      <<"\toffset on forward end:"<<Offset<<"\n"
+
       <<"\tmismatch rate threshold:"<<MismatchRateThreshold<<"\n"
       <<"\tminimum overlap length:"<<MinimumOverlapLength<<"\n";
   
@@ -129,19 +121,15 @@ int main(int argc, char* argv[])
   //fasta handler:reading fasta
   vector<SequenceString> vec_seq;
   vector<SequenceString> vec_Isotype_seq;//this will hold processed sequences on the forward end
-  //vector<SequenceString> vec_reverse_seq;//this will hold processed sequences on the reverse end
   
   cout<<"reading sequence data file: "<<ReadFasta(sequenceFile_name, vec_seq)<<endl;
   cout<<"1/1000:"<<vec_seq.at(0).toString()<<endl;
   
   cout<<"reading and processing isotype sequences for mapping......"<<endl;
-  /*if(trim==1) 
-    SetUpTrimFlag(true);
-  */
+
   //SetUpByIsotypeOutputFlag(true);
-  cout<<"Reading constant library file:"<<ReadFasta(IsotypeFile_name, vec_Isotype_seq);
-  //cout<<"Reading reverse library file (UPM):"<<ReadFasta(reverseFile_name, vec_reverse_seq);
-  //ProcessAdaptorSequences(adaptorFile_name, barcodeFile_name, forwardFile_name, reverseFile_name, vec_forward_seq, vec_reverse_seq);
+  cout<<"Reading constant library file:"<<ReadFasta(isotypeFile_name, vec_Isotype_seq);
+
 
   //reverse the Ig constant region sequence
   /*for(unsigned int i=0;i<vec_forward_seq.size();i++)
@@ -171,13 +159,13 @@ int main(int argc, char* argv[])
 static void parseArguments(int argc, char **argv, const char *opts)
 {
   int optchar;
-
+  int temp;
   while ((optchar = getopt(argc, argv, opts)) != -1)
     {
       switch(char(optchar))
 	{	  
 	case 'f':
-	  forwardFile_name=optarg;
+	  isotypeFile_name=optarg;
 	break;
 	
 	//case 'r':
@@ -208,15 +196,16 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	case 'p':
 	  Offset=atoi(optarg);
 	  break;
-	case 'd':------
-	  int temp=atoi(optarg);
+
+	case 'd':
+	  temp=atoi(optarg);
 	  if(temp==1)
 	    {
-	      mapEnd=5prime;
+	      mapEnd=FivePrime;
 	    }
 	  if(temp==2)
 	    {
-	      mapEnd=3prime;
+	      mapEnd=ThreePrime;
 	    }
 	  if(temp!=1&&temp!=2)
 	    {
@@ -225,6 +214,7 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	      exit(-1);
 	    }
 	  break;
+
 	case 'l':
 	  MinimumOverlapLength=atoi(optarg);
 	  break;
@@ -244,6 +234,7 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	  break;
 	  
 	case '?':
+	  
 	  /*if(optopt == 't')
 	    ;//cout<<"option"<<optopt<<" requires an argument.\n"<<endl;
 	    else*/
@@ -269,7 +260,7 @@ static void printUsage(int argc, char* argv[])
   cout<<"argv[0], the program used to identify the isotypes of the sequences and also\n"
       <<"\tdemutiplex them. This will work mainly on the new design of IgSeq data, which\n"
       <<"\tare pair-end and have We try to follow the style of cutadapt. Basically, we will\n"
-      <<"\tonly ask for the isotype sequence and then map them to one side of "
+      <<"\tonly ask for the isotype sequence and then map them to one side of ";
     cout<<"Option string: \"hva:b:f:r:g:e:t:m:s:k:\" \n";
   cout<<"Usage:\n";
   cout<<"\t"<<argv[0]<<" -s second sequence file " //[-a adaptor file] [-b barcode file]  \n"

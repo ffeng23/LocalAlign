@@ -242,7 +242,7 @@ ScoreMatrix tsm2(tsm2Int,1, tsm2Alphabet,4);
 //the scale information is kept same as the original one from NUC44
 //the score are from ncbi.
 //order is A   T   G   C   S   W   R   Y   K   M   B   V   H   D   N
-
+static int factor=4;
 static int nuc44HPInt_1d[] ={ 5,  -4*factor,-4*factor,  -4*factor,  -4*factor, 1,   1,  -4*factor,  -4*factor,   1,    -4*factor,  -1*factor,  -1*factor,  -1*factor,  -2*factor,
 			    -4*factor,  5,  -4*factor,  -4*factor,  -4*factor,   1,  -4*factor,   1,   1,  -4*factor,  -1*factor,  -4*factor,  -1*factor,  -1*factor,  -2*factor,
 			    -4*factor, -4*factor,   5,  -4*factor,   1,  -4*factor,   1,  -4*factor,   1,  -4*factor,  -1*factor,  -1*factor,  -4*factor,  -1*factor,  -2*factor,
@@ -314,9 +314,9 @@ static int nuc44DM1Int_1d[] ={ 5,  -4,  -4,  -4,  -4,   5,   5,  -4,  -4,   5,  
  *     assume it is equal likely for S to be G and C, we have 
  *     score=0.5*5+0.5*(-4)=0.5, we round it up to 1 for the integer format  
  */
-static const int* nuc44DM1Int[] ={nuc44MD1Int_1d,nuc44MD1Int_1d+15,nuc44MD1Int_1d+30,nuc44MD1Int_1d+45,nuc44MD1Int_1d+60,nuc44MD1Int_1d+75,
-			 nuc44MD1Int_1d+90,nuc44MD1Int_1d+105, nuc44MD1Int_1d+120, nuc44MD1Int_1d+135,nuc44MD1Int_1d+150, 
-			 nuc44MD1Int_1d+165, nuc44MD1Int_1d+15*12,nuc44MD1Int_1d+15*13, nuc44MD1Int_1d+15*14 
+static const int* nuc44DM1Int[] ={nuc44DM1Int_1d,nuc44DM1Int_1d+15,nuc44DM1Int_1d+30,nuc44DM1Int_1d+45,nuc44DM1Int_1d+60,nuc44DM1Int_1d+75,
+			 nuc44DM1Int_1d+90,nuc44DM1Int_1d+105, nuc44DM1Int_1d+120, nuc44DM1Int_1d+135,nuc44DM1Int_1d+150, 
+			 nuc44DM1Int_1d+165, nuc44DM1Int_1d+15*12,nuc44DM1Int_1d+15*13, nuc44DM1Int_1d+15*14 
                 };
 const char NucDM1Alphabet[]={ 'A' ,  'T' ,  'G'  ,'C',   'S',   'W',   'R' ,  'Y',   'K',   'M',   'B' ,  'V' ,  'H' , 'D',   'N'};
 //IUPAC code: S -> G or C;   W -> A or T; R -> A or G; Y -> C or T; K -> G or T;

@@ -39,7 +39,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		     vector<SequenceString>& _vecIsotype, /*this is the isotype sequences*/
 		     const mapType& type, /*indicating whether it is 5'prime or 3' prime*/
 		     ScoreMatrix* _sm, const double& _gapOpen, const double& _gapExtension,
-		     const double& _mismatchRateThreshold, const unsigned _minmumOverlapLength,
+		     const double& _mismatchRateThreshold, const unsigned _minimumOverlapLength,
 		     const unsigned int& _offset, //const unsigned int& _offsetReverse, 
 		     const string& _map_fname,
 		       const string& _unmap_fname//,
@@ -106,7 +106,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
       for(unsigned int j=0;j<_vecIsotype.size();j++)
 	{
 	  //now we need to separate out the two different mapping case, 5' and 3'
-	  if(mapType==5prime)
+	  if(type==FivePrime)
 	    {
 	      //cout<<"forward set:"<<j<<endl;
 	      //cout<<_vecForward.at(j).toString()<<endl;
@@ -228,7 +228,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	 if(found3PrimeFlag)
 	   { //this part, we need to test, to see whether this is correct
 	     //the rationale is that we revcomp the alignment, then the break part for this revComp is that we get the beginning of the alignment and then used the total length (-1) to get the correct break position (end pos)
-	   pt_vec_mapBoth_pos_end[foundIndex].push_back(_vecIsotype.at(foundIndex).GetLength()-1 - best3PrimeAlign.GetSubjectIndexStart());
+	   pt_vec_map_pos_end[foundIndex].push_back(_vecIsotype.at(foundIndex).GetLength()-1 - best3PrimeAlign.GetSubjectIndexStart());
 	 }
 	 
       //now we are done with stats recording.
@@ -335,7 +335,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	    tempLst3Prime.SetName("NoMatch");
 	  }
 	//cout<<"end of reverse on, tempLstR.seq:"<<tempLstR.toString()<<endl;
----
+
 	//#now we need to take care of the read sequence alignment string
 	//#on the reverse part first
 	//cout<<"seq string output read...."<<endl;
@@ -343,7 +343,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	tempLstSeq.SetSequence(_vecSeq.at(i).GetSequence());
 	tempLstSeq.SetName(_vecSeq.at(i).GetName());
 	replaceOne=_vecSeq.at(i).GetSequence();
-	if(foundReverseFlag)
+	if(found3PrimeFlag)
 	{
 	  //cout<<"1.."<<endl;
 	  replaceOne=_vecSeq.at(i).GetSequence().substr(0, best3PrimeAlign.GetPatternIndexStart());
@@ -388,11 +388,11 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	//tempLstR.SetSequence(leadingSpaceOriginal+tempLstR.GetSequence());//<-paste(tempStr, as.character(tempLstR$seq), sep="");
 	//tempLstR$seq<-paste(leadingSpaceOriginal, tempStr, sep="");
 	tempLstSeq.SetSequence(leadingSpaceOriginal+tempLstSeq.GetSequence());
----	
+	
 	//******************write to vectors***************
 	//#now put the sequences to the correct vectors
 	//cout<<"\tready to output strings........"<<endl;
-	vector<SequenceString>* p_vec_map;
+	vector<SequenceString> * p_vec_map;
        /*if(foundCrossOverFlag)
 	  {
 	    p_vec_map=&vec_mapCrossOver;
@@ -477,7 +477,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	  
 	*/
         p_vec_map=&vec_mapNone;
-          if(found5PrimerFlag)
+          if(found5PrimeFlag)
 		  {
 		    unsigned int found=LookUpVectorIndex(tempLst5Prime.GetName(), _vecIsotype);
 		    
@@ -500,7 +500,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		      }
 		    stringstream ss;
 		    ss<<tempLst5Prime.GetName()<<":"<<best5PrimeAlign.GetSubjectIndexStart()<<":"
-		      <<best5PrimeAlign.GetSubjectIndexEnd()
+		      <<best5PrimeAlign.GetSubjectIndexEnd();
 		      
 		    tempLst5Prime.SetName(ss.str());						
 		  }
@@ -626,7 +626,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
       //cout<<"\t------writing files at i-----:"<<s<<endl;
       //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
 		  		  
-      t_fileName=_mapNone_fname;
+      t_fileName=_unmap_fname;
       WriteFasta(t_fileName, vec_mapNone,100, ofstream::app);
       //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
       vec_mapNone.clear();
