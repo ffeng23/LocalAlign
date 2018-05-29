@@ -15,7 +15,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		     const mapType& type, /*indicating whether it is 5'prime or 3' prime*/
 		     ScoreMatrix* _sm, const double& _gapOpen, const double& _gapExtension,
 		     const double& _mismatchRateThreshold, const unsigned _minmumOverlapLength,
-		     const unsigned int& _offsetForward, const unsigned int& _offsetReverse, 
+		     const unsigned int& _offset, 
 		     const string& _map_fname,
 		       const string& _unmap_fname//,
 		     //const string& _mapReverse_fname, const string& _mapNone_fname,

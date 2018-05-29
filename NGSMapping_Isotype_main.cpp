@@ -31,7 +31,7 @@ static double MismatchRateThreshold=0.75; //not too many mismatch
 static unsigned int MinimumOverlapLength=10;//not too short
 
 //how far we allow the alignment to be away from the ends. can not be too far, since they are supposed to be aligned on the ends.
-unsigned int OffsetForward=15;//###10 might too big????
+unsigned int Offset=15;//###10 might too big????
 //unsigned int OffsetReverse=10;//
 
 static string scoreMatrixName="nuc44DM1"; //name as an input for specifing the name of the score matrix. for example nuc44
@@ -46,15 +46,13 @@ static double scale=1; //this is the one on top of matrix, the programe will run
 static double gapopen=-15;
 static double gapextension=-10;
 static bool gapextensionFlag=false;
-
+static mapType mapEnd;
 //static int trim=0;
 //static bool isotype_flag=false;
-
 int main(int argc, char* argv[])
 {
   //for parsing commandline arguement
-
-  const char *opts = "hvf:g:e:m:s:k:n:p:l:";
+  const char *opts = "hvf:g:e:m:s:k:n:p:l:d:";
   //a: the input file name adaptor  <----not used in this code
   //b: the input file name barcode  <----not used in this code
   //f: the input file name forward primer
@@ -73,6 +71,7 @@ int main(int argc, char* argv[])
   //l: minimum overlap length
   //xxxxnot used xxxxxx i: **********set to true if want to write up output by isotypes or false by not specify it
   //   always by isotype
+  //d: 5 prime or 3 prime mapping
 
   parseArguments(argc, argv, opts);
     
@@ -99,6 +98,7 @@ int main(int argc, char* argv[])
   
   cout<<"\tThe output file name : \""<<outputFileMap_name<<"\",\""
       <<outputFileNone_name<<"\";\n"
+      <<"\tmapEnd:"<<mapEnd<<"\n"
       <<"\n";
     
   //look up the score matix
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
       <<"\tgap extension penalty:"<<gapextension<<"\n"
       
       <<"\toffset on forward end:"<<OffsetForward<<"\n"
-      <<"\toffset on reverse end:"<<OffsetReverse<<"\n"
+    //<<"\toffset on reverse end:"<<OffsetReverse<<"\n"
       <<"\tmismatch rate threshold:"<<MismatchRateThreshold<<"\n"
       <<"\tminimum overlap length:"<<MinimumOverlapLength<<"\n";
   
@@ -149,13 +149,13 @@ int main(int argc, char* argv[])
       vec_forward_seq[i]=ReverseComplement(vec_forward_seq.at(i));
     }
   */
-  //SetupConstantPrimerInfo(1,forwardFile_name);
+ 
 //now we have everything, we just need to do the job, I mean mapping, here.
-  MappingIsotypes(vec_forward_seq, vec_reverse_seq, vec_seq, 
-		  sm, gapopen, gapextension,
-		   MismatchRateThreshold, MinimumOverlapLength, OffsetForward, OffsetReverse, 
-		   outputFileBoth_name, outputFileForward_name, outputFileReverse_name,outputFileNone_name,
-		   outputCrossOverFile_name,outputBreakOutsideConstantFile_name
+  MappingIsotypes(vec_seq, vec_Isotype_seq, 
+		  mapEnd,sm, gapopen, gapextension,
+		  MismatchRateThreshold, MinimumOverlapLength, 
+		  Offset, 
+		  outputFileMap_name, outputFileNone_name
 		  ); 
   
 
@@ -175,15 +175,14 @@ static void parseArguments(int argc, char **argv, const char *opts)
   while ((optchar = getopt(argc, argv, opts)) != -1)
     {
       switch(char(optchar))
-	{
-	  
+	{	  
 	case 'f':
 	  forwardFile_name=optarg;
 	break;
 	
-	case 'r':
-	  reverseFile_name=optarg;
-	break;
+	//case 'r':
+	//  reverseFile_name=optarg;
+	//break;
 	
 	case 's':
 	  sequenceFile_name=optarg;
@@ -207,10 +206,24 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	  MismatchRateThreshold=atof(optarg);
 	  break;
 	case 'p':
-	  OffsetForward=atoi(optarg);
+	  Offset=atoi(optarg);
 	  break;
-	case 'q':
-	  OffsetReverse=atoi(optarg);
+	case 'd':------
+	  int temp=atoi(optarg);
+	  if(temp==1)
+	    {
+	      mapEnd=5prime;
+	    }
+	  if(temp==2)
+	    {
+	      mapEnd=3prime;
+	    }
+	  if(temp!=1&&temp!=2)
+	    {
+	      cout<<"ERROR: unknown mapping type, can only be 1 or 2 (for 5prime or 3 prime mapping, respecitively);\n"<<endl;
+	      printUsage(argc, argv);
+	      exit(-1);
+	    }
 	  break;
 	case 'l':
 	  MinimumOverlapLength=atoi(optarg);
