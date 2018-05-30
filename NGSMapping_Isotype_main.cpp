@@ -44,7 +44,7 @@ static double scale=1; //this is the one on top of matrix, the programe will run
 static double gapopen=-15;
 static double gapextension=-10;
 static bool gapextensionFlag=false;
-static mapType mapEnd;
+static mapType mapEnd=FivePrime;
 //static int trim=0;
 //static bool isotype_flag=false;
 int main(int argc, char* argv[])
