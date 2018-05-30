@@ -39,22 +39,23 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		     vector<SequenceString>& _vecIsotype, /*this is the isotype sequences*/
 		     const mapType& type, /*indicating whether it is 5'prime or 3' prime*/
 		     ScoreMatrix* _sm, const double& _gapOpen, const double& _gapExtension,
-		     const double& _mismatchRateThreshold, const unsigned _minimumOverlapLength,
+		     const double& _matchRateThreshold, const unsigned _minimumOverlapLength,
 		     const unsigned int& _offset, //const unsigned int& _offsetReverse, 
 		     const string& _map_fname,
-		       const string& _unmap_fname//,
-		     //const string& _mapReverse_fname, const string& _mapNone_fname,
-		     //const string& _mapCrossOver_fname, const string& _mapBreakOutsideCon_fname
-		      )
-/*void MappingConstants(vector<SequenceString>& _vecForward, vector<SequenceString>& _vecReverse, vector<SequenceString>& _vecSeq, 
-		     ScoreMatrix* _sm, const double& _gapOpen, const double& _gapExtension,
-			 const double& _mismatchRateThreshold, const unsigned _minimumOverlapLength, const unsigned int& _offsetForward, const unsigned int& _offsetReverse, 
-		     const string& _mapBoth_fname, const string& _mapForward_fname,
-		      const string& _mapReverse_fname, const string& _mapNone_fname, const string& _mapCrossOver_fname, const string& _mapBreakOutsideCon_fname )*/
+		     const string& _unmap_fname//,
+		     )
 {
   unsigned int numOfSeqsUnit=20000;
   unsigned int timeOfWriting=1;
-  
+  int* numOfWritesDone_mapped =new int [_vecIsotype.size()+1];
+  for(unsigned int i=0;i<_vecIsotype.size()+1;i++)
+    {
+      numOfWritesDone_mapped[i]=0;
+    }
+
+  int numOfWritesDone_unmapped=0;
+  ios_base::openmode mode=ofstream::trunc; //by default, we need to clear out the file.
+
   //now we need to prepare the output vector, now we will prepare the outfile for each entry in _vecForward
   //they are the alleles for different isotypes (IgG/M), different subtypes (IgG1/2/3/4) and alleles IgG1*01/*02/*03, etc
   //
@@ -77,7 +78,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
   string strPattern;
   string strSubject;
   
-  double mismatch_rate=0.0;
+  double match_rate=0.0;
   cout<<"\n";
   for(unsigned int i=0;i<_vecSeq.size();i++)
     {
@@ -113,18 +114,18 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	      LocalAlignment lal (&(_vecSeq.at(i)), &(_vecIsotype.at(j)), _sm, _gapOpen, _gapExtension,1,numOfLocalAlignments);
 	      tempAS_arr=lal.GetAlignmentArr();
 	      //cout<<"\talignment score:"<<tempAS.GetScore()<<endl;
-	      //need to get the mismatch rate
+	      //need to get the match rate
 	      strPattern=tempAS_arr[0].GetPattern(true);
 	      strSubject=tempAS_arr[0].GetSubject(true);
 	      //cout<<"\tstrPattern:"<<strPattern<<endl;
 	      //cout<<"\tstrSubject:"<<strSubject<<endl;
 
-	      mismatch_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
+	      match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
 	      //cout<<"\tcompare:"<<CompareStrings(strPattern, strSubject)<<";length():"<<strPattern.length()<<endl;
-	      //cout<<"\tmismatch_rate:"<<mismatch_rate<<endl;
+	      //cout<<"\tmatch_rate:"<<match_rate<<endl;
 		
-	      //check the best score and mismatch rate
-	      if(tempAS_arr[0].GetScore()>best5PrimeScore&&mismatch_rate>_mismatchRateThreshold&&strPattern.length()>_minimumOverlapLength)
+	      //check the best score and match rate
+	      if(tempAS_arr[0].GetScore()>best5PrimeScore&&match_rate>_matchRateThreshold&&strPattern.length()>_minimumOverlapLength)
 		{
 		  //we need to see the offset too, only important to the pattern, here the 
 		  //the pattern is the long one, we align the primer sequence against
@@ -151,27 +152,27 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		  //OverlapAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension,1);
 		  LocalAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension,1,numOfLocalAlignments);
 		  //cout<<"after alignment:"<<k<<endl;
-		  //need to get the mismatch rate
+		  //need to get the match rate
 		  tempAS=ola.GetAlignment();
-		  //need to get the mismatch rate
+		  //need to get the match rate
 		  strPattern=tempAS.GetPattern(true);
 		  strSubject=tempAS.GetSubject(true);
-		  mismatch_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
+		  match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
 	  	
 		  //#check the best score
-		  if(tempAS.GetScore()>best3PrimeScore&&mismatch_rate>_mismatchRateThreshold&&strPattern.length()>_minimumOverlapLength)
+		  if(tempAS.GetScore()>best3PrimeScore&&match_rate>_matchRateThreshold&&strPattern.length()>_minimumOverlapLength)
 		    {
 		      //##we need to see the offset too, only important to the pattern, here the 
 		      //	##the pattern is the long one, we align the primer sequence against
 		      //	###the primer should on the both ends, not too far,
-		      //if( 
-		      // (_vecSeq.at(i).GetLength()-tempAS.GetPatternIndexEnd())<_offsetReverse )
-		      //{//we good
-		      best3PrimeScore=tempAS.GetScore();
-		      best3PrimeAlign=tempAS;//with name
-		      best3PrimeIndex=j;
-		      found3PrimeFlag=true;
-		      //}
+		      if( 
+			 (_vecSeq.at(i).GetLength()-tempAS.GetPatternIndexEnd())<_offset )
+		      {//we good
+			best3PrimeScore=tempAS.GetScore();
+			best3PrimeAlign=tempAS;//with name
+			best3PrimeIndex=j;
+			found3PrimeFlag=true;
+		      }
 		    }
 	    }//for 3 prime mapping
 	}//loop through the isotype sequences 
@@ -477,109 +478,133 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	  
 	*/
         p_vec_map=&vec_mapNone;
-          if(found5PrimeFlag)
-		  {
-		    unsigned int found=LookUpVectorIndex(tempLst5Prime.GetName(), _vecIsotype);
-		    
-		    
-		    //check to see whether we need to store the data by isotype
-		    //if(g_by_isotype_flag)
-		    //	{
-		    
-		    //cout<<"\t**********writing to vec now"<<found<<endl;
-		    
-		    //here we always store by isotype
-		    if(((signed)found) != -1)//string::npos)
-		      {
-			p_vec_map=&pt_vec_mapped[found];  //g_vec_mapBoth is initilized in the processingAdaptor function above
-		      }
-		    else
-		      {
-			cout<<"***WARNING:Can not find the forward primer name, something is wrong"<<endl;
-			p_vec_map=&pt_vec_mapped[_vecIsotype.size()];
-		      }
-		    stringstream ss;
-		    ss<<tempLst5Prime.GetName()<<":"<<best5PrimeAlign.GetSubjectIndexStart()<<":"
-		      <<best5PrimeAlign.GetSubjectIndexEnd();
-		      
-		    tempLst5Prime.SetName(ss.str());						
-		  }
-		
-		if(found3PrimeFlag)
-		  {
-		    unsigned int found=LookUpVectorIndex(tempLst3Prime.GetName(), _vecIsotype);
-		    if(((signed)found) != -1)//string::npos)
-		      {
-			p_vec_map=&pt_vec_mapped[found];  //g_vec_mapBoth is initilized in the processingAdaptor function above
-		      }
-		    else
-		      {
-			cout<<"***ERROR:Can not find the forward primer name, something is wrong"<<endl;
-			p_vec_map=&pt_vec_mapped[_vecIsotype.size()];
-		      }
-		    stringstream ss;
-		    ss<<tempLst3Prime.GetName()<<":"<<best3PrimeAlign.GetSubjectIndexStart()<<":"
-		      <<best3PrimeAlign.GetSubjectIndexEnd();
-		    
-		    tempLst3Prime.SetName(ss.str());
-		  }
-	 
+	if(found5PrimeFlag)
+	  {
+	    unsigned int found=LookUpVectorIndex(tempLst5Prime.GetName(), _vecIsotype);
+	    
+	    
+	    //check to see whether we need to store the data by isotype
+	    //if(g_by_isotype_flag)
+	    //	{
+	    
+	    //cout<<"\t**********writing to vec now"<<found<<endl;
+	    
+	    //here we always store by isotype
+	    if(((signed)found) != -1)//string::npos)
+	      {
+		p_vec_map=&pt_vec_mapped[found];  //g_vec_mapBoth is initilized in the processingAdaptor function above
+	      }
+	    else
+	      {
+		cout<<"***WARNING:Can not find the forward primer name, something is wrong"<<endl;
+		p_vec_map=&pt_vec_mapped[_vecIsotype.size()];
+	      }
+	    stringstream ss;
+	    ss<<tempLst5Prime.GetName()<<":"<<best5PrimeAlign.GetSubjectIndexStart()<<":"
+	      <<best5PrimeAlign.GetSubjectIndexEnd();
+	    
+	    tempLst5Prime.SetName(ss.str());						
+	  }
+	
+	if(found3PrimeFlag)
+	  {
+	    unsigned int found=LookUpVectorIndex(tempLst3Prime.GetName(), _vecIsotype);
+	    if(((signed)found) != -1)//string::npos)
+	      {
+		p_vec_map=&pt_vec_mapped[found];  //g_vec_mapBoth is initilized in the processingAdaptor function above
+	      }
+	    else
+	      {
+		cout<<"***ERROR:Can not find the forward primer name, something is wrong"<<endl;
+		p_vec_map=&pt_vec_mapped[_vecIsotype.size()];
+	      }
+	    stringstream ss;
+	    ss<<tempLst3Prime.GetName()<<":"<<best3PrimeAlign.GetSubjectIndexStart()<<":"
+	      <<best3PrimeAlign.GetSubjectIndexEnd();
+	    
+	    tempLst3Prime.SetName(ss.str());
+	  }
+	
 	//now we need to store the data into the correct vectors/files
 	p_vec_map->push_back(tempLstSeq);
 	if(found5PrimeFlag)
 	  p_vec_map->push_back(tempLst5Prime);
 	if(found3PrimeFlag)
 	  p_vec_map->push_back(tempLst3Prime);
-	
+		
 	//cout<<"start writing output........"<<endl;
+	//need to figure out how to (trunc or app) write the output at each round.
+	
 	if(i>=timeOfWriting*numOfSeqsUnit) //#write once every 20000 sequences
 	  {
+	    
+	    //if(timeOfWriting>1)
+	    //  {
+	    //	mode=ofstream::app;
+	    //  }
 	    timeOfWriting++;
 	    string t_fileName;
-	  //cout<<"i round:"<<i<<endl;
-	  //mapped
-	  for(unsigned int s=0;s<=_vecIsotype.size();s++)
-	    {
-	      if(pt_vec_mapped[s].size()>0)
-		{
-		  //cout<<"\t------writing files at i-----:"<<s<<endl;
-		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
-		  if(s<_vecIsotype.size())
-		    {
-		      t_fileName=_map_fname+ _vecIsotype.at(s).GetName();
-		    }
-		  else
-		    {
-		      t_fileName=_map_fname+ "notFoundIsotype";
-		    }
-		  WriteFasta(t_fileName, pt_vec_mapped[s],100, ofstream::app);
-		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
-		  pt_vec_mapped[s].clear();
-		  //cout<<"vecBoth cleared:"<<vec_mapBoth.size()<<endl;
-		  WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_map_pos_end[s], ' ', 1,ofstream::app);
-		  pt_vec_map_pos_end[s].clear();//g_vec_len_mapBoth.at(s).clear();
-		  /*if(g_trim_flag)
-		    {
+	    //cout<<"i round:"<<i<<endl;
+	    //mapped
+	    for(unsigned int s=0;s<=_vecIsotype.size();s++)
+	      {
+		if(pt_vec_mapped[s].size()>0)
+		  {
+		    if(numOfWritesDone_mapped[s]==0)
+		      {
+			mode=ofstream::trunc;
+		      }
+		    else
+		      {
+			mode=ofstream::app;
+		      }
+		    //cout<<"\t------writing files at i-----:"<<s<<endl;
+		    //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		    if(s<_vecIsotype.size())
+		      {
+			t_fileName=_map_fname+ _vecIsotype.at(s).GetName()+".fasta";
+		      }
+		    else
+		      {
+			t_fileName=_map_fname+ "notFoundIsotype.fasta";
+		      }
+		    WriteFasta(t_fileName, pt_vec_mapped[s],100, mode);
+		    //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+		    pt_vec_mapped[s].clear();
+		    //cout<<"vecBoth cleared:"<<vec_mapBoth.size()<<endl;
+		    WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_map_pos_end[s], ' ', 1,mode);
+		    numOfWritesDone_mapped[s]++;
+		    pt_vec_map_pos_end[s].clear();//g_vec_len_mapBoth.at(s).clear();
+		    /*if(g_trim_flag)
+		      {
 		      WriteFasta(t_fileName+"_trim.fas", g_vec_mapBoth_trim.at(s), 100,ofstream::app);
 		      g_vec_mapBoth_trim.at(s).clear();
 		      }*/
-		}
-	    }
+		  }
+	      }
 	    
-	  //none
-	      if(vec_mapNone.size()>0)
-		{
-		  //cout<<"\t------writing files at i-----:"<<s<<endl;
-		  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
-		  		  
-		  t_fileName=_unmap_fname;
-		  WriteFasta(t_fileName, vec_mapNone,100, ofstream::app);
-		  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
-		  vec_mapNone.clear();
-		}
-	  
-	  //cout<<"done map both"<<endl;
-	}//end of each 1000 seqs read write
+	    //none
+	    if(vec_mapNone.size()>0)
+	      {
+		//cout<<"\t------writing files at i-----:"<<s<<endl;
+		//cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+		if(numOfWritesDone_unmapped==0)
+		  {
+		    mode=ofstream::trunc;
+		  }
+		else
+		  {
+		    mode=ofstream::app;
+		  }
+		t_fileName=_unmap_fname;
+		WriteFasta(t_fileName, vec_mapNone,100, mode);
+		numOfWritesDone_unmapped++;
+		//#fileCounter_mpBoth<-fileCounter_mpBoth+1;
+		vec_mapNone.clear();
+	      }
+	    
+	    //cout<<"done map both"<<endl;
+	  }//end of each 1000 seqs read write
       
     }//end of for loop of sequence data vec
 
@@ -593,23 +618,33 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
       if(pt_vec_mapped[s].size()>0)
 	{
 	  //cout<<"\t------writing files at i-----:"<<s<<endl;
-	  //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
-	  if(s<_vecIsotype.size())
+	  //cout<<"numOfWritesDone:"<<numOfWritesDone_mapped[s]<<endl;
+	  if(numOfWritesDone_mapped[s]==0)
 	    {
-	      t_fileName=_map_fname+ _vecIsotype.at(s).GetName();
+	      mode=ofstream::trunc;
 	    }
 	  else
 	    {
-	      t_fileName=_map_fname+ "notFoundIsotype";
+	      mode=ofstream::app;
 	    }
 	  
+	  if(s<_vecIsotype.size())
+	    {
+	      t_fileName=_map_fname+ _vecIsotype.at(s).GetName()+".fasta";
+	    }
+	  else
+	    {
+	      t_fileName=_map_fname+ "notFoundIsotype.fasta";
+	    }
+	  //cout<<"writing fasta"<<endl;
 	  // t_fileName=_mapBoth_fname+ _vecForward.at(s).GetName();
-	  WriteFasta(t_fileName, pt_vec_mapped[s],100, ofstream::app);
+	  WriteFasta(t_fileName, pt_vec_mapped[s],100, mode);
+	  //cout<<"writing info"<<endl;
 	  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
 	  pt_vec_mapped[s].clear();
-	  WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_map_pos_end[s], ' ', 1,ofstream::app);
+	  WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_map_pos_end[s], ' ', 1,mode);
 	  pt_vec_map_pos_end[s].clear();//g_vec_len_mapBoth.at(s).clear();
-	  //cout<<"vecBoth cleared:"<<vec_mapBoth.size()<<endl;
+	  //cout<<"vecBoth cleared:"<<pt_vec_mapped[s].size()<<endl;
 	  //WriteTextFile(t_fileName+"_primerdimerStat.txt", pt_vec_isotype_primerDimer_pos_cross[s], ' ', 1,ofstream::app);
 	  //pt_vec_isotype_primerDimer_pos_cross[s].clear();//g_vec_len_mapBoth.at(s).clear();
 	  /*if(g_trim_flag)
@@ -623,11 +658,18 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
   //none
   if(vec_mapNone.size()>0)
     {
-      //cout<<"\t------writing files at i-----:"<<s<<endl;
+      //cout<<"\t------writing files at unmapped last-----:"<<endl;
       //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
-		  		  
+      if(numOfWritesDone_unmapped==0)
+	{
+	  mode=ofstream::trunc;
+	}
+      else
+	{
+	  mode=ofstream::app;
+	}
       t_fileName=_unmap_fname;
-      WriteFasta(t_fileName, vec_mapNone,100, ofstream::app);
+      WriteFasta(t_fileName, vec_mapNone,100, mode);
       //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
       vec_mapNone.clear();
     }
@@ -641,5 +683,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 
   delete [] pt_vec_map_pos_end;
   //delete [] pt_vec_mapForward_pos_end;
+
+  delete [] numOfWritesDone_mapped;
 }//end of function of map isotype
 

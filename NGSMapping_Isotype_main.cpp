@@ -21,12 +21,11 @@ static void parseArguments(int argc, char **argv, const char *opts);
 static int lookUpScoreMatrix(const string* _scoreMatrixNameArray,const int& len, const string& scoreMatrixName);
 
 //all file are in fasta format
-
 static string isotypeFile_name("HumanIGConstant_Lib.fas");//input ifle for forward constant 
 
 static string sequenceFile_name;//input file for sequence data
 
-static double MismatchRateThreshold=0.75; //not too many mismatch 
+static double matchRateThreshold=0.75; //not too many mismatch 
 static unsigned int MinimumOverlapLength=10;//not too short
 
 //how far we allow the alignment to be away from the ends. can not be too far, since they are supposed to be aligned on the ends.
@@ -63,7 +62,7 @@ int main(int argc, char* argv[])
   //xxxxxnot usedxxxxx t: ***No trimmed data !!!get trimmed data file (1) or no trimmed data (0), no trimmed data
   //k: scale factor
 
-  //n: mismatch ratio threshold 
+  //n: match ratio threshold 
   //p: offset in for the forward
   //q: offset for the reverse end
   //l: minimum overlap length
@@ -111,7 +110,7 @@ int main(int argc, char* argv[])
       
       <<"\toffset on forward end:"<<Offset<<"\n"
 
-      <<"\tmismatch rate threshold:"<<MismatchRateThreshold<<"\n"
+      <<"\tmatch rate threshold:"<<matchRateThreshold<<"\n"
       <<"\tminimum overlap length:"<<MinimumOverlapLength<<"\n";
   
   cout<<"  ****************\n";
@@ -141,7 +140,7 @@ int main(int argc, char* argv[])
 //now we have everything, we just need to do the job, I mean mapping, here.
   MappingIsotypes(vec_seq, vec_Isotype_seq, 
 		  mapEnd,sm, gapopen, gapextension,
-		  MismatchRateThreshold, MinimumOverlapLength, 
+		  matchRateThreshold, MinimumOverlapLength, 
 		  Offset, 
 		  outputFileMap_name, outputFileNone_name
 		  ); 
@@ -191,7 +190,7 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	  scale=atof(optarg);
 	  break;
 	case 'n':
-	  MismatchRateThreshold=atof(optarg);
+	  matchRateThreshold=atof(optarg);
 	  break;
 	case 'p':
 	  Offset=atoi(optarg);
@@ -270,7 +269,7 @@ static void printUsage(int argc, char* argv[])
       <<"\t  [-m score matrix] [-l MinimumOverlapLength]\n"
       <<"\t [-k scale] [-g gapopen panelty] [-e gap extension]\n"
     //<<"\t [-i]\n"
-      <<"\t [-n Mismatch rate threshold] [-p offset on forward end] \n"     
+      <<"\t [-n match rate threshold] [-p offset on forward end] \n"     
       <<"\t [-h] [-v]\n\n"
     ;
 
@@ -278,9 +277,11 @@ static void printUsage(int argc, char* argv[])
       <<"\n";
 
   cout<<"\t\t-f filename -- the isotype sequences fasta filename \n"
+      <<"\t\t\tif 3' is chosen, the isotype sequences will be reverse\n"
+      <<"\t\t\tcomplemented before mapping.\n"
       <<"\n";
 
-  cout<<"\t\t-r filename -- the reverse primer fasta filenames \n"
+  cout<<"\t\t-d # -- the mapping type, 5' (by default) or 3' mapping.  \n"
       <<"\n";
   
   cout<<"\t\t-m scorematrix -- the socre matrix name used for the alignment, \n"
@@ -304,9 +305,9 @@ static void printUsage(int argc, char* argv[])
       <<"\n";
   cout<<"\t\t-l minimum overlap length\n"
       <<"\n"; 
-  cout<<"\t\t-n mismatch rate threshold\n"
+  cout<<"\t\t-n match rate threshold\n"
       <<"\n"; 
-  cout<<"\t\t-p offset on the forward end\n"
+  cout<<"\t\t-p offset on the sequence ends\n"
       <<"\n"; 
   //cout<<"\t\t-q offset on the reverse end\n"
   //    <<"\n"; 
