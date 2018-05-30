@@ -260,28 +260,24 @@ static void printUsage(int argc, char* argv[])
   cout<<"argv[0], the program used to identify the isotypes of the sequences and also\n"
       <<"\tdemutiplex them. This will work mainly on the new design of IgSeq data, which\n"
       <<"\tare pair-end and have We try to follow the style of cutadapt. Basically, we will\n"
-      <<"\tonly ask for the isotype sequence and then map them to one side of ";
-    cout<<"Option string: \"hva:b:f:r:g:e:t:m:s:k:\" \n";
+      <<"\tonly ask for the isotype sequence and then map them to one side \n"
+      <<"\tof the sequences, which could be either 5' or 3'\n";
+  cout<<"\tOption string: \"hvf:d::g:e:m:s:k:p:n:l:\" \n";
   cout<<"Usage:\n";
   cout<<"\t"<<argv[0]<<" -s second sequence file " //[-a adaptor file] [-b barcode file]  \n"
-      <<"[-t reverse primer filename] [-f forward primer filename]\n"
-      <<"\t  [-m score matrix] [-t trim ] [-l MinimumOverlapLength]\n"
+      <<" [-f isotype sequence file name]"
+      <<" [-d mapping type]\n"
+      <<"\t  [-m score matrix] [-l MinimumOverlapLength]\n"
       <<"\t [-k scale] [-g gapopen panelty] [-e gap extension]\n"
     //<<"\t [-i]\n"
-      <<"\t [-n Mismatch rate threshold] [-p offset on forward end] [-q offset on reverse end]\n"     
+      <<"\t [-n Mismatch rate threshold] [-p offset on forward end] \n"     
       <<"\t [-h] [-v]\n\n"
     ;
 
   cout<<"\t\t-s filename -- the sequence fasta data filename \n"
       <<"\n";
 
-  //cout<<"\t\t-a filename -- the adaptor fasta filenames\n"
-  //    <<"\n";
-
-  //cout<<"\t\t-b filename -- the barcode fasta filenames \n"
-  //    <<"\n";
-
-  cout<<"\t\t-f filename -- the forward primer fasta filenames \n"
+  cout<<"\t\t-f filename -- the isotype sequences fasta filename \n"
       <<"\n";
 
   cout<<"\t\t-r filename -- the reverse primer fasta filenames \n"
@@ -312,8 +308,8 @@ static void printUsage(int argc, char* argv[])
       <<"\n"; 
   cout<<"\t\t-p offset on the forward end\n"
       <<"\n"; 
-  cout<<"\t\t-q offset on the reverse end\n"
-      <<"\n"; 
+  //cout<<"\t\t-q offset on the reverse end\n"
+  //    <<"\n"; 
   
   cout<<"\t\t-h -- help\n";
   cout<<"\n\t\tv0.1 this code is used to map the adaptor to the sequence\n"
@@ -321,7 +317,7 @@ static void printUsage(int argc, char* argv[])
      ;
 
   //cout<<"\n\t**************************"<<endl;
-  cout<<"\t\t\t*********by Feng @ BU 2013\n"; 
+  cout<<"\t\t\t*********by Feng @ BU 2018\n"; 
 
 
   exit(-1);
