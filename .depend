@@ -37,6 +37,9 @@ NGSMapping_Constant_main.o: NGSMapping_Constant_main.cpp string_ext.hpp \
  AlignmentString.hpp AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp FastaHandler.hpp SequenceHandlerConstant.hpp \
  SequenceHandlerCommon.hpp
+NGSMapping_Demux_main.o: NGSMapping_Demux_main.cpp string_ext.hpp \
+ score.hpp SequenceString.hpp FastaHandler.hpp SequenceHandlerIsotype.hpp \
+ SequenceHandlerCommon.hpp
 NGSMapping_Isotype_main.o: NGSMapping_Isotype_main.cpp string_ext.hpp \
  score.hpp SequenceString.hpp OverlapAlignment.hpp pairwiseAlignment.hpp \
  AlignmentString.hpp AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \

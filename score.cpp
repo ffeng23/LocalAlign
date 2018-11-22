@@ -328,3 +328,120 @@ const char NucDM1Alphabet[]={ 'A' ,  'T' ,  'G'  ,'C',   'S',   'W',   'R' ,  'Y
 //of course, another alternative is to define template and then do it.
 ScoreMatrix nuc44DM1(nuc44DM1Int,0.277316, NucDM1Alphabet,15);//again not sure where this scale come from by Matlab.
 
+/*-------------------------MatchMatrix----------------------------------------------*/
+
+//constructor
+MatchMatrix::MatchMatrix(const double*  matrix[ ] ,  const char* alphabet, const int& alphabet_array_size)
+  :
+  _matrix(matrix),
+  _alphabet(alphabet), c_alphabet_array_size(alphabet_array_size)
+{
+  //do nothing 
+}
+const int MatchMatrix::GetAlphabetLength()
+{
+  return this->c_alphabet_array_size;
+}
+const double** MatchMatrix::GetMatchMatrix() const
+{
+  return this->_matrix;
+}
+  
+MatchMatrix::~MatchMatrix()
+{
+  //here, we simply set the pointer to null, because we did not allocate the memory when we build it.
+  //the memory holding the data is declared outside and we simply point to it when we build the object.
+  this->_matrix=NULL;
+}
+const char* MatchMatrix::GetAlphabet() const
+{
+  return this->_alphabet;
+}
+//here, need to be care, we assume orders and asymmetry degeneracy
+double MatchMatrix::GetScore(const char& first, const char& second) const
+{
+  //look through
+  
+  int firstIndex=-1, secondIndex=-1;
+  char firstUp=toupper(first);
+  char secondUp=toupper(second);
+  for(int i=0;i<c_alphabet_array_size;i++)
+    {
+      
+      if(firstUp==_alphabet[i])
+	{
+	  firstIndex=i;
+	}
+      if(secondUp==_alphabet[i])
+	{
+	  secondIndex=i;
+	}
+      
+      if(firstIndex!=-1&&secondIndex!=-1)
+	{
+	  break;
+	}
+    }
+ 
+  if(firstIndex==-1)
+	{
+	  cout<<"********WARNING:can not find the letter \'"<<first<<"\', using \'"<<_alphabet[c_alphabet_array_size-1]<<"\' instead."<<endl; 
+	  firstIndex=c_alphabet_array_size-1;
+	}
+  if(secondIndex==-1)
+	{
+	  cout<<"********WARNING:can not find the letter \'"<<first<<"\', using \'"<<_alphabet[c_alphabet_array_size-1]<<"\' instead."<<endl; 
+	  secondIndex=c_alphabet_array_size-1;
+	}
+
+
+  //return _matrix[firstIndex][secondIndex]/_scale;
+  return _matrix[firstIndex][secondIndex];
+}
+
+
+//now define a match matrix mmf, match matrix feng
+//
+
+                           /*  A      T      G      C       S       W       R       Y       K      M      B     V     H      D    N*/
+static double mmf_1d[] ={ /*A*/   0,     1,     1,     1,      1,      0,      0,      1,      1,     0,     1,    0,    0,     0,   0,
+       		       /*T*/   1,     0,     1,     1,      1,      0,      0,      0,      0,     1,     0,    1,    0,     0,   0,
+		       /*G*/   1,     1,     0,     1,      0,      1,      0,      1,      0,     1,     0,    0,    1,     0,   0,
+		       /*C*/   1,     1,     1,     0,      0,      1,      1,      0,      1,     0,     0,    0,    0,     1,   0,
+		       /*S*/   1,     1,     0.5,   0.5,    0,      1,      0.5,    0.5,    0.5,   0.5,   0,    0,    0.5,   0.5, 0,
+		       /*W*/   0.5,   0.5,   1,     1,      1,      0,      0.5,    0.5,    0.5,   0.5,   0.5,  0.5,  0,     0,   0,
+		       /*R*/   0.5,   1,     0.5,   1,      0.5,    0.5,    0,      1,      0.5,   0.5,   0.5,  0,    0.5,   0,   0,
+		       /*Y*/   1,     0.5,   1,     0.5,    0.5,    0.5,    1,      0,      0.5,   0.5,   0,    0.5,  0,     0.5, 0,
+		       /*K*/   1,     0.5,   0.5,   1,      0.5,    0.5,    0.5,    0.5,    0,     1,     0,    0.5,  0.5,   0,   0,
+		       /*M*/   0.5,   1,     1,     0.5,    0.5,    0.5,    0.5,    0.5 ,   1,     0,     0.5,  0,    0,     0.5, 0,
+		       /*B*/   1,     0.666, 0.666, 0.666,  0.333,  0.666,  0.666,  0.333,  0.333, 0.666, 0,    0.333,0.333, 0.333,0,
+		       /*V*/   0.666, 1,     0.666, 0.666,  0.333,  0.666,  0.333,  0.666,  0.666, 0.333, 0.333,0,    0.333, 0.333,0,
+		       /*H*/   0.666, 0.666, 1,     0.666,  0.666,  0.333,  0.666,  0.333 , 0.666, 0.333, 0.333,0.333,0,     0.333,0,
+		       /*D*/   0.666, 0.666, 0.666, 1,      0.666,  0.333,  0.333,  0.666,  0.333, 0.666, 0.333,0.333,0.333, 0,    0,
+		       /*N*/   0.25,  0.25,  0.25,  0.25,   0.5,    0.5,    0.5,    0.5,    0.5,   0.5,   0.75, 0.75, 0.75,  0.75, 0
+		             };
+/* how to calculate the score for degnerated match, 
+ *eg. score('T','S'), since S -> G or C, so, this is mismatch anyway, 1
+ *  score('T', 'W'), since W->A or T, so this is a match,0. 
+ *  score ('S', 'W'), since s->G or C and w->A or T, so this is 
+ *     mismatch, score of 1.
+ *  score('S','R'), since s->G or C and R->A or G, when s is G, we have
+ *     score('G', 'R')=0 (match); when s is C, score('C', 'R')=1, If we
+ *     assume it is equal likely for S to be G and C, we have 
+ *     score=0*0.5+0.5*(1)=0.5, we have 0.5. so all between 0 and 1.
+ *in the end, we add all scores to get a match score of the sequence.
+ *that is basically how many mismatches for the matching.  
+ */
+static const double* mmf_score[] ={mmf_1d,mmf_1d+15,mmf_1d+30,mmf_1d+45,mmf_1d+60,mmf_1d+75,
+			 mmf_1d+90,mmf_1d+105, mmf_1d+120, mmf_1d+135,mmf_1d+150, 
+			 mmf_1d+165, mmf_1d+15*12,mmf_1d+15*13, mmf_1d+15*14 
+                };
+const char mmfAlphabet[]={ 'A' ,  'T' ,  'G'  ,'C',   'S',   'W',   'R' ,  'Y',   'K',   'M',   'B' ,  'V' ,  'H' , 'D',   'N'};
+//IUPAC code: S -> G or C;   W -> A or T; R -> A or G; Y -> C or T; K -> G or T;
+//   M -> A or C ; B -> C, G or T; V -> A or C or G; H -> A, C or T; D->A, G or T;
+//N-> any base
+//the reason we have to do it this way is because we can not do it simply by passing 
+//a two D array to the function. it is not supported. you have to know the size of
+//the dimension size except the first one.
+//of course, another alternative is to define template and then do it.
+MatchMatrix mmf(mmf_score, mmfAlphabet,15);//again not sure where this scale come from by Matlab.

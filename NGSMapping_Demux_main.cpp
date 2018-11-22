@@ -10,7 +10,7 @@
 
 #include "score.hpp"
 #include "SequenceString.hpp"
-#include "OverlapAlignment.hpp"
+//#include "OverlapAlignment.hpp"
 #include "FastaHandler.hpp"
 #include "SequenceHandlerIsotype.hpp"
 #include "SequenceHandlerCommon.hpp"
@@ -18,59 +18,60 @@ using namespace std;
 
 static void printUsage(int argc, char* argv[]);
 static void parseArguments(int argc, char **argv, const char *opts);
-static int lookUpScoreMatrix(const string* _scoreMatrixNameArray,const int& len, const string& scoreMatrixName);
+//static int lookUpScoreMatrix(const string* _scoreMatrixNameArray,const int& len, const string& scoreMatrixName);
 
 //all file are in fasta format
-static string isotypeFile_name("HumanIGConstant_Lib.fas");//input ifle for forward constant 
+static string barcodeFile_name("HumanIGConstant_Lib.fas");//default input file for single index, R1
 
 static string sequenceFile_name;//input file for sequence data
 
-static double matchRateThreshold=0.75; //not too many mismatch 
-static unsigned int MinimumOverlapLength=10;//not too short
+static unsigned  misMatchNum=1; //not too many mismatch 
+//static unsigned int MinimumOverlapLength=10;//not too short
 
-//how far we allow the alignment to be away from the ends. can not be too far, since they are supposed to be aligned on the ends.
-unsigned int Offset=15;//###10 might too big????
-
-static string scoreMatrixName="nuc44DM1"; //name as an input for specifing the name of the score matrix. for example nuc44
-
-static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1", "tsm2", "nuc44HP", "nuc44DM1"};
-
-static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1, &tsm2, &nuc44HP, &nuc44DM1};
-
-static double scale=1; //this is the one on top of matrix, the programe will run score and use the 
-//matrix specified scale first and then apply the scale set by this one.
-
-static double gapopen=-15;
-static double gapextension=-10;
-static bool gapextensionFlag=false;
 static mapType mapEnd=FivePrime;
-static bool demux=false;
-//static int trim=0;
-//static bool isotype_flag=false;
+
+static bool demux=false;//write stats only, no demux
+
+//note for match  matrix
+//the match matrix mmf has been declare and initialized in 
+//score.hpp and score.cpp, respectively. we can use it 
+//directly
+//   MatchMatrix mmf; 
+
+
 int main(int argc, char* argv[])
 {
   //for parsing commandline arguement
-  const char *opts = "hvf:g:e:m:s:k:n:p:l:d:x";
-  //a: the input file name adaptor  <----not used in this code
-  //b: the input file name barcode  <----not used in this code
-  //f: the input file name forward primer
-  //r: the input file name reverse primer
-  //d: the mapping type, either FivePrime or ThreePrime
-  //g: gap open
-  //e: gap extension
-  //m: score matrix
-  //s: sequece data file
-  //xxxxxnot usedxxxxx t: ***No trimmed data !!!get trimmed data file (1) or no trimmed data (0), no trimmed data
-  //k: scale factor
+  const char *opts = "hva:b:f:e:ptdr:s:n:";
+  //a: the input file barcode name (r2 for dual index input), assuming has identical name and order
+  //b: the input barcode file name (r1 or for single index input
+  //       a and b list the expected barcode to demux the input
+  //f: the input file name read 1 index
+  //e: the input file name read 2 index, 
+  //       f and r contains the read index from sequencing to be demux'ed
+  //p: paired end read, boolean 
+  //t: read indexs from the names of each sequence and assuming the illumina style
+  //         xxxxxx:xxxxx:xxxx:actgkd+acdfad, separated by ':' and the last field 
+  //         contains the barcode (pair)
+  //d: demux, meaning to write out the sequences or simple output the stats
+  //r: reverse complement the read2 barcode or not to do demux
 
-  //n: match ratio threshold 
-  //p: offset in for the forward
-  //q: offset for the reverse end
-  //l: minimum overlap length
-  //xxxxnot used xxxxxx i: **********set to true if want to write up output by isotypes or false by not specify it
-  //   always by isotype
-  //d: 5 prime or 3 prime mapping
+  //s: sequece data file, contains the real sequence data, having the same order and name.
 
+  //n: mismatch, allow degenerate barcode, meaning the barcode (expected) could be degenerated, but not the other way around
+  // barcode (expected)-->row, index (sequence read) ---->column
+  //      A C G T 
+  //note: 1)when do comparison, always use barcode(expected) to align index (data), in terms 
+  //          of alignment, barcode is sujbect, index is pattern
+  //             index (pattern)
+  //             |||||
+  //             barcode (subject)
+  //      2)allow degeneracy on barcode, but less so on index
+  //      3)it is possible to have index longer than barcode, but not vice versa
+  //      4)barcode and index must start on 5' position 1 (position 0 in c)
+  //      5)we don't do alignment in comparison, but string comparison, see comparison matrix
+  //                  match.matrix.feng
+  // v and h: version and help
   parseArguments(argc, argv, opts);
     
   if(sequenceFile_name.size()==0)
@@ -93,20 +94,7 @@ int main(int argc, char* argv[])
       <<"\tmapEnd:"<<mapEnd<<"\n"
       <<"\n";
     
-  //look up the score matix
-  int scoreMatrixIndex=lookUpScoreMatrix(supportedScoreMatrixNameArr, sizeof(supportedScoreMatrixNameArr)/sizeof(supportedScoreMatrixNameArr[0]),scoreMatrixName);
-  if(scoreMatrixIndex==-1)
-    {
-      cout<<"\tscore matrix specified by input was not found. Using the default scorematrix.\n";
-      scoreMatrixName="nuc44";
-      
-      scoreMatrixIndex=lookUpScoreMatrix(supportedScoreMatrixNameArr, sizeof(supportedScoreMatrixNameArr)/sizeof(supportedScoreMatrixNameArr[0]), scoreMatrixName);
-    }
-  cout<<"\tscore matrix:"<<scoreMatrixName<<"\n"
-  
-      <<"\tscale matrix scale:"<<scale<<"\n"
-  
-      <<"\tgap open penalty:"<<gapopen<<"\n"
+  cout<<"\tgap open penalty:"<<gapopen<<"\n"
       <<"\tgap extension penalty:"<<gapextension<<"\n"
       
       <<"\toffset on forward end:"<<Offset<<"\n"
@@ -116,9 +104,9 @@ int main(int argc, char* argv[])
       <<"\tdemux output:"<<demux<<"\n";
   cout<<"  ****************\n";
 
-  ScoreMatrix* sm= ScoreMatrixArr[scoreMatrixIndex];
+  MatchMatrix* mm= &mmf;//ScoreMatrixArr[scoreMatrixIndex];
+      //mmf has been done declaration and initialization in score.hpp/cpp
 
-  //cout<<""<<&sm<<endl;
 
   //fasta handler:reading fasta
   vector<SequenceString> vec_seq;
@@ -173,7 +161,7 @@ int main(int argc, char* argv[])
   //ofs.close();
 
   //cout<<"Total "<<gene_info.size()<<" genes are processed"<<endl;
-  cout<<"Thanks for using our program and have a nice day!!"<<endl;
+  cout<<"Thanks for using our program and have fun!!"<<endl;
   return 0;
 }
 
@@ -286,10 +274,10 @@ static void printUsage(int argc, char* argv[])
       <<"\tare pair-end and have We try to follow the style of cutadapt. Basically, we will\n"
       <<"\tonly ask for the isotype sequence and then map them to one side \n"
       <<"\tof the sequences, which could be either 5' or 3'\n";
-  cout<<"\tOption string: \"hvf:d::g:e:m:s:k:p:n:l:\" \n";
+  cout<<"\tOption string: \"hva:b:f:e:ptdr:s:n:\" \n";
   cout<<"Usage:\n";
-  cout<<"\t"<<argv[0]<<" -s second sequence file " //[-a adaptor file] [-b barcode file]  \n"
-      <<" [-f isotype sequence file name]"
+  cout<<"\t"<<argv[0]<<" [-s sequence file] -a adaptor file [-b barcode file]  \n"
+      <<" [-f  sequence file name] [-e "
       <<" [-d mapping type]\n"
       <<"\t  [-m score matrix] [-l MinimumOverlapLength]\n"
       <<"\t [-k scale] [-g gapopen panelty] [-e gap extension]\n"
@@ -367,21 +355,6 @@ static void printUsage(int argc, char* argv[])
   cout<<"\t\t\t*********updated by Feng @ BU 2018\n"; 
 
 
-  exit(-1);
-}
-//return the index that could be used to pick up the ScoreMatrix object from ScoreMatrixArr
-//-1 for can not find
-static int lookUpScoreMatrix(const string* _scoreMatrixNameArray,const int& len, const string& scoreMatrixName)
-{
-  //int index=-1;
-  //int size=sizeof(_scoreMatrixNameArray)/sizeof(_scoreMatrixNameArray[0]);
-  for(int i=0;i<len;i++)
-    {
-      if(scoreMatrixName.compare(_scoreMatrixNameArray[i])==0)
-	{
-	  return i;
-	}
-    }
-  return -1;
+  //exit(-1);
 }
 

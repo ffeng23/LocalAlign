@@ -42,7 +42,8 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		     const double& _matchRateThreshold, const unsigned _minimumOverlapLength,
 		     const unsigned int& _offset, //const unsigned int& _offsetReverse, 
 		     const string& _map_fname,
-		     const string& _unmap_fname//,
+		     const string& _unmap_fname,
+		     const bool& _demux
 		     )
 {
   unsigned int numOfSeqsUnit=20000;
@@ -60,13 +61,27 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
   //they are the alleles for different isotypes (IgG/M), different subtypes (IgG1/2/3/4) and alleles IgG1*01/*02/*03, etc
   //
   vector<SequenceString>* pt_vec_mapped=new vector<SequenceString>[_vecIsotype.size()+1]; //one more for holding unknown isotype
+  vector<SequenceString>* pt_vec_demux=new vector<SequenceString>[_vecIsotype.size()+1];//holding only the sequences by isotype, 
+                                                                                       //but no mapping as output
+
   //vector<SequenceString>* pt_vec_mapForward=new vector<SequenceString>[_vecForward.size()+1];//one more for holding unkown isotype
   //vector<SequenceString> vec_mapReverse;
   vector<SequenceString> vec_mapNone;
   
-  //holding the position where within the constant region the break is.
+  //the stats are arranged by isotypes(matched)
+  //holding the position where within the subject (isotype) the break is.
   vector<unsigned int>* pt_vec_map_pos_end=new vector<unsigned int>[_vecIsotype.size()];
-  //vector<unsigned int>* pt_vec_mapForward_pos_end=new vector<unsigned int>[_vecIsotype.size()];
+  vector<unsigned int>* pt_vec_map_pos_start=new vector<unsigned int>[_vecIsotype.size()];
+
+  //holding the position where within the pattern (seq) the break is.
+  vector<unsigned int>* pt_vec_map_pos_end_seq=new vector<unsigned int>[_vecIsotype.size()];
+  vector<unsigned int>* pt_vec_map_pos_start_seq=new vector<unsigned int>[_vecIsotype.size()];
+
+  //holding the stats of alignment overlap and match rate.
+  vector<double>* pt_vec_map_match_rate=new vector<double>[_vecIsotype.size()];
+  vector<unsigned int>* pt_vec_map_overlap=new vector<unsigned int>[_vecIsotype.size()];
+
+  vector<unsigned int>* pt_vec_map_seq_len=new vector<unsigned int>[_vecIsotype.size()];
 
   //vector<unsigned int[2]> vec_mapCrossOver_pos_end;
   //vector<unsigned int>vec_mapBreakOutsideConstant_pos_end;
@@ -221,17 +236,48 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 
       //here, to keep track of positions, because we are running local alignment, so we can simply keep track the end position of alignment.
       //we also have to check whether the break is in the constant
-	 if(found5PrimeFlag)
-	 {	   
-	   pt_vec_map_pos_end[foundIndex].push_back(best5PrimeAlign.GetSubjectIndexEnd());
-	 }
+      if(found5PrimeFlag)
+	{	   
+	  pt_vec_map_pos_end[foundIndex].push_back(best5PrimeAlign.GetSubjectIndexEnd());
+	  pt_vec_map_pos_start[foundIndex].push_back(best5PrimeAlign.GetSubjectIndexStart());
+
+	  pt_vec_map_pos_end_seq[foundIndex].push_back(best5PrimeAlign.GetPatternIndexEnd());
+	  pt_vec_map_pos_start_seq[foundIndex].push_back(best5PrimeAlign.GetPatternIndexStart());
+	  
+	  strPattern=best5PrimeAlign.GetPattern(true);
+	  strSubject=best5PrimeAlign.GetSubject(true);
+	  match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
+	  
+	  pt_vec_map_match_rate[foundIndex].push_back(match_rate);
+	  pt_vec_map_overlap[foundIndex].push_back(strPattern.length());
+	   
+	  pt_vec_map_seq_len[foundIndex].push_back(_vecSeq.at(i).GetLength());
+	  if(_demux)
+	    pt_vec_demux[foundIndex].push_back(_vecSeq.at(i));
+	}
 	 
-	 if(found3PrimeFlag)
-	   { //this part, we need to test, to see whether this is correct
-	     //the rationale is that we revcomp the alignment, then the break part for this revComp is that we get the beginning of the alignment and then used the total length (-1) to get the correct break position (end pos)
-	   pt_vec_map_pos_end[foundIndex].push_back(_vecIsotype.at(foundIndex).GetLength()-1 - best3PrimeAlign.GetSubjectIndexStart());
-	 }
-	 
+      if(found3PrimeFlag)
+	{ //this part, we need to test, to see whether this is correct
+	  //the rationale is that we revcomp the alignment, then the break part for this revComp is that we get the beginning of the alignment and then used the total length (-1) to get the correct break position (end pos)
+	  pt_vec_map_pos_end[foundIndex].push_back(_vecIsotype.at(foundIndex).GetLength()-1 - best3PrimeAlign.GetSubjectIndexStart());
+	  pt_vec_map_pos_start[foundIndex].push_back(_vecIsotype.at(foundIndex).GetLength()-1 -best3PrimeAlign.GetSubjectIndexEnd());
+
+	  pt_vec_map_pos_end_seq[foundIndex].push_back(best3PrimeAlign.GetPatternIndexEnd());
+	  pt_vec_map_pos_start_seq[foundIndex].push_back(best3PrimeAlign.GetPatternIndexStart());
+	  
+	  strPattern=best3PrimeAlign.GetPattern(true);
+	  strSubject=best3PrimeAlign.GetSubject(true);
+	  match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
+	  
+	  pt_vec_map_match_rate[foundIndex].push_back(match_rate);
+	  pt_vec_map_overlap[foundIndex].push_back(strPattern.length());
+
+	  pt_vec_map_seq_len[foundIndex].push_back(_vecSeq.at(i).GetLength());
+	  if(_demux)
+	    pt_vec_demux[foundIndex].push_back(_vecSeq.at(i));
+	}
+      
+
       //now we are done with stats recording.
       
       //***************************output*****************
@@ -546,6 +592,18 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	    string t_fileName;
 	    //cout<<"i round:"<<i<<endl;
 	    //mapped
+	    vector<string> header;
+	    header.push_back("lengthAlign");
+	    header.push_back("matchRate");
+	    header.push_back("seq_start");
+	    header.push_back("seq_end");
+	    header.push_back("isotype_start");
+	    header.push_back("isotype_end");
+	    header.push_back("Seq_length");
+
+	    bool writeHeader=true;
+
+	    vector<vector<double> > vec_stats(7);
 	    for(unsigned int s=0;s<=_vecIsotype.size();s++)
 	      {
 		if(pt_vec_mapped[s].size()>0)
@@ -553,28 +611,74 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		    if(numOfWritesDone_mapped[s]==0)
 		      {
 			mode=ofstream::trunc;
+			writeHeader=true;
 		      }
 		    else
 		      {
 			mode=ofstream::app;
+			writeHeader=false;
 		      }
 		    //cout<<"\t------writing files at i-----:"<<s<<endl;
 		    //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
 		    if(s<_vecIsotype.size())
 		      {
 			t_fileName=_map_fname+ _vecIsotype.at(s).GetName()+".fasta";
+
+			vector<double> temp(pt_vec_map_overlap[s].begin(),pt_vec_map_overlap[s].end());
+			vec_stats[0]= temp;
+			temp.clear();
+
+			vec_stats[1]=pt_vec_map_match_rate[s];
+
+			vector<double> temp1(pt_vec_map_pos_start_seq[s].begin(),pt_vec_map_pos_start_seq[s].end());
+			vec_stats[2]=temp1;
+			temp1.clear();
+
+			vector<double> temp2(pt_vec_map_pos_end_seq[s].begin(),pt_vec_map_pos_end_seq[s].end());
+			vec_stats[3]=temp2;
+			temp2.clear();
+
+			vector<double> temp3(pt_vec_map_pos_start[s].begin(),pt_vec_map_pos_start[s].end());
+			vec_stats[4]=temp3;
+			temp3.clear();
+
+			vector<double> temp4(pt_vec_map_pos_end[s].begin(), pt_vec_map_pos_end[s].end());
+			vec_stats[5]=temp4;
+			temp4.clear();
+
+			vector<double> temp5(pt_vec_map_seq_len[s].begin(), pt_vec_map_seq_len[s].end());
+			vec_stats[6]=temp5;
+			temp5.clear();
+			
+			WriteTextTableFile(t_fileName+"_ConstantStat.txt", vec_stats, ' ', writeHeader,mode, header);
+			
+			pt_vec_map_overlap[s].clear();
+			pt_vec_map_match_rate[s].clear();
+			pt_vec_map_pos_start_seq[s].clear();
+			pt_vec_map_pos_end_seq[s].clear();
+			pt_vec_map_pos_start[s].clear();
+			pt_vec_map_pos_end[s].clear();
+			pt_vec_map_seq_len[s].clear();
 		      }
 		    else
 		      {
 			t_fileName=_map_fname+ "notFoundIsotype.fasta";
 		      }
 		    WriteFasta(t_fileName, pt_vec_mapped[s],100, mode);
+		    if(_demux)
+		      {
+			t_fileName=_map_fname+ _vecIsotype.at(s).GetName()+"_demux.fasta";
+			WriteFasta(t_fileName, pt_vec_demux[s],100, mode);
+			pt_vec_demux[s].clear();
+		      }
 		    //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
 		    pt_vec_mapped[s].clear();
 		    //cout<<"vecBoth cleared:"<<vec_mapBoth.size()<<endl;
-		    WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_map_pos_end[s], ' ', 1,mode);
+		    //WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_map_pos_end[s], ' ', 1,mode);
+		    
 		    numOfWritesDone_mapped[s]++;
-		    pt_vec_map_pos_end[s].clear();//g_vec_len_mapBoth.at(s).clear();
+		    //pt_vec_map_pos_end[s].clear();//g_vec_len_mapBoth.at(s).clear();
+		    
 		    /*if(g_trim_flag)
 		      {
 		      WriteFasta(t_fileName+"_trim.fas", g_vec_mapBoth_trim.at(s), 100,ofstream::app);
@@ -613,6 +717,18 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
     
   string t_fileName;
   //mapBoth
+  vector<string> header;
+  header.push_back("lengthAlign");
+  header.push_back("matchRate");
+  header.push_back("seq_start");
+  header.push_back("seq_end");
+  header.push_back("isotype_start");
+  header.push_back("isotype_end");
+  header.push_back("Seq_length");
+
+  bool writeHeader=true;
+  
+  vector<vector<double> > vec_stats(7);
   for(unsigned int s=0;s<_vecIsotype.size();s++)
     {
       if(pt_vec_mapped[s].size()>0)
@@ -622,15 +738,51 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	  if(numOfWritesDone_mapped[s]==0)
 	    {
 	      mode=ofstream::trunc;
+	      writeHeader=true;
 	    }
 	  else
 	    {
 	      mode=ofstream::app;
+	      writeHeader=false;
 	    }
 	  
 	  if(s<_vecIsotype.size())
 	    {
 	      t_fileName=_map_fname+ _vecIsotype.at(s).GetName()+".fasta";
+	      vector<double> temp(pt_vec_map_overlap[s].begin(),pt_vec_map_overlap[s].end());
+	      vec_stats[0]= temp;
+	      temp.clear();
+
+	      vec_stats[1]=pt_vec_map_match_rate[s];
+
+	      vector<double> temp1(pt_vec_map_pos_start_seq[s].begin(),pt_vec_map_pos_start_seq[s].end());
+	      vec_stats[2]=temp1;
+	      temp1.clear();
+
+	      vector<double> temp2(pt_vec_map_pos_end_seq[s].begin(),pt_vec_map_pos_end_seq[s].end());
+	      vec_stats[3]=temp2;
+	      temp2.clear();
+
+	      vector<double> temp3(pt_vec_map_pos_start[s].begin(),pt_vec_map_pos_start[s].end());
+	      vec_stats[4]=temp3;
+	      temp3.clear();
+
+	      vector<double> temp4(pt_vec_map_pos_end[s].begin(), pt_vec_map_pos_end[s].end());
+	      vec_stats[5]=temp4;
+	      temp4.clear();
+
+	      vector<double> temp5(pt_vec_map_seq_len[s].begin(), pt_vec_map_seq_len[s].end());
+	      vec_stats[6]=temp5;
+	      temp5.clear();
+	      WriteTextTableFile(t_fileName+"_ConstantStat.txt", vec_stats, ' ', writeHeader,mode, header);
+			
+	      pt_vec_map_overlap[s].clear();
+	      pt_vec_map_match_rate[s].clear();
+	      pt_vec_map_pos_start_seq[s].clear();
+	      pt_vec_map_pos_end_seq[s].clear();
+	      pt_vec_map_pos_start[s].clear();
+	      pt_vec_map_pos_end[s].clear();
+	      pt_vec_map_seq_len[s].clear();
 	    }
 	  else
 	    {
@@ -639,11 +791,18 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	  //cout<<"writing fasta"<<endl;
 	  // t_fileName=_mapBoth_fname+ _vecForward.at(s).GetName();
 	  WriteFasta(t_fileName, pt_vec_mapped[s],100, mode);
+	  if(_demux)
+	    {
+	      t_fileName=_map_fname+ _vecIsotype.at(s).GetName()+"_demux.fasta";
+	      WriteFasta(t_fileName, pt_vec_demux[s],100, mode);
+	      pt_vec_demux[s].clear();
+	    }
 	  //cout<<"writing info"<<endl;
 	  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
 	  pt_vec_mapped[s].clear();
-	  WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_map_pos_end[s], ' ', 1,mode);
-	  pt_vec_map_pos_end[s].clear();//g_vec_len_mapBoth.at(s).clear();
+	  pt_vec_demux[s].clear();
+	  //WriteTextFile(t_fileName+"_ConstantStat.txt", pt_vec_map_pos_end[s], ' ', 1,mode);
+	  //pt_vec_map_pos_end[s].clear();//g_vec_len_mapBoth.at(s).clear();
 	  //cout<<"vecBoth cleared:"<<pt_vec_mapped[s].size()<<endl;
 	  //WriteTextFile(t_fileName+"_primerdimerStat.txt", pt_vec_isotype_primerDimer_pos_cross[s], ' ', 1,ofstream::app);
 	  //pt_vec_isotype_primerDimer_pos_cross[s].clear();//g_vec_len_mapBoth.at(s).clear();
@@ -682,6 +841,12 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
   //delete [] pt_vec_mapForward;
 
   delete [] pt_vec_map_pos_end;
+
+  delete [] pt_vec_map_pos_start;
+  delete [] pt_vec_map_pos_end_seq;
+  delete [] pt_vec_map_pos_start_seq;
+  delete [] pt_vec_map_match_rate;
+  delete [] pt_vec_map_overlap;
   //delete [] pt_vec_mapForward_pos_end;
 
   delete [] numOfWritesDone_mapped;

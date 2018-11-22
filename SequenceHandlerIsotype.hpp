@@ -17,7 +17,8 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		     const double& _mismatchRateThreshold, const unsigned _minimumOverlapLength,
 		     const unsigned int& _offset, 
 		     const string& _map_fname,
-		       const string& _unmap_fname//,
+		       const string& _unmap_fname,
+		     const bool& _demux=false
 		     //const string& _mapReverse_fname, const string& _mapNone_fname,
 		     //const string& _mapCrossOver_fname, const string& _mapBreakOutsideCon_fname
 		      ); 
