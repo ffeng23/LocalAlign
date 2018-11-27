@@ -12,8 +12,10 @@
 #include "SequenceString.hpp"
 //#include "OverlapAlignment.hpp"
 #include "FastaHandler.hpp"
-#include "SequenceHandlerIsotype.hpp"
+//#include "SequenceHandlerIsotype.hpp"
 #include "SequenceHandlerCommon.hpp"
+#include "SequenceHandlerBarcode.hpp"
+
 using namespace std;
 
 static void printUsage(int argc, char* argv[]);
@@ -21,16 +23,25 @@ static void parseArguments(int argc, char **argv, const char *opts);
 //static int lookUpScoreMatrix(const string* _scoreMatrixNameArray,const int& len, const string& scoreMatrixName);
 
 //all file are in fasta format
-static string barcodeFile_name("HumanIGConstant_Lib.fas");//default input file for single index, R1
+static string barFileR1_name;//default input file for single index, R1
+static string barFileR2_name;
+static string indexFileR1_name;
+static string indexFileR2_name;
+//static string outFile_name;//for stats;
 
-static string sequenceFile_name;//input file for sequence data
+static string sequenceFileR1_name;//input file for sequence data
+static string sequenceFileR2_name;//read 2
 
 static unsigned  misMatchNum=1; //not too many mismatch 
+
 //static unsigned int MinimumOverlapLength=10;//not too short
-
-static mapType mapEnd=FivePrime;
-
+//enum mapType {FivePrime, ThreePrime}; defined in SequenceHandlerBarcode.hpp
+static mapType mapEnd=FivePrime; //only work for R2, to reverse complement the sequence index 2,
+                                 //we never reverse complement the barcode. 
+static bool pairEnd=false;
+static bool indexFromSeq=false;
 static bool demux=false;//write stats only, no demux
+static bool dualIndex=true;
 
 //note for match  matrix
 //the match matrix mmf has been declare and initialized in 
@@ -42,7 +53,7 @@ static bool demux=false;//write stats only, no demux
 int main(int argc, char* argv[])
 {
   //for parsing commandline arguement
-  const char *opts = "hva:b:f:e:ptdr:s:n:";
+  const char *opts = "hva:b:f:e:ptdxrs:q:m:";
   //a: the input file barcode name (r2 for dual index input), assuming has identical name and order
   //b: the input barcode file name (r1 or for single index input
   //       a and b list the expected barcode to demux the input
@@ -53,12 +64,13 @@ int main(int argc, char* argv[])
   //t: read indexs from the names of each sequence and assuming the illumina style
   //         xxxxxx:xxxxx:xxxx:actgkd+acdfad, separated by ':' and the last field 
   //         contains the barcode (pair)
-  //d: demux, meaning to write out the sequences or simple output the stats
+  //x: demux, meaning to write out the sequences or simple output the stats
+  //d: dual index
   //r: reverse complement the read2 barcode or not to do demux
 
-  //s: sequece data file, contains the real sequence data, having the same order and name.
-
-  //n: mismatch, allow degenerate barcode, meaning the barcode (expected) could be degenerated, but not the other way around
+  //s: sequence data file, contains the real sequence data, having the same order and name.
+  //q: sequence data file, optional, could be specified or not. if dumux, then needed to check for this.
+  //m: mismatch, allow degenerate barcode, meaning the barcode (expected) could be degenerated, but not the other way around
   // barcode (expected)-->row, index (sequence read) ---->column
   //      A C G T 
   //note: 1)when do comparison, always use barcode(expected) to align index (data), in terms 
@@ -72,68 +84,181 @@ int main(int argc, char* argv[])
   //      5)we don't do alignment in comparison, but string comparison, see comparison matrix
   //                  match.matrix.feng
   // v and h: version and help
+
+  cout<<"Start parsing the input commands......."<<endl;
   parseArguments(argc, argv, opts);
-    
-  if(sequenceFile_name.size()==0)
+  
+  cout<<"***Input parameters Summary:\n";
+  
+  if(barFileR1_name.size()==0)
     {
-      cout<<"please specify the sequece data input fasta file name.......\n";
+      cout<<"please specify the barcode  data input fasta file name.......\n";
       //printUsage(argc, argv);
-      cout<<"type \"./ngsmapping -h \" for usage help\n";
+      cout<<"type "<<argv[0]<<" -h \" for usage help\n";
       exit(-1);
     }
+  cout<<"barcode file (Read 1):\""<<barFileR1_name<<"\".\n";
+  //dual index
+  if(dualIndex)
+    {
+      cout<<"Index type: dual index"<<endl;
+      if(barFileR2_name.size()==0)
+	{
+	  cout<<"please specify the barcode (R2) data input fasta file name.......\n";
+	  //printUsage(argc, argv);
+	  cout<<"type "<<argv[0]<<" -h \" for usage help\n";
+	  exit(-1);
+	}
+      cout<<"barcode file (Read 2):\""<<barFileR2_name<<"\".\n";
+    }
+  else
+    {
+      cout<<"Read type: single index"<<endl;
+    }
+
+  //pair end read 
+  if(demux||indexFromSeq)
+    {//so we have to have sequence file
+      if(sequenceFileR1_name.size()==0)
+	{
+	  cout<<"please specify the sequence data input fasta file name.......\n";
+	  //printUsage(argc, argv);
+	  cout<<"type "<<argv[0]<<" -h \" for usage help\n";
+	  exit(-1);
+	}
+      cout<<"Sequence data file:"<<sequenceFileR1_name<<endl;
+      //pairend yes or no
+      if(pairEnd)
+	{
+	  cout<<"Pair End read: TRUE\n"<<endl;
+	  if(sequenceFileR2_name.size()!=0)
+	    {
+	      cout<<"Sequence data R2 file:"<<sequenceFileR2_name<<endl;
+	    }
+	}
+      else
+	{
+	  cout<<"Pair End read: FALSE\n"<<endl;
+	  if(sequenceFileR2_name.size()!=0)
+	    {
+	      cout<<"Sequence data R2 file:"<<sequenceFileR2_name<<endl;
+	      cout<<"\tspecifed, but will be ignore"<<endl;
+	      sequenceFileR2_name="";
+	    }
+	}
+    }
   
-  //*********get output files
-  string outputFileMap_name=(sequenceFile_name+".mapped.fasta"); //the output file for mapped both files
-  string outputFileNone_name=(sequenceFile_name+".mapNone.fasta");//map none
-
-  cout<<"***Input parameters Summary:\n";
-  cout<<"\tIsotype file name:\""<<isotypeFile_name<<"\".\n";
-  cout<<"\tsequence data file name:\""<<sequenceFile_name<<"\".\n";
-  cout<<"\tThe output file name : \""<<outputFileMap_name<<"\",\""
-      <<outputFileNone_name<<"\";\n"
-      <<"\tmapEnd:"<<mapEnd<<"\n"
-      <<"\n";
+  cout<<"Demux:"<< demux<<endl;
+  cout<<"index from Sequence:"<<indexFromSeq<<endl;
+  
+  if(!indexFromSeq)
+    {
+      if(indexFileR1_name.size()==0)
+	{
+	  cout<<"please specify the index data (R1) input fasta file name.......\n";
+	  //printUsage(argc, argv);
+	  cout<<"type "<<argv[0]<<" -h \" for usage help\n";
+	  exit(-1);
+	}
+      cout<<"index read file (Read 1):\""<<indexFileR1_name<<"\".\n";
+      if(dualIndex)
+	{
+	  if(indexFileR2_name.size()==0)
+	    {
+	      cout<<"please specify the index data (R2) input fasta file name.......\n";
+	      //printUsage(argc, argv);
+	      cout<<"type "<<argv[0]<<" -h \" for usage help\n";
+	      exit(-1);
+	    }
+	  cout<<"index read file (Read 2):\""<<indexFileR2_name<<"\".\n";
+	}
+    }
+  cout<<"Map type:"<<mapEnd<<endl;
+  cout<<"# mismatch:"<<misMatchNum<<endl;
+  
+  //*********get output files names
+  string outFile_name;//=(sequenceFile_name+".mapped.fasta"); //the output file for mapped both files
+  //string outStat_name;//=(sequenceFile_name+".mapNone.fasta");//map none
     
-  cout<<"\tgap open penalty:"<<gapopen<<"\n"
-      <<"\tgap extension penalty:"<<gapextension<<"\n"
-      
-      <<"\toffset on forward end:"<<Offset<<"\n"
+  if(indexFromSeq)
+    {
+      outFile_name=sequenceFileR1_name;
+    }
+  else  //from index file;
+    {
+      outFile_name=indexFileR1_name;
+    }
+  //get rid of the file suffix
+  size_t pt=outFile_name.find_last_of('.');
+  if(pt!=string::npos)
+    {
+      outFile_name=outFile_name.substr(0, pt);
+    }
 
-      <<"\tmatch rate threshold:"<<matchRateThreshold<<"\n"
-      <<"\tminimum overlap length:"<<MinimumOverlapLength<<"\n"
-      <<"\tdemux output:"<<demux<<"\n";
-  cout<<"  ****************\n";
-
+  cout<<"\tThe output file name : \""<<outFile_name<<"\""
+    //<<outputFi<<"\";\n"
+    //<<"\tmapEnd:"<<mapEnd<<"\n"
+      <<"\n";
+  
   MatchMatrix* mm= &mmf;//ScoreMatrixArr[scoreMatrixIndex];
       //mmf has been done declaration and initialization in score.hpp/cpp
+  cout<<"The matching matrix for mm(A,T):"<<mm->GetScore('A','T')<<endl;
 
+  //start doing the reading....assuming all fasta, will do fastq later
+  //fasta handler:reading fasta files depending on the input
+  cout<<"--------------------\n";
+  cout<<"Starting reading the data from input file.....\n";
+  vector<SequenceString> vec_index1;
+  vector<SequenceString> vec_index2;
+  vector<SequenceString> vec_bar_seq1;//this will hold processed sequences on the forward end
+  vector<SequenceString> vec_bar_seq2;
+  vector<SequenceString> vec_seq1;
+  vector<SequenceString> vec_seq2;
 
-  //fasta handler:reading fasta
-  vector<SequenceString> vec_seq;
-  vector<SequenceString> vec_Isotype_seq;//this will hold processed sequences on the forward end
-  
-  cout<<"reading sequence data file: "<<ReadFasta(sequenceFile_name, vec_seq)<<endl;
-  cout<<"1/1000:"<<vec_seq.at(0).toString()<<endl;
-  
-  cout<<"reading and processing isotype sequences for mapping......"<<endl;
-
-  //SetUpByIsotypeOutputFlag(true);
-  cout<<"Reading constant library file:"<<ReadFasta(isotypeFile_name, vec_Isotype_seq)<<endl;
-
-
-  //reverse the Ig constant region sequence
-  /*for(unsigned int i=0;i<vec_forward_seq.size();i++)
+  //------all file are in fasta format
+  if(indexFromSeq)
     {
-      vec_forward_seq[i]=ReverseComplement(vec_forward_seq.at(i));
+      //reading R1
+      cout<<"reading sequence data file (Read 1): "<<ReadFasta(sequenceFileR1_name, vec_seq1)<<"sequences read"<<endl;
+      if(demux&&pairEnd)  //in this case, we don't have to get index from it, assuming indexes are in the name xxxxx+xxxxxx
+ 	{
+	  //reading R2
+	  cout<<"reading sequence data file (Read 2): "<<ReadFasta(sequenceFileR2_name, vec_seq2)<<"sequences read"<<endl;
+	}
     }
-  */
- 
+  else //reading
+    {
+      cout<<"reading index data file (Read 1): "<<ReadFasta(indexFileR1_name, vec_index1)<<"indexes read"<<endl;
+      if(dualIndex)
+	{
+	  cout<<"reading index data file (Read 2): "<<ReadFasta(indexFileR2_name, vec_index2)<<"indexes read"<<endl;
+	}
+      if(demux)
+	{
+	  cout<<"reading sequence data file (Read 1): "<<ReadFasta(sequenceFileR1_name, vec_seq1)<<"sequences read"<<endl;
+	  if(pairEnd)
+	    {
+	      cout<<"reading index data file (Read 2): "<<ReadFasta(sequenceFileR2_name, vec_seq2)<<"sequences read"<<endl;
+	    }
+	}
+      
+    }
+
+  cout<<"reading barcode data file  (Read 1): "<<ReadFasta(barFileR1_name, vec_bar_seq1)<<"barcodes read"<<endl;
+  if(dualIndex)
+    {
+      cout<<"reading barcode data file  (Read 2): "<<ReadFasta(barFileR2_name, vec_bar_seq2)<<"barcodes read"<<endl;
+    }
+  
+  //cout<<"reading sequence data file: "<<ReadFasta(sequenceFileR1_name, vec_seq1)<<endl;
+  //cout<<"1/1000:"<<vec_seq1.at(0).toString()<<endl;
+  cout<<"----------------------\n";
+  cout<<"reading and processing sequences for barcodes/demux......"<<endl;
+
 //now we have everything, we just need to do the job, I mean mapping, here.
-  MappingIsotypes(vec_seq, vec_Isotype_seq, 
-		  mapEnd,sm, gapopen, gapextension,
-		  matchRateThreshold, MinimumOverlapLength, 
-		  Offset, 
-		  outputFileMap_name, outputFileNone_name,demux
+  MappingBarcodes(vec_seq1, vec_seq2, vec_index1, vec_index2,vec_bar_seq1, vec_bar_seq2, 
+		  misMatchNum, pairEnd, dualIndex, indexFromSeq, mapEnd, demux,
+		  outFile_name
 		  ); 
   /*
   //test the writting the text table
@@ -169,44 +294,57 @@ int main(int argc, char* argv[])
 static void parseArguments(int argc, char **argv, const char *opts)
 {
   int optchar;
-  int temp;
+  //int temp;
   while ((optchar = getopt(argc, argv, opts)) != -1)
     {
       switch(char(optchar))
 	{	  
 	case 'f':
-	  isotypeFile_name=optarg;
-	break;
+	  indexFileR1_name=optarg;
+	  break;
 	
-	//case 'r':
-	//  reverseFile_name=optarg;
-	//break;
+	case 'e':
+	  indexFileR2_name=optarg;
+	  break;
 	
+	case 'b':
+	  barFileR1_name=optarg;
+	  break;
+	
+	case 'a':
+	  barFileR2_name=optarg;
+	  break;
+       
 	case 's':
-	  sequenceFile_name=optarg;
-	break;
-	
+	  sequenceFileR1_name=optarg;
+	  break;
+	case 'q':
+	  sequenceFileR2_name=optarg;
+	  break;
 	case 'm':
-	  scoreMatrixName=optarg;
+	  misMatchNum=atoi(optarg);
 	  break;
 	  
-	  //case 't':
-	  //trim=atoi(optarg);
-	  //break;
+	case 't':
+	  indexFromSeq=true;
+	  break;
 	  //case 'i':
 	  //isotype_flag=true;
 	  //break;
 
-	case 'k':
-	  scale=atof(optarg);
+	case 'x':
+	  demux=true;
 	  break;
-	case 'n':
-	  matchRateThreshold=atof(optarg);
+	case 'd':
+	  dualIndex=true;
+	  break;
+	case 'r':
+	  mapEnd=ThreePrime;
 	  break;
 	case 'p':
-	  Offset=atoi(optarg);
+	  pairEnd=true;
 	  break;
-
+	  /*
 	case 'd':
 	  temp=atoi(optarg);
 	  if(temp==1)
@@ -245,6 +383,7 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	case 'x':
 	  demux=true;
 	  break;
+	  */
 	case '?':
 	  
 	  /*if(optopt == 't')
@@ -269,92 +408,80 @@ static void parseArguments(int argc, char **argv, const char *opts)
 
 static void printUsage(int argc, char* argv[])
 {
-  cout<<"argv[0], the program used to identify the isotypes of the sequences and also\n"
-      <<"\tdemutiplex them. This will work mainly on the new design of IgSeq data, which\n"
-      <<"\tare pair-end and have We try to follow the style of cutadapt. Basically, we will\n"
-      <<"\tonly ask for the isotype sequence and then map them to one side \n"
-      <<"\tof the sequences, which could be either 5' or 3'\n";
-  cout<<"\tOption string: \"hva:b:f:e:ptdr:s:n:\" \n";
+  cout<<argv[0]<<", the program used to demux or runs stats of indexes. It would read in\n"
+      <<"barcodes and sequence indexes and then match(instead of align) to find them.\n"
+      <<"We assume that the index (read) and barcode (expected) are having identical length.\n"
+      <<"Well, actually, the index could be long, but the barcodes are having fixed length.\n"
+      <<"we always match/align barcodes again index(as template) and we simply match (compare)\n"
+      <<"instead of aligning them. We also allow degeneracy on barcode, but not on indexes.\n"
+      <<"Therefore, the match score, mmf, is asymmetric. We also allow to read sequence \n"
+      <<"index from the name of sequences instead of sequence read file. When sequences\n"
+      <<"are specified, we can do demux. Otherwise, we will only output stats about\n"
+      <<"barcoded sequences. We allow single or dual indexes. It is also possible to \n"
+      <<"do 5' or 3' aligned on the second read depending on how the input specified.\n";
+
+  cout<<"\tOption string: \"hva:b:f:e:ptdrxs:n:\" \n";
   cout<<"Usage:\n";
-  cout<<"\t"<<argv[0]<<" [-s sequence file] -a adaptor file [-b barcode file]  \n"
-      <<" [-f  sequence file name] [-e "
-      <<" [-d mapping type]\n"
-      <<"\t  [-m score matrix] [-l MinimumOverlapLength]\n"
-      <<"\t [-k scale] [-g gapopen panelty] [-e gap extension]\n"
-    //<<"\t [-i]\n"
-      <<"\t [-n match rate threshold] [-p offset on forward end] \n"     
-      <<"\t [-x] [-h] [-v]\n\n"
+  cout<<"\t"<<argv[0]<<" [-s sequence file] -a adaptor file (R1) [-b barcode file (R2)]\n"
+      <<"\t\t [-f  sequence index R1 file] [-e sequence index R2 file]\n"
+      <<"\t\t [-p (pair end read,true or false)] [-t (read indexes from the name of sequences] \n"
+      <<"\t\t [-x (demux or not)] [-r (reverse implement r2 sequence index)]\n"
+      <<"\t\t [-q sequence file r2, optional]\n"
+      <<"\t\t [-m maximal num of mismatch allowed] [-d (dual index)]\n"
+       <<"\t\t [-h] [-v]\n\n"
     ;
+  cout<<"\t-a: the input file barcode name (r2 for dual index input), \n"
+      <<"\t\tassuming has identical name and order\n";
+  cout<<"\t-b: the input barcode file name (r1 or for single index input\n"
+      <<"\t a and b list the expected barcode to demux the input\n";
+  cout<<"\t-f: the input file name read 1 index\n"
+      <<"\t-e: the input file name read 2 index\n" 
+      <<"\tf and e contain the read index from sequencing to be demux'ed\n";
+  cout<<"\t-p: paired end read, boolean, false by default\n" ;
+  cout<<"\t-t: read indexs from the names of each sequence and assuming \n"
+      <<"\t\tthe illumina style:\n"
+      <<"\t\t\t  xxxxxx:xxxxx:xxxx:actgkd+acdfad\n" 
+      <<"\t\t\t\tseparated by ':' and the last field contains the barcode (pair)\n"
+      <<"\t\t\t\tfalse by default\n";
+  cout<<"\t-x: demux (true or false), meaning to write out the sequences\n"
+      <<" \t\tor simple output the stats. False by default";
+  cout<<"\t-d: dual index (true or false), true by default\n"
+      <<" \t\tor simple output the stats";
+  cout<<"\t-r: reverse complement the read2 barcode or not to do demux\n"
+      <<"\t\tonly work for Read2, to reverse complement the sequence index 2,\n"
+      <<"\t\twe never reverse complement the barcode.False(FivePrime) by default\n"; 
+  cout<<"\t-q: sequence data file (R2), optional, could be\n"
+      <<"\t\tspecified or not. if dumux, then needed to check for this.\n";
+  cout<<"\t-s: sequece data file, contains the real sequence data, \n"
+      <<"\t\thaving the same order and name.\n";
 
-  cout<<"\t\t-s filename -- the sequence fasta data filename \n"
-      <<"\n";
+  cout<<"\t-m: maximal number of mismatches allowed, \n"
+      <<"\t\tallow degenerate barcode, meaning the barcode (expected)\n"
+      <<"\t\t could be degenerated, but not the other way around.\n"
+      <<"\t\t barcode (expected)-->row, index (sequence read) ---->column\n"
+      <<"\t\t also this number is the total number of mismatches allow \n"
+      <<"\t\t for both barcodes if there are dual indexeds. 1 by default\n";
 
-  cout<<"\t\t-f filename -- the isotype sequences fasta filename \n"
-      <<"\t\t\tif 3' is chosen, the isotype sequences will be reverse\n"
-      <<"\t\t\tcomplemented before mapping.\n"
-      <<"\n";
-
-  cout<<"\t\t-d # -- the mapping type, 5' (by default) or 3' mapping.\n"
-      <<"\t\t\t 1 for 5' and 2 for 3' mapping\n"
-      <<"\n";
-  
-  cout<<"\t\t-m scorematrix -- the socre matrix name used for the alignment, \n"
-      <<"\t\t\tonly support nuc44. nuc44 by default for nucleotide\n"
-      <<"\n";
-
-  //cout<<"\t\t-t # -- the number 0 indicate no trimmed data to be saved; \n"
-  //    <<"\t\t\t  All other number means to save the trimmed data to file\n\n";
-
-  cout<<"\t\t-k scale -- the scale factor used to set the returned score to the correct unit,\n"
-      <<"\t\t\t 1 by default. The programe first uses the scale factor coming with matrix\n"
-      <<"\t\t\t  to the return score and the the scale set by this option\n\n";
-
-  cout<<"\t\t-g gapopen -- the gap open value. will be turned into negative if not\n"
-      <<"\t\t\t 15 by default\n"
-      <<"\n";
-
-  //cout<<"\t\t-i -- set to output data by isotypes\n"
-  //    <<"\n";
-
-  cout<<"\t\t-e gapextension -- the gap extension value. will be turned into negative if not\n"
-      <<"\t\t\t10 by default\n"
-      <<"\n";
-  cout<<"\t\t-l minimum overlap length, 10 by default\n "
-      <<"\t\t\tsee note below in -n match rate threshold!!!\n"
-      <<"\n"; 
-  cout<<"\t\t-n match rate threshold,0.75 by default. This is not\n"
-      <<"\t\t\tthe error rate, but the match rate. It is empirically 0.3\n"
-      <<"\t\t\tminimum overlap length and match rate are not conflicting with each other,\n"
-      <<"\t\t\tsince partial matching is allowed. We specify the minimum overlap in case\n"
-      <<"\t\t\tit happens that a very small overlap with higher matching rate. For example\n"
-      <<"\t\t\tit could purely by chance be that 4 matches partial show in the matching.\n"
-      <<"\n"; 
-  cout<<"\t\t-p offset on the sequence ends, 15 by default\n"
-      <<"\n"; 
-  //cout<<"\t\t-q offset on the reverse end\n"
-  //    <<"\n"; 
-  cout<<"\t\t-x this is one to indicating whether to write demultiplexed output\n"
-      <<"\t\t\t note: when this is set, the output will write to have only\n"
-      <<"\t\t\t sequences arranged into different isotyped, but not mapped\n"
-      <<"\n";
-  cout<<"\t\t-h -- help\n";
-  cout<<"\n\t\tv0.1 this code is used to map the adaptor to the sequence\n"
-      <<"\t\t\tthere are 3 different outputs, two of which will always be\n"
-      <<"\t\t\twritten. The second one will only be written as requested by -x.\n"
-      <<"\t\t\tFirst one is the mapped file (and unmapped too), containing\n"
-      <<"\t\t\tthe sequence and aligned isotype sequence. The second is the\n"
-      <<"\t\t\tstats file, which contains the information about the alignment\n"
-      <<"\t\t\tincluding match rate and overlaping length, starting and ending\n"
-      <<"\t\t\tposition of the sequence and isotype as well as the length of\n"
-      <<"\t\t\tthe sequence.This stats file is included to make it easy to do\n"
-      <<"\t\t\tsummary\n"
-      <<"\t\t\t @4/2/2014 by Feng\n"
+  cout<<"\t-v and -h: version and help\n";
+  cout<<"Note: 1)when do comparison, always use barcode(expected) to \n"
+      <<"\talign index (data), in terms of alignment, barcode is sujbect,\n"
+      <<"\t index is pattern\n"
+      <<"\t             index (pattern)\n"
+      <<"\t             |||||\n"
+      <<"\t             barcode (subject)\n"
+      <<"\t2)allow degeneracy on barcode, but less so on index\n"
+      <<"\t3)it is possible to have index longer than barcode, but not vice versa\n"
+      <<"\t4)barcode and index must start on 5' position 1 (position 0 in c)\n"
+      <<"\t5)we don't do alignment in comparison, but string comparison, \n"
+      <<"\t\tsee comparison matrix, match.matrix.feng (mmf)\n"
+      <<"\t6)the match score could be fraction number, because of degeneracy\n"
+      <<"\t7)all the files should have the same name or order in order to reference them\n"
+    
+      <<"\t\t\t *************@4/2/2014 by Feng\n"
      ;
 
   //cout<<"\n\t**************************"<<endl;
   cout<<"\t\t\t*********updated by Feng @ BU 2018\n"; 
 
-
-  //exit(-1);
 }
 

@@ -38,8 +38,8 @@ NGSMapping_Constant_main.o: NGSMapping_Constant_main.cpp string_ext.hpp \
  MarkovChainGapModel_454.hpp FastaHandler.hpp SequenceHandlerConstant.hpp \
  SequenceHandlerCommon.hpp
 NGSMapping_Demux_main.o: NGSMapping_Demux_main.cpp string_ext.hpp \
- score.hpp SequenceString.hpp FastaHandler.hpp SequenceHandlerIsotype.hpp \
- SequenceHandlerCommon.hpp
+ score.hpp SequenceString.hpp FastaHandler.hpp SequenceHandlerCommon.hpp \
+ SequenceHandlerBarcode.hpp
 NGSMapping_Isotype_main.o: NGSMapping_Isotype_main.cpp string_ext.hpp \
  score.hpp SequenceString.hpp OverlapAlignment.hpp pairwiseAlignment.hpp \
  AlignmentString.hpp AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
@@ -59,6 +59,9 @@ pairwiseAlignment.o: pairwiseAlignment.cpp pairwiseAlignment.hpp \
  score.hpp SequenceString.hpp AlignmentString.hpp AffineGapModel.hpp \
  GapModel.hpp TracebackTable.hpp MarkovChainGapModel_454.hpp
 score.o: score.cpp score.hpp
+SequenceHandlerBarcode.o: SequenceHandlerBarcode.cpp SequenceHandler.hpp \
+ SequenceHandlerCommon.hpp SequenceString.hpp score.hpp FastaHandler.hpp \
+ SequenceHandlerBarcode.hpp
 SequenceHandlerCheckUPM_GCGvsATG.o: SequenceHandlerCheckUPM_GCGvsATG.cpp \
  FastaHandler.hpp SequenceString.hpp SequenceHandlerCheckUPM_GCGvsATG.hpp \
  score.hpp OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
