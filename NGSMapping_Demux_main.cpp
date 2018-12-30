@@ -1,7 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "string_ext.hpp"
+#include <zlib.h>
+#include "Accessory/string_ext.hpp"
 
 //from now on you need to specify the c libraries explicitly
 #include <unistd.h>
@@ -41,7 +42,7 @@ static mapType mapEnd=FivePrime; //only work for R2, to reverse complement the s
 static bool pairEnd=false;
 static bool indexFromSeq=false;
 static bool demux=false;//write stats only, no demux
-static bool dualIndex=true;
+static bool dualIndex=false;
 
 //note for match  matrix
 //the match matrix mmf has been declare and initialized in 
@@ -154,49 +155,113 @@ int main(int argc, char* argv[])
   if(!indexFromSeq)
     {
       if(indexFileR1_name.size()==0)
-	{
-	  cout<<"please specify the index data (R1) input fasta file name.......\n";
-	  //printUsage(argc, argv);
-	  cout<<"type "<<argv[0]<<" -h \" for usage help\n";
-	  exit(-1);
-	}
+		{
+		  cout<<"***please specify the index data (R1) input fasta file name.......\n";
+		  //printUsage(argc, argv);
+		  cout<<"type "<<argv[0]<<" -h \" for usage help\n";
+		  exit(-1);
+		}
       cout<<"index read file (Read 1):\""<<indexFileR1_name<<"\".\n";
       if(dualIndex)
-	{
-	  if(indexFileR2_name.size()==0)
-	    {
-	      cout<<"please specify the index data (R2) input fasta file name.......\n";
-	      //printUsage(argc, argv);
-	      cout<<"type "<<argv[0]<<" -h \" for usage help\n";
-	      exit(-1);
-	    }
-	  cout<<"index read file (Read 2):\""<<indexFileR2_name<<"\".\n";
-	}
+		{
+		  if(indexFileR2_name.size()==0)
+			{
+			  cout<<"****please specify the index data (R2) input fasta file name.......\n";
+			  //printUsage(argc, argv);
+			  cout<<"type "<<argv[0]<<" -h \" for usage help\n";
+			  exit(-1);
+			}
+		  cout<<"index read file (Read 2):\""<<indexFileR2_name<<"\".\n";
+		}
     }
   cout<<"Map type:"<<mapEnd<<endl;
   cout<<"# mismatch:"<<misMatchNum<<endl;
   
   //*********get output files names
-  string outFile_name;//=(sequenceFile_name+".mapped.fasta"); //the output file for mapped both files
-  //string outStat_name;//=(sequenceFile_name+".mapNone.fasta");//map none
-    
+  string outFileR1_name;//=(sequenceFile_name+".mapped.fasta"); //the output file for mapped both files
+  string outFileR2_name;//=(sequenceFile_name+".mapNone.fasta");//map none
+  string outSeqFileR1_name;
+  string outSeqFileR2_name;
+  size_t pt=0;
   if(indexFromSeq)
     {
-      outFile_name=sequenceFileR1_name;
+      outFileR1_name=sequenceFileR1_name;
+	  pt=outFileR1_name.find_last_of('.');
+	  
+	  if(demux)//now we need to distinguish the index and seq output file
+	  {
+		outFileR1_name+="_index";
+		outSeqFileR1_name=sequenceFileR1_name.substr(0,pt);
+		if(pairEnd)
+		{
+			//work on the second read 
+			outSeqFileR2_name=sequenceFileR2_name;
+			unsigned pt2=outSeqFileR2_name.find_last_of('.');
+			outSeqFileR2_name=outSeqFileR2_name.substr(0,pt2);
+		}
+	  }  //otherwise, we are fine. let's don't work on outseqfile name, simply leave it empty
+	  
+	  //get rid of the file suffix
+	  if(pt!=string::npos)
+	  {
+		outFileR1_name=outFileR1_name.substr(0, pt);
+	  }
+	  
+	  if(dualIndex)
+	  {
+		outFileR2_name=outFileR1_name;
+		
+		pt=outFileR2_name.rfind("R1");
+		if(pt!=string::npos)
+		{
+			cout<<"To doing replacing, pt:"<<pt<<";outFileR1_name:"<<outFileR1_name<<endl;
+			outFileR2_name=outFileR2_name.replace(pt,2,"R2");
+			cout<<"after replacing:outFileR1_name:"<<outFileR1_name<<";outFileR2_name:"<<outFileR2_name<<endl;
+		}
+		else
+		{
+			outFileR2_name=outFileR1_name+"_R2";
+		}
+	  }
     }
   else  //from index file;
     {
-      outFile_name=indexFileR1_name;
-    }
-  //get rid of the file suffix
-  size_t pt=outFile_name.find_last_of('.');
-  if(pt!=string::npos)
-    {
-      outFile_name=outFile_name.substr(0, pt);
+      outFileR1_name=indexFileR1_name;
+	  pt=outFileR1_name.find_last_of('.');
+	  if(pt!=string::npos)
+		{
+			outFileR1_name=outFileR1_name.substr(0, pt);
+		}
+	  if(dualIndex)
+	  {
+		outFileR2_name=indexFileR2_name;
+		pt=outFileR2_name.find_last_of('.');
+		if(pt!=string::npos)
+		{
+			outFileR2_name=outFileR2_name.substr(0, pt);
+		}
+	  }
+	  
+	  if(demux)//now we need to distinguish the index and seq output file
+	  {
+		//outFileR1_name+="_index";
+		pt=sequenceFileR1_name.find_last_of('.');
+		outSeqFileR1_name=sequenceFileR1_name.substr(0,pt);
+		if(pairEnd)
+		{
+			//work on the second read 
+			outSeqFileR2_name=sequenceFileR2_name;
+			unsigned pt2=outSeqFileR2_name.find_last_of('.');
+			outSeqFileR2_name=outSeqFileR2_name.substr(0,pt2);
+		}
+	  }  //otherwise, we are fine. let's don't work on outseqfile name, simply leave it empty
+	  
     }
 
-  cout<<"\tThe output file name : \""<<outFile_name<<"\""
-    //<<outputFi<<"\";\n"
+  cout<<"\tThe output file name index R1: \""<<outFileR1_name<<"\"\n"
+	  <<"\toutputFile index R2:\""<<outFileR2_name<<"\";\n"
+	  <<"\toutputFile seq R1:\""<<outSeqFileR1_name<<"\";\n"
+	  <<"\toutputFile seq R2:\""<<outSeqFileR2_name<<"\";\n"
     //<<"\tmapEnd:"<<mapEnd<<"\n"
       <<"\n";
   
@@ -218,35 +283,82 @@ int main(int argc, char* argv[])
   //------all file are in fasta format
   if(indexFromSeq)
     {
+		if(sequenceFileR1_name.length()==0)
+		{
+			cout<<"*****ERROR: request to read index from the sequence files, "
+				<<"\tbut the sequence R1 file has not been specified !!!"<<endl;
+			exit(-1);
+		}
       //reading R1
       cout<<"reading sequence data file (Read 1): "<<ReadFasta(sequenceFileR1_name, vec_seq1)<<"sequences read"<<endl;
       if(demux&&pairEnd)  //in this case, we don't have to get index from it, assuming indexes are in the name xxxxx+xxxxxx
- 	{
-	  //reading R2
-	  cout<<"reading sequence data file (Read 2): "<<ReadFasta(sequenceFileR2_name, vec_seq2)<<"sequences read"<<endl;
-	}
+		{
+			if(sequenceFileR2_name.length()==0)
+			{
+				cout<<"*****ERROR: request to do demux for pairEnd data, "
+					<<"\tbut the sequence R2 file has not been specified !!!"<<endl;
+				exit(-1);
+			}
+		  //reading R2
+		  cout<<"reading sequence data file (Read 2): "<<ReadFasta(sequenceFileR2_name, vec_seq2)<<"sequences read"<<endl;
+		}
     }
   else //reading
     {
+	  if(indexFileR1_name.length()==0)
+		{
+			cout<<"*****ERROR: request to read index from the index files, "
+				<<"\tbut the index R1 file has not been specified !!!"<<endl;
+			exit(-1);
+		}
       cout<<"reading index data file (Read 1): "<<ReadFasta(indexFileR1_name, vec_index1)<<"indexes read"<<endl;
       if(dualIndex)
-	{
-	  cout<<"reading index data file (Read 2): "<<ReadFasta(indexFileR2_name, vec_index2)<<"indexes read"<<endl;
-	}
+		{
+			if(indexFileR2_name.length()==0)
+			{
+				cout<<"*****ERROR: request to read dual indexes from the index files, "
+					<<"\tbut the index R2 file has not been specified !!!"<<endl;
+				exit(-1);
+			}
+			cout<<"reading index data file (Read 2): "<<ReadFasta(indexFileR2_name, vec_index2)<<"indexes read"<<endl;
+		}
       if(demux)
-	{
-	  cout<<"reading sequence data file (Read 1): "<<ReadFasta(sequenceFileR1_name, vec_seq1)<<"sequences read"<<endl;
-	  if(pairEnd)
-	    {
-	      cout<<"reading index data file (Read 2): "<<ReadFasta(sequenceFileR2_name, vec_seq2)<<"sequences read"<<endl;
-	    }
-	}
-      
+		{
+		  if(sequenceFileR1_name.length()==0)
+			{
+				cout<<"*****ERROR: request to demux from the sequence files, "
+					<<"\tbut the sequence R1 file has not been specified !!!"<<endl;
+				exit(-1);
+			}
+		  cout<<"reading sequence data file (Read 1): "<<ReadFasta(sequenceFileR1_name, vec_seq1)<<"sequences read"<<endl;
+		  if(pairEnd)
+			{
+				if(sequenceFileR2_name.length()==0)
+				{
+					cout<<"*****ERROR: request to demux for pairEnd sequence files, "
+						<<"\tbut the sequence R2 file has not been specified !!!"<<endl;
+					exit(-1);
+				}
+			  cout<<"reading index data file (Read 2): "<<ReadFasta(sequenceFileR2_name, vec_seq2)<<"sequences read"<<endl;
+			}
+		}      
     }
-
+	
+	
+	if(barFileR1_name.length()==0)
+	{
+		cout<<"*****ERROR: no bar code file R1 has not been specified !!!"<<endl;
+		exit(-1);
+	}
   cout<<"reading barcode data file  (Read 1): "<<ReadFasta(barFileR1_name, vec_bar_seq1)<<"barcodes read"<<endl;
   if(dualIndex)
     {
+		if(barFileR2_name.length()==0)
+		{
+			cout<<"*****ERROR: request to do dual index, "
+				<<"\tbut the bar code R2 file has not been specified !!!"<<endl;
+			exit(-1);
+		}
       cout<<"reading barcode data file  (Read 2): "<<ReadFasta(barFileR2_name, vec_bar_seq2)<<"barcodes read"<<endl;
     }
   
@@ -255,10 +367,34 @@ int main(int argc, char* argv[])
   cout<<"----------------------\n";
   cout<<"reading and processing sequences for barcodes/demux......"<<endl;
 
+  //now start testing the read indexes from seq
+  cout<<"vec_Seq1.size():"<<vec_seq1.size()<<endl;
+  if(indexFromSeq){
+	  unsigned num=ReadIndexFromSequenceName(vec_seq1, vec_index1, vec_index2, 8, dualIndex);
+	  cout<<"vec_Seq1.size():"<<vec_seq1.size()<<endl;
+	  cout<<"Total number of sequences and indexes read:"<<num<<endl;
+	  unsigned x=7;
+	  cout<<"vec_bar_seq1:"<<vec_bar_seq1.at(x).toString()<<endl;
+	  if(dualIndex){
+		cout<<"vec_bar_seq2:"<<vec_bar_seq2.at(x).toString()<<endl;
+	  }
+	  cout<<"ve_seq1:"<<vec_seq1.at(x).toString()<<endl;
+  }
+  else{
+	cout<<"*******reading index from index files;"<<endl; 
+  }
+  //testing the mathcing barcoe scoring system.
+	cout<<"TEsting matching score..............."<<endl;
+  SequenceString seq1("seq1", "ACTN");
+	SequenceString barcode("barcode", "ACTGAN");
+  double score=MatchBarcodes(seq1, barcode, mm);
+  cout<<"seq1:"<<seq1.toString()<<"\nbarcode:"<<barcode.toString()<<endl;
+  cout<<"Matching score is "<<score<<endl;
 //now we have everything, we just need to do the job, I mean mapping, here.
   MappingBarcodes(vec_seq1, vec_seq2, vec_index1, vec_index2,vec_bar_seq1, vec_bar_seq2, 
-		  misMatchNum, pairEnd, dualIndex, indexFromSeq, mapEnd, demux,
-		  outFile_name
+		  misMatchNum, pairEnd, dualIndex, indexFromSeq, mapEnd, demux, mm,
+		  outFileR1_name /*index file name*/, outFileR2_name /*index file R2*/,
+		  outSeqFileR1_name /*seq file name*/, outSeqFileR2_name /*seq file*/
 		  ); 
   /*
   //test the writting the text table

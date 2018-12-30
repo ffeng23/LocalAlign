@@ -7,15 +7,59 @@ void chomp_front_ext(string& s)
   for( unsigned int i=0;i<s.length();)
     {
       if(s[i]==' '||s[i]=='\t'||s[i]=='\n'||s[i]=='\r')
-	{
-	  s.erase(i,1);
-	}
+		{
+		  s.erase(i,1);
+		}
       else
-	break;
+		break;
     }
   //return 0;
 }
 
+//we work in-situ. means we get rid of white space in the front and
+//shift forward the whole string
+//return the new length of the string. or the old lenth if no chomping
+unsigned chomp_front_ext(char* s, const unsigned& len /*remember that the real length is one more
+							*since there is the null in the end '\0'*/
+						)
+{
+	
+	if(len==0)
+	{
+		return 0;
+	}
+	//assuming len is set up correctly, non-negative 
+	if(s[len]!='\0')
+	{
+		//not correctly ended. so set it to be correctly terminated
+		cout<<"WARNING: the C-style string is not set correctly terminated"<<endl;
+		s[len]='\0';
+		
+	}
+	unsigned real_start=0;
+	for( ;real_start<len;)
+    {
+      if(s[real_start]==' '||s[real_start]=='\t'||s[real_start]=='\n'||s[real_start]=='\r')
+		{
+		  real_start++; //point to the next one
+		}
+	  else
+		break;
+    }
+	
+	if(real_start==0) //we are done here
+		return len;
+	
+	unsigned real_len=len-real_start;
+	for (unsigned int i=0; i<=real_len;i++)
+	{
+		//We need to shift towards front
+		s[i]=s[real_start];
+		real_start++;
+	}
+	
+   return real_len;
+}
 
 void chomp_end_ext(string& s)
 {
@@ -32,11 +76,45 @@ void chomp_end_ext(string& s)
   //return 0;
 }
 
+unsigned chomp_end_ext(char* s, const unsigned& len)
+{
+	if(len==0)
+	{
+		return 0;
+	}
+	//assuming len is set up correctly, non-negative 
+	if(s[len]!='\0')
+	{
+		//not correctly ended. so set it to be correctly terminated
+		cout<<"WARNING: the C-style string is not set correctly terminated"<<endl;
+		s[len]='\0';
+		
+	}
+	unsigned real_end=len; //here is one more, pointing to the null char \0
+	for(unsigned int i=len-1;i>=0;i--)
+    {
+      if(s[i]==' '||s[i]=='\t'||s[i]=='\n'||s[i]=='\r')
+		{
+			real_end =i;
+		}
+      else
+		break;
+    }
+	return real_end;
+}
 void chomp_ext(string & s)
 {
   chomp_front_ext(s);
   chomp_end_ext(s);
   //return 0;
+}
+
+unsigned chomp_ext(char* s, const unsigned& len)
+{
+		unsigned real_len;
+		real_len=chomp_end_ext(s, len);
+		real_len=chomp_front_ext(s,len);
+		return real_len;
 }
 
 //return the number of elements parsed.5

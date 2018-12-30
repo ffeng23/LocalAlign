@@ -13,6 +13,9 @@ void chomp_front_ext(string & s);
 void chomp_end_ext(string & s);
 void chomp_ext(string & s);
 
+unsigned chomp_front_ext(char* s, const unsigned& len);
+unsigned chomp_end_ext(char* s, const unsigned& len);
+unsigned chomp_ext(char* s, const unsigned& len);
 
 
 //the caller has to deallocate the memory!!!

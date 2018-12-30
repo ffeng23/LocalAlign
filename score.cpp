@@ -400,12 +400,14 @@ double MatchMatrix::GetScore(const char& first, const char& second) const
 }
 
 
-//now define a match matrix mmf, match matrix feng
-//
 
-                           /*  A      T      G      C       S       W       R       Y       K      M      B     V     H      D    N*/
-static double mmf_1d[] ={ /*A*/   0,     1,     1,     1,      1,      0,      0,      1,      1,     0,     1,    0,    0,     0,   0,
-       		       /*T*/   1,     0,     1,     1,      1,      0,      0,      0,      0,     1,     0,    1,    0,     0,   0,
+//now define a match matrix mmf, match matrix feng
+//strict score matrix, NOT USED YET. need to work on it more.
+//the idea is that we strictly disallow the degeneracy. <--- implement this later!!!
+               /*      A      T      G      C       S       W       R       Y       K      M      B     V     H      D    N*/
+static double mmf_strict_1d[] ={ 
+			   /*A*/   0,     1,     1,     1,      1,      0,      0,      1,      1,     0,     1,    0,    0,     0,   0,
+       		   /*T*/   1,     0,     1,     1,      1,      0,      1,      0,      0,     1,     0,    1,    0,     0,   0,
 		       /*G*/   1,     1,     0,     1,      0,      1,      0,      1,      0,     1,     0,    0,    1,     0,   0,
 		       /*C*/   1,     1,     1,     0,      0,      1,      1,      0,      1,     0,     0,    0,    0,     1,   0,
 		       /*S*/   1,     1,     0.5,   0.5,    0,      1,      0.5,    0.5,    0.5,   0.5,   0,    0,    0.5,   0.5, 0,
@@ -418,8 +420,34 @@ static double mmf_1d[] ={ /*A*/   0,     1,     1,     1,      1,      0,      0
 		       /*V*/   0.666, 1,     0.666, 0.666,  0.333,  0.666,  0.333,  0.666,  0.666, 0.333, 0.333,0,    0.333, 0.333,0,
 		       /*H*/   0.666, 0.666, 1,     0.666,  0.666,  0.333,  0.666,  0.333 , 0.666, 0.333, 0.333,0.333,0,     0.333,0,
 		       /*D*/   0.666, 0.666, 0.666, 1,      0.666,  0.333,  0.333,  0.666,  0.333, 0.666, 0.333,0.333,0.333, 0,    0,
-		       /*N*/   0.25,  0.25,  0.25,  0.25,   0.5,    0.5,    0.5,    0.5,    0.5,   0.5,   0.75, 0.75, 0.75,  0.75, 0
+		       /*N*/   0.75,  0.75,  0.75,  0.75,   0.5,    0.5,    0.5,    0.5,    0.5,   0.5,   0.25, 0.25, 0.25,  0.25, 0
 		             };
+static const double* mmf_strict_score[] ={mmf_strict_1d,mmf_strict_1d+15,mmf_strict_1d+30,mmf_strict_1d+45,mmf_strict_1d+60,mmf_strict_1d+75,
+			 mmf_strict_1d+90,mmf_strict_1d+105, mmf_strict_1d+120, mmf_strict_1d+135,mmf_strict_1d+150, 
+			 mmf_strict_1d+165, mmf_strict_1d+15*12,mmf_strict_1d+15*13, mmf_strict_1d+15*14 
+                };
+
+               /*      A      T      G      C       S       W       R       Y       K      M      B     V     H      D    N*/
+static double mmf_1d[] ={ 
+			   /*A*/   0,     1,     1,     1,      1,      0,      0,      1,      1,     0,     1,    0,    0,     0,   0,
+       		   /*T*/   1,     0,     1,     1,      1,      0,      1,      0,      0,     1,     0,    1,    0,     0,   0,
+		       /*G*/   1,     1,     0,     1,      0,      1,      0,      1,      0,     1,     0,    0,    1,     0,   0,
+		       /*C*/   1,     1,     1,     0,      0,      1,      1,      0,      1,     0,     0,    0,    0,     1,   0,
+		       /*S*/   1,     1,     0.5,   0.5,    0,      1,      0.5,    0.5,    0.5,   0.5,   0,    0,    0.5,   0.5, 0,
+		       /*W*/   0.5,   0.5,   1,     1,      1,      0,      0.5,    0.5,    0.5,   0.5,   0.5,  0.5,  0,     0,   0,
+		       /*R*/   0.5,   1,     0.5,   1,      0.5,    0.5,    0,      1,      0.5,   0.5,   0.5,  0,    0.5,   0,   0,
+		       /*Y*/   1,     0.5,   1,     0.5,    0.5,    0.5,    1,      0,      0.5,   0.5,   0,    0.5,  0,     0.5, 0,
+		       /*K*/   1,     0.5,   0.5,   1,      0.5,    0.5,    0.5,    0.5,    0,     1,     0,    0.5,  0.5,   0,   0,
+		       /*M*/   0.5,   1,     1,     0.5,    0.5,    0.5,    0.5,    0.5 ,   1,     0,     0.5,  0,    0,     0.5, 0,
+		       /*B*/   1,     0.666, 0.666, 0.666,  0.333,  0.666,  0.666,  0.333,  0.333, 0.666, 0,    0.333,0.333, 0.333,0,
+		       /*V*/   0.666, 1,     0.666, 0.666,  0.333,  0.666,  0.333,  0.666,  0.666, 0.333, 0.333,0,    0.333, 0.333,0,
+		       /*H*/   0.666, 0.666, 1,     0.666,  0.666,  0.333,  0.666,  0.333 , 0.666, 0.333, 0.333,0.333,0,     0.333,0,
+		       /*D*/   0.666, 0.666, 0.666, 1,      0.666,  0.333,  0.333,  0.666,  0.333, 0.666, 0.333,0.333,0.333, 0,    0,
+		       /*N*/   0.75,  0.75,  0.75,  0.75,   0.5,    0.5,    0.5,    0.5,    0.5,   0.5,   0.25, 0.25, 0.25,  0.25, 0
+		             };
+//IUPAC code: S -> G or C;   W -> A or T; R -> A or G; Y -> C or T; K -> G or T;
+//   M -> A or C ; B -> C, G or T; V -> A or C or G; H -> A, C or T; D->A, G or T;
+
 /* how to calculate the score for degnerated match, 
  *eg. score('T','S'), since S -> G or C, so, this is mismatch anyway, 1
  *  score('T', 'W'), since W->A or T, so this is a match,0. 
@@ -445,3 +473,4 @@ const char mmfAlphabet[]={ 'A' ,  'T' ,  'G'  ,'C',   'S',   'W',   'R' ,  'Y', 
 //the dimension size except the first one.
 //of course, another alternative is to define template and then do it.
 MatchMatrix mmf(mmf_score, mmfAlphabet,15);//again not sure where this scale come from by Matlab.
+MatchMatrix mmf_strict(mmf_strict_score, mmfAlphabet, 15);

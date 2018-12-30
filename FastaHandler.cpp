@@ -2,7 +2,8 @@
 #include <stdlib.h>
 //#include <stdio.h>
 #include <fstream>
-#include "string_ext.hpp"
+#include <zlib.h>
+#include "Accessory/string_ext.hpp"
 using namespace std;
 unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec, bool toUpper)
 {
@@ -80,7 +81,7 @@ unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec,
   
 
   //we are done with reading the promoter sequence file.
-  cout<<"\nfinish reading the promoter file........\n"
+  cout<<"\nfinish reading the file........\n"
       <<"\tsummary: total "<<line_count<<" line read in and \n"
       <<"\t\t"<<gene_number<<" sequences store in the vector...."<<endl;
   

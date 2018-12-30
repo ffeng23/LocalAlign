@@ -1,5 +1,5 @@
 #include "SequenceHandlerCommon.hpp"
-
+#include <string>
 using namespace std;
 
 
@@ -145,4 +145,24 @@ unsigned int index2=tempStr.length()-1;
 	
 	delete [] cstr_ret;
   return temp;
+}
+
+double MatchBarcodes(const SequenceString& seq, const SequenceString& barcode, const MatchMatrix* mm)
+{
+  double score=0;
+  unsigned seq_len=seq.GetSequence().length();
+  string seqStr=seq.GetSequence();
+  
+  unsigned barcode_len=barcode.GetSequence().length();
+  if(seq_len<barcode_len)
+    {
+      seqStr.append(barcode_len-seq_len,'N');
+    }
+  string barcodeStr=barcode.GetSequence();
+  for(unsigned i=0;i<barcode_len;i++)
+    {
+      //compare each char for score
+      score+=mm->GetScore(seqStr.at(i),barcodeStr.at(i));
+    }
+  return score;
 }

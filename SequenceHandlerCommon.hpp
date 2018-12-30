@@ -13,7 +13,7 @@ SequenceString ReverseComplement(SequenceString& seq);
 //"abc" vs "ab" reurn 1
 //"abc" vs "cab" return 3
 unsigned int CompareStrings(const string& str1, const string& str2);
-
+double MatchBarcodes(const SequenceString& seq, const SequenceString& barcode, const MatchMatrix* mm);
 SequenceString Reverse(SequenceString& seq);
 
 #endif
