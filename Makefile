@@ -7,7 +7,7 @@
 GCC = gcc
 GXX = g++
 
-CFLAG= -Wall -g -Werror -O 
+CFLAG= -Wall -g -Werror -O -std=c++11
 LOADFLAG=-s -lm -lz
 
 CXXFLAG=${CFLAG}
