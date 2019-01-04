@@ -141,8 +141,9 @@ int main(int argc, char* argv[])
   vector<unsigned> v_count;
   cout<<"Counting unique barcodes from indexes......."<<endl;
   unsigned numOfBar=GetBarcodes(v_index1, v_index2, dualIndex, v_BarSeq1, v_BarSeq2, v_count);
-  cout<<"\tnumber of bar:"<<numOfBar<<endl;
+  cout<<"\n\tnumber of bar:"<<numOfBar<<endl;
   
+  cout<<"Start writting output files..........."<<endl;
   //WriteFasta("index1.fasta", v_index1);
   //WriteFasta("index2.fasta", v_index2);
   WriteFasta(sequenceFile_name+"bar1.fasta", v_BarSeq1);

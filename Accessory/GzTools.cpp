@@ -9,7 +9,7 @@
 //#define BUF_SIZE 0x50
 //#define DEBUG
 
-#define CHUNK 0x5000
+#define CHUNK 0x500000
 //#define CHUNK 0x50
 //#define CHUNK 0x20
 #define OUT_CHUNK CHUNK*1

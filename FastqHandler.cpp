@@ -51,7 +51,7 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
   int line_count=0;
   string temp_seq;
 
-  cout<<"read the fastq file........."<<endl;
+  cout<<"read the fastq file.........";
   //cout<<"line#: ";
   //  double d_storage, d_current;
   string temp_string;
@@ -172,7 +172,7 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 	  Fastq fq(gene_info,SequenceString(gene_info, gene_sequence),quality);
 	  _seqStrVec.push_back(fq);
 	  line_count++;
-      if(line_count/10000*10000==line_count)
+      if(line_count%10000==0)
 		{
 		  cout<<"..... "<<line_count;
 		  cout.flush();

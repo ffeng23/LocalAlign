@@ -466,10 +466,14 @@ unsigned int GetBarcodes(vector<SequenceString>& _vecIndex1, /*this is the seque
 	list<SequenceString> listBarSeq1;
 	list<SequenceString> listBarSeq2;
 	list<SequenceString> listCount;*/
-	
+	cout<<"processing indexes:"<<flush;
 	//go through the indexes and insert into the output Barcode vector
 	for(unsigned i=0;i<_vecIndex1.size();i++)
 	{
+		if(i%10000==0)
+		{
+			cout<<i<<"/"<<_vecIndex1.size()<<"...."<<flush;
+		}
 		//check whether it has been doing insertion sort kind of operation
 		//working lists of barcodes.
 		SequenceString r1(_vecIndex1.at(i));
