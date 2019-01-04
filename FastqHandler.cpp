@@ -52,18 +52,12 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
   string temp_seq;
 
   cout<<"read the fastq file........."<<endl;
-  cout<<"line#: ";
+  //cout<<"line#: ";
   //  double d_storage, d_current;
   string temp_string;
   bool ok=true;
   while(ok)
     {
-      line_count++;
-      if(line_count/10000*10000==line_count)
-		{
-		  cout<<"..... "<<line_count;
-		  cout.flush();
-		}
       
 	  //start reading lines and parsing
 	  //fq files line 1: name
@@ -101,14 +95,14 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 		{//
 			cout<<"ERROR: corrupted file, no firs with '@...' please check"<<endl;
 			
-			if(gzflag)
+			/*if(gzflag)
 			  {
 				gzClose_B(fb);
 			  }
 			  else
 			  {  
 				ifs_p.close();
-			  }
+			  }*/
 			break;
 			
 		}
@@ -153,7 +147,7 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 		  cout<<"ERROR: something wrong. the file is corrupted!!"<<endl;
 		  break;
     	}
-	
+	//cout<<line<<endl;
 	//last, check the file end 
 		if(!gzflag)
 			ok=!ifs_p.eof();	
@@ -172,10 +166,19 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 	  
 	  quality.assign(line);
 		
+	  
+	
 	  //done, now we need to push to the vector 
 	  Fastq fq(gene_info,SequenceString(gene_info, gene_sequence),quality);
 	  _seqStrVec.push_back(fq);
-	 
+	  line_count++;
+      if(line_count/10000*10000==line_count)
+		{
+		  cout<<"..... "<<line_count;
+		  cout.flush();
+		}
+      
+	 //cout<<line<<endl;
 	  //last, check the file end 
 		if(!gzflag)
 			ok=!ifs_p.eof();   //we don't have to check for gzipped case, since it will return false anyway.
@@ -184,7 +187,7 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 
   //we are done with reading the promoter sequence file.
   cout<<"\nfinish reading the file........\n"
-      <<"\tsummary: total "<<line_count<<" line read in and \n"
+      <<"\tsummary: total "<<line_count<<" records read in and \n"
       <<"\t\t"<<gene_number<<" sequences store in the vector...."<<endl;
   if(gzflag)
   {

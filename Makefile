@@ -8,7 +8,7 @@ GCC = gcc
 GXX = g++
 
 CFLAG= -Wall -g -Werror -O 
-LOADFLAG=-s -lm
+LOADFLAG=-s -lm -lz
 
 CXXFLAG=${CFLAG}
 
@@ -25,7 +25,7 @@ SRCS_3=	NGSMapping_Constant_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp Sequen
 SRCS_4=	NGSMapping_Isotype_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp FastaHandler.cpp SequenceHandlerIsotype.cpp TracebackTable.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp LocalAlignment.cpp SequenceHandlerCommon.cpp
 
 SRCS_5=NGSMapping_Demux_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp FastaHandler.cpp SequenceHandlerCommon.cpp SequenceHandlerBarcode.cpp
-#SRCS_1=	rm_x_s_probes.cpp string_ext.cpp
+SRCS_6=NGSMapping_getBarcode_main.cpp FASTQ.cpp SequenceString.cpp ${ACCESSDIR}GzTools.cpp FastqHandler.cpp ${ACCESSDIR}string_ext.cpp SequenceHandlerBarcode.cpp SequenceHandlerCommon.cpp FastaHandler.cpp score.cpp ${ACCESSDIR}FileHandler.cpp
 #SRCS_2=remove_replicates.cpp string_ext.cpp 
 
 OBJS_0=${SRCS_0:.cpp=.o}
@@ -34,6 +34,7 @@ OBJS_2=${SRCS_2:.cpp=.o}
 OBJS_3=${SRCS_3:.cpp=.o}
 OBJS_4=${SRCS_4:.cpp=.o}
 OBJS_5=${SRCS_5:.cpp=.o}
+OBJS_6=${SRCS_6:.cpp=.o}
 
 #OBJS_1=${SRCS_1:.cpp=.o}
 #OBJS_2=${SRCS_2:.cpp=.o}
@@ -44,19 +45,21 @@ PROG_2=ngsmapping_primer_dimer
 PROG_3=ngsmapping_constant
 PROG_4=ngsmapping_Isotype
 PROG_5=ngsmapping_demux
+PROG_6=ngsmapping_getBarcode
 #PROG_1=rmxs_at
 #PROG_2=remove_replicate
 DEPEND=$(GXX) $(CFLAG) -MM
 
 ######Rules######
 
-all: $(PROG_0) $(PROG_1) $(PROG_2) $(PROG_3) $(PROG_4) $(PROG_5)
+all: $(PROG_0) $(PROG_1) $(PROG_2) $(PROG_3) $(PROG_4) $(PROG_5) $(PROG_6)
 
 .PHONY: clean all depend
 
 clean:
-	rm -fr *.o *~ core $(PROG_0) $(PROG_1) $(PROG_2) $(PROG_3) $(PROG_4) $(PROG_5)
-
+	rm -fr *.o *~ core $(PROG_0) $(PROG_1) $(PROG_2) $(PROG_3) $(PROG_4) $(PROG_5) $(PROG_6) 
+	cd $(ACCESSDIR); rm -fr *.o *~ core; ls ; cd ../ ; pwd ; # note makefile is a script and each command is doing its own sub-precess
+	
 .cpp.o:   #old fasion suffix rule, double suffix rule
 	$(GXX) $(CXXFLAG) -c $< -o $(addsuffix .o, $(basename $<))
 
@@ -90,6 +93,11 @@ $(PROG_5): $(OBJS_5)
 	@echo ""
 	@echo "******Make complete"
 
+$(PROG_6): $(OBJS_6)
+	$(GXX) -o $@ $(CXXFLAG) $(LOADFLAG) $+
+	@echo ""
+	@echo "******Make complete"
+
 
 #$(PROG_1): $(OBJS_1)
 #	$(GXX) -o $@ $(CXXFLAG) $(LOADFLAG) $+
@@ -105,7 +113,7 @@ $(PROG_5): $(OBJS_5)
 
 depend: .depend
 
-.depend: Makefile $(SRCS_0) $(SRCS_1) $(SRCS_2) $(SRCS_3) $(SRCS_4) $(SRCS_5)
+.depend: Makefile $(SRCS_0) $(SRCS_1) $(SRCS_2) $(SRCS_3) $(SRCS_4) $(SRCS_5) $(SRCS_6)
 	$(GXX) -MM *.cpp >.depend
 	@echo " "
 	@echo "****Dependencies generated successfully."

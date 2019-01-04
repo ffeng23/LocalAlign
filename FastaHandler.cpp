@@ -247,3 +247,111 @@ void WriteTextTableFile(const string& _fname, vector<vector<double> >& _seqStrVe
   ofs.close();
 }//end of function
 
+
+
+//Writing a text table file, with header or not
+//input: _fname, file name
+//       _seqStrVec, vector of vector of  numbers to be written
+//       _c, a char to delimite the columns
+//       _header, whether to write the header
+//       mode, to open the files, truc (new) or append
+//       _headerStr, the header names to be written.
+void WriteTextTableFile(const string& _fname, vector<vector<string> >& _seqStrVec, const char& c, const bool& _header, ios_base::openmode mode, vector<string> _headerStr)
+{
+  ofstream ofs((_fname).c_str(), mode);
+  
+  if(!ofs.is_open())
+    {
+      cout<<">>>>>>ERROR:the output file \""<<_fname<<"\" can not be opened, quit....\n";
+      exit(-1);
+    }
+  unsigned colNum=_seqStrVec.size();
+  if(colNum==0)
+    {
+      ofs.close();
+      return ;
+    }
+  //now check for the headers
+  if(_header)//write header, so go head
+    {
+      //cout<<"Wring header line......."<<endl;
+      if(_headerStr.size()==0)
+	{
+	  //cout<<"size is zero"<<endl;
+	  //_headerStr=new vector<string>;
+	
+	  for(unsigned int i=0;i<colNum;i++)
+	    {
+	      _headerStr.push_back("NA");
+	    }
+	}
+      if(_headerStr.size()<colNum)
+	{
+	  //cout<<"heaer line is smaller"<<endl;
+	  for(unsigned int i=_headerStr.size();i<colNum;i++)
+	    {
+	      _headerStr.push_back("NA");
+	    }
+	}
+      for(unsigned int i=0;i<colNum;i++)
+	{
+	  //cout<<"writing "<<i<<"...";
+	  ofs<<_headerStr.at(i);
+	  //cout<<"elsment :"<<_headerStr.at(i)<<"xxx";
+	  if(i!=colNum-1)
+	    ofs<<c;
+	  else
+	    ofs<<"\n";
+	}
+      //cout<<endl;
+    }
+  
+
+  unsigned maxSize=_seqStrVec.at(0).size();
+  //cout<<"maxsize is :"<<maxSize<<endl;
+  for(unsigned int i=1;i<colNum;i++)
+    {
+      
+      if(maxSize<_seqStrVec.at(i).size())
+		{
+		  maxSize=_seqStrVec.at(i).size();
+		}
+		
+    }
+  //cout<<"maxsize is (after):"<<maxSize<<endl;
+
+  vector<string> tempStr;
+  for(unsigned int j=0;j<maxSize;j++)
+    {
+      //ofs<<">"<<_seqStrVec.at(i).GetName()<<"\n";
+      
+      for(unsigned int i=0;i<_seqStrVec.size();i++)
+		{
+		  tempStr=_seqStrVec.at(i);
+		  //in case the vectors are of unequal length
+		  if(j<tempStr.size())
+			{
+			  ofs<<tempStr.at(j);
+			}
+		  else
+			{
+			  ofs<<"";
+			}
+		  if(i!=colNum-1)
+			ofs<<c;
+		  else
+			ofs<<"\n";
+		}	
+	/*if((i+1)%_width==0||i==_seqStrVec.size()-1)
+	{
+	  ofs<<"\n";
+	}
+      else
+	{
+	  ofs<<c;
+	  }*/
+    }
+
+  ofs.close();
+}//end of function
+

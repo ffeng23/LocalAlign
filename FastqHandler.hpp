@@ -14,6 +14,9 @@ using namespace std;
 
 //return total number of sequeces read in.
 //toUpper =true : convert the character to upper case. false: keep the original letter
+//
+//the file could be gz'ed or regular fastq. then the sequence data are read into a vector of 
+//fastq objects. 
 unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toUpper=false);
 
 

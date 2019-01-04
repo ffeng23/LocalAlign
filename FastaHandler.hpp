@@ -34,5 +34,6 @@ void WriteTextFile(const string& _fname, vector<unsigned int>& _seqStrVec, const
 //       _headerStr, the header names to be written.
 void WriteTextTableFile(const string& _fname, vector<vector<double> >& _seqStrVec, const char& c='\t', const bool& _header=true, ios_base::openmode mode=ios_base::out,vector<string> _headerStr=vector<string>());
 
+void WriteTextTableFile(const string& _fname, vector<vector<string> >& _seqStrVec, const char& c='\t', const bool& _header=true, ios_base::openmode mode=ios_base::out, vector<string> _headerStr=vector<string>());
 
 #endif

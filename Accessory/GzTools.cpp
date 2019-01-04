@@ -4,10 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 //one thing to note is that gzFile is a pointer 
-#define BUF_SIZE 0x50
+#define BUF_SIZE 0x200
+//#define BUF_SIZE 0x50
+//#define BUF_SIZE 0x50
 //#define DEBUG
 
-#define CHUNK 0x500
+#define CHUNK 0x5000
+//#define CHUNK 0x50
+//#define CHUNK 0x20
 #define OUT_CHUNK CHUNK*1
 
  void debugChars(const char* s, size_t t, const string& n="");
@@ -370,7 +374,7 @@ bool getline_B(FILE* _f, string& l)
 			}
 			//calculate the size of current, it is a little complicated, note now the current_line_size holding 
 			//the strm.avail_out before reading, which is the possible len to before inflating meaning the max-value for current_line_size
-			if(current_line_size>=strm.avail_out)  //this is no wrapping up and we still have some free bytes
+			if(current_line_size>=strm.avail_out)  //this is no wrapping up (because resetting) and we still have some free bytes
 			{//could be no writing of the output due to some reason (decompressing and not more buffer)
 				if(strm.avail_out==OUT_CHUNK&&current_line_size==OUT_CHUNK)//this is a very special case
 				{
@@ -435,7 +439,10 @@ bool getline_B(FILE* _f, string& l)
 			
 		}
 		//cout<<"inflating....."<<endl;
-		
+#ifdef DEBUG
+		cout<<"Before searching for \\n, current_line_size:"<<current_line_size<<endl;
+		cout<<"\t*******current:"<<current_line<<endl;
+#endif 		
 		next_line=strcnstr(current_line,current_line_size,'\n');//current line pointing to the inflated z_stream output region , and now we start parsing (meaning trying to find a newline)
 		if(next_line){//find a newline, then we need to point the next_line to the correct region 
 #ifdef DEBUG
@@ -531,14 +538,17 @@ FILE* gzOpen_B(const string& _fname, const string & _mode)
 		cout<<"ERROR: can not open gz file. the file name has not been specified correctly"<<endl;
 		return NULL;
 	}
+	//cout<<"start opeing....."<<endl;
 	//open the file 
 	FILE* f=fopen(_fname.c_str(), _mode.c_str());
+	cout<<"here....."<<endl;
 	if(!f)
 	{
-		cout<<"ERROR: file open error (error code:"<<ferror(f)<<")!!"<<endl;
+		//cout<<"inside........"<<endl;
+		cout<<"ERROR: file open error !!"<<endl;
 		perror("\terr msg:");
-		clearerr(f);
-		fclose(f);
+		//clearerr(f);
+		//fclose(f);
 		return 0;
 	}
 	//initiate/start the zstrem
@@ -629,7 +639,7 @@ char* strcnstr(char* source, size_t size, const char& c)
 	char* pos=NULL;
 	
 	//for loop
-	for(unsigned i=0;i<=size;i++)
+	for(unsigned i=0;i<size;i++)
 	{
 		if(c==source[i])
 		{

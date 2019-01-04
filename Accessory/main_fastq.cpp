@@ -46,9 +46,9 @@ int main()
 	  cout<<"\tNo, did not find it."<<endl;
   
   //Start testing the readfastq function
-  cout<<"---------start testing read fastq ......."<<endl;
+  cout<<"---------start testing read fastq (either gz'ed or regular fastq) ......."<<endl;
   vector<Fastq> vec;
-  _fname.assign("/home/feng/Feng/hg/LocalAlign/Accessory/SCRS-01-1_S1_L002_R1_001_first98b.fastq");
+  _fname.assign("/home/feng/Feng/hg/LocalAlign/Accessory/SCRS-01-1_S1_L002_R1_001_first100.fastq.gz");
   unsigned int num=ReadFastq(_fname, vec, false);
   cout<<"total number of sequences read: "<<num<<endl;
   
