@@ -172,10 +172,10 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 	  Fastq fq(gene_info,SequenceString(gene_info, gene_sequence),quality);
 	  _seqStrVec.push_back(fq);
 	  line_count++;
-      if(line_count%10000==0)
+      if(line_count%100==0)
 		{
-		  cout<<"..... "<<line_count;
-		  cout.flush();
+		  cout<<"..... "<<line_count<<endl;
+		  //cout.flush();
 		}
       
 	 //cout<<line<<endl;
