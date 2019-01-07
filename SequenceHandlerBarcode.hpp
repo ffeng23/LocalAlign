@@ -111,6 +111,23 @@ void InsertRecordAt(const SequenceString& r1, const SequenceString& r2, const si
 			 vector<SequenceString>& _vecBarSeq1, /*this is the barcode sequences R1*/
 		     vector<SequenceString>& _vecBarSeq2, /*this is the barcode sequences R2*/
 			 vector<unsigned>& _vecCount);
+			 
+//for the group of 3 functions below, GetBarcodes2, FindInsertionPosition2, InsertRecordAt2,
+//we are doing basically the identically manipulations by insertion sort kind of algorithm
+//the things we changed are using extra index array to take care of insertion aiming to 
+//increase the performance. In the original function, we using vector, the insertion is 
+//slow, therefore we try to copy over manually. But still this is slow. So now we try to
+//now add an index array. We don't insert or work on vecotr of SequenceString, but instead
+//we do it on array of indexes (unsigned). We pre-allocate the array and using memcpy to 
+//"insert/shift" elements. Hope we will make it faster.
+
+unsigned int GetBarcodes2(vector<SequenceString>& _vecIndex1, /*this is the sequence index data r1*/
+		     vector<SequenceString>& _vecIndex2, /*this is the sequence index data r2*/
+		     const bool& dualIndex, /*indicating whether to do dual indexes, Index1 and Index2 are available*/
+			 vector<SequenceString>& _vecBarSeq1, /*this is the barcode sequences R1*/
+		     vector<SequenceString>& _vecBarSeq2, /*this is the barcode sequences R2*/
+			 vector<unsigned>& _vecCount /*show the number of sequences holding the barcodes*/
+			 );
 
 #endif
 

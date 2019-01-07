@@ -104,7 +104,7 @@ void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const 
       ofs<<">"<<_seqStrVec.at(i).GetName()<<"\n";
       for(unsigned int j=0;j*_width<_seqStrVec.at(i).GetLength();j++)
 	{
-	  ofs<<_seqStrVec.at(i).GetSequence().substr(j*_width, _width)<<endl;
+	  ofs<<_seqStrVec.at(i).GetSequence().substr(j*_width, _width)<<"\n";
 	}
     }
 
@@ -286,23 +286,23 @@ void WriteTextTableFile(const string& _fname, vector<vector<string> >& _seqStrVe
 	    }
 	}
       if(_headerStr.size()<colNum)
-	{
-	  //cout<<"heaer line is smaller"<<endl;
-	  for(unsigned int i=_headerStr.size();i<colNum;i++)
-	    {
-	      _headerStr.push_back("NA");
-	    }
-	}
+		{
+		  //cout<<"heaer line is smaller"<<endl;
+		  for(unsigned int i=_headerStr.size();i<colNum;i++)
+			{
+			  _headerStr.push_back("NA");
+			}
+		}
       for(unsigned int i=0;i<colNum;i++)
-	{
-	  //cout<<"writing "<<i<<"...";
-	  ofs<<_headerStr.at(i);
-	  //cout<<"elsment :"<<_headerStr.at(i)<<"xxx";
-	  if(i!=colNum-1)
-	    ofs<<c;
-	  else
-	    ofs<<"\n";
-	}
+		{
+		  //cout<<"writing "<<i<<"...";
+		  ofs<<_headerStr.at(i);
+		  //cout<<"elsment :"<<_headerStr.at(i)<<"xxx";
+		  if(i!=colNum-1)
+			ofs<<c;
+		  else
+			ofs<<"\n";
+		}
       //cout<<endl;
     }
   
@@ -320,28 +320,43 @@ void WriteTextTableFile(const string& _fname, vector<vector<string> >& _seqStrVe
     }
   //cout<<"maxsize is (after):"<<maxSize<<endl;
 
-  vector<string> tempStr;
+  //vector<string> tempStr;
+  string sw;
   for(unsigned int j=0;j<maxSize;j++)
     {
       //ofs<<">"<<_seqStrVec.at(i).GetName()<<"\n";
-      
+      //sw.assign("");
       for(unsigned int i=0;i<_seqStrVec.size();i++)
 		{
-		  tempStr=_seqStrVec.at(i);
+		  //tempStr=_seqStrVec.at(i);
 		  //in case the vectors are of unequal length
-		  if(j<tempStr.size())
+		  if(j<_seqStrVec.at(i).size())
 			{
-			  ofs<<tempStr.at(j);
+			  //ofs<<tempStr.at(j);
+			  sw.append(_seqStrVec.at(i).at(j));
 			}
 		  else
 			{
-			  ofs<<"";
+			  //ofs<<"";
+			  sw.append("");
 			}
 		  if(i!=colNum-1)
-			ofs<<c;
+		  {
+			//ofs<<c;
+			sw.append(1, c);
+		  }
 		  else
-			ofs<<"\n";
-		}	
+		  {
+			//ofs<<"\n";
+			sw.append("\n");
+		  }
+		}
+	  if((j%10000==0&&j>0)||j==maxSize-1)
+	  {
+		  ofs<<sw;
+		  sw.assign("");
+	  }
+		
 	/*if((i+1)%_width==0||i==_seqStrVec.size()-1)
 	{
 	  ofs<<"\n";

@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
   vector<SequenceString> v_BarSeq2;
   vector<unsigned> v_count;
   cout<<"Counting unique barcodes from indexes......."<<endl;
-  unsigned numOfBar=GetBarcodes(v_index1, v_index2, dualIndex, v_BarSeq1, v_BarSeq2, v_count);
+  unsigned numOfBar=GetBarcodes2(v_index1, v_index2, dualIndex, v_BarSeq1, v_BarSeq2, v_count);
   cout<<"\n\tnumber of bar:"<<numOfBar<<endl;
   
   cout<<"Start writting output files..........."<<endl;
@@ -150,6 +150,7 @@ int main(int argc, char* argv[])
   WriteFasta(sequenceFile_name+"bar2.fasta", v_BarSeq2);
   WriteTextFile(sequenceFile_name+"count.txt", v_count);
 
+  cout<<"prepare for the stat table writing........"<<endl;
   //make it ready as a table
   vector<vector<string> > stat_vec;
   vector<string> bar1;
@@ -177,7 +178,8 @@ int main(int argc, char* argv[])
   header.push_back("count");
   
   //now calling to get it written down to the disk
-WriteTextTableFile(sequenceFile_name+"_stat.txt",stat_vec, '\t',true, ios_base::out,header); 
+  cout<<"Writing the states............"<<endl;
+  WriteTextTableFile(sequenceFile_name+"_stat.txt",stat_vec, '\t',true, ios_base::out,header); 
   
   return 0;
 }

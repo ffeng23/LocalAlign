@@ -5,12 +5,12 @@
 #include <stdlib.h>
 //one thing to note is that gzFile is a pointer 
 #define BUF_SIZE 0x200
-//#define BUF_SIZE 0x50
+//#define BUF_SIZE 0x100
 //#define BUF_SIZE 0x50
 //#define DEBUG
 
 #define CHUNK 0x500000
-//#define CHUNK 0x50
+//#define CHUNK 0x200
 //#define CHUNK 0x20
 #define OUT_CHUNK CHUNK*1
 
@@ -92,7 +92,7 @@ bool getline_A(gzFile _if, string& _line )
 
 ///-----------the following section contains code for getlinne B function
 #define windowBits 15
-#define ENABLE_ZLIB_GZIP 32
+#define ENABLE_ZLIB_GZIP 16
 
 //this is a stream for gzreading and decompression
 static z_stream strm = {0};
@@ -110,11 +110,22 @@ int init_gzip_stream(bool full/*FILE* file,char* out*/)
 			strm.zalloc = Z_NULL;
 			strm.zfree = Z_NULL;
 			strm.opaque = Z_NULL;
-			strm.next_in = gzip_in; //bytes holding the input data 
+			strm.next_in = Z_NULL; //bytes holding the input data 
 			strm.avail_in = 0;
+			x=inflateInit2 (& strm,  windowBits| ENABLE_ZLIB_GZIP);
+			//x=inflateInit (& strm);//,  windowBits | ENABLE_ZLIB_GZIP);
+			if(x!=Z_OK)
+			{
+				cout<<"******ERROR: in initialize the strm buffer..........."<<endl;
+			}
+			else
+			{
+				cout<<"****good at initializing buffer............."<<endl;
+			}
+			strm.next_in = gzip_in; //bytes holding the input data 
+			//strm.avail_in = 0;
 			strm.next_out = gzip_out; //bytes holding the output data
 			strm.avail_out=OUT_CHUNK;
-			x=inflateInit2 (& strm,  windowBits | ENABLE_ZLIB_GZIP);			
 		}
 		else
 		{ //The application must update next_in and avail_in when avail_in has dropped to zero. 
@@ -145,7 +156,9 @@ void debugZstream(const string& s)
 		
 		cout<<"\t&gzip_out initialized lenth:"<<OUT_CHUNK<<endl;
 		cout<<"\t^gzip_out detected lenth:"<<strlen((char*)gzip_out)<<endl;
-		cout<<"\t^gzip_out string:"<<gzip_out<<endl;
+		cout<<"\t^gzip_out string: "<<gzip_out<<endl;
+		cout<<"\t~gzip_in first char: ID1--"<<(int)(gzip_in[0])<<";ID2--"<<(int)(gzip_in[1])
+			<<";CM--"<<(int)(gzip_in[2])<<endl;
 		cout<<"\t*pointer addresses---gzip_in:strm.next_in ("<< static_cast<const void *>(gzip_in)<<":"<<static_cast<const void *>(strm.next_in)<<")"<<endl;
 		cout<<"\t* gzip_out:strm.next_out ("<<static_cast<const void *>(gzip_out)<<":"<<static_cast<const void *>(strm.next_out)<<")"<<endl;		
 		//cout<<"\tsizeof(char):"<<sizeof(char)<<"sizeof(unsigned char):"<<sizeof(unsigned char)<<endl;
@@ -203,6 +216,7 @@ void debugZstream(const string& s)
   //            printf ("string %s, length %i",gzip_out, strm.avail_out);
 			unsigned avail_out_after=strm.avail_out;
 			bool ok=true;
+			int y=0;
 			switch(rt)
 			{
 			case Z_OK: //if some progress has been made (more input processed or more output produced), 
@@ -214,10 +228,16 @@ void debugZstream(const string& s)
 				break;
 			case Z_STREAM_END:  //if the end of the compressed data has been reached and all uncompressed output has been produced, 
 				ok=true;
+				//strm.avail_in=0;
 #ifdef DEBUG
 				cout<<"z_stream reaching end:"<<endl;
 				//cout<<"\t"<<strm.msg<<endl;
 #endif
+				y=inflateReset(&strm);
+				if(y!=Z_OK)
+				{
+					cout<<"ERRRROR::::::::::after z_stream_end and reset"<<endl;
+				}
 				break;
 			case Z_NEED_DICT: // if a preset dictionary is needed at this point, 
 				ok=false;   //not what does it mean!!

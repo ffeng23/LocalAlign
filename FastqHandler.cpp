@@ -65,8 +65,10 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 	  //	line 3: +
 	  //	line 4: quality
 	  //
+	  //cout<<"start the loop......."<<endl;
 	  if(gzflag) //compressed file 
 	  {
+		//cout<<"\tready to read........"<<endl;
 		ok=getline_B(fb, line);
 	  }
 	  else
@@ -166,19 +168,17 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 	  
 	  quality.assign(line);
 		
-	  
+	 //cout<<line<<endl; 
 	
 	  //done, now we need to push to the vector 
 	  Fastq fq(gene_info,SequenceString(gene_info, gene_sequence),quality);
 	  _seqStrVec.push_back(fq);
 	  line_count++;
-      if(line_count%100==0)
+      if(line_count%10000==0)
 		{
-		  cout<<"..... "<<line_count<<endl;
-		  //cout.flush();
+		  cout<<"..... "<<line_count;//<<endl;
+		  cout.flush();
 		}
-      
-	 //cout<<line<<endl;
 	  //last, check the file end 
 		if(!gzflag)
 			ok=!ifs_p.eof();   //we don't have to check for gzipped case, since it will return false anyway.

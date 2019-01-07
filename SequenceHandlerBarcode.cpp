@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <sstream>
+#include <stdio.h>
+#include <string.h>
 
 #include "SequenceHandlerBarcode.hpp"
 //#include "OverlapAlignment.hpp"
@@ -651,5 +653,274 @@ void InsertRecordAt(const SequenceString& r1, const SequenceString& r2, const si
 		_vecBarSeq2.at(index)=r2;
 	}
 	_vecCount.at(index)=1;
+	//done
+}
+
+//doing the real insertion at the specific position "index"
+//
+static void InsertRecordAt2(const SequenceString& r1, const SequenceString& r2, const size_t& index, 
+		     const bool& dualIndex, /*indicating whether to do dual indexes, Index1 and Index2 are available*/
+			 vector<SequenceString>& _vecBarSeq1, /*this is the barcode sequences R1*/
+		     vector<SequenceString>& _vecBarSeq2, /*this is the barcode sequences R2*/
+			 vector<unsigned>& _vecCount, /*count array for stats */
+			 unsigned*& barVecIndex_array, /* pass a pointer by reference since it can change in here*/
+			 unsigned& currentSize /*this is the total size of the barcode index array, pass by reference*/
+			 );
+//finding where to insert the "new" barcode
+//returning an index to it. if this is not new, update the count and 
+//return string::npos 
+static size_t FindInsertionPosition2(const SequenceString& r1,const SequenceString& r2, 
+		     const bool& dualIndex, /*indicating whether to do dual indexes, Index1 and Index2 are available*/
+			 vector<SequenceString>& _vecBarSeq1, /*this is the barcode sequences R1*/
+		     vector<SequenceString>& _vecBarSeq2, /*this is the barcode sequences R2*/
+			 vector<unsigned>& _vecCount,
+			 const unsigned * const barVecIndex_array /*we will not change the value and the pointer, the total 
+											size should be bigger than the acutal number of elemets, which is 
+											the size of the _vecBarSeq1.size()*/ 
+			 );
+
+//for the group of 3 functions below, GetBarcodes2, FindInsertionPosition2, InsertRecordAt2,
+//we are doing basically the identically manipulations by insertion sort kind of algorithm
+//the things we changed are using extra index array to take care of insertion aiming to 
+//increase the performance. In the original function, we using vector, the insertion is 
+//slow, therefore we try to copy over manually. But still this is slow. So now we try to
+//now add an index array. We don't insert or work on vecotr of SequenceString, but instead
+//we do it on array of indexes (unsigned). We pre-allocate the array and using memcpy to 
+//"insert/shift" elements. Hope we will make it faster.
+
+unsigned int GetBarcodes2(vector<SequenceString>& _vecIndex1, /*this is the sequence index data r1*/
+		     vector<SequenceString>& _vecIndex2, /*this is the sequence index data r2*/
+		     const bool& dualIndex, /*indicating whether to do dual indexes, Index1 and Index2 are available*/
+			 vector<SequenceString>& _vecBarSeq1, /*this is the barcode sequences R1*/
+		     vector<SequenceString>& _vecBarSeq2, /*this is the barcode sequences R2*/
+			 vector<unsigned>& _vecCount /*show the number of sequences holding the barcodes*/
+			 )
+{
+	cout<<"processing indexes:"<<flush;
+	//prepare for the index array
+	unsigned split =3;
+	unsigned currentSize=_vecIndex1.size()/split;
+	if(currentSize==0)
+		currentSize=_vecIndex1.size();
+	
+	unsigned* barVecIndex_array=new unsigned[currentSize];
+	
+	//go through the indexes and insert into the output Barcode vector
+	for(unsigned i=0;i<_vecIndex1.size();i++)
+	{	
+		if(i%10000==0)
+		{
+			cout<<i<<"/"<<_vecIndex1.size()<<"...."<<flush;
+		}
+		//check whether it has been doing insertion sort kind of operation
+		//working lists of barcodes.
+		SequenceString r1(_vecIndex1.at(i));
+		SequenceString r2;
+		if(dualIndex)
+			r2=_vecIndex2.at(i);
+		//cout<<"i:"<<i<<endl;
+		size_t pos=FindInsertionPosition2(r1,r2,dualIndex,
+					_vecBarSeq1, _vecBarSeq2, _vecCount, barVecIndex_array);
+		//cout<<"\tafter position"<<endl;
+		if(pos!=string::npos)
+			InsertRecordAt2(r1,r2,pos, dualIndex, _vecBarSeq1,_vecBarSeq2,_vecCount, barVecIndex_array, currentSize);
+		//else //otherwise we are, because this one is alreay in the barcode vec, and we have update the count in the FindInsertionPosition function
+		//cout<<"\tdone for one loop"<<endl;
+	}
+
+	//clean up
+	delete [] barVecIndex_array;
+	/*
+	//turning lists back into vectors
+	for(list<SequenceString>::it=listBarSeq1.cbegin();it!=cend();it++)
+	{
+		_vecBarSeq1.push_back(*it);
+	}
+	
+	if(dualIndex)
+	{
+		for(list<SequenceString>::it=listBarSeq2.cbegin();it!=cend();it++)
+		{
+			_vecBarSeq2.push_back(*it);
+		}
+	}
+	*/
+	return _vecBarSeq1.size();				
+}
+
+//finding where to insert the "new" barcode
+//returning an index to it. if this is not new, update the count and 
+//return string::npos
+ 
+static size_t FindInsertionPosition2(const SequenceString& r1,const SequenceString& r2, 
+		     const bool& dualIndex, /*indicating whether to do dual indexes, Index1 and Index2 are available*/
+			 vector<SequenceString>& _vecBarSeq1, /*this is the barcode sequences R1*/
+		     vector<SequenceString>& _vecBarSeq2, /*this is the barcode sequences R2*/
+			 vector<unsigned>& _vecCount,
+			 const unsigned * const barVecIndex_array /*we will not change the value and the pointer, the total 
+											size should be bigger than the acutal number of elemets, which is 
+											the size of the _vecBarSeq1.size()*/ 
+			 )
+{
+	//now we are doing the barcode vector index array, in order to insert index instead of sequence string recods
+	//to the vector.
+	//we assume the total size of this index array is no smaller than the veBarSeq array
+	
+	//now we first need to compare the sequences and find the location to insert
+	size_t start=0;
+	size_t end=_vecBarSeq1.size()-1;
+	
+	size_t middle;//=(start+end)/2;
+	string ss;
+	size_t in_pos=0;
+	
+	SequenceString r=r1;
+	if(dualIndex)
+	{
+		r.SetSequence(r1.GetSequence()+r2.GetSequence());
+	}
+	for(;end>=start&&_vecBarSeq1.size()!=0;)//check for cases where we only have 0 elements
+	{						//end==start means we have one element, start ==0 and end ==0. 1 element
+							//_listBarSeq1.size()==0, no elements
+							//end<start occurs only when we have zero element in here.
+							//mean we only take care non-zero case in the loop.
+							//we need take care 1 or more element case in here 
+		middle=(start+end)/2;//in case one element, middle == start
+		//do comparison
+		ss.assign(_vecBarSeq1.at(barVecIndex_array[middle]).GetSequence());
+		if(dualIndex)
+		{
+			ss.append(_vecBarSeq2.at(barVecIndex_array[middle]).GetSequence());
+		}
+		int c=ss.compare(r.GetSequence());
+		if(c==0) //we are done
+		{
+			//update the
+			_vecCount.at(barVecIndex_array[middle])+=1;
+			return string::npos;
+		}
+		else
+		{
+			if(c<0)
+			{
+				if(end==start+1)//only possible case where we have more than one elements in the vector 
+				{
+					//in this case, the middle is the start, this means the inserting string is bigger 
+					//(i.e. the ss string is smaller than r). this is most likely the case.
+					//now we need to compare this one to the "end" string
+					ss.assign(_vecBarSeq1.at(barVecIndex_array[end]).GetSequence());
+					if(dualIndex)
+					{
+						ss.append(_vecBarSeq2.at(barVecIndex_array[end]).GetSequence());
+					}
+					//check for "end" string 
+					int c_2=ss.compare(r.GetSequence());
+					if(c_2==0)
+					{
+						_vecCount.at(barVecIndex_array[end])+=1;//insert after "end" string 
+						return string::npos;
+					}
+					else //for un-equal cases 
+					{
+						if(c_2<0)  //the end position string also smaller
+						{
+							in_pos=end+1;
+							break;
+						}
+						else //c_2>0
+						{
+							in_pos=end;
+							break;
+						}
+					}						
+						
+				}
+				if(end==start)//only possible case is where we have only 1 element in the vector
+				{
+					in_pos=middle+1; //also equivalently end+1 or start+1
+					break;
+				}
+				start=middle;
+			}
+			else //c>0
+			{
+				if(end==start+1)//only possible case where we have more than one elements in the vector 
+				{
+					//in this case start==middle. so start is bigger, which means the all bigger 
+					//than the inserting string, assuming we are dealing with a sorted vector .
+					in_pos=start;
+					break;
+				}
+				if(end==start)//only possible case is where we have only 1 element in the vector
+				{
+					in_pos=start;
+					break;
+				}
+				//if we are here, we might have many elements.
+				end=middle;
+			}
+		}
+	}
+	return in_pos;
+}
+
+//doing the real insertion at the specific position "index"
+//
+static void InsertRecordAt2(const SequenceString& r1, const SequenceString& r2, const size_t& index, 
+		     const bool& dualIndex, /*indicating whether to do dual indexes, Index1 and Index2 are available*/
+			 vector<SequenceString>& _vecBarSeq1, /*this is the barcode sequences R1*/
+		     vector<SequenceString>& _vecBarSeq2, /*this is the barcode sequences R2*/
+			 vector<unsigned>& _vecCount, /*count array for stats */
+			 unsigned*& barVecIndex_array, /* pass a pointer by reference since it can change in here*/
+			 unsigned& currentSize /*this is the total size of the barcode index array, pass by reference*/
+			 )
+{
+	//in this function, we will for sure insert a new record.
+	//do it in the begin to check for the size of the barVecIndex_array
+	//to make sure it holds enough elements
+	if(currentSize<=_vecBarSeq1.size()) //it should never be smaller, when it equals to vec size, 
+				//we need to increase the size, since we will insert more (at least one here). 
+	{
+		unsigned tempSize=currentSize*2;
+		unsigned* tempArr=new unsigned [tempSize];
+		//copy over
+		memcpy(tempArr, barVecIndex_array, sizeof(unsigned)*currentSize);
+		//delete old
+		delete[] barVecIndex_array;
+		barVecIndex_array=tempArr;
+		currentSize=tempSize;
+	}
+	
+	//shift all the elements after index-1 one position towards the end of barVecIndex_array, 
+	//keep the ones at the postion 0 to index-1 unchanged
+	memcpy(&(barVecIndex_array[index+1]), &(barVecIndex_array[index]), sizeof(unsigned)*(_vecBarSeq2.size()-index));
+	barVecIndex_array[index]=_vecBarSeq1.size();
+	
+	_vecBarSeq1.push_back(r1);
+	
+	if(dualIndex)
+	{
+		_vecBarSeq2.push_back(r2);
+	}
+	_vecCount.push_back(1);
+	
+	/*
+	//cout<<"index:"<<index<<";size:"<<_vecBarSeq1.size()<<endl;
+	//now move it. from the back
+	for(unsigned i=_vecBarSeq1.size()-1;i>index;i--)
+	{
+		//move i-1 to i
+		_vecBarSeq1.at(i)=_vecBarSeq1.at(i-1);
+		if(dualIndex)
+			_vecBarSeq2.at(i)=_vecBarSeq2.at(i-1);
+		_vecCount.at(i)=_vecCount.at(i-1);
+	}
+	//insert record to the index
+	_vecBarSeq1.at(index)=r1;
+	if(dualIndex)
+	{
+		_vecBarSeq2.at(index)=r2;
+	}
+	_vecCount.at(index)=1;*/
 	//done
 }
