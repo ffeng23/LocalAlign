@@ -8,10 +8,11 @@ we will not demux, but simply do stats. To do demux, we need to run
 NGSMapping_barcode_main.cpp to get partial match etc.
 
 to call
-ngsmapping_getBarcode -n -s file.fastq(.gz) -d
+ngsmapping_getBarcode -n -s file.fastq(.gz) -d -l 8
 
   #-n to do read from sequence name, -s is the data file
   #-d is the dualindex mode.
+  #-s is the sequence read file, we are getting barcoes/indexes from the name of sequences.
 there are 3 outputs, unique barcode in fasta format (r1 and r2),
       stats/counts of each barcods
       table format summarizing together including above two.

@@ -1,6 +1,6 @@
 #ifndef SEQUENCEHANDLERCOMMON_HPP
 #define SEQUENCEHANDLERCOMMON_HPP
-#include "SequenceString.hpp"
+#include "Accessory/SequenceString.hpp"
 #include "score.hpp"
 
 

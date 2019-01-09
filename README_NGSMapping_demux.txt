@@ -7,7 +7,11 @@ calling commands
 	
 	
 ../ngsmapping_demux -b Barcode7b_R1.fasta -a Barcode7b_R2.fasta -t -s Undetermined_S0_L002_R1_001_1000.fasta -q Undetermined_S0_L002_R2_001_1000.fasta -d >temp.txt
-
+		#-t read indexes from the name of the sequences.
+		#-s and -q are the sequence data 
+		#-d is to do demux
+		#-b and -a, the expected barcodes 
+		
 ./ngsmapping_demux, the program used to demux or runs stats of indexes. It would read in
 barcodes and sequence indexes and then match(instead of align) to find them.
 We assume that the index (read) and barcode (expected) are having identical length.
@@ -73,3 +77,12 @@ Note: 1)when do comparison, always use barcode(expected) to
 	7)all the files should have the same name or order in order to reference them
 			 *************@4/2/2014 by Feng
 			*********updated by Feng @ BU 2018
+			
+####1/8/2019, run this to parse out the indexes, no demux, but reading from the output of
+				#the ngsmapping_getbarcode, index1 and index2, allowing maximal 2 mismatches.
+				#we want to see how the barcodes working on the data\
+				#for WL02nano first try
+###this below calling is correct, but the input indexes are not including all. are unique ones from ngsmapping_getbarcode run. so run the next one below this one.
+./ngsmapping_demux -f Undetermined_S0_L001_R1_001.fastq.gzbar1.fasta -e Undetermined_S0_L001_R1_001.fastq.gzbar2.fasta -b WL02Nano_barcode1.fasta -a WL02Nano_barcode2.fasta -d -m2
+
+####calling on reading the 

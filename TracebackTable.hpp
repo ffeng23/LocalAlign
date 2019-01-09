@@ -1,7 +1,7 @@
 #ifndef TRACEBACKTABLE_HPP
 #define TRACEBACKTABLE_HPP
 
-#include "SequenceString.hpp"
+#include "Accessory/SequenceString.hpp"
 
 //this is struct to record the link back for tracing
 //zero is for local align to indicate this is a zero node for terminating a path

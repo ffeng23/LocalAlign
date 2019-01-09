@@ -14,9 +14,9 @@ LOADFLAG=-s -lm -lz
 CXXFLAG=${CFLAG}
 ALIGNMENTDIR=../
 SIGPIGDIR=../SIGPIG/
-SRCS_0=main.cpp Poisson.cpp 
+SRCS_0=main.cpp Poisson.cpp FASTQ.cpp SequenceString.cpp GzTools.cpp FastqHandler.cpp string_ext.cpp FastaHandler.cpp FileHandler.cpp
 
-SRCS_1=	main_fastq.cpp ${ALIGNMENTDIR}FASTQ.cpp ${ALIGNMENTDIR}SequenceString.cpp GzTools.cpp ${ALIGNMENTDIR}FastqHandler.cpp string_ext.cpp ${ALIGNMENTDIR}SequenceHandlerBarcode.cpp ${ALIGNMENTDIR}SequenceHandlerCommon.cpp ${ALIGNMENTDIR}FastaHandler.cpp ${ALIGNMENTDIR}score.cpp
+SRCS_1=	main_fastq.cpp FASTQ.cpp SequenceString.cpp GzTools.cpp FastqHandler.cpp string_ext.cpp ${ALIGNMENTDIR}SequenceHandlerBarcode.cpp ${ALIGNMENTDIR}SequenceHandlerCommon.cpp FastaHandler.cpp ${ALIGNMENTDIR}score.cpp
 
 #SRCS_1=	main_reformat.cpp ${ALIGNMENTDIR}string_ext.cpp ${ALIGNMENTDIR}SequenceString.cpp ${ALIGNMENTDIR}FastaHandler.cpp ${SIGPIGDIR}LoadData.cpp
 

@@ -1,13 +1,17 @@
 #include <iostream>
 #include <string.h>
 
-#include "../FASTQ.hpp"
-#include "../FastqHandler.hpp"
+#include "FASTQ.hpp"
+#include "FastqHandler.hpp"
 #include "../SequenceHandlerBarcode.hpp"
-#include "../FastaHandler.hpp"
+#include "FastaHandler.hpp"
 using namespace std;
-int main()
+
+string ifname("/home/feng/Feng/hg/LocalAlign/Accessory/SCRS-01-1_S1_L002_R1_001_first100.fastq.gz");
+int main(int argc, char* argv[])
 {
+  if(argc ==2)
+	  ifname.assign(argv[1]);
 
   cout<<"****Testing Poisson distribution******"<<endl;
 //string c("hello world");
@@ -48,7 +52,8 @@ int main()
   //Start testing the readfastq function
   cout<<"---------start testing read fastq (either gz'ed or regular fastq) ......."<<endl;
   vector<Fastq> vec;
-  _fname.assign("/home/feng/Feng/hg/LocalAlign/Accessory/SCRS-01-1_S1_L002_R1_001_first100.fastq.gz");
+  _fname.assign(ifname);
+  
   unsigned int num=ReadFastq(_fname, vec, false);
   cout<<"total number of sequences read: "<<num<<endl;
   
@@ -74,7 +79,7 @@ int main()
   
   cout<<"Reading indexes from Sequence names......."<<endl;
   unsigned numOfSeq=ReadIndexFromSequenceName(v_seq, v_index1, v_index2, lenOfBarcode, dualIndex);
-  
+
   cout<<"\tnumber of sequences processed:"<<numOfSeq<<endl;
   
   /*for(unsigned i=0;i<v_index1.size();i++)

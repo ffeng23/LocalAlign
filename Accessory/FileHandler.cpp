@@ -1,6 +1,12 @@
 #include "FileHandler.hpp"
 #include "string_ext.hpp"
+#include "FASTQ.hpp"
+#include "FastaHandler.hpp"
+#include "FastqHandler.hpp"
 #include <string>
+#include <string.h>
+
+
 bool is_file(const char* path) {
     struct stat buf;
     stat(path, &buf);
@@ -103,4 +109,67 @@ FileType getFileType(const string& fname)
 	return UNKNOWN;
 }
 
+
+//a file handler to read file into a fasta vector vector
+//we try to detect the following thing in this function 
+// 1, file exist?
+// 2, is it a file or directory
+// 3, is it a fasta, fastq or gziped fasta, gziped fastq. No other type supported so far
+// 
+// We will return a vector holding the squenences of the file (SquenceStrings)
+// we will return the total number of sequences read in. If none or error, we will return 
+// string::npos.
+size_t readFile2SeqStrVector(string _fname, vector<SequenceString>& _vec)
+{
+	//check for files
+	if(!exist(_fname.c_str()))
+	{
+		cout<<"ERROR: the specified file ("<<_fname<<") does not exist!!"<<endl;
+		return string::npos;
+	}
+	//check for files
+	if(is_dir(_fname.c_str()))
+	{
+		cout<<"ERROR: the specified file ("<<_fname<<") is a directory!!"<<endl;
+		return string::npos;
+	}
+	//check file type 
+	FileType ft=getFileType(_fname);
+	size_t numReads;
+	switch(ft)
+	{
+		case FASTA:
+	
+		case GZ_FASTA:
+			numReads=ReadFasta(_fname, _vec);
+			break;
+			
+		case FASTQ:
+		case GZ_FASTQ:
+		{
+			vector<Fastq> _vec_fq;
+			numReads=ReadFastq(_fname, _vec_fq);
+			if(numReads==string::npos)
+				return numReads;
+			//rewrite it into fasta vector
+			for(unsigned i=0;i<numReads;i++)
+			{
+				_vec.push_back(_vec_fq.at(i).GetSequenceString());
+			}
+			numReads=_vec.size();
+			break;
+		}	
+		case GZ:
+		case GZ_TXT:
+		case TXT:
+		case UNKNOWN:
+		case DIR:
+		default:
+			cout<<"ERROR: unsupported file format for this action"<<endl;
+			numReads= string::npos;
+			break;
+	}
+	
+	return _vec.size();
+}	
 

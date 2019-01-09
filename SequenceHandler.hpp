@@ -5,7 +5,7 @@
 #include <string>
 #include "SequenceHandlerCommon.hpp"
 
-#include "SequenceString.hpp"
+#include "Accessory/SequenceString.hpp"
 #include "score.hpp"
 
 //this translation unit is to define some function to take care of sequence mapping

@@ -10,10 +10,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "FASTQ.hpp"
-#include "FastqHandler.hpp"
+#include "Accessory/FASTQ.hpp"
+#include "Accessory/FastqHandler.hpp"
 #include "SequenceHandlerBarcode.hpp"
-#include "FastaHandler.hpp"
+#include "Accessory/FastaHandler.hpp"
 using namespace std;
 
 //global function for help and input

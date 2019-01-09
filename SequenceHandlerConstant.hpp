@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include "SequenceString.hpp"
+#include "Accessory/SequenceString.hpp"
 #include "score.hpp"
 
 using namespace std;

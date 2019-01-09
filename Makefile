@@ -14,18 +14,20 @@ CXXFLAG=${CFLAG}
 
 ACCESSDIR=Accessory/
 
-SRCS_0=main.cpp ${ACCESSDIR}string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp LocalAlignment.cpp GlobalAlignment.cpp OverlapAlignment.cpp FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp TracebackTable.cpp SequenceHandlerCommon.cpp
+SRCS_0=main.cpp ${ACCESSDIR}string_ext.cpp score.cpp ${ACCESSDIR}SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp LocalAlignment.cpp GlobalAlignment.cpp OverlapAlignment.cpp ${ACCESSDIR}FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp TracebackTable.cpp SequenceHandlerCommon.cpp ${ACCESSDIR}GzTools.cpp
 
-SRCS_1=	NGSMapping_Adaptor_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp TracebackTable.cpp SequenceHandlerCommon.cpp LocalAlignment.cpp
+SRCS_1=	NGSMapping_Adaptor_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp ${ACCESSDIR}SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp ${ACCESSDIR}FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp TracebackTable.cpp SequenceHandlerCommon.cpp LocalAlignment.cpp ${ACCESSDIR}GzTools.cpp
 
-SRCS_2=	NGSMapping_PrimerDimer_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp TracebackTable.cpp SequenceHandlerCommon.cpp LocalAlignment.cpp
+SRCS_2=	NGSMapping_PrimerDimer_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp ${ACCESSDIR}SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp ${ACCESSDIR}FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp TracebackTable.cpp SequenceHandlerCommon.cpp LocalAlignment.cpp ${ACCESSDIR}GzTools.cpp
 
-SRCS_3=	NGSMapping_Constant_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp FastaHandler.cpp SequenceHandlerConstant.cpp TracebackTable.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp LocalAlignment.cpp SequenceHandlerCommon.cpp
+SRCS_3=	NGSMapping_Constant_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp ${ACCESSDIR}SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp ${ACCESSDIR}FastaHandler.cpp SequenceHandlerConstant.cpp TracebackTable.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp LocalAlignment.cpp SequenceHandlerCommon.cpp ${ACCESSDIR}GzTools.cpp
 
-SRCS_4=	NGSMapping_Isotype_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp FastaHandler.cpp SequenceHandlerIsotype.cpp TracebackTable.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp LocalAlignment.cpp SequenceHandlerCommon.cpp
+SRCS_4=	NGSMapping_Isotype_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp ${ACCESSDIR}SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp ${ACCESSDIR}FastaHandler.cpp SequenceHandlerIsotype.cpp TracebackTable.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp LocalAlignment.cpp SequenceHandlerCommon.cpp ${ACCESSDIR}GzTools.cpp
 
-SRCS_5=NGSMapping_Demux_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp SequenceString.cpp AlignmentString.cpp FastaHandler.cpp SequenceHandlerCommon.cpp SequenceHandlerBarcode.cpp
-SRCS_6=NGSMapping_getBarcode_main.cpp FASTQ.cpp SequenceString.cpp ${ACCESSDIR}GzTools.cpp FastqHandler.cpp ${ACCESSDIR}string_ext.cpp SequenceHandlerBarcode.cpp SequenceHandlerCommon.cpp FastaHandler.cpp score.cpp ${ACCESSDIR}FileHandler.cpp
+SRCS_5=NGSMapping_Demux_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp ${ACCESSDIR}SequenceString.cpp AlignmentString.cpp ${ACCESSDIR}FastaHandler.cpp SequenceHandlerCommon.cpp SequenceHandlerBarcode.cpp ${ACCESSDIR}GzTools.cpp ${ACCESSDIR}FileHandler.cpp ${ACCESSDIR}FastqHandler.cpp ${ACCESSDIR}FASTQ.cpp
+
+SRCS_6=NGSMapping_getBarcode_main.cpp ${ACCESSDIR}FASTQ.cpp ${ACCESSDIR}SequenceString.cpp ${ACCESSDIR}GzTools.cpp ${ACCESSDIR}FastqHandler.cpp ${ACCESSDIR}string_ext.cpp SequenceHandlerBarcode.cpp SequenceHandlerCommon.cpp ${ACCESSDIR}FastaHandler.cpp score.cpp ${ACCESSDIR}FileHandler.cpp
+
 #SRCS_2=remove_replicates.cpp string_ext.cpp 
 
 OBJS_0=${SRCS_0:.cpp=.o}
@@ -58,8 +60,8 @@ all: $(PROG_0) $(PROG_1) $(PROG_2) $(PROG_3) $(PROG_4) $(PROG_5) $(PROG_6)
 
 clean:
 	rm -fr *.o *~ core $(PROG_0) $(PROG_1) $(PROG_2) $(PROG_3) $(PROG_4) $(PROG_5) $(PROG_6) 
-	cd $(ACCESSDIR); rm -fr *.o *~ core; ls ; cd ../ ; pwd ; # note makefile is a script and each command is doing its own sub-precess
-	
+	cd $(ACCESSDIR); rm -fr *.o *~ core; #ls ;   #pwd ; # note makefile is a script and each command is doing its own sub-precess
+
 .cpp.o:   #old fasion suffix rule, double suffix rule
 	$(GXX) $(CXXFLAG) -c $< -o $(addsuffix .o, $(basename $<))
 
