@@ -29,7 +29,7 @@ the end.
  
 -d 2  for 3' mapping
 -g 10 to gap opening of 10 might be good
--e 5 to extension of score of 5
+-e 5 to extension score of 5
 -n 0.7 70% matching is a good empirical rate.
 
 the rest should be using the default one.
