@@ -1,21 +1,41 @@
 #include "FastaHandler.hpp"
 #include <stdlib.h>
+#include <string.h>
 //#include <stdio.h>
 #include <fstream>
 #include <zlib.h>
-#include "Accessory/string_ext.hpp"
+#include "string_ext.hpp"
+#include "GzTools.hpp"
+
 using namespace std;
-unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec, bool toUpper)
+size_t ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec, bool toUpper)
 {
-  ifstream ifs_p(_fname.c_str());
-      
-  if(!ifs_p.is_open())
+	//need to know whether this is compressed file;
+	//we are using the ".gz" suffix as a criterion for the compressed file.
+	//we only do gzip compression.not others.
+	bool gzflag=_fname.substr(_fname.size()-3, 3)==".gz";
+	
+  ifstream ifs_p;//(_fname.c_str());
+  FILE* fb=NULL;
+  if(gzflag) //gziped
+  {
+  //cout<<"....1"<<endl;
+	fb=gzOpen_B(_fname, "rb");
+	if(!fb)
+	{
+		cout<<">>>>>>ERROR:input file\""<<_fname<<"\" can not be opened, quit....\n"<<endl;
+		return string::npos;
+	}
+  } 
+  else
+  {
+	 ifs_p.open(_fname);
+	if(!ifs_p.is_open())
     {
       cout<<">>>>>>ERROR:the input file \""<<_fname<<"\" can not be opened, quit....\n";
-      exit(-1);
-    }
-  
-
+      return string::npos;
+    }  
+  }
   //so far, we have open files, now we need to read the file first.
   string line; //out_line;
 
@@ -31,47 +51,63 @@ unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec,
   cout<<"line#: ";
   //  double d_storage, d_current;
   string temp_string;
-  while(!ifs_p.eof())
+  bool ok=true;
+  while(ok)//(!ifs_p.eof())
     {
       line_count++;
       if(line_count/5000*5000==line_count)
-	{
-	  cout<<"..... "<<line_count;
-	  cout.flush();
-	}
+		{
+		  cout<<"..... "<<line_count;
+		  cout.flush();
+		}
       //found_one=false;
-      getline(ifs_p, line);
-      chomp_ext(line);
+	  //cout<<"start the loop......."<<endl;
+	  if(gzflag) //compressed file 
+	  {
+		//cout<<"\tready to read........"<<endl;
+		ok=getline_B(fb, line);
+	  }
+	  else
+		getline(ifs_p, line);
+      
+	  chomp_ext(line);
 
       if(line.compare("\n")==0||line.length()==0||line.compare("\t")==0||line.compare("\t\t")==0)
-	{
-	  cout<<"...read an empty row (skip!)"<<endl;
-	  continue;
-	}
+		{
+		  cout<<"...read an empty row (skip!)"<<endl;
+		   //last, check the file end 
+		  if(!gzflag)
+			ok=!ifs_p.eof();
+		
+		  continue;
+		}
             //cout<<"here......"<<endl;
       if(line[0]=='>')
-	{
-	  //this is a new refSeq header line,
-	  temp_string=line.substr( 1,line.length());
-	  	  	  
-	  if(gene_number>0) //we already read something, so we have to store it to the vector
-	    {
+		{
+		  //this is a new refSeq header line,
+		  temp_string=line.substr( 1,line.length());
+				  
+		  if(gene_number>0) //we already read something, so we have to store it to the vector
+			{
 
-	      SequenceString ss(gene_info,to_upper_str(temp_seq));
-	      _seqStrVec.push_back(ss);
-	      
-	    }//otherwise, we are doing the first one, so do bother
-	  gene_info=temp_string;
-	  temp_seq.clear();
-	  gene_number++;
-	  
-	}
+			  SequenceString ss(gene_info,to_upper_str(temp_seq));
+			  _seqStrVec.push_back(ss);
+			  
+			}//otherwise, we are doing the first one, so do not bother
+		  gene_info=temp_string;
+		  temp_seq.clear();
+		  gene_number++;
+		  
+		}
       else
-	{//append the seqence to it
-	  temp_seq.append(line);
-	  //temp_seq.append("\n");
-	}
+		{//append the seqence to it
+		  temp_seq.append(line);
+		  //temp_seq.append("\n");
+		}
 
+		//at the end we need to check for end of file for regular reading (not gz'ed file)
+		if(!gzflag)
+			ok=!ifs_p.eof();	
     }
   
   //here we have to update/add the last gene
@@ -85,7 +121,15 @@ unsigned int ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec,
       <<"\tsummary: total "<<line_count<<" line read in and \n"
       <<"\t\t"<<gene_number<<" sequences store in the vector...."<<endl;
   
-  ifs_p.close();
+  if(gzflag)
+  {
+	gzClose_B(fb);
+  }
+  else
+  {  
+	ifs_p.close();
+  }
+  
   return gene_number;
 }
 

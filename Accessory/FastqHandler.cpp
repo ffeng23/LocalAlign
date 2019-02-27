@@ -3,12 +3,12 @@
 //#include <stdio.h>
 #include <fstream>
 #include <zlib.h>
-#include "Accessory/string_ext.hpp"
+#include "string_ext.hpp"
 using namespace std;
 
 
-
-unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toUpper)
+//return string::npos upon error 
+size_t ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toUpper)
 {
 	//need to know whether this is compressed file;
 	//we are using the ".gz" suffix as a criterion for the compressed file.
@@ -25,7 +25,7 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 		if(!fb)
 		{
 			cout<<">>>>>>ERROR:input file\""<<_fname<<"\" can not be opened, quit....\n"<<endl;
-			exit(-1);
+			return string::npos;
 		}
 	}
 	else
@@ -35,7 +35,7 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 		if(!ifs_p.is_open())
 		{
 			cout<<">>>>>>ERROR:the input file \""<<_fname<<"\" can not be opened, quit....\n"<<endl;
-			exit(-1);
+			return string::npos;
 		}
 	}  
 	//cout<<"....4 : ifs good :"<<ifs_p.good()<<endl;
@@ -95,7 +95,7 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 		}
       else
 		{//
-			cout<<"ERROR: corrupted file, no firs with '@...' please check"<<endl;
+			cout<<"ERROR: corrupted file, no lines with '@...' please check! Reading is stopped"<<endl;
 			
 			/*if(gzflag)
 			  {
@@ -146,7 +146,7 @@ unsigned int ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toU
 	  if(line[0]!='+'||line.size()!=1)
 		{
 		  //there is something wrong. we need to quit
-		  cout<<"ERROR: something wrong. the file is corrupted!!"<<endl;
+		  cout<<"ERROR: something wrong. the file is corrupted!! Reading is stopped!!"<<endl;
 		  break;
     	}
 	//cout<<line<<endl;

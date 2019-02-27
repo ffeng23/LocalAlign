@@ -2,7 +2,7 @@
 #define PAIRWISEALIGNMENT_HPP
 
 #include "score.hpp"
-#include "SequenceString.hpp"
+#include "Accessory/SequenceString.hpp"
 #include "AlignmentString.hpp"
 #include "AffineGapModel.hpp"
 #include "MarkovChainGapModel_454.hpp"

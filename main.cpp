@@ -10,11 +10,11 @@
 #include <stdio.h>
 
 #include "score.hpp"
-#include "SequenceString.hpp"
+#include "Accessory/SequenceString.hpp"
 #include "LocalAlignment.hpp"
 #include "GlobalAlignment.hpp"
 #include "OverlapAlignment.hpp"
-#include "FastaHandler.hpp"
+#include "Accessory/FastaHandler.hpp"
 #include "SequenceHandler.hpp"
 
 using namespace std;

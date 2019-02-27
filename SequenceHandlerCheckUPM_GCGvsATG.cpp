@@ -1,5 +1,5 @@
 //#include "SequenceHandler.hpp"
-#include "FastaHandler.hpp"
+#include "Accessory/FastaHandler.hpp"
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>

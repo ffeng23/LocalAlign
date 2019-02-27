@@ -1,101 +1,111 @@
 AffineGapModel.o: AffineGapModel.cpp AffineGapModel.hpp GapModel.hpp \
- TracebackTable.hpp SequenceString.hpp
+ TracebackTable.hpp Accessory/SequenceString.hpp
 AlignmentString.o: AlignmentString.cpp AlignmentString.hpp
-FastaHandler.o: FastaHandler.cpp FastaHandler.hpp SequenceString.hpp \
- Accessory/string_ext.hpp
-FASTQ.o: FASTQ.cpp FASTQ.hpp SequenceString.hpp
-FastqHandler.o: FastqHandler.cpp FastqHandler.hpp SequenceString.hpp \
- Accessory/GzTools.hpp FASTQ.hpp Accessory/string_ext.hpp
 GapModel.o: GapModel.cpp GapModel.hpp TracebackTable.hpp \
- SequenceString.hpp
+ Accessory/SequenceString.hpp
 GlobalAlignment.o: GlobalAlignment.cpp GlobalAlignment.hpp \
- pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp \
- AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
+ pairwiseAlignment.hpp score.hpp Accessory/SequenceString.hpp \
+ AlignmentString.hpp AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp
 LocalAlignment.o: LocalAlignment.cpp LocalAlignment.hpp \
- pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp \
- AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
+ pairwiseAlignment.hpp score.hpp Accessory/SequenceString.hpp \
+ AlignmentString.hpp AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp
-main.o: main.cpp Accessory/string_ext.hpp score.hpp SequenceString.hpp \
- LocalAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
- AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
+main.o: main.cpp Accessory/string_ext.hpp score.hpp \
+ Accessory/SequenceString.hpp LocalAlignment.hpp pairwiseAlignment.hpp \
+ AlignmentString.hpp AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp GlobalAlignment.hpp OverlapAlignment.hpp \
- FastaHandler.hpp SequenceHandler.hpp SequenceHandlerCommon.hpp
+ Accessory/FastaHandler.hpp Accessory/SequenceString.hpp \
+ SequenceHandler.hpp SequenceHandlerCommon.hpp
 MarkovChainGapModel_454.o: MarkovChainGapModel_454.cpp \
  MarkovChainGapModel_454.hpp AffineGapModel.hpp GapModel.hpp \
- TracebackTable.hpp SequenceString.hpp
+ TracebackTable.hpp Accessory/SequenceString.hpp
 NGSChecking_UPMGCG_ATG_main.o: NGSChecking_UPMGCG_ATG_main.cpp \
- Accessory/string_ext.hpp score.hpp SequenceString.hpp \
+ Accessory/string_ext.hpp score.hpp Accessory/SequenceString.hpp \
  OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
- MarkovChainGapModel_454.hpp FastaHandler.hpp SequenceHandlerCommon.hpp \
+ MarkovChainGapModel_454.hpp Accessory/FastaHandler.hpp \
+ Accessory/SequenceString.hpp SequenceHandlerCommon.hpp \
  SequenceHandlerCheckUPM_GCGvsATG.hpp
 NGSMapping_Adaptor_main.o: NGSMapping_Adaptor_main.cpp \
- Accessory/string_ext.hpp score.hpp SequenceString.hpp \
+ Accessory/string_ext.hpp score.hpp Accessory/SequenceString.hpp \
  OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
- MarkovChainGapModel_454.hpp FastaHandler.hpp SequenceHandler.hpp \
+ MarkovChainGapModel_454.hpp Accessory/FastaHandler.hpp \
+ Accessory/SequenceString.hpp SequenceHandler.hpp \
  SequenceHandlerCommon.hpp
 NGSMapping_Constant_main.o: NGSMapping_Constant_main.cpp \
- Accessory/string_ext.hpp score.hpp SequenceString.hpp \
+ Accessory/string_ext.hpp score.hpp Accessory/SequenceString.hpp \
  OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
- MarkovChainGapModel_454.hpp FastaHandler.hpp SequenceHandlerConstant.hpp \
+ MarkovChainGapModel_454.hpp Accessory/FastaHandler.hpp \
+ Accessory/SequenceString.hpp SequenceHandlerConstant.hpp \
  SequenceHandlerCommon.hpp
 NGSMapping_Demux_main.o: NGSMapping_Demux_main.cpp \
- Accessory/string_ext.hpp score.hpp SequenceString.hpp FastaHandler.hpp \
- SequenceHandlerCommon.hpp SequenceHandlerBarcode.hpp
+ Accessory/string_ext.hpp score.hpp Accessory/SequenceString.hpp \
+ Accessory/FastaHandler.hpp Accessory/SequenceString.hpp \
+ SequenceHandlerCommon.hpp SequenceHandlerBarcode.hpp \
+ Accessory/FileHandler.hpp
 NGSMapping_getBarcode_main.o: NGSMapping_getBarcode_main.cpp \
- Accessory/string_ext.hpp Accessory/FileHandler.hpp FASTQ.hpp \
- SequenceString.hpp FastqHandler.hpp Accessory/GzTools.hpp \
- SequenceHandlerBarcode.hpp score.hpp FastaHandler.hpp
+ Accessory/string_ext.hpp Accessory/FileHandler.hpp \
+ Accessory/SequenceString.hpp Accessory/FASTQ.hpp \
+ Accessory/FastqHandler.hpp Accessory/GzTools.hpp Accessory/FASTQ.hpp \
+ SequenceHandlerBarcode.hpp Accessory/SequenceString.hpp score.hpp \
+ Accessory/FastaHandler.hpp
 NGSMapping_Isotype_main.o: NGSMapping_Isotype_main.cpp \
- Accessory/string_ext.hpp score.hpp SequenceString.hpp \
+ Accessory/string_ext.hpp score.hpp Accessory/SequenceString.hpp \
  OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
- MarkovChainGapModel_454.hpp FastaHandler.hpp SequenceHandlerIsotype.hpp \
+ MarkovChainGapModel_454.hpp Accessory/FastaHandler.hpp \
+ Accessory/SequenceString.hpp SequenceHandlerIsotype.hpp \
  SequenceHandlerCommon.hpp
 NGSMapping_PrimerDimer_main.o: NGSMapping_PrimerDimer_main.cpp \
- Accessory/string_ext.hpp score.hpp SequenceString.hpp \
+ Accessory/string_ext.hpp score.hpp Accessory/SequenceString.hpp \
  OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
- MarkovChainGapModel_454.hpp FastaHandler.hpp SequenceHandler.hpp \
+ MarkovChainGapModel_454.hpp Accessory/FastaHandler.hpp \
+ Accessory/SequenceString.hpp SequenceHandler.hpp \
  SequenceHandlerCommon.hpp
 output.o: output.cpp
 OverlapAlignment.o: OverlapAlignment.cpp OverlapAlignment.hpp \
- pairwiseAlignment.hpp score.hpp SequenceString.hpp AlignmentString.hpp \
- AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
+ pairwiseAlignment.hpp score.hpp Accessory/SequenceString.hpp \
+ AlignmentString.hpp AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp
 pairwiseAlignment.o: pairwiseAlignment.cpp pairwiseAlignment.hpp \
- score.hpp SequenceString.hpp AlignmentString.hpp AffineGapModel.hpp \
- GapModel.hpp TracebackTable.hpp MarkovChainGapModel_454.hpp
+ score.hpp Accessory/SequenceString.hpp AlignmentString.hpp \
+ AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
+ MarkovChainGapModel_454.hpp
 score.o: score.cpp score.hpp
 SequenceHandlerBarcode.o: SequenceHandlerBarcode.cpp SequenceHandler.hpp \
- SequenceHandlerCommon.hpp SequenceString.hpp score.hpp FastaHandler.hpp \
+ SequenceHandlerCommon.hpp Accessory/SequenceString.hpp score.hpp \
+ Accessory/FastaHandler.hpp Accessory/SequenceString.hpp \
  SequenceHandlerBarcode.hpp
 SequenceHandlerCheckUPM_GCGvsATG.o: SequenceHandlerCheckUPM_GCGvsATG.cpp \
- FastaHandler.hpp SequenceString.hpp SequenceHandlerCheckUPM_GCGvsATG.hpp \
+ Accessory/FastaHandler.hpp Accessory/SequenceString.hpp \
+ SequenceHandlerCheckUPM_GCGvsATG.hpp Accessory/SequenceString.hpp \
  score.hpp OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp LocalAlignment.hpp SequenceHandlerCommon.hpp
 SequenceHandlerCommon.o: SequenceHandlerCommon.cpp \
- SequenceHandlerCommon.hpp SequenceString.hpp score.hpp
+ SequenceHandlerCommon.hpp Accessory/SequenceString.hpp score.hpp
 SequenceHandlerConstant.o: SequenceHandlerConstant.cpp \
- SequenceHandler.hpp SequenceHandlerCommon.hpp SequenceString.hpp \
- score.hpp FastaHandler.hpp SequenceHandlerConstant.hpp \
+ SequenceHandler.hpp SequenceHandlerCommon.hpp \
+ Accessory/SequenceString.hpp score.hpp Accessory/FastaHandler.hpp \
+ Accessory/SequenceString.hpp SequenceHandlerConstant.hpp \
  OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp LocalAlignment.hpp
 SequenceHandler.o: SequenceHandler.cpp SequenceHandler.hpp \
- SequenceHandlerCommon.hpp SequenceString.hpp score.hpp FastaHandler.hpp \
+ SequenceHandlerCommon.hpp Accessory/SequenceString.hpp score.hpp \
+ Accessory/FastaHandler.hpp Accessory/SequenceString.hpp \
  OverlapAlignment.hpp pairwiseAlignment.hpp AlignmentString.hpp \
  AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp LocalAlignment.hpp
 SequenceHandlerIsotype.o: SequenceHandlerIsotype.cpp SequenceHandler.hpp \
- SequenceHandlerCommon.hpp SequenceString.hpp score.hpp FastaHandler.hpp \
+ SequenceHandlerCommon.hpp Accessory/SequenceString.hpp score.hpp \
+ Accessory/FastaHandler.hpp Accessory/SequenceString.hpp \
  SequenceHandlerIsotype.hpp OverlapAlignment.hpp pairwiseAlignment.hpp \
  AlignmentString.hpp AffineGapModel.hpp GapModel.hpp TracebackTable.hpp \
  MarkovChainGapModel_454.hpp LocalAlignment.hpp
-SequenceString.o: SequenceString.cpp SequenceString.hpp
 TracebackTable.o: TracebackTable.cpp TracebackTable.hpp \
- SequenceString.hpp
+ Accessory/SequenceString.hpp

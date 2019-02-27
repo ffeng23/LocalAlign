@@ -10,12 +10,13 @@
 #include <stdio.h>
 
 #include "score.hpp"
-#include "SequenceString.hpp"
+#include "Accessory/SequenceString.hpp"
 //#include "OverlapAlignment.hpp"
-#include "FastaHandler.hpp"
+#include "Accessory/FastaHandler.hpp"
 //#include "SequenceHandlerIsotype.hpp"
 #include "SequenceHandlerCommon.hpp"
 #include "SequenceHandlerBarcode.hpp"
+#include "Accessory/FileHandler.hpp"
 
 using namespace std;
 
@@ -290,7 +291,8 @@ int main(int argc, char* argv[])
 			exit(-1);
 		}
       //reading R1
-      cout<<"reading sequence data file (Read 1): "<<ReadFasta(sequenceFileR1_name, vec_seq1)<<"sequences read"<<endl;
+	  //#now we also want to 
+      cout<<"reading sequence data file (Read 1): "<<readFile2SeqStrVector(sequenceFileR1_name, vec_seq1)<<"sequences read"<<endl;
       if(demux&&pairEnd)  //in this case, we don't have to get index from it, assuming indexes are in the name xxxxx+xxxxxx
 		{
 			if(sequenceFileR2_name.length()==0)
@@ -300,7 +302,7 @@ int main(int argc, char* argv[])
 				exit(-1);
 			}
 		  //reading R2
-		  cout<<"reading sequence data file (Read 2): "<<ReadFasta(sequenceFileR2_name, vec_seq2)<<"sequences read"<<endl;
+		  cout<<"reading sequence data file (Read 2): "<<readFile2SeqStrVector(sequenceFileR2_name, vec_seq2)<<"sequences read"<<endl;
 		}
     }
   else //reading
@@ -311,7 +313,7 @@ int main(int argc, char* argv[])
 				<<"\tbut the index R1 file has not been specified !!!"<<endl;
 			exit(-1);
 		}
-      cout<<"reading index data file (Read 1): "<<ReadFasta(indexFileR1_name, vec_index1)<<"indexes read"<<endl;
+      cout<<"reading index data file (Read 1): "<<readFile2SeqStrVector(indexFileR1_name, vec_index1)<<"indexes read"<<endl;
       if(dualIndex)
 		{
 			if(indexFileR2_name.length()==0)
@@ -320,7 +322,7 @@ int main(int argc, char* argv[])
 					<<"\tbut the index R2 file has not been specified !!!"<<endl;
 				exit(-1);
 			}
-			cout<<"reading index data file (Read 2): "<<ReadFasta(indexFileR2_name, vec_index2)<<"indexes read"<<endl;
+			cout<<"reading index data file (Read 2): "<<readFile2SeqStrVector(indexFileR2_name, vec_index2)<<"indexes read"<<endl;
 		}
       if(demux)
 		{
@@ -330,7 +332,7 @@ int main(int argc, char* argv[])
 					<<"\tbut the sequence R1 file has not been specified !!!"<<endl;
 				exit(-1);
 			}
-		  cout<<"reading sequence data file (Read 1): "<<ReadFasta(sequenceFileR1_name, vec_seq1)<<"sequences read"<<endl;
+		  cout<<"reading sequence data file (Read 1): "<<readFile2SeqStrVector(sequenceFileR1_name, vec_seq1)<<"sequences read"<<endl;
 		  if(pairEnd)
 			{
 				if(sequenceFileR2_name.length()==0)
@@ -339,7 +341,7 @@ int main(int argc, char* argv[])
 						<<"\tbut the sequence R2 file has not been specified !!!"<<endl;
 					exit(-1);
 				}
-			  cout<<"reading index data file (Read 2): "<<ReadFasta(sequenceFileR2_name, vec_seq2)<<"sequences read"<<endl;
+			  cout<<"reading index data file (Read 2): "<<readFile2SeqStrVector(sequenceFileR2_name, vec_seq2)<<"sequences read"<<endl;
 			}
 		}      
     }
@@ -350,7 +352,7 @@ int main(int argc, char* argv[])
 		cout<<"*****ERROR: no bar code file R1 has not been specified !!!"<<endl;
 		exit(-1);
 	}
-  cout<<"reading barcode data file  (Read 1): "<<ReadFasta(barFileR1_name, vec_bar_seq1)<<"barcodes read"<<endl;
+  cout<<"reading barcode data file  (Read 1): "<<readFile2SeqStrVector(barFileR1_name, vec_bar_seq1)<<"barcodes read"<<endl;
   if(dualIndex)
     {
 		if(barFileR2_name.length()==0)
@@ -359,7 +361,7 @@ int main(int argc, char* argv[])
 				<<"\tbut the bar code R2 file has not been specified !!!"<<endl;
 			exit(-1);
 		}
-      cout<<"reading barcode data file  (Read 2): "<<ReadFasta(barFileR2_name, vec_bar_seq2)<<"barcodes read"<<endl;
+      cout<<"reading barcode data file  (Read 2): "<<readFile2SeqStrVector(barFileR2_name, vec_bar_seq2)<<"barcodes read"<<endl;
     }
   
   //cout<<"reading sequence data file: "<<ReadFasta(sequenceFileR1_name, vec_seq1)<<endl;
