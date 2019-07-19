@@ -35,10 +35,10 @@ static enum SeqType
     AminoAcid,
     Nucleotide
   } seqtype=Nucleotide; //by default
-static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1", "tsm2", "nuc44HP"};
+static string supportedScoreMatrixNameArr[]={"nuc44","blosum50", "tsm1", "tsm2", "nuc44HP", "nuc44DM1"};
 //tsm2: score matrix from Geoffrey Barton reference.
 
-static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1, &tsm2, &nuc44HP};
+static ScoreMatrix* ScoreMatrixArr[]={&nuc44, &blosum50, &tsm1, &tsm2, &nuc44HP, &nuc44DM1};
 
 static double scale=1; //this is the one on top of matrix, the programe will run score and use the 
 //matrix specified scale first and then apply the scale set by this one.
@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
   if(inputFile1_name.size()==0)
     {
       cout<<"please specify the seq1 input fasta file name.......\n";
-      cout<<"type \"./testalign -h\" for usage help\n";
+      cout<<"type \"./"<<argv[0]<<" -h\" for usage help\n";
       exit(-1);
       //printUsage(argc, argv);
     }
@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     {
       cout<<"please specify the seq2 input fasta file name.......\n";
       //printUsage(argc, argv);
-      cout<<"type \"./testalign -h \" for usage help\n";
+      cout<<"type \"./"<<argv[0]<<" -h \" for usage help\n";
       exit(-1);
     }
 
@@ -112,65 +112,49 @@ int main(int argc, char* argv[])
 
   cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore(c1,c2)<<endl;
   
-  //aminoacid
+  //fasta handler
+  cout<<"Reading input file 1:";
+  vector<SequenceString> vec_seq1;
+  int num1=ReadFasta(inputFile1_name, vec_seq1);
+  cout<<num1<<" sequence(s) read in"<<endl;
+	if(num1>1)
+	  {
+		  cout<<"\tmore than one sequences read in from the input file,"
+			  <<"\t\tonly the first one will be used"<<endl; 		  
+	  }
+	if(num1==0)
+	{
+		cout<<"ERROR***:no sequence read from the input, please check the file...."<<endl;
+		exit(-1);
+	}
+	SequenceString Seq1=vec_seq1.at(0);//("seq1", "ATGACGGTGATGATGGTAGTGGCCATTTCTTTGCCTACCCACTGTGGCCTTGTTGTGAAGAACTTTGATGCCCTGTTGTATGTGATCGTTATGACAATCCTGTGAAGTTTTTCAATGATGAAGGAAACTGAGGCTTAGAGAGTTGGAGTAATCTGTGAAGGCTCAGGATGGGCAAGAGGTCCCGCCCAGGTTTGAGCCCAGATGCGAGGTTACCACGCTTCCTGGTGAGGTGTTTTACAACTAAGGCCAAGCCAGGCAAAACCCATTGTTCTGCAGCTTCTGGCTTGGATTGGGTGTCTTGTTGAGTATGTGGGCAGTGGATCTGATGTTTTCCACTTCCACCAAGGGCCCATCGGTCTTCCCCCTGT");
   
-  //SequenceString Seq1("seq1","VSPAGMASGYDPGKA");
-  //SequenceString Seq2("seq2", "IPGKATREYDVSPAG");
-
-  //SequenceString Seq1("seq1","ASGYDPGKA");
-  //SequenceString Seq2("seq2", "ATREYDVSPAG");
-
-
-  //testing local alignment
-  //SequenceString Seq2("seq1","AGCTAGAGACCCCAGTCTGAGGTAGA");
-  //SequenceString Seq1("seq2", "AGCTAGAGACCAGCTATCTAGAGGTAGA");
-  //SequenceString Seq1("seq1","ACCCCAG");
-  //SequenceString Seq2("seq2", "ACCAG");
-
-
-  //SequenceString Seq1("seq1","TGAGGTAGA");
-  //SequenceString Seq2 ("seq2", "TAGAGGTAGA");
-
-  //****the sequences from the "Geoffrey Barton reference"
-  //SequenceString Seq1("seq1","CCAATCTACTACTGCTTGCAGTACTTGT");
-  //SequenceString Seq2 ("seq2", "AGTCCGAGGGCTACTCTACTGAAC");
-
-  //SequenceString Seq1("seq1","AGACGCACTCGTTCGGGAAGTAGTCCTTGACCAGGCAGCCCACGGCGCTGTC");
-  //SequenceString Seq2 ("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTGTTCGGGGAAGTAGTCCTTGAC");
-  //SequenceString Seq2("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTCAGGAGACGAGGGGGAA");
-  //SequenceString Seq2("seq2","CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTACGTTGGGTGGTACCCAGTTAT");
-  //SequenceString Seq2("seq2", "CGTATCGCCTCCCTCGCGCCATCAGACGAGTGCGTACGACTCACTATAGGGCAAGCAGTGGTAACAACGCAGAGTACGCGGG");
-  //SequenceString Seq1("seq1","ATCGA");
-  //SequenceString Seq2 ("seq2", "GATTGA");
-
-  //SequenceString Seq2("seq1","CGGGA");
-  //SequenceString Seq1 ("seq2", "CGGA");
-
-  //SequenceString Seq1("seq1","ATAT");
-  //SequenceString Seq2 ("seq2", "ACHKAT");
-  //SequenceString Seq1("seq","AGACGCACTGTTCGGGAAGTAGTCCTTGACCAGGCAGCCACCCATGTACTCTGCGTTGATACCACTGCTTGCCCTATAGTGAGTCGTGAGTGCGTCTCTGACGGGCTGGCAAGGCGCATAG");
-  //SequenceString Seq2("Constant","cctccaccaagggcccatcggtcttccccctggcgccctgctccaggagcacctccgagagcacagcggccctgggctgcctggtcaaggactacttccccgaaccggtgacggtgtcgtggaactcaggcgctctgaccagcggcgtgcacaccttcccggctgtcctacagtcctcaggactctactccctcagcagcgtggtgaccgtgacctccagcaacttcggcacccagacctacacctgcaacgtagatcacaagcccagcaacaccaaggtggacaagacagttg");
-  
-  //SequenceString Seq1("seq1","CCTATAGTGAGTCGTACGCACTCGTCTGAGCGGGCTGGCAAGGCGCATAG");
-  //SequenceString Seq2("seq2", "CCCGCGTACTCTGCGTTGTTACCACTGCTTGCCCTATAGTGAGTCGT");
-
-  //SequenceString Seq1("seq1", "AGTGCGTCAGGGACGAGGGGGTGGATTCACCCATGTACTCTGCGTTGATACCACTGCTTGCCCTATAGTGAGTCGTACGCACTCGTCTGANCGGGCTGGCAAGGCGCATAG");
-  //SequenceString Seq2("IgMCH1", "CTGGAAGAGGCACGTTCTTTTCTTTGTTGCCGTTGGGGTGCTGGACTTTGCACACCACGTGTTCGTCTGTGCCCTGCATGACGTCCTTGGAAGGCAGCAGCACCTGTGAGGTGGCTGCGTACTTGCCCCCTCTCAGGACTGATGGGAAGCCCCGGGTACTGCTGATGTCAGAGTTGTTCTTGTATTTCCAGGACAAAGTGATGGAGTCGGGAAGGAAGTCCTGTGCGAGGCAGCCAACGGCCACGCTGCTCGTATCCGACGGGGAATTCTCACAGGAGACGAGGGGGAAAAGGGTTGGGGCGGATGCACTCC");
-  //SequenceString Seq2("IgGCH1", "CAACTCTCTTGTCCACCTTGGTGTTGCTGGGCTTGTGATTCACGTTGCAGGTGTAGGTCTGGGTGCCCAAGCTGCTGGAGGGCACGGTCACCACGCTGCTGAGGGAGTAGAGTCCTGAGTACTGTAGGACAGCCGGGAAGGTGTGCACGCCGCTGGTCAGGGCGCCTGAGTTCCACGACACCGTCACCGGTTCGGGGAAGTAGTCCTTGACCAGGCAGCCCAGGGCCGCTGTGCCCCCAGAGGTGCTCCTGGAGCAGGGCGCCAGGGGGAAGACCGATGGGCCCTTGGTGGAAG");
-  //SequenceString Seq2("IgA1", "CTGGGCAGGGCACAGTCACATCCTGGCTGGGATTCGTGTAGTGCTTCACGTGGCATGTCACGGACTTGCCGGCTAGGCACTGTGTGGCCGGCAGGGTCAGCTGGCTGCTCGTGGTGTACAGGTCCCCGGAGGCATCCTGGCTGGGTGGGAAGTTTCTGGCGGTCACGCCCTGTCCGCTTTCGCTCCAGGTCACACTGAGTGGCTCCTGGGGGAAGAAGCCCTGGACCAGGCAGGCGATGACCACGTTCCCATCTGGCTGGGTGCTGCAGAGGCTCAGCGGGAAGACCTTGGGGCTGGTCGGGGATG");
-  //SequenceString Seq2("IgD1", "CTGGCCAGCGGAAGATCTCCTTCTTACTCTTGCTGGCGGTGTGCTGGACCACGCATTTGTACTCGCCTTGGCGCCACTGCTGGAGGGGGGTGGAGAGCTGGCTGCTTGTCATGTAGTAGCTGTCCCGTCTTTGTATCTCAGGGAAGGTTCTCTGGGGCTGGCTCTGTGTCCCCATGTACCAGGTGACAGTCACGGACGTTGGGTGGTACCCAGTTATCAAGCATGCCAGGACCACAGGGCTGTTATCCTTTGGGTGTCTGCACCCTGATATGATGGGGAACACATCCGGAGCCTTGGTGGGTG");
-  SequenceString Seq1("seq1", "ATGACGGTGATGATGGTAGTGGCCATTTCTTTGCCTACCCACTGTGGCCTTGTTGTGAAGAACTTTGATGCCCTGTTGTATGTGATCGTTATGACAATCCTGTGAAGTTTTTCAATGATGAAGGAAACTGAGGCTTAGAGAGTTGGAGTAATCTGTGAAGGCTCAGGATGGGCAAGAGGTCCCGCCCAGGTTTGAGCCCAGATGCGAGGTTACCACGCTTCCTGGTGAGGTGTTTTACAACTAAGGCCAAGCCAGGCAAAACCCATTGTTCTGCAGCTTCTGGCTTGGATTGGGTGTCTTGTTGAGTATGTGGGCAGTGGATCTGATGTTTTCCACTTCCACCAAGGGCCCATCGGTCTTCCCCCTGT");
-  SequenceString Seq2("seq2","GTATTATGATTACGTTTGGGGGAGTTATCGTTATACC");
+  //fasta handler
+  cout<<"Reading input file 2:";
+  vector<SequenceString> vec_seq2;
+  int num2=ReadFasta(inputFile2_name, vec_seq2);
+  cout<<num2<<" sequences(s) read in"<<endl;
+	if(num2>1)
+	  {
+		  cout<<"\tmore than one sequences read in from the input file,"
+			  <<"\t\tonly the first one will be used"<<endl; 		  
+	  }
+	 if(num2==0)
+	{
+		cout<<"ERROR***:no sequence read from the input, please check the file...."<<endl;
+		exit(-1);
+	}
+  SequenceString Seq2=vec_seq2.at(0);//("seq2","GTATTATGATTACGTTTGGGGGAGTTATCGTTATACC");
   cout<<"showing sequence string\n"<<Seq1.toString()<<Seq2.toString()<<endl;
 
   SequenceString tempSStr=ReverseComplement(Seq2);
   
   //now testing alignment
-  cout<<"Testing alignment:"<<endl;
+  cout<<"Running local alignment:"<<endl;
 
 cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore('A','A')<<endl;
   
- LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,1, 1,0);
+ LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,scale, 1);//,1);
   //LocalAlignment la(&Seq1,&tempSStr,sm, gapopen, gapextension,1, 100);
   cout<<"\tdone and the score is "<<la.GetScore()<<endl;
   cout<<"\t"<<la.GetAlignment().toString()<<endl;
@@ -185,43 +169,18 @@ cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore('A','A')<<endl;
     }
   
   /*
-  //testing globalAlignment
-  cout<<"Testing global alignment:"<<endl;
-  GlobalAlignment gla(&Seq1,&Seq2,sm, gapopen, gapextension,1);
-  //OverlapAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
-  cout<<"\tdone and the score is "<<gla.GetScore()<<endl;
-  cout<<"\t********"<<gla.GetAlignment().toString()<<endl;
-  */
-  
-  //testing overlapAlignment
-  /*
-  cout<<"Testing overlap alignment:"<<endl;
-  OverlapAlignment ola(&Seq1,&Seq2,sm, gapopen, gapextension,1);
-  
-  //OverlapAlignment ola(&Seq1,&tempSStr,sm, gapopen, gapextension,1);
-  cout<<"\tdone and the score is "<<ola.GetScore()<<endl;
-  cout<<"\t"<<ola.GetAlignment().toString()<<endl;
-  */
-  cout<<"done"<<endl;
-  
-
-  //testing fasta handler
-  vector<SequenceString> vec_seq;
-  cout<<"reading in "<<ReadFasta(inputFile1_name, vec_seq)<<endl;
-
   if(vec_seq.size()>=0)
 	cout<<"1/1000:"<<vec_seq.at(0).toString()<<endl;
   if(vec_seq.size()>=999)
 	cout<<"999/1000;"<<vec_seq.at(999).toString()<<endl;
 
-  WriteFasta("feng.fa",vec_seq);
-
+  
   //testing reverseComp
   cout<<"Testing reverse comp:"<<endl;
   SequenceString tempSString=ReverseComplement(vec_seq.at(0));
 
   cout<<"rev comp 0/1000"<<tempSString.toString()<<endl;
-
+*/
   cout<<"Test substr(\"feng\")"<<endl;
   string tempString("feng");
   cout<<"0,1 : "<<tempString.substr(0,1)<<endl;

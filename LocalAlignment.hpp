@@ -2,6 +2,7 @@
 #define LOCALALIGNMENT_HPP
 #include "pairwiseAlignment.hpp"
 #include <vector>
+
 using namespace std;
 
 //this entry class is used to define each local alignment entry/path

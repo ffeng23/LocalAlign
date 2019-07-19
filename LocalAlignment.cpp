@@ -28,6 +28,8 @@ LocalAlignment::LocalAlignment(SequenceString* _pattern, SequenceString* _subjec
   //dp_table=NULL;
   //traceback_table=NULL;
   this->align();
+  //cout<<"in between"<<endl;
+  //flush(cout);
   this->traceBackMultiple();
 }
   
@@ -170,6 +172,9 @@ void LocalAlignment::traceBackMultiple()
 {
   //decide how many we will be tracing back 
   //unsigned int actualNumOfAlignments;
+  //cout<<"+++++++++doing the multiple trce bck "<<endl;
+  //cout<<"c_path_vec.size():"<<c_path_vec.size()<<endl;
+	flush(cout);
   if(c_numOfAlignments>c_path_vec.size())
     {//can only do what there are.
       c_numOfAlignments=c_path_vec.size();
@@ -177,6 +182,14 @@ void LocalAlignment::traceBackMultiple()
   if(c_numOfAlignments==0)
     c_numOfAlignments=1;
 
+	if(c_path_vec.size()==0)
+		c_numOfAlignments=0;
+	if(c_numOfAlignments==0)
+	{
+		c_alignmentArr=NULL;
+		c_scoreArr=NULL;
+		return ;
+	}
   c_alignmentArr=new AlignmentString[c_numOfAlignments];
   c_scoreArr=new double[c_numOfAlignments];
 
@@ -194,13 +207,17 @@ void LocalAlignment::traceBackMultiple()
   //now sort the vector
   sort(c_path_vec.begin(), c_path_vec.end(), comparePathElement);
   
+//cout<<"\tefore looping......."<<endl;
+//flush(cout);
 
   for(unsigned int i=0;i<c_numOfAlignments;i++)
     {
+	//cout<<"i:"<<i<<"..."<<endl;
       //prepare the input and output
       c_optimalIndex[0]=c_path_vec.at(i)->GetOptimalIndex()[0];
       c_optimalIndex[1]=c_path_vec.at(i)->GetOptimalIndex()[1];
-      
+      //cout<<"before doing trace back;"<<endl;
+	  //flush(cout);
       //now call the traceBack to do the job
       traceBack();
       
@@ -228,6 +245,9 @@ c_alignment.SetPattern(c_alignmentArr[0].GetPattern(true), true);
       c_alignment.SetSubjectIndex(c_alignmentArr[0].GetSubjectIndexStart(), c_alignmentArr[0].GetSubjectIndexEnd());
       c_alignment.SetScore(c_path_vec.at(0)->GetOptimalValue());
       c_score=c_path_vec.at(0)->GetOptimalValue();
+	  
+	//  cout<<"+++++++++done the multiple trace back"<<endl;
+	//flush(cout);
   
   //done!!!
 }
@@ -239,7 +259,7 @@ void LocalAlignment::traceBack()
   //vector<double[2]> curr_and_max;
 
   //cout<<"doing trace back in the local alignment"<<endl;
-  
+  //flush(cout);
   //starting from optimalIndex going backing
   unsigned int i=c_optimalIndex[0];
   unsigned int j=c_optimalIndex[1];
@@ -311,6 +331,9 @@ void LocalAlignment::traceBack()
   c_alignment.SetSubjectIndex(j,c_optimalIndex[1]-1);
   c_alignment.SetScore(c_score);
   
+  //cout<<"+++++++++done the trace back "<<endl;
+	//flush(cout);
+  
 }
 
 
@@ -321,6 +344,8 @@ void LocalAlignment::traceBack()
 //efficient;
 void LocalAlignment::align()
 {
+	//cout<<"+++++++++doing the alignment "<<endl;
+	//flush(cout);
   	//Create empty dynamic programming table
   unsigned lenP=c_pattern->GetLength();
   unsigned lenS=c_subject->GetLength();
@@ -365,8 +390,11 @@ void LocalAlignment::align()
   string strP=c_pattern->GetSequence();
   string strS=c_subject->GetSequence();
   
-  double* maximumGapValue_subject=new double[lenS+1]; //we still keep this same len as the curr/prev col, but we will never use the first one.
-  unsigned int* maximumGapIndex_subject=new unsigned int[lenS+1];//just as above, this one is used to keep record of the maximum Gap Value so far, and the first one [0] is not used.
+  double* maximumGapValue_subject=new double[lenS+1]; 
+	//we still keep this same len as the curr/prev col, but we will never use the first one.
+  
+  unsigned int* maximumGapIndex_subject=new unsigned int[lenS+1];
+	//just as above, this one is used to keep record of the maximum Gap Value so far, and the first one [0] is not used.
   
   //maximumGapValue[0]=-1E9;
   //maximumGapValue[1]=c_gapOpen+c_gapExtension*1;
@@ -379,14 +407,17 @@ void LocalAlignment::align()
       //maximumGapIndex[1]=1;//to the
     } 
 
-  //for pattern gap, this maximumGapValue, a scalar is OK. since we keep this as a running one, like the current column
+  //for pattern gap, this maximumGapValue, a scalar instead of matrix is OK. 
+  //since we keep this as a running one, like the current column
   double maximumGapValue_pattern=-1E60;
   unsigned int maximumGapIndex_pattern=0;
 
-  //a new table used to keep track how each entry in a dp table or tracebacktable related to the path element in the vector path
+  //a new table used to keep track how each entry in a dp table or tracebacktable 
+  //related to the path element in the vector path
   unsigned int* pathElementTable=new unsigned int[(lenP+1)*(lenS+1)];
   //again it has one extra one in each dimesnion, first ones are not used, only for a purpose of simplicity.
-  //also not every elements in the talbe is assigned, ZERO link ones are not set, only the larger than zero one is set related to a new path
+  //also not every elements in the talbe is assigned, ZERO link ones are not set, only the larger than zero one 
+  //is set related to a new path
 
   //we have to be very careful here
   //the dimension of the dp table and the strings are not same.
@@ -596,6 +627,9 @@ void LocalAlignment::align()
   delete[] maximumGapValue_subject;
   delete[] maximumGapIndex_subject;
   delete[] pathElementTable;
+  
+  //cout<<"+++++++++done with the alignment "<<endl;
+  //	flush(cout);
   //delete gm;
   //traceback_table will be deleted upon destruction
 }//end of the localAlign

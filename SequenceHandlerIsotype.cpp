@@ -10,6 +10,7 @@
 #include "AlignmentString.hpp"
 #include "LocalAlignment.hpp"
 
+//#define debug 
 
 
 //**********************************************
@@ -46,6 +47,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		     const bool& _demux
 		     )
 {
+	short gapModel=0; //0, affine gaps;1, 454 gap model.
   unsigned int numOfSeqsUnit=20000;
   unsigned int timeOfWriting=1;
   int* numOfWritesDone_mapped =new int [_vecIsotype.size()+1];
@@ -98,13 +100,18 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
   for(unsigned int i=0;i<_vecSeq.size();i++)
     {
       //printing progress
-      if(i/numOfSeqsUnit *numOfSeqsUnit==i)
-	{
+#ifndef debug     
+				if(i/numOfSeqsUnit *numOfSeqsUnit==i)
+					{
+#endif
 	  cout<<"..."<<i<<"/"<<_vecSeq.size();
-	  flush(cout);
+
+#ifndef	debug  			
+						flush(cout);
 	  
 	  //need to write to file.
-	}
+					}
+#endif
       
       //here we separate the two different type of mapping, in case we need to do outputing differently
       double best5PrimeScore= -10000000;
@@ -118,18 +125,33 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	
       bool 	found5PrimeFlag=false;
       bool	found3PrimeFlag=false;
+	  //cout<<"sequence"<< i<<":"<<endl;
+	  //    cout<<_vecSeq.at(i).toString()<<endl;
+	//	  flush(cout);
       //cout<<"Map isotype set"<<endl;
+	  //flush(cout);
       for(unsigned int j=0;j<_vecIsotype.size();j++)
 	{
 	  //now we need to separate out the two different mapping case, 5' and 3'
 	  if(type==FivePrime)
 	    {
-	      //cout<<"forward set:"<<j<<endl;
-	      //cout<<_vecForward.at(j).toString()<<endl;
-	      LocalAlignment lal (&(_vecSeq.at(i)), &(_vecIsotype.at(j)), _sm, _gapOpen, _gapExtension,1,numOfLocalAlignments);
+	      //cout<<"Isotype set:"<<j<<endl;
+	      //cout<<_vecIsotype.at(j).toString()<<endl;
+		  //flush(cout);
+	      LocalAlignment lal (&(_vecSeq.at(i)), &(_vecIsotype.at(j)), _sm, _gapOpen, _gapExtension
+						,1,numOfLocalAlignments, gapModel);
+		  //cout<<"\tdone with local alignment...."<<endl;
+		  flush(cout);
+		  if(lal.GetNumberOfAlignments()==0)
+		  {
+			  continue;//don't do anyting.
+		  }
 	      tempAS_arr=lal.GetAlignmentArr();
-	      //cout<<"\talignment score:"<<tempAS.GetScore()<<endl;
-	      //need to get the match rate
+#ifdef debug  
+			cout<<"\talignment score:"<<tempAS_arr[0].GetScore()<<endl;
+			flush(cout);
+#endif	      
+		  //need to get the match rate
 	      strPattern=tempAS_arr[0].GetPattern(true);
 	      strSubject=tempAS_arr[0].GetSubject(true);
 	      //cout<<"\tstrPattern:"<<strPattern<<endl;
@@ -137,8 +159,10 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 
 	      match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
 	      //cout<<"\tcompare:"<<CompareStrings(strPattern, strSubject)<<";length():"<<strPattern.length()<<endl;
-	      //cout<<"\tmatch_rate:"<<match_rate<<endl;
-		
+#ifdef debug	      
+			cout<<"\tmatch_rate:"<<match_rate<<endl;
+			flush(cout);
+#endif		
 	      //check the best score and match rate
 	      if(tempAS_arr[0].GetScore()>best5PrimeScore&&match_rate>_matchRateThreshold&&strPattern.length()>_minimumOverlapLength)
 		{
@@ -157,23 +181,40 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	    }
 	  else //in this case this is 3' mapping
 	    {
-	      //cout<<"map reverse set"<<endl;
+#ifdef debug	      
+			cout<<"map reverse set"<<endl;
+#endif
 	      //3' should be mapped on the end of the reads, need to reverse complement the sequence too
 	      //for(unsigned int k=0;k< _vecReverse.size();k++)
 	      //{
 		  //cout<<"start doing k:"<<k<<endl;
 		  SequenceString reverseComplementReverse=ReverseComplement(_vecIsotype.at(j));
-		  //cout<<"after revcomp"<<endl;
+#ifdef debug		  
+					  cout<<"\t**after revcomp"<<endl;
+					  cout<<"\t\t "<<_vecIsotype.at(j).toString()<<endl;
+					  cout<<"\t\t "<<reverseComplementReverse.toString()<<endl;
+#endif
 		  //OverlapAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension,1);
-		  LocalAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension,1,numOfLocalAlignments);
+		  LocalAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension
+					,1,numOfLocalAlignments, gapModel);
 		  //cout<<"after alignment:"<<k<<endl;
 		  //need to get the match rate
+		  if(ola.GetNumberOfAlignments()==0)
+		  {
+			  continue;//don't do anyting.
+		  }
 		  tempAS=ola.GetAlignment();
 		  //need to get the match rate
 		  strPattern=tempAS.GetPattern(true);
 		  strSubject=tempAS.GetSubject(true);
 		  match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
-	  	
+#ifdef debug		  
+					  cout<<"\t\tstrPattern:"<<strPattern<<endl;
+					  cout<<"\t\tstrSubject:"<<strSubject<<endl;
+					  cout<<"\t\tscore:"<<tempAS.GetScore();
+					  cout<<"\t\t***pattern index End:"<<tempAS.GetPatternIndexEnd()<<endl;
+					  cout<<"\t\t***_vecSeq.at(i) length"<<_vecSeq.at(i).GetLength()<<endl;
+#endif
 		  //#check the best score
 		  if(tempAS.GetScore()>best3PrimeScore&&match_rate>_matchRateThreshold&&strPattern.length()>_minimumOverlapLength)
 		    {
@@ -708,6 +749,9 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	      }
 	    
 	    //cout<<"done map both"<<endl;
+#ifdef debug
+		flush(cout);
+#endif
 	  }//end of each 1000 seqs read write
       
     }//end of for loop of sequence data vec

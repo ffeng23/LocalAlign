@@ -33,3 +33,13 @@ the end.
 -n 0.7 70% matching is a good empirical rate.
 
 the rest should be using the default one.
+
+
+####update 6/15/209
+after a little studying, the following parameters are used and might have a better performance
+-d 2 for 3'
+-g -10 for gap opening
+-e -10 don't encourage a gap extension
+-n 0.8 not too many errors.
+-l 16 minimum 16 match. don't want this to be too short
+-p 350 the point is that no matter where, as long as it shows up. we treat it as a good one.but we might want to have a better way for this like(it should be long enough left for the variable region, such as >100????).
