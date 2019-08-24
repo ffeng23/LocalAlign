@@ -12,13 +12,28 @@
 #include "Accessory/SequenceString.hpp"
 #include "OverlapAlignment.hpp"
 #include "Accessory/FastaHandler.hpp"
+#include "Accessory/FastqHandler.hpp"
 #include "SequenceHandlerIsotype.hpp"
 #include "SequenceHandlerCommon.hpp"
+#include <zlib.h>
+#include "Accessory/string_ext.hpp"
+#include "Accessory/FileHandler.hpp"
 using namespace std;
 
 static void printUsage(int argc, char* argv[]);
 static void parseArguments(int argc, char **argv, const char *opts);
 static int lookUpScoreMatrix(const string* _scoreMatrixNameArray,const int& len, const string& scoreMatrixName);
+
+void printCallingCommand(int argc, char* argv[])
+{
+	cout<<"Calling:"<<endl;
+	for(int i =0;i<argc;i++)
+	{
+		cout<<argv[i]<<" ";
+	}
+	cout<<endl;
+}
+
 
 //all file are in fasta format
 static string isotypeFile_name("HumanIGConstant_Lib.fas");//input ifle for forward constant 
@@ -49,10 +64,9 @@ static bool demux=false;
 //static bool isotype_flag=false;
 int main(int argc, char* argv[])
 {
+	printCallingCommand(argc, argv);
   //for parsing commandline arguement
   const char *opts = "hvf:g:e:m:s:k:n:p:l:d:x";
-  //a: the input file name adaptor  <----not used in this code
-  //b: the input file name barcode  <----not used in this code
   //f: the input file name forward primer
   //r: the input file name reverse primer
   //d: the mapping type, either FivePrime or ThreePrime
@@ -124,12 +138,38 @@ int main(int argc, char* argv[])
   vector<SequenceString> vec_seq;
   vector<SequenceString> vec_Isotype_seq;//this will hold processed sequences on the forward end
   
-  cout<<"reading sequence data file: "<<ReadFasta(sequenceFile_name, vec_seq)<<endl;
-  cout<<"1/1000:"<<vec_seq.at(0).toString()<<endl;
+  vector<string> vec_seq_Q;
   
-  cout<<"reading and processing isotype sequences for mapping......"<<endl;
+  //check file type and then decide to do reading 
+  //check file format, so far we only read either fastq or gzip'ed fastq
+  FileType ft=getFileType(sequenceFile_name);
+  if(ft!=FASTQ&&ft!=GZ_FASTQ&&ft!=FASTA&&ft!=GZ_FASTA)
+  {
+	cout<<"ERROR: so far we only process the fastq/fasta or gzip'ed fastq/fasta files"<<endl;
+	return 0;
+  }
+  unsigned int num;
+  if(ft==FASTQ||ft==GZ_FASTQ)
+	num=ReadFastq(sequenceFile_name, vec_seq, vec_seq_Q, false);
+  else 
+  {
+	  if(ft==FASTA||ft==GZ_FASTA)
+		  num=ReadFasta(sequenceFile_name, vec_seq, false);
+  }
+  cout<<"total number of sequences read: "<<num<<endl;
+  
+  //cout<<"reading sequence data file: "<<ReadFasta(sequenceFile_name, vec_seq)<<endl;
+  //cout<<"1/1000:"<<vec_seq.at(0).toString()<<endl;
+  
+  //cout<<"reading and processing isotype sequences for mapping......"<<endl;
 
   //SetUpByIsotypeOutputFlag(true);
+  ft=getFileType(isotypeFile_name);
+  if(ft!=FASTA&&ft!=GZ_FASTA)
+  {
+	cout<<"ERROR: so far we only process the fasta or fasta files"<<endl;
+	return 0;
+  }
   cout<<"Reading constant library file:"<<ReadFasta(isotypeFile_name, vec_Isotype_seq)<<endl;
 
 

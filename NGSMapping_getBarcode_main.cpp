@@ -37,8 +37,20 @@ static unsigned lenOfBarcode=8;
 //directly
 //   MatchMatrix mmf; 
 
+void printCallingCommand(int argc, char* argv[])
+{
+	cout<<"Calling:"<<endl;
+	for(int i =0;i<argc;i++)
+	{
+		cout<<argv[i]<<" ";
+	}
+	cout<<endl;
+}
+
+
 int main(int argc, char* argv[])
 {
+	printCallingCommand(argc,argv);
 	//for parsing commandline arguement
   const char *opts = "hvs:di:j:nl:";
   //d: dual index, indicating the inpute is dual index
@@ -93,26 +105,34 @@ int main(int argc, char* argv[])
   
   //check file format, so far we only read either fastq or gzip'ed fastq
   FileType ft=getFileType(sequenceFile_name);
-  if(ft!=FASTQ&&ft!=GZ_FASTQ)
+  if(ft!=FASTQ&&ft!=GZ_FASTQ&&ft!=FASTA&&ft!=GZ_FASTA)
   {
-	cout<<"ERROR: so far we only process the fastq or gzip'ed fastq files"<<endl;
+	cout<<"ERROR: so far we only process the fastq/fasta or gzip'ed fastq/fasta files"<<endl;
 	return 0;
   }
   //Start testing the readfastq function
-  cout<<"---------start testing read fastq (either gz'ed or regular fastq) ......."<<endl;
-  vector<Fastq> vec;
+  cout<<"---------start testing read fastq/fasta (either gz'ed or regular fastq/fasta) ......."<<endl;
+  vector<SequenceString> v_seq;
+  vector<string> vec_Q;
   
-  unsigned int num=ReadFastq(sequenceFile_name, vec, false);
+  unsigned int num;
+  if(ft==FASTQ||ft==GZ_FASTQ)
+	num=ReadFastq(sequenceFile_name, v_seq, vec_Q, false);
+  else 
+  {
+	  if(ft==FASTA||ft==GZ_FASTA)
+		  num=ReadFasta(sequenceFile_name, v_seq, false);
+  }
   cout<<"total number of sequences read: "<<num<<endl;
   
-  vector<SequenceString> v_seq;
-  //now we need to print out for debugging.
+//  vector<SequenceString> v_seq;
+/*  //now we need to print out for debugging.
   for(unsigned i=0;i<vec.size();i++)
   {
 	  //cout<<"i:"<<i<<"--"<<vec.at(i).toString()<<endl;
 	  v_seq.push_back(vec.at(i).GetSequenceString());
   }
-  
+  */
   cout<<"DONE"<<endl;
   
   cout<<"=====Start proessing indexes ..........."<<endl;
@@ -278,7 +298,7 @@ static void printUsage(int argc, char* argv[])
       <<"\t\thaving the same order and name. This input is only good \n"
 	  <<"\t\tbecause we need to read indexes from the name of the sequences\n"
 	  <<"\t\tit has to be set together with -n reading index from name\n"
-	  <<"\t\tNOTE:: CURRENTLY ONLY SUPORT FASTQ OR GZ'ed FASTQ file!!!!!\n"
+	  <<"\t\tNOTE:: CURRENTLY SUPORT FASTQ/FASTA OR GZ'ed FASTQ/FASTA file!!!!!\n"
 		;
   cout<<"\t-i: the input file name read 1 index\n"
       <<"\t-j: the input file name read 2 index\n" 
@@ -292,9 +312,10 @@ static void printUsage(int argc, char* argv[])
       <<"\t\t\t\tfalse by default\n";
   
   cout<<"\t-d: dual index (true or false), true by default\n"
-      <<" \t\tor simple output the stats";
+      <<" \t\tor simple output the stats\n";
   cout<<"\t-l: length of barcodes, used to read indexes form sequence names\n"
-		<<"\t 8 by default\n"
+		<<"\t 8 by default. The index could longer, we will read the whole index including\n"
+		<<"\t the longer ones, but if they are shorter, we will append N's(is this a good way)\n"
       ; 
 
   cout<<"\t-v and -h: version and help\n";

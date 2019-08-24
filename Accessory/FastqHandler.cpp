@@ -6,7 +6,23 @@
 #include "string_ext.hpp"
 using namespace std;
 
-
+//not very efficient. might need to rewrite. but how to avoid the code duplication?
+size_t ReadFastq(const string& _fname, vector<SequenceString>& _seqStrVec, vector<string>& _vecQ, bool toUpper)
+{
+		vector<Fastq> v_fastq;
+		size_t n=ReadFastq(_fname, v_fastq, toUpper);
+		_seqStrVec.clear();
+		_vecQ.clear();
+		if(v_fastq.size()>0)
+		{
+			for(unsigned i =0;i<v_fastq.size();i++)
+			{
+				_seqStrVec.push_back(v_fastq.at(i).GetSequenceString());
+				_vecQ.push_back(v_fastq.at(i).GetQualityString());
+			}
+		}
+		return n;
+}
 //return string::npos upon error 
 size_t ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toUpper)
 {
@@ -223,4 +239,31 @@ void WriteFastq(const string& _fname, vector<Fastq>& _fqVec,  ios_base::openmode
   ofs.close();
 }
 
+void WriteFastq(const string& _fname, vector<SequenceString>& _seqStrVec, 
+	vector<string>& _qVec,
+	ios_base::openmode mode)
+{
+  ofstream ofs((_fname).c_str(), mode);
+  
+  if(!ofs.is_open())
+    {
+      cout<<">>>>>>ERROR:the output file \""<<_fname<<"\" can not be opened, quit....\n";
+      exit(-1);
+    }
+  if(_qVec.size()!=_seqStrVec.size())
+  {
+	  cout<<"ERROR: the sizes of the sequence string and qualtiy string don't match. please check........"<<endl;
+  }
+  for(unsigned int i=0;i<_qVec.size();i++)
+    {
+      ofs<<"@"<<_seqStrVec.at(i).GetName()<<"\n";
+      
+	  ofs<<_seqStrVec.at(i).GetSequence()<<"\n";
+	  
+	  ofs<<"+\n"<<_qVec.at(i)<<"\n";
+	
+    }
 
+  ofs.close();	
+		
+}

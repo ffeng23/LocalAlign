@@ -20,8 +20,14 @@ using namespace std;
 //return string::npos upon error 
 size_t ReadFastq(const string& _fname, vector<Fastq>& _seqStrVec, bool toUpper=false);
 
+size_t ReadFastq(const string& _fname, vector<SequenceString>& _seqStrVec, vector<string>& _vecQ, bool toUpper=false);
+
 
 void WriteFastq(const string& _fname, vector<Fastq>& _seqStrVec,  ios_base::openmode mode=ios_base::out);
+//updated 8/21/2019, add this to write the fastq based on the separated sstring and quality.
+void WriteFastq(const string& _fname, vector<SequenceString>& _seqStrVec, 
+	vector<string>& _qVec,
+	ios_base::openmode mode=ios_base::out);
 
 
 #endif

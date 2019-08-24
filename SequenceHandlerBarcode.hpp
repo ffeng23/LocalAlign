@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 #include "Accessory/SequenceString.hpp"
+#include "Accessory/FileHandler.hpp"
+
 #include "score.hpp"
 #include <sstream>
 
@@ -53,7 +55,11 @@ void MappingBarcodes(vector<SequenceString>& _vecSeq1, /*this is the sequence da
 			const string& _indexR1_fname,// output file name
 		    const string& _indexR2_fname,// output file name
 			const string& _seqR1_fname,// output file name, demux
-			const string& _seqR2_fname// output file name, demux
+			const string& _seqR2_fname,// output file name, demux
+			vector<string>& _vecSeq1_Q, //input vector for quality, could be empty.if no emptry, we will write fastq
+			vector<string>& _vecSeq2_Q, //input vector for quality, could be empty.if no emptry, we will write fastq
+			vector<string>& _vecIndex1_Q, //input vector for quality, could be empty.if no emptry, we will write fastq
+			vector<string>& _vecIndex2_Q	//input vector for quality, could be empty.if no emptry, we will write fastq
 		      ); 
 
 //a helper function to peel the indexes from the sequences. should not be called directly by the outside caller.
@@ -82,6 +88,26 @@ unsigned int ReadIndexFromSequenceName(vector<SequenceString>& _vecSeq,  /*this 
 			      const unsigned& lenOfBarcode,
 			      const bool& dualIndex /*indicating whether to do dual indexes*/
 				       );
+
+//a helper function to read the barcodes from the file. The barcode files must be of the fasta format.
+//
+/*Helper function to get barcode sequences from the fasta file.
+ *this function is different from reading fasta file into a vector by its checking the 
+ *barcode length. If the length is smaller than the specified length, an error will be
+ *issued. If the length is bigger, then we will chop it to read only the first specified
+ *portion. 
+ *
+ *Input:_fname , the fasta file name of barcodes. 
+		_vectBar the holder of the barcodes 
+ *		 lenOfBarcode
+ *
+ *Output: the number of barcodes read in. 
+ */
+unsigned int ReadBarcodeFromFile(const string& _fname,
+					vector<SequenceString>& _vecBar,  /*this is the sequence data r1*/
+			      const unsigned& lenOfBarcode
+				);
+
 
 /*function to collect barcodes from the indexes, assuming we don't know the expected barcodes 
 	we will also generate stats/counts of each barcode

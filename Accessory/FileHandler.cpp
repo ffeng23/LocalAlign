@@ -119,7 +119,7 @@ FileType getFileType(const string& fname)
 // We will return a vector holding the squenences of the file (SquenceStrings)
 // we will return the total number of sequences read in. If none or error, we will return 
 // string::npos.
-size_t readFile2SeqStrVector(string _fname, vector<SequenceString>& _vec)
+size_t readFile2SeqStrVector(string _fname, vector<SequenceString>& _vec, vector<string>* _vec_Q)
 {
 	//check for files
 	if(!exist(_fname.c_str()))
@@ -147,6 +147,11 @@ size_t readFile2SeqStrVector(string _fname, vector<SequenceString>& _vec)
 		case FASTQ:
 		case GZ_FASTQ:
 		{
+			/*if(_vec_Q==NULL)
+			{
+				cout<<"ERROR: Quality vector(s) for fastq data has not been initalizated correctly. check !!"<<endl;
+				exit(-1);
+			}*/
 			vector<Fastq> _vec_fq;
 			numReads=ReadFastq(_fname, _vec_fq);
 			if(numReads==string::npos)
@@ -155,6 +160,7 @@ size_t readFile2SeqStrVector(string _fname, vector<SequenceString>& _vec)
 			for(unsigned i=0;i<numReads;i++)
 			{
 				_vec.push_back(_vec_fq.at(i).GetSequenceString());
+				_vec_Q->push_back(_vec_fq.at(i).GetQualityString());
 			}
 			numReads=_vec.size();
 			break;

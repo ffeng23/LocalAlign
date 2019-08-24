@@ -1,5 +1,6 @@
 #include "SequenceHandler.hpp"
 #include "Accessory/FastaHandler.hpp"
+#include "Accessory/FastqHandler.hpp"
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
@@ -112,6 +113,38 @@ unsigned int ReadIndexFromSequenceName(vector<SequenceString>& _vecSeq,  /*this 
   return _vecSeq.size();
 }
 
+/*see the function description in hpp file.*/
+unsigned int ReadBarcodeFromFile(const string& _fname,
+					vector<SequenceString>& _vecBar,  /*this is the sequence data r1*/
+			      const unsigned& lenOfBarcode)
+{
+	//first read the files into the vector
+	unsigned int num=readFile2SeqStrVector(_fname, _vecBar);
+	if(num==0)
+	{
+		cout<<"WARNING: in reading the barcode files, 0 barcodes read in. please check....\n";
+		return 0;
+	}
+	//Based on the barcode sequence length, we need to check and chop if necessary
+	for(unsigned int i=0;i<num;i++)
+	{
+		SequenceString ss=_vecBar.at(i);
+		if(ss.GetLength()<lenOfBarcode)
+		{
+			cout<<"ERROR: the barcode("<<i<<") is shorter than the specified length. Please check...."<<endl;
+			exit(-1);
+		}
+		else { 
+			if(ss.GetLength()>lenOfBarcode)
+			{
+				//chop it.
+				ss.SetSequence(ss.GetSequence().substr(0,lenOfBarcode));
+				_vecBar.at(i)=ss;
+			}//else do nothing.
+		}
+	}
+	return num;
+}
 
 /*in this function, we process the index read or sequence for indexes(the actual read
  *from sequencing). Then we will do simply matching/instead of alignment for
@@ -144,7 +177,11 @@ void MappingBarcodes(vector<SequenceString>& _vecSeq1, /*this is the sequence da
 			const string& _indexR1_fname,// output file name
 		    const string& _indexR2_fname,// output file name
 			const string& _seqR1_fname,// output file name, demux
-			const string& _seqR2_fname// output file name, demux
+			const string& _seqR2_fname,// output file name, demux
+			vector<string>& _vecSeq1_Q, //input vector for quality, could be empty.if no emptry, we will write fastq
+			vector<string>& _vecSeq2_Q, //input vector for quality, could be empty.if no emptry, we will write fastq
+			vector<string>& _vecIndex1_Q, //input vector for quality, could be empty.if no emptry, we will write fastq
+			vector<string>& _vecIndex2_Q
 		      )
 {
   //first get everything ready for input
@@ -213,9 +250,14 @@ void MappingBarcodes(vector<SequenceString>& _vecSeq1, /*this is the sequence da
   //cout<<"before looping, the size of vec bar seq1:"<<_vecBarSeq1.size()<<endl;
   vector<SequenceString>* mapIndex1=new vector<SequenceString>[_vecBarSeq1.size()+1]();
   vector<SequenceString>* mapIndex2=new vector<SequenceString>[_vecBarSeq1.size()+1]();
+  vector<string>* mapIndex1_Q=new vector<string>[_vecBarSeq1.size()+1]();
+  vector<string>* mapIndex2_Q=new vector<string>[_vecBarSeq1.size()+1]();
   
   vector<SequenceString>* mapSeq1=new vector<SequenceString>[_vecBarSeq1.size()+1]();
   vector<SequenceString>* mapSeq2=new vector<SequenceString>[_vecBarSeq1.size()+1]();
+  vector<string>* mapSeq1_Q=new vector<string>[_vecBarSeq1.size()+1]();
+  vector<string>* mapSeq2_Q=new vector<string>[_vecBarSeq1.size()+1]();
+  
   //cout<<"*****testing initialization:"<<endl;
 	//cout<<"\t mapIndex1 at 1 size:"<<mapIndex1[1].size()<<endl;
   //plus one for the size is because we need store the unmapped sequences
@@ -291,19 +333,26 @@ void MappingBarcodes(vector<SequenceString>& _vecSeq1, /*this is the sequence da
 		//}
 		//cout<<"\t\tbest Bar:"<<bestBar<<endl;
 		mapIndex1[bestBar].push_back(index1);
-		
+		if(_vecIndex1_Q.size()>0)
+			mapIndex1_Q[bestBar].push_back(_vecIndex1_Q.at(i));
 		if(dualIndex)
 		{
 			//cout<<"doing dual Index"<<endl;
 			mapIndex2[bestBar].push_back(index2);
+			if(_vecIndex2_Q.size()>0)
+				mapIndex2_Q[bestBar].push_back(_vecIndex2_Q.at(i));
 		}
 		
 		if(demux)
 		{
 			mapSeq1[bestBar].push_back(_vecSeq1.at(i));
+			if(_vecSeq1_Q.size()>0)
+				mapSeq1_Q[bestBar].push_back(_vecSeq1_Q.at(i));
 			if(pairEnd)
 			{
 				mapSeq2[bestBar].push_back(_vecSeq2.at(i));
+				if(_vecSeq2_Q.size()>0)
+					mapSeq2_Q[bestBar].push_back(_vecSeq2_Q.at(i));
 			}
 		}
 		count++;//remember how many we done so far.
@@ -367,13 +416,28 @@ void MappingBarcodes(vector<SequenceString>& _vecSeq1, /*this is the sequence da
 					}
 				  }
 				cout<<"\t\t------ filename:"<< t_fileNameR1<<endl;
-				WriteFasta(t_fileNameR1+".fasta", mapIndex1[s],100, mode);
+				if(_vecIndex1_Q.size()>0)//we have quality, so we need to write fastq.
+				{
+					WriteFastq(t_fileNameR1+".fastq", mapIndex1[s],mapIndex1_Q[s], mode);
+					mapIndex1_Q[s].clear();
+				}
+				else{
+					WriteFasta(t_fileNameR1+".fasta", mapIndex1[s],100, mode);
+				}
 				mapIndex1[s].clear();
+				
 				if(dualIndex)
 				{
 					cout<<"\t\t------ filename(REade2):"<< t_fileNameR2<<endl;
-
-					WriteFasta(t_fileNameR2+".fasta", mapIndex2[s],100, mode);
+					if(_vecIndex2_Q.size()>0)
+					{
+						WriteFastq(t_fileNameR2+".fastq", mapIndex2[s],mapIndex2_Q[s], mode);
+						mapIndex2_Q[s].clear();
+					}
+					else
+					{
+						WriteFasta(t_fileNameR2+".fasta", mapIndex2[s],100, mode);
+					}
 					mapIndex2[s].clear();
 				}
 				
@@ -405,11 +469,28 @@ void MappingBarcodes(vector<SequenceString>& _vecSeq1, /*this is the sequence da
 					}
 					//pt_vec_demux[s].clear();
 					//if(
-					WriteFasta(t_fileNameR1+".fasta", mapSeq1[s],100, mode);
+					if(_vecSeq1_Q.size()>0)
+					{
+						WriteFastq(t_fileNameR1+".fastq", mapSeq1[s],mapSeq1_Q[s], mode);
+						mapSeq1_Q[s].clear();
+					}
+					else
+					{
+						WriteFasta(t_fileNameR1+".fasta", mapSeq1[s],100, mode);
+					}
 					mapSeq1[s].clear();
+					
 					if(pairEnd)
 					{
-						WriteFasta(t_fileNameR2+".fasta", mapSeq2[s],100, mode);
+						if(_vecSeq2_Q.size()>0)
+						{
+							WriteFastq(t_fileNameR2+".fastq", mapSeq2[s],mapSeq2_Q[s], mode);
+							mapSeq2_Q[s].clear();
+						}
+						else
+						{
+							WriteFasta(t_fileNameR2+".fasta", mapSeq2[s],100, mode);
+						}
 						mapSeq2[s].clear();
 					}
 				}
@@ -436,6 +517,10 @@ void MappingBarcodes(vector<SequenceString>& _vecSeq1, /*this is the sequence da
   delete [] mapIndex2;
   delete [] mapSeq1;
   delete [] mapSeq2;
+  delete [] mapIndex1_Q;
+  delete [] mapIndex2_Q;
+  delete [] mapSeq1_Q;
+  delete [] mapSeq2_Q;
   return ;
 }
 

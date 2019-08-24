@@ -30,6 +30,11 @@ bool exist(const char* path);
 // We will return a vector holding the squenences of the file (SquenceStrings)
 // we will return the total number of sequences read in. If none or error, we will return 
 // string::npos.
-size_t readFile2SeqStrVector(string _fname, vector<SequenceString>& _vec);
+//----updated 8/21/19
+// expanded this to reading possibly fasta, fastq, fastq gzipped.
+// we will return separately the sequence string and quality string in order to be compatible 
+// with the previous version of the function.
+size_t readFile2SeqStrVector(string _fname, vector<SequenceString>& _vec, vector<string>* _vec_Q=NULL);
+
 
 #endif

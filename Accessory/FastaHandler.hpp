@@ -27,6 +27,7 @@ void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const 
 //       mode, to open the files, truc (new) or append
 void WriteTextFile(const string& _fname, vector<unsigned int>& _seqStrVec, const char& c='\t', const unsigned int& _width=1, ios_base::openmode mode=ios_base::out);
 
+//this is not for fasta files. for "regular" table format files
 //Writing a text table file, with header or not
 //input: _fname, file name
 //       _seqStrVec, vector of vector of  numbers to be written
