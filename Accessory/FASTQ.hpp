@@ -47,8 +47,6 @@ protected:
   string c_name; //name, the first line 
   SequenceString c_ss;//sequencestring holding the sequence 
   string c_q;//qualtiy score
-  
-
 };	
 
 #endif

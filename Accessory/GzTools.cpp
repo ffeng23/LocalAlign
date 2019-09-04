@@ -3,19 +3,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-//one thing to note is that gzFile is a pointer 
-#define BUF_SIZE 0x200
-//#define BUF_SIZE 0x100
-//#define BUF_SIZE 0x50
-//#define DEBUG
+#include "FileHandler.hpp"
 
-#define CHUNK 0x500000
-//#define CHUNK 0x200
-//#define CHUNK 0x20
-#define OUT_CHUNK CHUNK*1
-
- void debugChars(const char* s, size_t t, const string& n="");
-
+//for printing out the content of the char array.
+//static void debugChars(const char* s, size_t t, const string& n="");
+//not implemented yet.
 //to read one line from an opened gzFile stream 
 gzFile getline(gzFile _if, string& _line, const char& _delimit)
 {
@@ -23,13 +15,12 @@ gzFile getline(gzFile _if, string& _line, const char& _delimit)
 }
 
 //In there, just for fun, we will create two different ways of get line
-//but will only be called (used) by getline for better typedef, these 
-//two will be moved to cpp, so not be called directly by other files
+//
 /*typeA, we are doing the simple one with the gzgets
-*
+* NOTE: THIS ONE HAS BEEN TESTED. COULD BE WRONG. NEED TO BE THOROULY TESTED 
 *Input: _if, an opened gzFile pointer, 
 *			_line, a line buf to read things in 
-*Output: number character read in. 			 
+*Output: bool TRUE if the reading is good. 			 
 */
 bool getline_A(gzFile _if, string& _line )
 							//, const char& _delimit)
@@ -46,6 +37,8 @@ bool getline_A(gzFile _if, string& _line )
                 // handle error
 				cout<<"ERROR: "<<msg<<endl;
             }
+			//clean up to avoid buffer leaking
+			delete [] v;
             return false;
         }
 		//gzgets read in len -1 chars or when a newline char is read in
@@ -93,26 +86,32 @@ bool getline_A(gzFile _if, string& _line )
 ///-----------the following section contains code for getlinne B function
 #define windowBits 15
 #define ENABLE_ZLIB_GZIP 16
+//define a default gzip untility variable to be used
+//GZ_UTILITY _gu {0};
 
+
+/*
 //this is a stream for gzreading and decompression
-static z_stream strm = {0};
+static z_stream strm = {0}; //initialize all members to be zero
 static unsigned char gzip_in[CHUNK];
 static unsigned char gzip_out[OUT_CHUNK];
-
+*/
 //static 
-int init_gzip_stream(bool full/*FILE* file,char* out*/)
+int init_gzip_stream(GZ_UTILITY& gu, bool full/*FILE* file,char* out*/ 
+				 
+			)
 {// unsigned     
         
 		//need to check for errors
         int x=Z_OK;
 		if(full)
 		{//The application must initialize zalloc, zfree and opaque before calling the init function. 
-			strm.zalloc = Z_NULL;
-			strm.zfree = Z_NULL;
-			strm.opaque = Z_NULL;
-			strm.next_in = Z_NULL; //bytes holding the input data 
-			strm.avail_in = 0;
-			x=inflateInit2 (& strm,  windowBits| ENABLE_ZLIB_GZIP);
+			gu.strm.zalloc = Z_NULL;
+			gu.strm.zfree = Z_NULL;
+			gu.strm.opaque = Z_NULL;
+			gu.strm.next_in = Z_NULL; //bytes holding the input data 
+			gu.strm.avail_in = 0;
+			x=inflateInit2 (& gu.strm,  windowBits| ENABLE_ZLIB_GZIP);
 			//x=inflateInit (& strm);//,  windowBits | ENABLE_ZLIB_GZIP);
 			if(x!=Z_OK)
 			{
@@ -122,29 +121,29 @@ int init_gzip_stream(bool full/*FILE* file,char* out*/)
 			{
 				cout<<"****good at initializing buffer............."<<endl;
 			}
-			strm.next_in = gzip_in; //bytes holding the input data 
+			gu.strm.next_in = gu.gzip_in; //bytes holding the input data 
 			//strm.avail_in = 0;
-			strm.next_out = gzip_out; //bytes holding the output data
-			strm.avail_out=OUT_CHUNK;
+			gu.strm.next_out = gu.gzip_out; //bytes holding the output data
+			gu.strm.avail_out=OUT_CHUNK;
 		}
 		else
 		{ //The application must update next_in and avail_in when avail_in has dropped to zero. 
 		  //It must update next_out and avail_out when avail_out has dropped to zero. 
-			if(strm.avail_in==0)
+			if(gu.strm.avail_in==0)
 			{
-				strm.next_in=gzip_in;
+				gu.strm.next_in=gu.gzip_in;
 			}
-			if(strm.avail_out==0)
+			if(gu.strm.avail_out==0)
 			{
-				strm.next_out=gzip_out;
-				strm.avail_out=OUT_CHUNK;
+				gu.strm.next_out=gu.gzip_out;
+				gu.strm.avail_out=OUT_CHUNK;
 			}
 		}
 		//All other fields are set by the compression library and must not be updated by the application.
 		
     return x; //strm;
 }
-
+/*
 void debugZstream(const string& s)
 {
 	
@@ -166,7 +165,7 @@ void debugZstream(const string& s)
 		cout<<"\t*end at null????gzip_in of "<<strlen((char*)gzip_out )<<":"<<(unsigned)gzip_out[strlen((char*)gzip_out)]<<endl<<endl;
 		
 		//debugging the bugger
-		/*cout<<"\t**Debugging:gzip_out buf diplay:"<<endl;
+		/// *cout<<"\t**Debugging:gzip_out buf diplay:"<<endl;
 		cout<<"\t**";
 		for(unsigned i=0;i<OUT_CHUNK;i++)
 		{
@@ -176,11 +175,11 @@ void debugZstream(const string& s)
 				cout<<"["<<i<<"]:"<<"\\0"<<";";
 		}
 		cout<<endl;
-		*/
+		/// * /
 		debugChars((char*) gzip_out, OUT_CHUNK, "gzip_out (strm output)");
 }
-
- void debugChars(const char* s, size_t t, const string& n)
+*/
+/* void debugChars(const char* s, size_t t, const string& n)
 {
 	cout<<"**Debugging:\""<<n<<"\" buf diplay:"<<endl;
 		cout<<"\t**";
@@ -205,9 +204,11 @@ void debugZstream(const string& s)
 		cout<<endl;
 
 }
+*/
 //static
- bool inflate_gzip( z_stream& strm, const size_t& bytes_read, const size_t& bytes_avail, int& code)
+ bool inflate_gzip( GZ_UTILITY& gu, const size_t& bytes_read, const size_t& bytes_avail, int& code )
  {
+			z_stream& strm =gu.strm;
 			strm.avail_in = (int)bytes_read;
             
             strm.avail_out = (int)bytes_avail;
@@ -286,7 +287,7 @@ void debugZstream(const string& s)
 				code=100; //<---this is my own defined INFLATE_HEADER_ONLY 
 			}
 			if(ok)		
-			 x=init_gzip_stream(false);  //<--we are resetting the parameters of the strm (checking for avail_in and avail_out for conditions)
+			 x=init_gzip_stream(gu,false);  //<--we are resetting the parameters of the strm (checking for avail_in and avail_out for conditions)
 			
 #ifdef DEBUG
 		debugZstream("inside the inflate() at the end");
@@ -295,7 +296,7 @@ void debugZstream(const string& s)
 			return false;
     return ok;// all OK
 }
-
+/*
 static char* first_line=(char*)&gzip_out[0];
 static char* current_line=first_line;
 static char* next_line=first_line;
@@ -305,20 +306,20 @@ static unsigned next_line_size=0;
 
 static char hangover[OUT_CHUNK+2];
 static bool z_stream_init=false;
-
+*/
 //In there, just for fun, we will create two different ways of get line
 //but will only be called (used) by getline for better typedef, these 
 //two will be moved to cpp, so not be called directly by other files
 
 //assuming the file has been opened 
-bool getline_B(FILE* _f, string& l)
+bool getline_B(FILE* _f, string& l, GZ_UTILITY& gu)
 			//, const char& _delimit)
 {
 	//assume at this point, the file has been opened correctly.	
 	bool ok=true;
 	unsigned size_line=BUF_SIZE;
-	current_line=next_line;
-	current_line_size=next_line_size;
+	gu.current_line=gu.next_line;
+	gu.current_line_size=gu.next_line_size;
 	char* line=new char [size_line];
 	line[0]=0; //set it to empty
 	unsigned line_len=0;
@@ -330,27 +331,28 @@ bool getline_B(FILE* _f, string& l)
 	//case 3: reading outside of the buffer now.
 	//in all these cases, we need to read the file buffer and inflate
 	do{	
+		//cout<<"reading......."<<endl;
 #ifdef DEBUG	
-		cout<<"reding......."<<endl;
+		cout<<"reading......."<<endl;
 #endif
-		if(!current_line || current_line_size==0 || ((unsigned char*) next_line) >= gzip_out + OUT_CHUNK) //this is necessary, since in here we check for whether we have done with reading a line in the available buffer. the enclosed section check whether we have the read in buffer processed/inflated and whether to read in more input from the file buffer.
+		if(!gu.current_line || gu.current_line_size==0 || ((unsigned char*) gu.next_line) >= gu.gzip_out + OUT_CHUNK) //this is necessary, since in here we check for whether we have done with reading a line in the available buffer. the enclosed section check whether we have the read in buffer processed/inflated and whether to read in more input from the file buffer.
 		{   //if we are doing a new call of "getline", we are checking actually the next_line in the previous call.
 			// the third condition in above will not used if we have done a correct job previously, just keep it here for safety.
 			//if we are in the current call, but come here because we are looping from previous unfound "new line" case, we are 
 			//be jumping using current_line_size==0 condition (2nd condition), we will not use the third condition either.
 			
 			//if we are there we need either to read file or inflate more. in any case we will need to rest to here ??using th estrm.next_out 
-			current_line= (char*)strm.next_out;
-			next_line=current_line; //reset this in case next_line is out of boundary of gizp_out and no new line found, this might create a new read.(this is not necessary, since we set the current line to zero, so we should be fine)
-			bytes_read=strm.avail_in;//<---
+			gu.current_line= (char*)(gu.strm.next_out);
+			gu.next_line=gu.current_line; //reset this in case next_line is out of boundary of gizp_out and no new line found, this might create a new read.(this is not necessary, since we set the current line to zero, so we should be fine)
+			bytes_read=gu.strm.avail_in;//<---
 			//bytes_avail=strm.avail_out; //<---
 			
-			if(strm.avail_in==0&&strm.avail_out!=0) //strm.avail_in !=0 means we have more input to decompress and strm.avail_out means we have more output to write 
+			if(gu.strm.avail_in==0&&gu.strm.avail_out!=0) //strm.avail_in !=0 means we have more input to decompress and strm.avail_out means we have more output to write 
 			{//we are here means we need to do more reading to get data 
 			//we here check whether we have more file to read before reading the file .
 				if (feof (_f)) { //we are done 
 					cout<<"reaching the end of the input file"<<endl;
-					int err=inflateEnd (& strm);
+					int err=inflateEnd (& (gu.strm));
 					//check for error 
 					if(err ==Z_STREAM_ERROR)
 						cout<<"ERROR: when closing the stream, Z_STREAM_ERROR is returned!!"<<endl;
@@ -370,7 +372,7 @@ bool getline_B(FILE* _f, string& l)
 				cout<<"-----bytes_read:"<<bytes_read<<endl;
 #endif
 				
-				bytes_read = fread (gzip_in, sizeof (char), CHUNK, _f);
+				bytes_read = fread (gu.gzip_in, sizeof (char), CHUNK, _f);
 #ifdef DEBUG
 		cout<<"-----bytes_read:"<<bytes_read<<endl;
 		debugZstream("after reading the bytes");
@@ -380,9 +382,9 @@ bool getline_B(FILE* _f, string& l)
 			//in any case, either we have read more or not, we need to inflate the buffer 
 //			cout<<"before inflating....."<<endl;
 			//here now we have other things to do, figure out the length of current 
-			current_line_size=strm.avail_out; //remember it before inflating, as holder 
+			gu.current_line_size=gu.strm.avail_out; //remember it before inflating, as holder 
 			int inflate_code =Z_OK;
-			ok=inflate_gzip(strm, bytes_read, strm.avail_out, inflate_code);
+			ok=inflate_gzip(gu, bytes_read, gu.strm.avail_out, inflate_code);
 			//if reading and inflation are OK.
 			if(!ok){//so far, ok means everything is fine. otherwise (ok==false) we got an error, need to stop.
 				/*//here we are done with reading the file by reaching the end, 
@@ -394,34 +396,34 @@ bool getline_B(FILE* _f, string& l)
 			}
 			//calculate the size of current, it is a little complicated, note now the current_line_size holding 
 			//the strm.avail_out before reading, which is the possible len to before inflating meaning the max-value for current_line_size
-			if(current_line_size>=strm.avail_out)  //this is no wrapping up (because resetting) and we still have some free bytes
+			if(gu.current_line_size>=gu.strm.avail_out)  //this is no wrapping up (because resetting) and we still have some free bytes
 			{//could be no writing of the output due to some reason (decompressing and not more buffer)
-				if(strm.avail_out==OUT_CHUNK&&current_line_size==OUT_CHUNK)//this is a very special case
+				if(gu.strm.avail_out==OUT_CHUNK&&gu.current_line_size==OUT_CHUNK)//this is a very special case
 				{
 					//we need to check for z_stream comppressing eror , if not then we are good
 					if(inflate_code !=Z_BUF_ERROR&&inflate_code!=100) //the only possible cases are Z_BUF_ERROR, Z_STREAM_END and Z_OK  if ok is true 
 					{
 						//note 100 is my own defined code, which is reading the header only
-						current_line_size=OUT_CHUNK;
+						gu.current_line_size=OUT_CHUNK;
 					}
 					else  //no read, so 
 					{
-						current_line_size=0;
+						gu.current_line_size=0;
 					}
 				}
 				else  //case where we read something or did not read anything.
 				{
-					current_line_size-=strm.avail_out;//we got the bytes
+					gu.current_line_size-=gu.strm.avail_out;//we got the bytes
 				}
 			}
 			else  //in here means we wrapping out due to the fact that we used up the buffer in inflating.
 			{//and in this case, the only possible value is OUT_CHUNK.
-				if(strm.avail_out!=OUT_CHUNK)
+				if(gu.strm.avail_out!=OUT_CHUNK)
 				{	cout<<"ERROR: something is wrong, strm avail is not what we expected, please check!!!"<<endl;
 					return false;
 				}
 									
-				current_line_size=current_line_size-0;//0 is the value of strm.avail_out before updating the params in strm
+				gu.current_line_size=gu.current_line_size-0;//0 is the value of strm.avail_out before updating the params in strm
 			}
 #ifdef DEBUG
 			cout<<"&&&&size debug, current_line_size:"<<current_line_size<<endl;
@@ -447,12 +449,12 @@ bool getline_B(FILE* _f, string& l)
 				debugChars(line, size_line, "line (buf display) before copy handover in case ******");
 				cout<<"line_len:"<<line_len<<"---hangover_len:"<<hangover_len<<endl;
 #endif
-				strncpy(line+line_len,hangover, hangover_len); //<- this is just in case there are leftovers in the hangover region. this could because we did not find new line in the last round of reading and inflating 
+				strncpy(line+line_len,gu.hangover, hangover_len); //<- this is just in case there are leftovers in the hangover region. this could because we did not find new line in the last round of reading and inflating 
 				line_len += hangover_len;//<-------- size_line and line_len??????
 #ifdef DEBUG				
 				debugChars(line, size_line, "line (buf display) after copy handover in case ******");
 #endif
-				hangover[0]=0;
+				gu.hangover[0]=0;
 				hangover_len=0;
 				
 			}
@@ -460,17 +462,17 @@ bool getline_B(FILE* _f, string& l)
 		}
 		//cout<<"inflating....."<<endl;
 #ifdef DEBUG
-		cout<<"Before searching for \\n, current_line_size:"<<current_line_size<<endl;
-		cout<<"\t*******current:"<<current_line<<endl;
+		cout<<"Before searching for \\n, current_line_size:"<<gu.current_line_size<<endl;
+		cout<<"\t*******current:"<<gu.current_line<<endl;
 #endif 		
-		next_line=strcnstr(current_line,current_line_size,'\n');//current line pointing to the inflated z_stream output region , and now we start parsing (meaning trying to find a newline)
-		if(next_line){//find a newline, then we need to point the next_line to the correct region 
+		gu.next_line=strcnstr(gu.current_line,gu.current_line_size,'\n');//current line pointing to the inflated z_stream output region , and now we start parsing (meaning trying to find a newline)
+		if(gu.next_line){//find a newline, then we need to point the next_line to the correct region 
 #ifdef DEBUG
 			cout<<"\tfound a new line"<<endl;
 #endif			
-			next_line[0]=0; //finish/replace the end of  current line with '\0'
-			next_line++;  //point to the next line 
-			while(next_line-current_line+line_len>size_line)
+			gu.next_line[0]=0; //finish/replace the end of  current line with '\0'
+			gu.next_line++;  //point to the next line 
+			while(gu.next_line-gu.current_line+line_len>size_line)
 			{
 				//size_line*=2;
 				//delete [] line;
@@ -482,8 +484,8 @@ bool getline_B(FILE* _f, string& l)
 				strncpy(line,temp, size_line/2);
 				delete [] temp;
 			}
-			next_line_size=current_line_size-(next_line-current_line);
-			current_line_size=next_line-current_line;
+			gu.next_line_size=gu.current_line_size-(gu.next_line-gu.current_line);
+			gu.current_line_size=gu.next_line-gu.current_line;
 			//next_line_size=(char*)(strm._)-next_line;
 			
 #ifdef DEBUG			
@@ -493,9 +495,9 @@ bool getline_B(FILE* _f, string& l)
 			cout<<"pointer address line:"<<static_cast<const void *>(line)<<"; plus line size("<<line_len<<"):"<<static_cast<const void *>(line+line_len)<<endl;
 			cout<<"next line size :"<<next_line_size<<endl;
 #endif			
-			strncpy(line+line_len,current_line, current_line_size); //copy to the hangover/buffer zone, increase it in case this is too big 
+			strncpy(line+line_len,gu.current_line, gu.current_line_size); //copy to the hangover/buffer zone, increase it in case this is too big 
 #ifdef DEBUG			
-			cout<<"--after copying, current_line:"<<current_line<<"****current_line_size:"<<current_line_size<<endl;
+			cout<<"--after copying, current_line:"<<gu.current_line<<"****current_line_size:"<<gu.current_line_size<<endl;
 			debugChars(line, size_line, "line (final output)");
 
 			cout<<"\t**the line is "<<line<<endl;
@@ -503,13 +505,13 @@ bool getline_B(FILE* _f, string& l)
 			//cout<<"\tgzout:"<<gzip_out<<endl;
 #endif
 			//cleanup and ready to jump out 
-			hangover[0]=0;//set the buffer to empty
+			gu.hangover[0]=0;//set the buffer to empty
 			hangover_len=0;
 			//cout<<"line_len before:"<<line_len;
-			line_len+=(next_line-current_line);
+			line_len+=(gu.next_line-gu.current_line);
 #ifdef DEBUG
 			cout<<";line_len after:"<<line_len<<endl;
-			cout<<"done for the all loop rounds........."<<current_line<<endl;
+			cout<<"done for the all loop rounds........."<<gu.current_line<<endl;
 #endif
 			break;
 		}else{ //could not find a new line in this case we need to read more bytes or inflate more
@@ -520,24 +522,24 @@ bool getline_B(FILE* _f, string& l)
 #endif			
 			//please do make sure you set the hangover(dest buffer is bigger enough to hold the copying.) otherwise
 			//anything could happen.!!!!! Yes, we do , in this case, hangover is 1 more than gzip_out(OUT_CHUNK)
-			strncpy(hangover,current_line, current_line_size);//before start reading, we need to copy over to hangover buffer
+			strncpy(gu.hangover,gu.current_line, gu.current_line_size);//before start reading, we need to copy over to hangover buffer
 			//line[0]=0;// skip that one!!
 #ifdef DEBUG
 			cout<<"\t hangover_len:"<<hangover_len<<endl;
-			cout<<"\t current_line_size:"<<current_line_size<<endl;
+			cout<<"\t current_line_size:"<<gu.current_line_size<<endl;
 #endif
-			hangover_len = current_line_size;
+			hangover_len = gu.current_line_size;
 				//strm.avail_out/sizeof(char)-(current_line-(char*)strm.next_out);
 #ifdef DEBUG
 			cout<<"##within the hangover region, hangover_len:"<<hangover_len<<"; hangover[len]:"<<
-					(unsigned)hangover[hangover_len]<<endl;
-			cout<<"\t current_line_size:"<<current_line_size<<endl;
+					(unsigned)gu.hangover[hangover_len]<<endl;
+			cout<<"\t current_line_size:"<<gu.current_line_size<<endl;
 #endif			
 			//dump all the data in the current_line, since we need to either read more or decompress more 
 			//current_line[0]=0; //<--???by doing this we "destroyed" the gzip_out buffer holding the usedcurrentline data.
 						//the one before strm.next_in
 					
-			current_line_size=0;//this is necessary
+			gu.current_line_size=0;//this is necessary
 			
 			//in this case, we will not use next line, since there is no '\n' found. we will go back the loop read 
 			//more data and will not go out of loop for a new call.
@@ -550,7 +552,7 @@ bool getline_B(FILE* _f, string& l)
 	delete [] line ;
 	return true;
 }
-FILE* gzOpen_B(const string& _fname, const string & _mode)
+FILE* gzOpen_B(const string& _fname,  GZ_UTILITY& gu, const string & _mode)
 {
 	//here we now simly call the zlib open 
 	if(_fname.length()==0)
@@ -558,30 +560,82 @@ FILE* gzOpen_B(const string& _fname, const string & _mode)
 		cout<<"ERROR: can not open gz file. the file name has not been specified correctly"<<endl;
 		return NULL;
 	}
-	//cout<<"start opeing....."<<endl;
+	//cout<<"start opeing....."<<_fname<<endl;
 	//open the file 
 	FILE* f=fopen(_fname.c_str(), _mode.c_str());
-	cout<<"here....."<<endl;
+	//cout<<"here....."<<endl;
 	if(!f)
 	{
-		//cout<<"inside........"<<endl;
+		////cout<<"inside........"<<endl;
 		cout<<"ERROR: file open error !!"<<endl;
 		perror("\terr msg:");
 		//clearerr(f);
 		//fclose(f);
 		return 0;
 	}
+	init_gu(gu);
+	gu.z_stream_init=false;
 	//initiate/start the zstrem
-	if(!z_stream_init)
+	if(!gu.z_stream_init)
 	{	
-		z_stream_init=true;
-		init_gzip_stream(true/*_f,&line[0]*/);
+		gu.z_stream_init=true;
+		init_gzip_stream( gu,true/*_f,&line[0]*/);
 	}
+	
 	
 	return f;
 }
-void gzClose_B(FILE* _f)
+void init_gu(GZ_UTILITY& gu)
 {
+	//cout<<"inside inti gu ...."<<endl;
+	gu.strm = {0}; //initialize all members to be zero
+	//unsigned char gzip_in[CHUNK];
+	//unsigned char gzip_out[OUT_CHUNK];
+	
+	//
+	gu.first_line=(char*)(&(gu.gzip_out[0]));
+	gu.current_line=gu.first_line;
+	gu.next_line=gu.first_line;
+
+	gu.current_line_size=0;
+	gu.next_line_size=0;
+
+	//char hangover[OUT_CHUNK+2];
+	gu.z_stream_init=false;
+}
+/*void init_gu2(GZ_UTILITY2& gu)
+{
+	cout<<"inside inti gu ...."<<endl;
+	gu.strm = {0}; //initialize all members to be zero
+	//unsigned char gzip_in[CHUNK];
+	//unsigned char gzip_out[OUT_CHUNK];
+	
+	//
+	gu.first_line=(char*)(&(gu.gzip_out[0]));
+	gu.current_line=gu.first_line;
+	gu.next_line=gu.first_line;
+
+	gu.current_line_size=0;
+	gu.next_line_size=0;
+
+	//char hangover[OUT_CHUNK+2];
+	gu.z_stream_init=false;
+}*/
+
+void gzClose_B(FILE* _f, GZ_UTILITY& gu)
+{
+	//reset everything.
+	gu.z_stream_init=false;
+	gu.strm={0};
+	gu.first_line=(char*)&(gu.gzip_out[0]);
+	gu.current_line=gu.first_line;
+	gu.next_line=gu.first_line;
+
+	gu.current_line_size=0;
+	gu.next_line_size=0;
+
+	//cout<<"close the file stream.........."<<endl;
+	//we leave the buffers alone, as long as we set the flags correctly 
 	//do I need to close or de-initialize the z_stream??
 	fclose(_f);
 }
@@ -604,6 +658,11 @@ gzFile gzOpen(const string& _fname, const string & _mode)
 	if(_fname.length()==0)
 	{
 		cout<<"ERROR: can not open gz file. the file name has not been specified correctly"<<endl;
+		return NULL;
+	}
+	//check for file existence.
+	if(!exist(_fname.c_str()))
+	{
 		return NULL;
 	}
 	//now call zlib

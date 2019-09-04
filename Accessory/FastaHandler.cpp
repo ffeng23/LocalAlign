@@ -6,6 +6,10 @@
 #include <zlib.h>
 #include "string_ext.hpp"
 #include "GzTools.hpp"
+#include "../SequenceHandlerCommon.hpp"
+//#include ".hpp"
+
+#define MAX 6000
 
 using namespace std;
 size_t ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec, bool toUpper)
@@ -17,10 +21,11 @@ size_t ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec, bool 
 	
   ifstream ifs_p;//(_fname.c_str());
   FILE* fb=NULL;
+  GZ_UTILITY gu{0};
   if(gzflag) //gziped
   {
   //cout<<"....1"<<endl;
-	fb=gzOpen_B(_fname, "rb");
+	fb=gzOpen_B(_fname, gu, "rb");
 	if(!fb)
 	{
 		cout<<">>>>>>ERROR:input file\""<<_fname<<"\" can not be opened, quit....\n"<<endl;
@@ -65,7 +70,7 @@ size_t ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec, bool 
 	  if(gzflag) //compressed file 
 	  {
 		//cout<<"\tready to read........"<<endl;
-		ok=getline_B(fb, line);
+		ok=getline_B(fb, line,gu);
 	  }
 	  else
 		getline(ifs_p, line);
@@ -123,7 +128,7 @@ size_t ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec, bool 
   
   if(gzflag)
   {
-	gzClose_B(fb);
+	gzClose_B(fb,gu);
   }
   else
   {  
@@ -133,6 +138,259 @@ size_t ReadFasta(const string& _fname, vector<SequenceString>& _seqStrVec, bool 
   return gene_number;
 }
 
+//in here we read ONE record of fasta 
+//the caller needs to open/close  the file
+/*input: 
+ *	fb FILE stream pointer, assuming it is ok. but we need to check for the end of file status.
+ *	ss SequenceString reference, used to return the read record.
+ *	hangover, string buffer used to hold the hangover from the previous read. 
+ *		will be passed between calls.
+ *  gu, GZ_UTILITY, used by the gz tools for reading the compressed files. 
+ *		will be passed between calls
+ *	gz bool, used to indicating whether this is a compressed stream. 
+ *output:
+ *	return the bool indcating whether the reading COULD BE CONTINUE.
+ *		true: meaning we can go on to read and current record is good. 
+ *		false when we reach the end or there is an error (either stream reading error or parsing error (no '>', etc).
+ *		the outer caller need to check whether it is a eof or error. 
+ *      Most importantly, it could happen that the reading can not go on (false), but the current 
+ *		read is still valid. Just check to see whether it is a good read. if the read is no good
+ *		due to the error, the rescord is set to be empty.!!!!
+ */
+bool get1FastaSeq(FILE* fb, SequenceString& ss, string& hangover, GZ_UTILITY& gu, const bool& gz)
+{
+	bool ok=true;
+	string line;
+	string sname;
+	string sseq;
+	bool gotHeader=false;
+	char buf[MAX];
+	//GZ_UTILITY gu;
+	
+	//now the first thing to do is to check the hangover buffer 
+	//to get the reads from the previous read.
+	if(hangover.length()!=0)
+	{//there are something in there,
+		if(hangover[0]!='>')
+		{
+			//this is impossible. it should not happen.
+			cout<<"Corrupted file reading, reading stopped!!"<<endl;
+			return false;
+		}
+		sname=move(hangover.substr( 1));
+		gotHeader=true;
+	}
+	
+	//assume the file is opened. start reading.
+	while (ok)
+	{
+		/*
+		//need to check whether we are reaching the end of file
+		if((gz&&!ok)||((!gz)&&feof(fb)))
+		{
+			//cout<<"***\t first line reaching end...."<<endl;
+			//reaching the end, done. 
+			return false;
+		}
+		*/
+		if(gz)
+		{
+			//cout<<"\tready to read........"<<endl;
+			ok=getline_B(fb, line,gu);
+			//if(!ok)
+			//	cout<<"\t----no good"<<endl;
+		}
+		else
+		{
+			//cout<<"read the fline"<<endl;
+			char* st=fgets(buf,(size_t)MAX, fb);
+			//ok=(feof(fb)&&st!=nullptr);
+			ok=(st!=nullptr);
+		}  
+
+		if(!ok)
+		{//could be error or reaching the end.
+			 if(sseq.length()==0 ||sname.length()==0)
+			{
+				//cout<<"sname:"<<sname<<"\n sseq:"<<sseq<<endl;
+				ss.SetName("");
+				ss.SetSequence("");
+				ok= false;
+			}
+			else{
+				ss.SetName(move(sname));
+				ss.SetSequence(move(sseq));
+				ok=false;
+				
+			}
+				
+			  //return false;
+			  //cout<<"\t\t 0--0-breaking the loop inside....."<<endl;
+			  break; 
+		}
+		if(!gz)
+			line=buf;
+		
+		chomp_ext(line);
+		
+		if(line[0]=='>') //first line or header line, need to check for whether to continue or finish this one.
+		{
+			if(!gotHeader)
+			{
+				sname=move(line.substr( 1,line.length()));
+				gotHeader=true;
+			}
+			else //need to finish this	
+			{
+				ss.SetName(move(sname));
+				ss.SetSequence(move(sseq));
+	
+				hangover=move(line);
+				break;
+			}
+				
+		}
+		else 
+		{
+			sseq.append(line);
+		}
+		/*//read again 
+		if((gz&&!ok)||((!gz)&&feof(fb)))
+		{
+			//cout<<"\t****reaching end"<<endl; 
+			//reaching the end, done. 
+			return false;
+		}
+		
+		if(gz)
+		{
+			//cout<<"\tready to read........"<<endl;
+			ok=getline_B(fb, line,gu);
+		}
+		else
+		{
+			char* st=fgets(buf,MAX, fb);
+			ok=(st!=nullptr);
+		}  
+
+		if(!ok||(gz&&line[0]=='>')||((!gz)&&buf[0]=='>'))
+		{
+			  //cout<<"...rerror occured , !!!"<<endl;
+			  
+			  return false;
+		}
+		if(gz)
+			sseq=move(line);
+		else
+			sseq=buf;*/
+	}
+	
+	return ok;
+}	
+
+//now we want to read and concate the fasta files 
+//
+size_t concatenateFasta(const string& fn_r1, const string& fn_r2, 
+			FileType ft, string outFile_name, 
+			ios_base::openmode mode,
+			bool rc)
+{
+		//need to know whether this is compressed file;
+	//we are using the ".gz" suffix as a criterion for the compressed file.
+	//we only do gzip compression.not others.
+	bool gzflag=(ft==GZ_FASTA);
+	
+	//opent file first
+	
+	FILE* fb1=NULL; FILE* fb2=NULL;
+	GZ_UTILITY gu1{0};
+	GZ_UTILITY gu2{0};
+  if(gzflag) //gziped
+  {
+  //cout<<"....1"<<endl;
+	fb1=gzOpen_B(fn_r1, gu1, "rb");
+	fb2=gzOpen_B(fn_r2, gu2, "rb");
+	if(!fb1||!fb2)
+	{
+		cout<<">>>>>>ERROR:input file\""<<fn_r1<<" or "<<fn_r2<<"\" can not be opened, quit....\n"<<endl;
+		return string::npos;
+	}
+  } 
+  else
+  {
+	 fb1=fopen(fn_r1.c_str(), "r");
+	 fb2=fopen(fn_r2.c_str(), "r");
+	if(fb1==nullptr||fb2==nullptr)
+    {
+      cout<<">>>>>>ERROR:the input file \""<<fn_r1<<"\" or \""<<fn_r2<<"\" can not be opened, quit....\n";
+      return string::npos;
+    }  
+  }
+  //call to read
+	bool ok1=true, ok2=true;
+	string hangover1, hangover2;
+	SequenceString ss1;
+	SequenceString ss2;
+	SequenceString ssc;
+	unsigned count=0;
+	
+	ofstream ofs((outFile_name).c_str(), mode);
+  
+  if(!ofs.is_open())
+    {
+      cout<<">>>>>>ERROR:the output file \""<<outFile_name<<"\" can not be opened, quit....\n";
+      return 0;
+    }
+  while(ok1&&ok2)
+  {
+	  ok1=get1FastaSeq(fb1, ss1,hangover1,gu1, gzflag);
+	  
+	  ok2=get1FastaSeq(fb2, ss2,hangover2, gu2, gzflag);
+	  
+	  
+	  //now we should do concate
+	  if(ss1.GetName()!=""&&ss2.GetName()!="")
+	  {
+		count++;
+		/*cout<<"-----seq:"<<count<<endl;
+		  cout<<"record 1:"<<ss1.toString()<<endl;
+		  cout<<"record 2:"<<ss2.toString()<<endl;
+		*/
+		//
+		ssc.SetName(ss1.GetName());
+		string tempSeq=ss1.GetSequence();
+		if(rc)
+		{
+			//only reverse complement the read2
+			
+			tempSeq.append(ReverseComplement(ss2).GetSequence());
+			
+		}
+		else
+		{
+			tempSeq.append(ss2.GetSequence());
+		}
+		ssc.SetSequence(move(tempSeq));
+		writ1FastaSeq(ofs, ssc);
+	  }
+	  
+  }
+  
+  if(gzflag)
+  {
+	gzClose_B(fb1,gu1);
+	gzClose_B(fb2,gu2);
+  }
+  else
+  {  
+	fclose(fb1);
+	fclose(fb2);
+  }
+  ofs.close();
+  return count;
+}
+
+//write 
 void WriteFasta(const string& _fname, vector<SequenceString>& _seqStrVec, const unsigned int& _width,  ios_base::openmode mode)
 {
   ofstream ofs((_fname).c_str(), mode);
@@ -413,4 +671,14 @@ void WriteTextTableFile(const string& _fname, vector<vector<string> >& _seqStrVe
 
   ofs.close();
 }//end of function
+
+bool writ1FastaSeq(ofstream& ofs, const SequenceString& ss, const unsigned& _width)
+{
+	ofs<<">"<<ss.GetName()<<"\n";
+    for(unsigned int j=0;j*_width<ss.GetLength();j++)
+	{
+	  ofs<<ss.GetSequence().substr(j*_width, _width)<<"\n";
+	}
+	return true;
+}
 

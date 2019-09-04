@@ -13,7 +13,17 @@ using namespace std;
 enum FileType {GZ, FASTA, FASTQ, TXT, GZ_FASTA, GZ_FASTQ, GZ_TXT, DIR, UNKNOWN};
 
 //get file type, note FileType is user-defined enum.
-FileType getFileType(const string& fname);
+//we will do two ways, either by file name, simply check the file name 
+//	or deep mode, to read the file and the check the first two bytes/chars 
+//	gzip file first byte is 31 and second 139
+//	fasta '>'
+//	fastq '@'
+//input :
+//	fname string name of the file 
+//	deep bool to read first 2 byte to tell what file this is.
+//return: 
+//	FILETYPE. this is the userdefine and file type.
+FileType getFileType(const string& fname, bool deep=false);
 
 bool is_file(const char* path) ;
 
@@ -34,7 +44,27 @@ bool exist(const char* path);
 // expanded this to reading possibly fasta, fastq, fastq gzipped.
 // we will return separately the sequence string and quality string in order to be compatible 
 // with the previous version of the function.
-size_t readFile2SeqStrVector(string _fname, vector<SequenceString>& _vec, vector<string>* _vec_Q=NULL);
+size_t readFile2SeqStrVector(const string& _fname, vector<SequenceString>& _vec, vector<string>* _vec_Q=NULL);
+
+/* read two files (pair end reads) and then cancatenate them 
+ * assuming they are r1 and r2, we also need to revcomp the second 
+ * reads.
+ * input:
+ * 		r1 string file name of read 1
+ *		r2 string file name of read 2
+ * output: 
+ * 		return the total number of reads processed.
+*/
+size_t concatnateSeqFiles(const string& fn_r1, const string& fn_r2);
+
+FileType check_gzFileType(const string& fname);
+
+bool is_fastq(const string& fname);
+bool is_fasta(const string& fname);
+bool is_text(const string& fname);
+
+FileType getFileType_deep(const string& fname);
+FileType getFileType_byName(const string& fname);
 
 
 #endif

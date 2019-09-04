@@ -3,7 +3,9 @@
 #include "Accessory/SequenceString.hpp"
 #include "score.hpp"
 
-
+//we don't do in-place modification, but instead make a new 
+//copy and return it. 
+//
 SequenceString ReverseComplement(SequenceString& seq);
 
 //compare two strings character by character, return # of chars that are different. if two strings are of different size, 
