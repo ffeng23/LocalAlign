@@ -1,0 +1,231 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <zlib.h>
+#include "Accessory/string_ext.hpp"
+
+//from now on you need to specify the c libraries explicitly
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "Accessory/SequenceString.hpp"
+#include "Accessory/FastaHandler.hpp"
+#include "SequenceHandlerCommon.hpp"
+
+#include "Accessory/FileHandler.hpp"
+#include "Accessory/FASTQ.hpp"
+#include "Accessory/FastqHandler.hpp"
+
+using namespace std;
+
+static void printUsage(int argc, char* argv[]);
+static void parseArguments(int argc, char **argv, const char *opts);
+void printCallingCommand(int argc, char* argv[]);
+
+static string fileR1_name;//default input file for single index, R1
+static string fileR2_name;
+
+enum mapType {FivePrime, ThreePrime}; //defined in SequenceHandlerBarcode.hpp
+static mapType mapEnd=FivePrime; //only work for R2, to reverse complement the sequence index 2,
+                                 //we never reverse complement the barcode. 
+
+int main(int argc, char* argv[])
+{
+  printCallingCommand(argc, argv);
+  //for parsing commandline arguement
+  const char *opts = "hvs:t:r";
+  //r: reverse complement the read2 barcode or not to do demux
+  //s: sequence data file, contains the real sequence data, having the same order and name.
+  //t: sequence data file, optional, could be specified or not. if dumux, then needed to check for this.
+  // v and h: version and help
+
+  cout<<"Start parsing the input commands......."<<endl;
+  parseArguments(argc, argv, opts);
+  
+  cout<<"***Input parameters Summary:\n";
+  
+  if(fileR1_name.size()==0)
+    {
+      cout<<"please specify the input file name (R1).......\n";
+      //printUsage(argc, argv);
+      cout<<"type "<<argv[0]<<" -h \" for usage help\n";
+      exit(-1);
+    }
+  if(fileR2_name.size()==0)
+    {
+      cout<<"please specify the input file name (R2).......\n";
+      //printUsage(argc, argv);
+      cout<<"type "<<argv[0]<<" -h \" for usage help\n";
+      exit(-1);
+    }
+  cout<<"file (Read 1):\""<<fileR1_name<<"\".\n";
+  cout<<"file (Read 2):\""<<fileR2_name<<"\".\n";
+  
+  cout<<"Map type:"<<mapEnd<<endl;
+  
+  //*********get output files names
+  string outFile_name;//for index R1 output file 
+  outFile_name.assign(fileR1_name+".Conc");
+  
+  //check the input file types
+  FileType ft1=getFileType(fileR1_name,true);
+  FileType ft2=getFileType(fileR2_name,true);
+  if(ft1!=ft2)
+  {
+	  cout<<"Error: file types are not match. Please check...."<<endl;
+	  exit(-1);
+  }
+  cout<<"File Type:";
+  bool unknownType=false;
+  switch (ft1)
+  {
+	  case FASTA:
+		cout<<"FASTA";
+		outFile_name.append(".fasta");
+		break;
+	  case GZ_FASTA:
+		cout<<"gzip FASTA (compressed)";
+		outFile_name.append(".fasta");
+		break;
+	  case FASTQ:
+		cout<<"FASTQ";
+		outFile_name.append(".fastq");
+		break;
+	  case GZ_FASTQ:
+		cout<<"gzip FASTQ (compressed)";
+		outFile_name.append(".fastq");
+		break;
+	  case GZ:
+		cout<<"compressed file";
+		unknownType=true;
+		break;
+	  case TXT:
+		cout<<"text file";
+		unknownType=true;
+		break;
+	  case UNKNOWN:
+	  default:
+		cout<<"UNKNOWN file type";
+		unknownType=true;
+		break;
+  }
+  cout<<endl;
+  if(unknownType)
+  {
+	  cout<<"The file type is not supported, please input file of (gzip) fasta/fastq files"<<endl;
+	  exit(-1);
+  }
+  
+  // the output file names  
+  //outFileR1_name=outFileR1_name.append(".conc.
+  cout<<"The output file name : \""<<outFile_name<<"\"\n";
+  
+  //start doing the reading....assuming we only deal with fasta, fastq and fastq gzipped. no others
+  //the file type only  
+  cout<<"--------------------\n";
+  cout<<"Starting reading from input file ad concatenating.....\n";
+  size_t pt=0;
+
+  if(ft1==GZ_FASTA||ft1==FASTA)
+  {
+	 pt=concatenateFasta(fileR1_name, fileR2_name,ft1,
+	     outFile_name);
+  }
+  else 
+  {
+	  if(ft1==GZ_FASTQ||ft1==FASTQ)
+	  {
+		  cout<<"calling here......"<<endl;
+		 pt=concatenateFastq(fileR1_name, fileR2_name, ft1,outFile_name);
+	  }
+  }
+  cout<<"Total "<<pt<<" records processed"<<endl;
+  cout<<"Done!!!"<<endl;
+  
+  cout<<"Thanks for using our program and have fun!!"<<endl;
+  return 0;
+}
+
+
+static void parseArguments(int argc, char **argv, const char *opts)
+{
+  int optchar;
+  //int temp;
+  while ((optchar = getopt(argc, argv, opts)) != -1)
+    {
+      switch(char(optchar))
+	{	  
+	case 's':
+	  fileR1_name=optarg;
+	  break;
+	case 't':
+	  fileR2_name=optarg;
+	  break;
+	case 'r':
+	  mapEnd=ThreePrime;
+	  break;
+	
+	case '?':
+	  
+	  /*if(optopt == 't')
+	    ;//cout<<"option"<<optopt<<" requires an argument.\n"<<endl;
+	    else*/
+	  if(isprint(optopt))
+	    {
+	      cout<<"Unknown option "<<optopt<<endl;
+	    }
+	  else
+	    cout<<"Unknown option character"<<endl;
+	
+	case 'v':  
+	case 'h': // usage or unknown
+	default:
+	  printUsage(argc, argv);
+	  exit(-1);
+	}
+    }
+}
+
+
+static void printUsage(int argc, char* argv[])
+{
+  cout<<argv[0]<<", the program used to concatenate two fasta/fastq files."
+	  <<"Assume the two files are read 1 and read 2 of the same type. "
+	  <<"We also reverse complement the read 2 file by deafault."
+	  <<"Currently support (fastq/fasta/fq/fa).(gz/gzip).\n";
+
+  cout<<"\tOption string: \"hvs:t:r\" \n";
+  cout<<"Usage:\n";
+  cout<<"\t"<<argv[0]<<" -s sequence file (R1) -t sequence file r2\n"
+	  <<"\t\t [-r (reverse implement r2 sequence index)]\n"
+      <<"\t\t [-h] [-v]\n\n"
+    ;
+  cout<<"\t-s: the input barcode file name (for r1) \n";
+  cout<<"\t-t: the input file barcode name (for r2) \n"
+      <<"\t\tassuming has identical name and order\n"
+	  <<"\t-r: reverse complement the read2 sequences\n"
+      ;
+  cout<<"\t-v and -h: version and help\n";
+  cout<<"Note: 1)when we do the concatenation, we reverse complement the r2 and "
+	  <<"reverse the quality string if they are the fastq files.\n";
+	
+  cout<<"2)The output file are either fasta or fastq. \n"
+	  ;
+  cout<<"Example:\n"
+		<<"\t"<<argv[0]<<"-s file1.fasta(.gz) -t file2.fasta(.gz) -r\n"
+		;
+  cout   <<"\t\t\t *************@9/2/2019 by Feng\n"
+     ;
+}
+
+void printCallingCommand(int argc, char* argv[])
+{
+	cout<<"Calling:"<<endl;
+	for(int i =0;i<argc;i++)
+	{
+		cout<<argv[i]<<" ";
+	}
+	cout<<endl;
+}
+
