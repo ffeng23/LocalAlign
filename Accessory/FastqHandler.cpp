@@ -298,7 +298,7 @@ bool get1FastqSeq(FILE* fb, SequenceString& ss, string& qs, GZ_UTILITY& gu, cons
 			//if(!ok)
 			//	cout<<"\t----no good"<<endl;
 		}
-		else
+	else
 		{
 			//cout<<"read the fline"<<endl;
 			char* st=fgets(buf,(size_t)MAX, fb);
@@ -308,6 +308,7 @@ bool get1FastqSeq(FILE* fb, SequenceString& ss, string& qs, GZ_UTILITY& gu, cons
 	
 		if(!ok)
 		{//could be error or reaching the end.
+			//cout<<"in here ,error"<<endl;
 			 if(sseq.length()==0 ||sname.length()==0||qs.length()==0)
 			{
 				//cout<<"sname:"<<sname<<"\n sseq:"<<sseq<<endl;
@@ -332,7 +333,7 @@ bool get1FastqSeq(FILE* fb, SequenceString& ss, string& qs, GZ_UTILITY& gu, cons
 			line=buf;
 		//cout<<"read 2"<<endl;
 		chomp_ext(line);
-		
+		//cout<<"line read:"<<endl;
 		if(line[0]=='@') //first line or header line, need to check for whether to continue or finish this one.
 		{
 			ss.SetName(move(line.substr( 1,line.length())));
@@ -340,6 +341,7 @@ bool get1FastqSeq(FILE* fb, SequenceString& ss, string& qs, GZ_UTILITY& gu, cons
 		}
 		else 
 		{
+			//cout<<"in here error"<<endl;
 			ok=false; 
 			return ok;
 			//ss.SetSequence(line);
@@ -368,7 +370,7 @@ bool get1FastqSeq(FILE* fb, SequenceString& ss, string& qs, GZ_UTILITY& gu, cons
 		chomp_ext(line);
 		if(!ok)//||((!gz)&&buf[0]=='>'))
 		{
-			  cout<<"...rerror occured , !!!"<<endl;
+			  //cout<<"...rerror occured , !!!"<<endl;
 			  
 			  return false;
 		}
@@ -440,7 +442,7 @@ size_t concatenateFastq(const string& fn_r1, const string& fn_r2,
 	//need to know whether this is compressed file;
 	//we are using the ".gz" suffix as a criterion for the compressed file.
 	//we only do gzip compression.not others.
-	bool gzflag=(ft==GZ_FASTA);
+	bool gzflag=(ft==GZ_FASTQ);
 	
 	//opent file first
 	
@@ -484,6 +486,7 @@ size_t concatenateFastq(const string& fn_r1, const string& fn_r2,
       cout<<">>>>>>ERROR:the output file \""<<outFile_name<<"\" can not be opened, quit....\n";
       return 0;
     }
+	//cout<<"start doing it ...."<<endl;
   while(ok1&&ok2)
   {
 	  ok1=get1FastqSeq(fb1, ss1,qs1,gu1, gzflag);
@@ -491,21 +494,25 @@ size_t concatenateFastq(const string& fn_r1, const string& fn_r2,
 	  ok2=get1FastqSeq(fb2, ss2,qs2, gu2, gzflag);
 	  
 	  string tempStr;
+	  //cout<<"ss1:"<<ss1.GetName()<<endl;
 	  //now we should do concate
 	  if(ss1.GetName()!=""&&ss2.GetName()!="")
 	  {
+		  //cout<<"Get one !!!"<<endl;
 		  ssc.SetName(ss1.GetName());
 		  qsc.assign(qs1);
-		  qsc.append(move(flipStr(qs2)));
+		  
 		  tempStr.assign(ss1.GetSequence());
 		  count++;
 		  if(rc)
 		  {
 			  tempStr.append(ReverseComplement(ss2).GetSequence());
+			  qsc.append(move(flipStr(qs2)));
 		  }
 		  else 
 		  {
 			  tempStr.append(ss2.GetSequence());
+			  qsc.append(move(qs2));
 		  }
 		  ssc.SetSequence(move(tempStr));
 		  writ1FastqSeq(ofs, ssc, qsc);

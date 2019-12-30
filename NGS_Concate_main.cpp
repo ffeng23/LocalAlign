@@ -25,16 +25,17 @@ void printCallingCommand(int argc, char* argv[]);
 
 static string fileR1_name;//default input file for single index, R1
 static string fileR2_name;
+static string outFile_name;//for index R1 output file 
 
-enum mapType {FivePrime, ThreePrime}; //defined in SequenceHandlerBarcode.hpp
-static mapType mapEnd=FivePrime; //only work for R2, to reverse complement the sequence index 2,
-                                 //we never reverse complement the barcode. 
+//enum mapType {FivePrime, ThreePrime}; //defined in SequenceHandlerBarcode.hpp
+static bool rc=false; //only work for R2, to reverse complement the sequence  R2,
+                                 //we never reverse complement the sequence R1. 
 
 int main(int argc, char* argv[])
 {
   printCallingCommand(argc, argv);
   //for parsing commandline arguement
-  const char *opts = "hvs:t:r";
+  const char *opts = "hvs:t:ro:";
   //r: reverse complement the read2 barcode or not to do demux
   //s: sequence data file, contains the real sequence data, having the same order and name.
   //t: sequence data file, optional, could be specified or not. if dumux, then needed to check for this.
@@ -62,11 +63,11 @@ int main(int argc, char* argv[])
   cout<<"file (Read 1):\""<<fileR1_name<<"\".\n";
   cout<<"file (Read 2):\""<<fileR2_name<<"\".\n";
   
-  cout<<"Map type:"<<mapEnd<<endl;
+  cout<<"reverse complement of R2:"<<rc<<endl;
   
   //*********get output files names
-  string outFile_name;//for index R1 output file 
-  outFile_name.assign(fileR1_name+".Conc");
+  if(outFile_name.size()==0)
+	outFile_name.assign(fileR1_name+".Conc");
   
   //check the input file types
   FileType ft1=getFileType(fileR1_name,true);
@@ -116,7 +117,18 @@ int main(int argc, char* argv[])
 	  cout<<"The file type is not supported, please input file of (gzip) fasta/fastq files"<<endl;
 	  exit(-1);
   }
-  
+  if(outFile_name.compare(fileR1_name)==0)
+  {
+	  size_t dot_pos=outFile_name.find_last_of('.');
+	  if(dot_pos==string::npos)
+	  {
+		  outFile_name.append("_2");
+	  }
+	  else
+	  {
+		  outFile_name.insert(dot_pos, 1,'2');
+	  }
+  }
   // the output file names  
   //outFileR1_name=outFileR1_name.append(".conc.
   cout<<"The output file name : \""<<outFile_name<<"\"\n";
@@ -130,14 +142,14 @@ int main(int argc, char* argv[])
   if(ft1==GZ_FASTA||ft1==FASTA)
   {
 	 pt=concatenateFasta(fileR1_name, fileR2_name,ft1,
-	     outFile_name);
+	     outFile_name,ios_base::out,rc);
   }
   else 
   {
 	  if(ft1==GZ_FASTQ||ft1==FASTQ)
 	  {
-		  cout<<"calling here......"<<endl;
-		 pt=concatenateFastq(fileR1_name, fileR2_name, ft1,outFile_name);
+		  //cout<<"calling here......"<<endl;
+		 pt=concatenateFastq(fileR1_name, fileR2_name, ft1,outFile_name,ios_base::out,rc);
 	  }
   }
   cout<<"Total "<<pt<<" records processed"<<endl;
@@ -163,9 +175,11 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	  fileR2_name=optarg;
 	  break;
 	case 'r':
-	  mapEnd=ThreePrime;
+	  rc=true;
 	  break;
-	
+	case 'o':
+		outFile_name=optarg;
+		break;
 	case '?':
 	  
 	  /*if(optopt == 't')
@@ -199,6 +213,7 @@ static void printUsage(int argc, char* argv[])
   cout<<"Usage:\n";
   cout<<"\t"<<argv[0]<<" -s sequence file (R1) -t sequence file r2\n"
 	  <<"\t\t [-r (reverse implement r2 sequence index)]\n"
+	  <<"\t\t [-o output file name prefix]\n"
       <<"\t\t [-h] [-v]\n\n"
     ;
   cout<<"\t-s: the input barcode file name (for r1) \n";
@@ -207,16 +222,27 @@ static void printUsage(int argc, char* argv[])
 	  <<"\t-r: reverse complement the read2 sequences\n"
       ;
   cout<<"\t-v and -h: version and help\n";
-  cout<<"Note: 1)when we do the concatenation, we reverse complement the r2 and "
+  cout<<"Note: 1)when we do the concatenation, we reverse complement the r2 and \n"
 	  <<"reverse the quality string if they are the fastq files.\n";
 	
   cout<<"2)The output file are either fasta or fastq. \n"
+	  <<"3)The output file name is either determined from user defined by \"-o\"\n"
+	  <<"\t or it is determined using the R1 input file name. \n"
+	  <<"\twhen user input the file name, we assume it is the prefix without the file type.\n"
+	  <<"\tthe file type is determined by the input file type.\n"
 	  ;
+	  
   cout<<"Example:\n"
 		<<"\t"<<argv[0]<<"-s file1.fasta(.gz) -t file2.fasta(.gz) -r\n"
 		;
-  cout   <<"\t\t\t *************@9/2/2019 by Feng\n"
-     ;
+  cout<<"**Note**:\n"
+	<<"\tthis program could be used to add the umi barcodes to the beginning of R1 file \n"
+	<<"\tin case of nextseq data, which has R2 as the umi and R1 and R3 are the regular \n"
+	<<"\tR1 and R2 input file, respectively.\n"
+	;
+  cout   <<"\t\t\t *************@9/2/2019 by Feng\n";
+  cout<<"\t\t\t\t *****updated 12/29/2019 by Feng: adding output file name -o\n";
+     
 }
 
 void printCallingCommand(int argc, char* argv[])

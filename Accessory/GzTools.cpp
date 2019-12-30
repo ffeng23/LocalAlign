@@ -116,10 +116,11 @@ int init_gzip_stream(GZ_UTILITY& gu, bool full/*FILE* file,char* out*/
 			if(x!=Z_OK)
 			{
 				cout<<"******ERROR: in initialize the strm buffer..........."<<endl;
+				//exit(-1); we don't have to quit here, we return the signal to the caller and let the caller to decide and handle.
 			}
 			else
 			{
-				cout<<"****good at initializing buffer............."<<endl;
+				//cout<<"****good at initializing buffer............."<<endl;
 			}
 			gu.strm.next_in = gu.gzip_in; //bytes holding the input data 
 			//strm.avail_in = 0;
@@ -351,7 +352,7 @@ bool getline_B(FILE* _f, string& l, GZ_UTILITY& gu)
 			{//we are here means we need to do more reading to get data 
 			//we here check whether we have more file to read before reading the file .
 				if (feof (_f)) { //we are done 
-					cout<<"reaching the end of the input file"<<endl;
+					//cout<<"reaching the end of the input file"<<endl;
 					int err=inflateEnd (& (gu.strm));
 					//check for error 
 					if(err ==Z_STREAM_ERROR)
