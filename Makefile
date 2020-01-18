@@ -32,6 +32,7 @@ SRCS_7=localAlign_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp ${ACCESSDIR}Sequ
 
 SRCS_8=NGS_Concate_main.cpp ${ACCESSDIR}string_ext.cpp ${ACCESSDIR}SequenceString.cpp ${ACCESSDIR}FastaHandler.cpp  ${ACCESSDIR}GzTools.cpp ${ACCESSDIR}FileHandler.cpp ${ACCESSDIR}FASTQ.cpp ${ACCESSDIR}FastqHandler.cpp SequenceHandlerCommon.cpp score.cpp
 
+SRCS_9=	NGSMapping_UMI_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp ${ACCESSDIR}SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp OverlapAlignment.cpp GlobalAlignment.cpp ${ACCESSDIR}FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp MarkovChainGapModel_454.cpp TracebackTable.cpp SequenceHandlerCommon.cpp LocalAlignment.cpp ${ACCESSDIR}GzTools.cpp ${ACCESSDIR}FileHandler.cpp ${ACCESSDIR}FASTQ.cpp ${ACCESSDIR}FastqHandler.cpp SequenceHandler_umi.cpp
 #SRCS_2=remove_replicates.cpp string_ext.cpp 
 
 OBJS_0=${SRCS_0:.cpp=.o}
@@ -43,6 +44,7 @@ OBJS_5=${SRCS_5:.cpp=.o}
 OBJS_6=${SRCS_6:.cpp=.o}
 OBJS_7=${SRCS_7:.cpp=.o}
 OBJS_8=${SRCS_8:.cpp=.o}
+OBJS_9=${SRCS_9:.cpp=.o}
 
 #OBJS_1=${SRCS_1:.cpp=.o}
 #OBJS_2=${SRCS_2:.cpp=.o}
@@ -56,18 +58,19 @@ PROG_5=ngsmapping_demux
 PROG_6=ngsmapping_getBarcode
 PROG_7=localAlign
 PROG_8=ngs_concate
+PROG_9=ngs_umi_barcode
 #PROG_1=rmxs_at
 #PROG_2=remove_replicate
 DEPEND=$(GXX) $(CFLAG) -MM
 
 ######Rules######
 
-all: $(PROG_0) $(PROG_1) $(PROG_2) $(PROG_3) $(PROG_4) $(PROG_5) $(PROG_6) $(PROG_7) $(PROG_8)
+all: $(PROG_0) $(PROG_1) $(PROG_2) $(PROG_3) $(PROG_4) $(PROG_5) $(PROG_6) $(PROG_7) $(PROG_8) $(PROG_9)
 
 .PHONY: clean all depend
 
 clean:
-	rm -fr *.o *~ core $(PROG_0) $(PROG_1) $(PROG_2) $(PROG_3) $(PROG_4) $(PROG_5) $(PROG_6) $(PROG_7) $(PROG_8)
+	rm -fr *.o *~ core $(PROG_0) $(PROG_1) $(PROG_2) $(PROG_3) $(PROG_4) $(PROG_5) $(PROG_6) $(PROG_7) $(PROG_8) $(PROG_9)
 	cd $(ACCESSDIR) && rm -fr *.o *~ core; #ls ;   #pwd ; # note makefile is a script and each line (of commands) is doing its own sub-precess (&& is trying to stop if the "cd" command fails.
 
 .cpp.o:   #old fasion suffix rule, double suffix rule
@@ -115,7 +118,12 @@ $(PROG_8): $(OBJS_8)
 	$(GXX) -o $@ $(CXXFLAG) $(LOADFLAG) $+
 	@echo "";	
 	@echo "******Make complete"
-	
+
+$(PROG_9): $(OBJS_9)
+	$(GXX) -o $@ $(CXXFLAG) $(LOADFLAG) $+
+	@echo "";	
+	@echo "******Make complete"
+		
 #$(PROG_1): $(OBJS_1)
 #	$(GXX) -o $@ $(CXXFLAG) $(LOADFLAG) $+
 #	@echo ""
@@ -130,7 +138,7 @@ $(PROG_8): $(OBJS_8)
 
 depend: .depend
 
-.depend: Makefile $(SRCS_0) $(SRCS_1) $(SRCS_2) $(SRCS_3) $(SRCS_4) $(SRCS_5) $(SRCS_6) $(SRCS_7) $(SRCS_8)
+.depend: Makefile $(SRCS_0) $(SRCS_1) $(SRCS_2) $(SRCS_3) $(SRCS_4) $(SRCS_5) $(SRCS_6) $(SRCS_7) $(SRCS_8) $(SRCS_9)
 	$(GXX) -MM *.cpp >.depend
 	@echo " "
 	@echo "****Dependencies generated successfully."

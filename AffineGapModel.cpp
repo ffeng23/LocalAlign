@@ -46,16 +46,16 @@ double AffineGapModel::GapValue(const TracebackTable* _tbTable, const unsigned i
     {
       _MaxGapValue=newGapOpenValue;
       if(_patternGap)//we are doing row gaps/pattern gaps
-	{
-	  //_colIndex--;
-	  _MaxGapIndex=_subjectIndex-1;
-	  
-	}
+		{
+		  //_colIndex--;
+		  _MaxGapIndex=_subjectIndex-1;
+		  
+		}
       else  //row gaps/subject gaps
-	{
-	  //_rowIndex--;
-	  _MaxGapIndex=_patternIndex-1;
-	}
+		{
+		  //_rowIndex--;
+		  _MaxGapIndex=_patternIndex-1;
+		}
       
     }
   else

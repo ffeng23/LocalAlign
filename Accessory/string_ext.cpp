@@ -588,8 +588,50 @@ char DnaComplement(const char& c)
 	  temp='N';
 	  break;
 	}
-      
 
       return temp;
-
+}
+bool is_nucleotide(const char &c)
+{ 
+      switch(c)
+	{
+	case 'A':
+	case 'a':
+	case 'T':
+	case 't':
+	case 'U':
+	case 'u':
+	case 'G':
+	case 'g':
+	case 'C':
+	case 'c':
+	case 'Y':
+	case 'y':
+	case 'R':
+	case 'r':
+	case 'S':
+	case 's':
+	case 'W':
+	case 'w':
+	case 'K':
+	case 'k':
+	case 'M':
+	case 'm':
+	case 'B':
+	case 'b':
+	case 'D':
+	case 'd':
+	case 'H':
+	case 'h':
+	case 'V':
+	case 'v':
+	case 'N':
+	case 'n':
+		return true;
+		break;
+	default:
+		return false;
+		break;
+	}
+    return false;
 }

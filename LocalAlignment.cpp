@@ -456,7 +456,9 @@ void LocalAlignment::align()
 	  //for(int k = i-1; k > 0; --k) 
 	  // {		//check all sub rows
 	  //cout<<"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&calling gm gapValue"<<endl;
-	  c_gm->GapValue(c_traceback_table, i,j,false, dp_table_prev_col[j], maximumGapValue_subject[j], maximumGapIndex_subject[j]);	
+	  //update the subject gap, column gap 
+	  c_gm->GapValue(c_traceback_table, i, j, false, 
+				dp_table_prev_col[j], maximumGapValue_subject[j], maximumGapIndex_subject[j]);	
 
 	  /*double openNewGapValue=dp_table_prev_col[j]+c_gapOpen + c_gapExtension;
 	  double maxGapExtendedValue=maximumGapValue[j]+c_gapExtension;

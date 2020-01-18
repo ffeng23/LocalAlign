@@ -55,4 +55,8 @@ string flipStr(const string&);
 
 char DnaComplement(const char& c);
 
+//return whether a char is a valid IUPAC nucleotide code. 
+//Note: it doesn't include gap '-' or '.' as a valid code.
+bool is_nucleotide(const char &c);
+
 #endif

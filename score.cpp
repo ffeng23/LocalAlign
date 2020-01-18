@@ -304,7 +304,7 @@ static int nuc44DM1Int_1d[] ={ 5,  -4,  -4,  -4,  -4,   5,   5,  -4,  -4,   5,  
 	/*D*/		      -1,  -1,  -1,  -4,  -1,   2,   2,  -1,   2,  -1,   2,  2,  2,  5,  5,
 	/*N*/		      -2,  -2,  -2,  -2,   1,   1,   1,   1,   1,   1,   3 , 3,  3,  3,  5
 		             };
-/* how to calculate the score for degnerated match, 
+/* how to calculate the score for degnerated match, row first and column second.
  *eg. score('T','S'), since S -> G or C, so, this is mismatch anyway
  *  score('T', 'W'), since W->A or T, so this is a match. 
  *  score ('S', 'W'), since s->G or C and w->A or T, so this is 

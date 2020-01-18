@@ -36,14 +36,14 @@ void AlignmentString::SetSubject(const string& _subject, const bool& gapFlag)
     c_subject=_subject;
 }
   
-string AlignmentString::GetPattern(const bool& gapFlag)
+string AlignmentString::GetPattern(const bool& gapFlag) const
 {
   if(gapFlag)
     return c_pattern_w_gap;
   else
     return c_pattern;
 }
-string AlignmentString::GetSubject(const bool& gapFlag)
+string AlignmentString::GetSubject(const bool& gapFlag) const
 {
   if(gapFlag)
     return c_subject_w_gap;
@@ -62,24 +62,24 @@ void AlignmentString::SetSubjectIndex(const int& _start, const int& _end)
   c_subject_end=_end;
 }
 
-unsigned int AlignmentString::GetPatternIndexStart()
+unsigned int AlignmentString::GetPatternIndexStart() const
 {
   return c_pattern_start;
 }
-unsigned int AlignmentString::GetPatternIndexEnd()
+unsigned int AlignmentString::GetPatternIndexEnd() const
 {
   return c_pattern_end;
 }
-unsigned int AlignmentString::GetSubjectIndexStart()
+unsigned int AlignmentString::GetSubjectIndexStart() const
 {
   return c_subject_start;
 }
-unsigned int AlignmentString::GetSubjectIndexEnd()
+unsigned int AlignmentString::GetSubjectIndexEnd() const
 {
   return c_subject_end;
 }
 
-string AlignmentString::toString()
+string AlignmentString::toString() const
 {
   ostringstream oss("");
   ostringstream intoss("");
@@ -111,7 +111,7 @@ void AlignmentString::SetScore(const double& _s)
 {
   c_score=_s;
 }
-double AlignmentString::GetScore()
+double AlignmentString::GetScore() const
 {
   return c_score;
 }

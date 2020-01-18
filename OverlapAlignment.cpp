@@ -11,8 +11,8 @@ using namespace std;
 
 OverlapAlignment::OverlapAlignment(SequenceString* _pattern, SequenceString* _subject, 
 			       ScoreMatrix* _m, const double& _gopen, 
-			       const double& _gextension, const double& _scale):
-  PairwiseAlignment(_pattern, _subject, _m, _gopen, _gextension, _scale)
+			       const double& _gextension, const double& _scale, const short& _typeOfGapModel):
+  PairwiseAlignment(_pattern, _subject, _m, _gopen, _gextension, _scale, _typeOfGapModel)
 {
   //now we need to
   //c_alignmentArr=new AlignmentString[this->c_numOfAlignments];

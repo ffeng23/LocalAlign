@@ -16,23 +16,24 @@ public:
   void SetPattern(const string& _pattern, const bool& gapFlag=false);
   void SetSubject(const string& _subject, const bool& gapFlag=false);
   
-  string GetPattern(const bool& gapFlag=false);
-  string GetSubject(const bool& gapFlag=false);
+  string GetPattern(const bool& gapFlag=false) const;
+  string GetSubject(const bool& gapFlag=false) const;
+  
   
   void SetPatternIndex(const int& _start, const int& _end);
   void SetSubjectIndex(const int& _start, const int& _end);
 
-  unsigned int GetPatternIndexStart();
-  unsigned int GetPatternIndexEnd();
-  unsigned int GetSubjectIndexStart();
-  unsigned int GetSubjectIndexEnd();
+  unsigned int GetPatternIndexStart() const;
+  unsigned int GetPatternIndexEnd() const;
+  unsigned int GetSubjectIndexStart() const;
+  unsigned int GetSubjectIndexEnd() const;
 
   //this is the method 
   //unsigned int FoundAlignedIndexOnOppositeStrand(const byte& _strand, const unsigned int& _index);
 
-  string toString();
+  string toString() const;
   void SetScore(const double& _s);
-  double GetScore();
+  double GetScore() const;
 private:
   string c_pattern;//the original aligned substring 
   string c_subject;//the original aligned substring
