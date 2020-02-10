@@ -25,10 +25,10 @@ static unsigned int LookUpVectorIndex(const string& _adaptorName, vector<Sequenc
     {
       //cout<<"\t%%%%%%"<<_vecPrimer.at(i).GetName()<<endl;
       unsigned found;
-      found=_adaptorName.find(_vecPrimer.at(i).GetName()); //will return -1( string::npos) if can not find it.
+      found=_adaptorName.compare(_vecPrimer.at(i).GetName()); //will return -1( string::npos) if can not find it.
       //cout<<"\t%%%%%%%%%%%"<<(signed)found<<":npos: "<<string::npos<<endl;
       //if(found!=std::string::npos)
-      if((signed)found!=-1)
+      if(found==0)
 	{
 	  return i;
 	}
@@ -154,24 +154,31 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		  //need to get the match rate
 	      strPattern=tempAS_arr[0].GetPattern(true);
 	      strSubject=tempAS_arr[0].GetSubject(true);
-	      //cout<<"\tstrPattern:"<<strPattern<<endl;
-	      //cout<<"\tstrSubject:"<<strSubject<<endl;
-
+#ifdef debug
+	      cout<<"\tstrPattern:"<<strPattern<<endl;
+	      cout<<"\tstrSubject:"<<strSubject<<endl;
+#endif
 	      match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
 	      //cout<<"\tcompare:"<<CompareStrings(strPattern, strSubject)<<";length():"<<strPattern.length()<<endl;
 #ifdef debug	      
-			cout<<"\tmatch_rate:"<<match_rate<<endl;
+			cout<<"\tmatch_rate:"<<match_rate<<" match rate thresld:"<<_matchRateThreshold<<endl;
 			flush(cout);
 #endif		
 	      //check the best score and match rate
 	      if(tempAS_arr[0].GetScore()>best5PrimeScore&&match_rate>_matchRateThreshold&&strPattern.length()>_minimumOverlapLength)
 		{
+#ifdef debug
+			cout<<"length:"<<strPattern.length()<<" and length thresld:"<<_minimumOverlapLength<<endl;
+#endif
 		  //we need to see the offset too, only important to the pattern, here the 
 		  //the pattern is the long one, we align the primer sequence against
 		  //the primer should be in the beginning, not too far,
 		  if(tempAS_arr[0].GetPatternIndexStart()<_offset )
 		    {//we good
-		      //cout<<"\t***get one bigger"<<endl;
+#ifdef debug
+		      cout<<"\t***get one bigger"<<endl;
+			  cout<<"starting offset"<<tempAS_arr[0].GetPatternIndexStart()<<"and offset:"<<_offset<<endl;
+#endif
 		      best5PrimeScore=tempAS_arr[0].GetScore();
 		      best5PrimeAlign=tempAS_arr[0];//with name
 		      best5PrimeIndex=j;
@@ -275,7 +282,8 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	  foundIndex=best3PrimeIndex;
 	}
 
-      //here, to keep track of positions, because we are running local alignment, so we can simply keep track the end position of alignment.
+      //here, to keep track of positions, because we are running local alignment, so we can simply keep 
+	  //track the end position of alignment.
       //we also have to check whether the break is in the constant
       if(found5PrimeFlag)
 	{	   
@@ -573,9 +581,9 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	    //check to see whether we need to store the data by isotype
 	    //if(g_by_isotype_flag)
 	    //	{
-	    
-	    //cout<<"\t**********writing to vec now"<<found<<endl;
-	    
+#ifdef debug	    
+	    cout<<"\t**********writing to vec now"<<found<<endl;
+#endif	    
 	    //here we always store by isotype
 	    if(((signed)found) != -1)//string::npos)
 	      {
