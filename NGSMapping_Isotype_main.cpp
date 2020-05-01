@@ -172,6 +172,9 @@ int main(int argc, char* argv[])
   }
   cout<<"Reading constant library file:"<<ReadFasta(isotypeFile_name, vec_Isotype_seq)<<endl;
 
+  //cout<<"first isotype:\n"<<vec_Isotype_seq.at(0).toString()<<endl;
+  //cout<<"Second isotype:\n"<<vec_Isotype_seq.at(1).toString()<<endl;
+  
 
   //reverse the Ig constant region sequence
   /*for(unsigned int i=0;i<vec_forward_seq.size();i++)
