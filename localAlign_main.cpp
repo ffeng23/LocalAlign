@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
 
 cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore('A','A')<<endl;
   
- LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,scale, 1);//,1);
+ LocalAlignment la(&Seq1,&Seq2,sm, gapopen, gapextension,scale, 1,0);//,1);
   //LocalAlignment la(&Seq1,&tempSStr,sm, gapopen, gapextension,1, 100);
   cout<<"\tdone and the score is "<<la.GetScore()<<endl;
   cout<<"\t"<<la.GetAlignment().toString()<<endl;

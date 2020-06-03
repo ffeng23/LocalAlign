@@ -16,6 +16,7 @@
 #include "Accessory/FileHandler.hpp"
 #include "SequenceHandler.hpp"
 #include "SequenceHandler_umi.hpp"
+#include "LocalAlignment.hpp"
 using namespace std;
 
 static void printUsage(int argc, char* argv[]);
@@ -332,17 +333,31 @@ int main(int argc, char* argv[])
 		anchor_positions, anchor_length, seq_str_start, seq_str_end)<<endl;
   cout		<<"\n\tSeq start: "<<seq_str_start<<"; end: "<<seq_str_end
 		<<endl;
-  /*
+  
   //+++++++++testing alignment
   cout<<"====================="<<endl;
   
-  SequenceString p("p","TACACCTCGGGTT");
-  SequenceString s("s","ACATNNGGGNT");
+  //SequenceString p("p","GGGCAAAA");
+  //SequenceString s("s","GGGAAAAA");
+  
+  //SequenceString p("p","GGGGAAAC");
+  //SequenceString s("s","GGAAAACCT");
+  
+  
+  //SequenceString p("p","GGGGAAAC");
+  //SequenceString s("s","GGGAAAACCT");
+  
+  SequenceString p("p","GGGATATATA");
+  SequenceString s("s","GGGTATATAT");
+  
   cout<<"the pattern string: "<<p.toString()<<endl;
   cout<<"the subject string: "<<s.toString()<<endl;
-  OverlapAlignment ol(&p, &s, sm, gapopen, gapextension
-						,scale,0);
-	AlignmentString aso=ol.GetAlignment(); //pattern is on top; and subject is on bottom.
+  LocalAlignment ol(&p, &s, sm, gapopen, gapextension
+						,scale,4,0);
+	AlignmentString* aso_arr=ol.GetAlignmentArr(); //pattern is on top; and subject is on bottom.
+	cout<<"first alignment"<<endl;
+	cout<<aso_arr[0].toString()<<endl;
+	AlignmentString aso=aso_arr[1];
 	unsigned p_start=aso.GetPatternIndexStart();
 	unsigned p_end=aso.GetPatternIndexEnd();
 	unsigned s_start=aso.GetSubjectIndexStart();
@@ -353,15 +368,56 @@ int main(int argc, char* argv[])
 	cout<<"pattern:"<<aso.GetPattern()<<endl;
 	cout<<"subject:"<<aso.GetSubject()<<endl;
 	cout<<"alignment:\n"<<aso.toString()<<endl;
-
+	
+	// ---------start testing the functions for adding nodes.
+	cout<<"---------------testing the adding nodes-----------\n";
+	PathElementEntry pee;
+	cout<<"\tTesting empty pathelement etry....\n"<<endl;
+	
+	cout<<pee.toString()<<endl;
+	cout<<"\t--adding a new path element:";
+	pee.AddPathInfoNoCheckingDuplication(pee.GetNumberOfPathes(), 1, 20, 2, 2);
+	cout<<"..DONE!!"<<endl;
+	cout<<pee.toString()<<endl;
+	
+	cout<<"--testing comming nodes:"<<endl;
+	PathElementEntry pee2(pee);
+	pee2.AddPathInfoNoCheckingDuplication(pee2.GetNumberOfPathes(), 2, 15, 1, 9);
+	cout<<"--\t a new node:"<<endl;
+	cout<<pee2.toString()<<endl;
+	
+	cout<<"\t\t-- combining....";
+	pee.AddPathInfo(pee2);
+	cout<<"Done"<<endl;
+	
+		cout<<"\t---the new commbined nodes pathes:\n"<<pee.toString()<<endl;
+	
+	cout<< pee2.toString()<<endl;
+	
+	// --- pee3 with 3 entry
+	PathElementEntry pee3;
+	pee3.AddPathInfoNoCheckingDuplication(pee3.GetNumberOfPathes(), 4, 190, 21, 39);
+	cout<<"new pee3 node:"<<pee3.toString();
+	pee.AddPathInfo(pee3);
+	cout<<"after added pee3 to pee, pee is "<<pee.toString()<<endl;
+	
+	//
+	cout<<"Testing adding an empty node"<<endl;
+	PathElementEntry pee4;
+	pee.AddPathInfo(pee4);
+	cout<<"pee is now "<<pee.toString();
+	
+	
+	
+/*
 	// ******************
 	cout<<"tesiting extracting umi........."<<endl;
 	cout<<"\t Get GetUmiFromAlignmentString:"<<GetUmiFromAlignmentString(aso)<<endl;
 	cout<<"testing trim sequence ....."<<endl;
 	cout<<"\trimming the sequence at "<<11<<endl;
 	cout<<"\t "<<trimSequenceUmiAnchorFromStart(p.GetSequence(), 11)<<endl;
-*/	
-	//*********testing extracting the umi
+	
+	// *********testing extracting the umi
 	cout<<"*****************testing extraction umi "<<endl;
 	string ex_umi;
 	bool t=extractUmi(ss1, umi_pattern, 
@@ -377,7 +433,7 @@ int main(int argc, char* argv[])
 		cout<<"extraction success!!"<<endl;
 	else
 		cout<<"extractoin is not successful"<<endl;
-	cout<<"the extracted umi:"<<ex_umi<<endl;
+	cout<<"the extracted umi:"<<ex_umi<<endl;*/
 /*  cout<<"===>reading and processing adaptor sequences for mapping......"<<endl;
   if(trim==1)
     {

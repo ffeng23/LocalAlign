@@ -29,7 +29,8 @@ AffineGapModel::~AffineGapModel()
 //Output
 //_MaxGapValue
 //_MaxGapIndex
-double AffineGapModel::GapValue(const TracebackTable* _tbTable, const unsigned int& _patternIndex, const unsigned int& _subjectIndex, const bool& _patternGap,
+double AffineGapModel::GapValue(const TracebackTable* _tbTable, const unsigned int& _patternIndex, 
+			const unsigned int& _subjectIndex, const bool& _patternGap,
 			const double& _prevEntryValue,
 			  double& _MaxGapValue, unsigned int& _MaxGapIndex) const
 {

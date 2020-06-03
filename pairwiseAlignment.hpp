@@ -30,6 +30,7 @@ public:
   AlignmentString GetAlignment();
 
 protected:
+  PairwiseAlignment(){};
   virtual void align()=0;
   virtual void traceBack();
 
