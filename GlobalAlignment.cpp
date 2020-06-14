@@ -207,7 +207,7 @@ void GlobalAlignment::align()
       //now, we go through each element and do the job
       for(unsigned int j = 1; j <= lenS; ++j) 
 	{	//for all values of strB
-	  cout<<"****doing round ("<<i<<","<<j<<")."<<endl;	
+	  //cout<<"****doing round ("<<i<<","<<j<<")."<<endl;	
 	  //MATCH
 	  //if(strP.at(i-1) == strS.at(j-1)) 
 	  //{				//if current sequence values are the same

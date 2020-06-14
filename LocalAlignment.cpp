@@ -48,11 +48,19 @@ LocalAlignment::LocalAlignment(SequenceString* _pattern, SequenceString* _subjec
   c_scoreArr=new double[this->c_numOfAlignments];
   //dp_table=NULL;
   //traceback_table=NULL;
-  cout<<"before"<<endl;
+#ifdef DEBUG
+  cout<<"LocalAlignment: Start doing align()......"<<endl;
+#endif
   this->align();
-  cout<<"in between"<<endl;
+#ifdef DEBUG
+  cout<<"LocalAlignment: start doing Trackback()...."<<endl;
+ 
   //flush(cout);
+#endif
   this->traceBackMultiple();
+#ifdef DEBUG
+  cout<<"LocalAlignment: done!!!....."<<endl;
+#endif
 }
   
 LocalAlignment::~LocalAlignment()
@@ -219,9 +227,11 @@ void LocalAlignment::traceBackMultiple()
 {
   //decide how many we will be tracing back 
   //unsigned int actualNumOfAlignments;
-  //cout<<"+++++++++doing the multiple trce bck "<<endl;
-  //cout<<"c_path_vec.size():"<<c_path_vec.size()<<endl;
+#ifdef DEBUG
+  cout<<"+++++++++doing the multiple trce bck "<<endl;
+  cout<<"c_path_vec.size():"<<c_path_vec.size()<<endl;
 	flush(cout);
+#endif 
   if(c_numOfAlignments>c_path_vec.size())
     {//can only do what there are.
       c_numOfAlignments=c_path_vec.size();
@@ -241,36 +251,57 @@ void LocalAlignment::traceBackMultiple()
   c_scoreArr=new double[c_numOfAlignments];
 
   //showing the vector information
-  /*
+ #ifdef DEBUG
   cout<<"******************SHOWING PATH INFO**************"<<endl;
   cout<<"\ttotal num of path:"<<c_path_vec.size()<<endl;
   for(unsigned int i=0;i<c_path_vec.size();i++)
     {
       cout<<i<<"/"<<c_path_vec.size()<<": start at ("<<c_path_vec.at(i)->GetStartIndex()[0]<<","
 	  <<c_path_vec.at(i)->GetStartIndex()[1]<<") and end at ("<<c_path_vec.at(i)->GetOptimalIndex()[0]
-	  <<","<<c_path_vec.at(i)->GetOptimalIndex()[1]<<");\n";
+	  <<","<<c_path_vec.at(i)->GetOptimalIndex()[1]<<"); score of :("<<c_path_vec.at(i)->GetOptimalValue()<<";\n";
     }
-  */
+#endif
   //now sort the vector of PathID, we will not change the order of the c_path_vec
   //since the 
   c_pathID_vec.resize(c_pathID_vec.size());
   iota(begin(c_pathID_vec), end(c_pathID_vec),0);
   sort(c_pathID_vec.begin(), c_pathID_vec.end(), 
 		bind(comparePathElementIndex, placeholders::_1, placeholders::_2, c_path_vec));
-  
+	//cout<<"maxi one :"<<c_path_vec.at(c_pathID_vec.at(0))->GetOptimalValue()<<endl;
+	//cout<<"maxi one2 :"<<c_path_vec.at(c_pathID_vec.at(1))->GetOptimalValue()<<endl;
+//showing the vector information
+/*  
+  cout<<"******************SHOWING PATH INFO**************"<<endl;
+  cout<<"\ttotal num of path:"<<c_path_vec.size()<<endl;
+  for(unsigned int i=0;i<c_pathID_vec.size();i++)
+    {
+      cout<<i<<"/"<<c_path_vec.size()<<": start at ("<<c_path_vec.at(c_pathID_vec.at(i))->GetStartIndex()[0]<<","
+	  <<c_path_vec.at(c_pathID_vec.at(i))->GetStartIndex()[1]<<") and end at ("<<c_path_vec.at(c_pathID_vec.at(i))->GetOptimalIndex()[0]
+	  <<","<<c_path_vec.at(c_pathID_vec.at(i))->GetOptimalIndex()[1]<<"); score of :"<<c_path_vec.at(c_pathID_vec.at(i))->GetOptimalValue()<<";\n";
+    }
+  */
 //cout<<"\tefore looping......."<<endl;
 //flush(cout);
 
   for(unsigned int i=0;i<c_numOfAlignments;i++)
     {
-	cout<<"i:"<<i<<"..."<<endl;
+#ifdef DEBUG
+		cout<<"i:"<<i<<"..."<<endl;
+#endif
       //prepare the input and output for trackack() function
       c_optimalIndex[0]=c_path_vec.at(c_pathID_vec.at(i))->GetOptimalIndex()[0];
       c_optimalIndex[1]=c_path_vec.at(c_pathID_vec.at(i))->GetOptimalIndex()[1];
 	  c_current_path_tk=c_pathID_vec.at(i); //path ID for the one currently being checked/traced back 
-	  
-      cout<<"before doing trace back;"<<endl;
+
+#ifdef DEBUG	  
+	  cout<<"//*************showing path info************"<<endl;
+	  cout<<"Path start at ("<<c_path_vec.at(c_pathID_vec.at(i))->GetStartIndex()[0]<<","
+	  <<c_path_vec.at(c_pathID_vec.at(i))->GetStartIndex()[1]<<") and end at ("<<c_path_vec.at(c_pathID_vec.at(i))->GetOptimalIndex()[0]
+	  <<","<<c_path_vec.at(c_pathID_vec.at(i))->GetOptimalIndex()[1]<<"); score of :("<<c_path_vec.at(c_pathID_vec.at(i))->GetOptimalValue()<<";\n";
+      
+	  cout<<"before doing trace back;"<<endl;
 	  //flush(cout);
+#endif
       //now call the traceBack to do the job
       traceBack();
       
@@ -307,7 +338,7 @@ void LocalAlignment::traceBackMultiple()
       c_alignment.SetScore(c_path_vec.at(0)->GetOptimalValue());
       c_score=c_path_vec.at(c_pathID_vec.at(0))->GetOptimalValue();
 	  
-	cout<<"+++++++++done the multiple trace back"<<endl;
+	//cout<<"+++++++++done the multiple trace back"<<endl;
 	flush(cout);
   
   //done!!!
@@ -400,7 +431,8 @@ void LocalAlignment::recordPathInfoToBeRemove(const unsigned& _patternIndex,
 //multiple links, so in this way, some other path become dead and not valid anymore. For 
 //those pathes that were involved we have "remember" them in a vector (vec_pathToBeChecked).
 //now we need to go through the path vector to update in case 
-//some node has been take by the current path. this is the driving function will call
+//some node has been taken by the current path. 
+//this is the driving function will call
 //the recursive function to update the whole path for those remebered during the tracing back. 
 //input: 
 //	current_pathID, the ID for the currently traced back.
@@ -415,13 +447,24 @@ void LocalAlignment::updatePathForMultipleLinks(const unsigned& current_pathID,
 	unsigned running_starting_index_p;
 	double running_optimalScore;
 	unsigned lenP=c_pattern->GetLength();
+#ifdef DEBUG
+	cout<<"UpdatedPathForMultipleLinks:current path ID:"<<current_pathID<<endl;
 	cout<<"total number of pathes to be checked:"<<vec_pathToBeChecked.size()<<endl;
+#endif
 	for(unsigned i=0;i<vec_pathToBeChecked.size();i++)
 	{
+#ifdef DEBUG
 		cout<<" checking ith path:"<<i<<endl;
+#endif
 		//following the path and starting at the path starting indexes.
 		running_pathID=vec_pathToBeChecked.at(i);
-		cout<<" for path id :"<<running_pathID<<endl;
+#ifdef DEBUG		
+		cout<<" checking path id :"<<running_pathID<<endl;
+		cout<<"//*************showing path info************"<<endl;
+	  cout<<"Path start at ("<<c_path_vec.at(running_pathID)->GetStartIndex()[0]<<","
+	  <<c_path_vec.at(running_pathID)->GetStartIndex()[1]<<") and end at ("<<c_path_vec.at(running_pathID)->GetOptimalIndex()[0]
+	  <<","<<c_path_vec.at(running_pathID)->GetOptimalIndex()[1]<<"); score of :("<<c_path_vec.at(running_pathID)->GetOptimalValue()<<";\n";
+#endif      
 		running_starting_index_p=c_path_vec.at(running_pathID)->GetStartIndex()[0];
 		running_starting_index_s=c_path_vec.at(running_pathID)->GetStartIndex()[1];
 		
@@ -430,12 +473,21 @@ void LocalAlignment::updatePathForMultipleLinks(const unsigned& current_pathID,
 		PathElementEntry* p_pee=&(c_PathElementTable[running_starting_index_p + running_starting_index_s*(lenP+1)]);
 		unsigned index_pee= p_pee->LookUpPathIndex(running_pathID);
 		running_optimalScore= p_pee->GetPathOptimalScore(index_pee);//<-IMPORTANT, we need to get the current one optimal score so far.
-		
+#ifdef DEBUG		
+		cout<<"running_optimalScore:"<<running_optimalScore<<endl;
 		cout<<"calling the recurvise working horse...."<<endl;
-		//now calling to chedk the nodes, recursively
+#endif
+		//now calling to chedk the nodes, recursively, assuming the initial node of the checking path is good. 
+		//if we have done good job, we will never have the initial node of a path to be part of the previous path.!!!
+		//this is why we set removeThis node to be false. it has to be ZERO link back, which is a starting node.
+		//also we need to reset the running_path to be zero, and optimal index now is the starting pointer
+		//c_path_vec.at(running_PathID)-
+		running_optimalScore=0;
 		updatePathForMultipleLinks_Node(running_pathID, running_starting_index_p, running_starting_index_s,
 				running_optimalScore, false, ZERO);
+#ifdef DEBUG
 		cout<<"done.........."<<endl;
+#endif
 	}
 	
 }
@@ -489,7 +541,7 @@ void LocalAlignment::removePathFromNode(const unsigned& pathID, const unsigned& 
 //		anyway.
 //	PathID, this current path being checked.
 //	optimal score is the best score so far for the path being checked.  
-//  link, used to indicate the current node has to have the correct link back in order to ex
+//  link, this is the link of the caller. together with this current node link it is used to indicate the current node has to have the correct link back in order to ex
 //			extend the path. the case might be even the node is on the path valid, but 
 //			it is not linked from the immdiate node calling the recursive funciton. 
 //			in this case, we still don't count it as a valid one. The caller will only
@@ -508,31 +560,41 @@ void LocalAlignment::updatePathForMultipleLinks_Node(const unsigned& pathID, con
 	//      3) we are reaching a ZERO node.
 	//		4) the currentPath don't go through the node being checked. then we will stop. 
 	//		5) the node has been used.???, we will remove the path from the pathElementTable entry from this node, but still will go down the links/path to update the downstream node for this path. 
+#ifdef DEBUG	
 	cout<<"%%%%%checking node("<<index_p <<","<<index_s<<");"<<endl;
 	//Case 1 and 2
 	cout<<"c_pattern->GetLength():"<<c_pattern->GetLength();
+#endif
 	if(index_p>c_pattern->GetLength()||index_s>c_subject->GetLength())
 	{
-			cout<<"returning due to out of string"<<endl;
+#ifdef DEBUG
+			cout<<"returning due to out of string (reaching side)"<<endl;
+#endif
 		return ;
 	}
 	//Case 3
+	//cout<<"1:ZERO :"<<ZERO<<";current link:"<<c_traceback_table->GetLink(index_p, index_s)<<endl;
 	if(c_traceback_table->GetLink(index_p, index_s)==ZERO)
 	{
+#ifdef DEBUG
 		cout<<"returning duo to ZERO out of score"<<endl;
+#endif
 		return;
 	}
 	unsigned lenP=c_pattern->GetLength();
 	//Case 4
 	if(!isPathThruThisNode(pathID, index_p, index_s))
 	{
+#ifdef DEBUG
 		cout<<c_PathElementTable[index_p+index_s*(1+lenP)].toString()<<endl;
 		cout<<"returning due to no pass throug"<<endl;
+#endif
 		return ;
 	}
 	
 	//case 6
 	LinkBack current_node_link=c_traceback_table->GetLink(index_p, index_s);
+	//cout<<"ZERO :"<<ZERO<<";current link:"<<c_traceback_table->GetLink(index_p, index_s)<<endl;
 	//checking the links and
 	
 		switch(link)
@@ -540,31 +602,39 @@ void LocalAlignment::updatePathForMultipleLinks_Node(const unsigned& pathID, con
 			case ZERO:
 				if(current_node_link!=UPLEFT)
 				{
-					cout<<"start one should UPLEFT, so returning..."<<endl;
+#ifdef DEBUG
+					cout<<"start one should UPLEFT, so returning...SOMETHING WRONG> it is impossilbe"<<endl;
+#endif 
 					return ;
 				}
 				break;
 			case UP:
 				if(current_node_link!=UP&&current_node_link!=UP_UPLEFT&&current_node_link!=UP_LEFT&&current_node_link!=UP_LEFT_UPLEFT)
 				{
+#ifdef DEBUG
 					//this is no way to be a good node for this branch, break out
 					cout<<"good node, but not pass through this branch, go return UP case"<<endl;
+#endif
 					return ;
 				}
 				break;
 			case UPLEFT:
 				if(current_node_link!=UPLEFT&&current_node_link!=UP_UPLEFT&&current_node_link!=LEFT_UPLEFT&&current_node_link!=UP_LEFT_UPLEFT)
 				{
+#ifdef DEBUG
 					//this is no way to be a good node for this branch, break out
 					cout<<"good node, but not pass through this branch, go return UPLEFT case"<<endl;
+#endif
 					return ;
 				}
 				break;
 			case LEFT:
 				if(current_node_link!=LEFT&&current_node_link!=LEFT_UPLEFT&&current_node_link!=UP_LEFT&&current_node_link!=UP_LEFT_UPLEFT)
 				{
+#ifdef DEBUG
 					//this is no way to be a good node for this branch, break out
 					cout<<"good node, but not pass through this branch, go return LEFT case"<<endl;
+#endif
 					return ;
 				}
 				break;
@@ -584,15 +654,21 @@ void LocalAlignment::updatePathForMultipleLinks_Node(const unsigned& pathID, con
 	//update information 
 	if(c_traceback_table->GetPathUsageState(index_p, index_s)||removeThisPath) //case #5 
 	{  //used, so we need to get ride of the path from this node
+#ifdef DEBUG
 		cout<<"this node has been used by other higher priority path, but search is going on"<<endl;
+#endif
 		running_removeThisPath=true; 
 		//remove the pathID from this nodes, for one try , we might come back again if path passes here many times. 
 		removePathFromNode(pathID, index_p, index_s); 
+#ifdef DEBUG
 		cout<<c_PathElementTable[index_p+index_s*(1+lenP)].toString()<<endl;
+#endif
 	}
 	else //this node has Not been used, so we are ok.
 	{
-		cout<<"****go nodes for this path"<<endl;
+#ifdef DEBUG
+		cout<<"****good nodes for this path"<<endl;
+#endif
 		//update
 		PathElementEntry* p_pee=&(c_PathElementTable[index_p+index_s*(lenP+1)]);
 		unsigned index_pee=p_pee->LookUpPathIndex(pathID);
@@ -607,13 +683,19 @@ void LocalAlignment::updatePathForMultipleLinks_Node(const unsigned& pathID, con
 			c_path_vec.at(pathID)->SetOptimalIndex(temp_OptimalIndex);
 		}
 		else  //no better than the optimal value of the path so far, remember the best one, and write it to the pathelemententry
-		{//and get ready to call the next node along the nodes.
+		{//and get ready to call the next node along the path.
 			running_optimalScore=optimalScore;
 			//running_optimalIndex[0]=c_PathElementTable[index_p+index_s*(lenP+1)].GetPathOptimalIndexPattern(index_pee);
 			//running_optimalIndex[1]=c_PathElementTable[index_p+index_s*(lenP+1)].GetPathOptimalIndexSubject(index_pee);
 		}
 	} //OK we are done with good job, 
-	
+
+#ifdef DEBUG	
+	cout<<"//*************showing path info************"<<pathID <<endl;
+	  cout<<"Path start at ("<<c_path_vec.at(pathID)->GetStartIndex()[0]<<","
+	  <<c_path_vec.at(pathID)->GetStartIndex()[1]<<") and end at ("<<c_path_vec.at(pathID)->GetOptimalIndex()[0]
+	  <<","<<c_path_vec.at(pathID)->GetOptimalIndex()[1]<<"); score of :("<<c_path_vec.at(pathID)->GetOptimalValue()<<";\n";
+#endif      
 	//update index and go next
 	//go right 
 	
@@ -649,8 +731,10 @@ void LocalAlignment::traceBack()
   vector<unsigned int> vec_pathToBeChecked;//use this to remeber what to check after this path has been traced back;
   //vector<unsigned> vec_pathToBeChecked_StartIndex_Pattern;
   //vector<unsigned vec_pathToBeChecked_StartIndex_Subject;
-  
-  //cout<<"starting from ("<<i<<","<<j<<")"<<endl;
+#ifdef DEBUG
+  cout<<"---------Start tracing back---------------"<<endl;
+  cout<<"starting from ("<<i<<","<<j<<")"<<endl;
+#endif
   string c_pattern_wg;//aligned string with gap
   string c_subject_wg;//aligend string with gap
   //cout<<"length of patten :"<<c_pattern->GetLength()<<endl;
@@ -662,7 +746,9 @@ void LocalAlignment::traceBack()
   // while(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks()!=ZERO)  //keep going till we reach a zero
   while(c_traceback_table->GetLink(i,j)!=ZERO)  //keep going till we reach a zero
     {
+#ifdef DEBUG
       cout<<"\t("<<i<<","<<j<<"):"<<endl;
+#endif
       unsigned int currentIndex;
       //check the link table, decide where to go
       //switch(c_traceback_table[i+j*(c_pattern->GetLength()+1)].GetLinks())
@@ -674,7 +760,9 @@ void LocalAlignment::traceBack()
       switch(c_traceback_table->GetLink(i,j))
 		{
 		case UP:
-		  //cout<<"UP:"<<endl;
+#ifdef DEBUG
+			cout<<"UP:"<<endl;
+#endif
 		  //now we have to check how many indels
 		  currentIndex=j;
 		  for(unsigned int k =0;k<c_traceback_table->GetNumOfIndels(i, currentIndex);k++)//c_traceback_table[i+currentIndex*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
@@ -687,7 +775,9 @@ void LocalAlignment::traceBack()
 			}
 		  break;
 		case LEFT:
-		  //cout<<"LEFT"<<endl;
+#ifdef DEBUG
+		  cout<<"LEFT"<<endl;
+#endif
 		  //need to check how many indels
 		  currentIndex=i;
 		  for(unsigned int k=0;k<c_traceback_table->GetNumOfIndels_s(currentIndex,j);k++)//c_traceback_table[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
@@ -699,7 +789,9 @@ void LocalAlignment::traceBack()
 			}
 		  break;
 		case UPLEFT:
-		  //cout<<"UPLEFT"<<endl;
+#ifdef DEBUG
+		  cout<<"UPLEFT"<<endl;
+#endif
 		  c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
 		  c_subject_wg=c_subject->GetSequence().at(j-1)+c_subject_wg;
 		  c_traceback_table->SetPathUsageState(i,j,true);//this one has been used.
@@ -708,7 +800,9 @@ void LocalAlignment::traceBack()
 		  break;
 		case UP_UPLEFT: 
 			//we take upleft first, and also we have to check for the path 
-		  //cout<<"UP_UPLEFT"<<endl;
+#ifdef DEBUG
+		  cout<<"UP_UPLEFT"<<endl;
+#endif
 		  recordPathInfoToBeRemove(i,j, c_current_path_tk, vec_pathToBeChecked 
 					);
 		  if(isPathThruThisNode(c_current_path_tk, i-1, j-1))
@@ -740,7 +834,9 @@ void LocalAlignment::traceBack()
 			if(isPathThruThisNode(c_current_path_tk, i-1, j-1))
 			{
 			//take upleft first, if it allows
-			  //cout<<"LEFT_UPLEFT"<<endl;
+#ifdef DEBUG
+			  cout<<"LEFT_UPLEFT"<<endl;
+#endif
 			  c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
 			  c_subject_wg=c_subject->GetSequence().at(j-1)+c_subject_wg;
 			  c_traceback_table->SetPathUsageState(i,j,true);//this one has been used.
@@ -761,7 +857,9 @@ void LocalAlignment::traceBack()
 			}
 		  break;
 		case UP_LEFT: //in this case, we take left link nodes first (subject gap), 
-		  //cout<<"LEFT"<<endl;
+#ifdef DEBUG
+		  cout<<"UP_LEFT"<<endl;
+#endif
 		  //need to check how many indels, we need to remeber each one 
 		  //if they are mutiple 
 		  
@@ -798,7 +896,9 @@ void LocalAlignment::traceBack()
 			if(isPathThruThisNode(c_current_path_tk, i-1, j-1))
 			{
 			//take upleft first, if it allows
-			  //cout<<"LEFT_UPLEFT"<<endl;
+#ifdef DEBUG
+			  cout<<"UP_LEFT_UPLEFT"<<endl;
+#endif
 			  c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
 			  c_subject_wg=c_subject->GetSequence().at(j-1)+c_subject_wg;
 			  c_traceback_table->SetPathUsageState(i,j,true);//this one has been used.
@@ -839,7 +939,9 @@ void LocalAlignment::traceBack()
 		  break;
 		}//switch
     }  //end of while loop.
-  cout<<"Done with alingment!!!"<<endl;
+#ifdef DEBUG
+	cout<<"Done with tracing for the this current path ready to update !!!"<<endl;
+#endif
   //we are done
   
   c_alignment.SetPattern(c_pattern_wg, true);
@@ -854,14 +956,16 @@ void LocalAlignment::traceBack()
   
   //done with trace back, set it to be traced
   	c_path_vec.at(c_current_path_tk)->setTraced();
- cout<<"before doing the update for recurisive one"<<endl;
+#ifdef DEBUG
+	cout<<"before doing the update for recurisive one"<<endl;
+#endif
   //now we are done for this path track back,
   //no we need to go through the path list to update incase some node has been take by the current path
   updatePathForMultipleLinks(c_current_path_tk, vec_pathToBeChecked);
-			
+#ifdef DEBUG			
   cout<<"+++++++++done the trace back "<<endl;
 	//flush(cout);
-  
+#endif 
 }
 //internal function (protected)
 //used by --the align()-- function for the case where we have linkback to UPLEFT ONLY case 
@@ -942,10 +1046,25 @@ void LocalAlignment::updateNodePath(const unsigned& i, const unsigned& j, const 
 //but instead we keep only one column (in fact for coding
 //purpose, we keep two columns to make the algorithm working
 //efficient;
+
+//*********NOTE:
+//     patter is on the top is the columns
+//	subject is on the left is the rows
+//			patter p p p............p
+//			S
+//			S 
+//			S 
+//			.
+//			.
+//			.
+//			s
+
 void LocalAlignment::align()
 {
-	//cout<<"+++++++++doing the alignment "<<endl;
+#ifdef DEBUG
+	cout<<"+++++++++doing the alignment "<<endl;
 	//flush(cout);
+#endif
   	//Create empty dynamic programming table
   unsigned lenP=c_pattern->GetLength();
   unsigned lenS=c_subject->GetLength();
@@ -1036,8 +1155,7 @@ void LocalAlignment::align()
       //1)first exchange the curr and prev col(actually, it is better to do this one at end of each loop, otherwise it will be trouble in the beginning of the first loop
       //2)reset the curr_col first one to zero, it should be zero anyway.
       
-      
-      dp_table_curr_col[0]=0;
+      dp_table_curr_col[0]=0; //local alignment so set to be zero 
       
       maximumGapValue_pattern=-1E60;
       maximumGapIndex_pattern=0;
@@ -1045,7 +1163,7 @@ void LocalAlignment::align()
       //now, we go through each element and do the job
       for(unsigned int j = 1; j <= lenS; ++j) 
 	{	//for all values of strB
-	  cout<<"****doing round ("<<i<<","<<j<<")."<<endl;	
+	  //cout<<"****doing round ("<<i<<","<<j<<")."<<endl;	
 	  //MATCH
 	  //if(strP.at(i-1) == strS.at(j-1)) 
 	  //{				//if current sequence values are the same
@@ -1086,11 +1204,15 @@ void LocalAlignment::align()
 	  compval = maximumGapValue_subject[j];		//set compval to that square
 	  //c_traceback_table[i+j*(lenP+1)].SetLinks(LEFT);
 	  //c_traceback_table[i+j*(lenP+1)].SetNumOfIndels(i-maximumGapIndex[j]);
+	  //assume now this is the best score and set it as if this is a true good one, we will update this in the next two steps
+	  //very specifically we need to reset the pattern gap to be zero, if this is a true best score. but we can not simply do this now. it will
+	  //interfer the later steps.
 	  c_traceback_table->SetTableEntry(i, j, LEFT, c_traceback_table->GetNumOfIndels(i,j),i-maximumGapIndex_subject[j]);
 	  //  }
 	  //cout<<"maximumGapValue[j]:"<<maximumGapValue_subject[j]<<",";
 	  //cout<<"campval after rowGap:"<<compval<<";";
 
+	  //do pattern gap now.
 	  //this is the pattern/column gap, we keep it same as we are doing with the whole dp table
 	  c_gm->GapValue(c_traceback_table, i,j,true, dp_table_curr_col[j-1], maximumGapValue_pattern, maximumGapIndex_pattern);
 
@@ -1114,11 +1236,12 @@ void LocalAlignment::align()
 	    {
 	      //set compval to that square, UP only
 	      compval=maximumGapValue_pattern;
-	      c_traceback_table->SetTableEntry(i,j,UP, j-maximumGapIndex_pattern,0);
+	      c_traceback_table->SetTableEntry(i,j,UP, j-maximumGapIndex_pattern,0);//now this is a pattern gap, so set the subject pattern to be zero 
 	    }
 	  else
 	  {
-		  if(abs(compval - maximumGapValue_pattern)<1E-12) //special case, UP and LEFT
+		  if(abs(compval - maximumGapValue_pattern)<1E-12) //special case two gaps EQUAL, set both route UP and LEFT,
+						//note, in here we assume the subject gap of NumOfIndels is set correctly, so we simply read it and reset it accordingly
 		  {
 			  //
 			  c_traceback_table->SetTableEntry(i,j,UP_LEFT, 
@@ -1126,7 +1249,7 @@ void LocalAlignment::align()
 
 		  }
 		  else  //the left gap value is the largest so far. set it back to LEFT, LEFT only!!
-				//we do this because we want to reset pattern gap to be zero.
+				//we do this because we want to reset pattern gap to be zero.<-----, do we have to do this????
 		  {
 			  c_traceback_table->SetTableEntry(i, j, LEFT, 0,i-maximumGapIndex_subject[j]);
 		  }
@@ -1137,7 +1260,7 @@ void LocalAlignment::align()
 	  //cout<<"compval afer col gap:"<<compval<<endl;	
 
 	  //***************do Match/Mismatch now***********
-	  if( //match and mismatch from upleft is bigger. so we need take this path 
+	  if( //match and mismatch from upleft is bigger. so we need take this path, score of (i-1),(j-1), because the string is starting at zero and dp table is starting at 1
 			(compval - (dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1)))) < -1E-12
 	    )
 	    {
@@ -1147,7 +1270,7 @@ void LocalAlignment::align()
 	      c_traceback_table->SetTableEntry(i,j, UPLEFT,0,0);//c_traceback_table[i+j*(lenP+1)].SetLinks(UPLEFT);//for this one, we don't have to set the #numOfIndels, since there is none
 	    }
 	  else //in this case we have a tie, meaning we can go up and upleft or go left and upleft. this only(?)happens when
-			//we have a gap value and a mismatch penalty equals.
+						//we have a gap value and a mismatch penalty equals.
 	  {
 		 if(abs(compval-(dp_table_prev_col[(j-1)] + c_sm->GetScore(strP.at(i-1),strS.at(j-1))))
 					< 1E-12
@@ -1171,7 +1294,7 @@ void LocalAlignment::align()
 							c_traceback_table->GetNumOfIndels(i,j),c_traceback_table->GetNumOfIndels_s(i,j));
 			 }
 		 } 
-		 //else //do nothing, in this case, we compval < 0, this will be 
+		 //else //do nothing, in this case, the compval > alignment score. we will check whether compval<0 next 
 	  }
 	  
 	  //here, we try to update information after compare values 	
@@ -1185,14 +1308,14 @@ void LocalAlignment::align()
 	    }
 	  else //found a larger than zero value (no value could , this is where we need to check whether this is good starting for a new path
 	    {
-			cout<<"Before+++:";
-			cout<<c_PathElementTable[i+j*(lenP+1)].toString()<<endl;
+			//cout<<"Before+++:";
+			//cout<<c_PathElementTable[i+j*(lenP+1)].toString()<<endl;
 
 			LinkBack lb=c_traceback_table->GetLink(i,j);
 			switch(lb)
 			{
 				case UPLEFT:
-				cout<<"\t|| --link: UPLEFT || ";fflush(stdout);
+				//cout<<"\t|| --link: UPLEFT || ";fflush(stdout);
 				//it is possible that this is a new path start. 
 				//there is no way that a path starting from an insertion, it has to be a match
 				this->updateNodePath(i,j,lenP, lenS, compval);
@@ -1244,21 +1367,21 @@ void LocalAlignment::align()
 						}*/
 					break;
 				case UP:
-				cout<<"\t|| --link: UP || ";fflush(stdout);
+				//cout<<"\t|| --link: UP || ";fflush(stdout);
 				//for not a UPLEFT entry, means this one is a indel, the score is descreasing, well so 1)it has to follow 
 				//a path 2)it is no way to the maximum one so far, we only need to update the pathElement table information, don't have
 				//update the path entry
 					c_PathElementTable[i+j*(lenP+1)].AddPathInfo(c_PathElementTable[i+(j-c_traceback_table->GetNumOfIndels(i,j))*(lenP+1)]);
 					break;
 				case LEFT:
-				cout<<"\t|| --link: LEFT || ";fflush(stdout);
+				//cout<<"\t|| --link: LEFT || ";fflush(stdout);
 				//for not a UPLEFT entry, means this one is a indel, the score is descreasing, well so 1)it has to follow 
 				//a path 2)it is no way to the maximum one so far, we only need to update the pathElement table information, don't have
 				//update the path entry
 					c_PathElementTable[i+j*(lenP+1)].AddPathInfo(c_PathElementTable[(i-c_traceback_table->GetNumOfIndels_s(i,j))+j*(lenP+1)]);	//pathElementTable[i+j*(lenP+1)]=pathElementTable[(i-c_traceback_table->GetNumOfIndels(i,j))+j*(lenP+1)];
 					break;
 				case UP_UPLEFT:
-				cout<<"\t|| --link: UP_UPLEFT || ";fflush(stdout);
+				//cout<<"\t|| --link: UP_UPLEFT || ";fflush(stdout);
 				//in this case we have the entry pointing back with two path up and upLEFT, meaning from up by pattern gap and
 				//from upleft by mismatch lead to identical score, so we keep both and update both path 
 				//this could happen when the mismatch and gap penalty score are identical.
@@ -1272,7 +1395,7 @@ void LocalAlignment::align()
 					//cout<<"done for this one"<<endl;
 					break;
 				case LEFT_UPLEFT:
-				cout<<"\t|| --link: LEFT_UPLEFT || ";fflush(stdout);
+				//cout<<"\t|| --link: LEFT_UPLEFT || ";fflush(stdout);
 				//in this case we have the entry pointing back with two path left and upLEFT, meaning from up by subject gap and
 				//from upleft by mismatch lead to identical score, so we keep both and update both path 
 				//this could happen when the mismatch and gap penalty score are identical.
@@ -1285,7 +1408,7 @@ void LocalAlignment::align()
 					
 					break;
 				case UP_LEFT:
-				cout<<"\t|| --link: UP_&_LEFT || ";fflush(stdout);
+				//cout<<"\t|| --link: UP_&_LEFT || ";fflush(stdout);
 				//in this special case we have the entry pointing back with two linkbacks left and up, meaning from up by subject gap and
 				//from left by pattern gap lead to identical score and also identical paths??? (possible, but
 				//not 100% sure), so we keep both linkback and update path (also check to make sure, we did not 
@@ -1299,7 +1422,7 @@ void LocalAlignment::align()
 					c_PathElementTable[i+j*(lenP+1)].AddPathInfo(c_PathElementTable[(i-c_traceback_table->GetNumOfIndels_s(i,j))+j*(lenP+1)]);
 					break;
 				case UP_LEFT_UPLEFT:
-				cout<<"\t|| --link: UP_&_LEFT_&_UPLEFT || ";fflush(stdout);
+				//cout<<"\t|| --link: UP_&_LEFT_&_UPLEFT || ";fflush(stdout);
 				//in this special case we have the entry pointing back with THREE linkbacks left and up, meaning from up by subject gap and
 				//from left by pattern gap lead to identical score and also upleft by mismatch
 				//identical paths ??(possible, but
@@ -1371,7 +1494,7 @@ void LocalAlignment::align()
 	    }
 	  */
 	  dp_table_curr_col[j] = compval;	//set current cell to highest possible score and move on
-	  cout<<"\t\trunning score:"<<compval<<endl;
+	  //cout<<"\t\trunning score:"<<compval<<endl;
 
 	  //find a best one so far, acutally these values here are not very useful in localalignment, 
 	  //they are usful for doing pairwise and overlap, since there are only one best value and, 
@@ -1383,8 +1506,8 @@ void LocalAlignment::align()
 	      c_optimalIndex[0]=i;
 	      c_optimalIndex[1]=j;
 	    }
-	cout<<"after+++:";
-					cout<<c_PathElementTable[i+j*(lenP+1)].toString()<<endl;
+	//cout<<"after+++:";
+	//				cout<<c_PathElementTable[i+j*(lenP+1)].toString()<<endl;
 			
 	}//end of col
       
@@ -1395,7 +1518,7 @@ void LocalAlignment::align()
     }//end of row
 	//cout<<"end of the align()"<<endl;
 	//printPathEntryTable();
-	cout<<"---total number of pathes:"<<c_pathID_vec.size()<<endl;
+	//cout<<"---total number of pathes:"<<c_pathID_vec.size()<<endl;
   //clean up
   delete[] dp_table_prev_col;
   delete[] dp_table_curr_col;
@@ -1650,7 +1773,7 @@ void PathElementEntry::RemovePath(const unsigned index)
 	c_optimalIndexSubject.erase(c_optimalIndexSubject.begin()+index);//same thing, but on subject.
 
 }
-//based on the pathid, look up the index of the path in the records.
+//based on the pathid, look up the index of the path in the recored (c_pathID). the record is for each node!!! there are might be multiple path through the node.
 unsigned PathElementEntry::LookUpPathIndex(const unsigned& pathID) const 
 {
 	for(unsigned i=0;i<c_pathID.size();i++)

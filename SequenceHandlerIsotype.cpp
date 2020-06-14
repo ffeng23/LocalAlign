@@ -91,7 +91,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
   //now, we need to prepare the output files
   AlignmentString tempAS;
   AlignmentString* tempAS_arr;
-  unsigned int numOfLocalAlignments=5; //we most likely will do overlap alignment. so this might not be necessary
+  unsigned int numOfLocalAlignments=1; //we most likely will do overlap alignment. so this might not be necessary
   string strPattern;
   string strSubject;
   
@@ -765,7 +765,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
     }//end of for loop of sequence data vec
 
   //one last writing
-  cout<<"start writing last round of output........"<<endl;
+ // cout<<"start writing last round of output........"<<endl;
     
   string t_fileName;
   //mapBoth
@@ -884,7 +884,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
       //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
       vec_mapNone.clear();
     }
-  cout<<"done with one last write"<<endl;
+  //cout<<"done with one last write"<<endl;
   
   cout<<endl;
   //cleanup

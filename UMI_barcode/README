@@ -1,0 +1,10 @@
+In this folder, we save the developing materials for UMI_barcodes. 
+
+See the README_umi_barcode.txt and ngs_umi_barcode -h for some information. 
+
+In here we also save the testing examples and calling commands for run tests.
+
+1)temp_125.fastq,   sequence input for doing tests.
+2)temp22.txt, the calling commands and debugging output. testing non-identical gap penalty and mismatch. 
+3)temp223.txt the calling commands and debugging info. testing identical value between gap penalty and mismatch.
+

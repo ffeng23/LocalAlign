@@ -186,9 +186,6 @@ void updatePathForMultipleLinks_Node(const unsigned& pathID, const unsigned& ind
 							//cases where we might have multiple linkback/path with gap penalty and
 							//mismatch score identical.
   unsigned int c_current_path_tk; //the current path that is checking by traceback()function
-  
-  
 };
-
 
 #endif

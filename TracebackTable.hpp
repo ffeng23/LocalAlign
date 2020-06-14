@@ -36,7 +36,7 @@ private:
   LinkBack c_link;//this is pointer pointing to the one leading to this, could be left, up, upleft, zero
   unsigned int c_numOfIndels;//this is only works for left or up(indels),using to indicate how indels leads to this,not necessarily only 1.
   unsigned int c_numOfIndels_s; //this is added 1/26/2020 for added second numOfIndels because it could possibly 
-						//both pattern gap and subject gap. so we using c_numOfIndels_2 for subject gap and the first for the pattern gap.
+						//both pattern gap and subject gap. so we using c_numOfIndels_s for subject gap and the first for the pattern gap.
 						//--- gaps on subject. 
 						//the first one is the gap on pattern 
   bool c_used; //this is a new field added on 1/19/2020 in order to indicate whehter this current entry has been 

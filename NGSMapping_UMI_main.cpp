@@ -328,6 +328,7 @@ int main(int argc, char* argv[])
   cout<<"++++++++++++++++++++++++"<<endl;
   cout<<"**extracted and inserted umi:"<<insertUmi2SName_umitools(ss1.GetName(), "ACATGGG")<<endl;
   */
+  cout<<"Showing first sequence:"<<endl;
   unsigned seq_str_start=0, seq_str_end=0;
   cout<<"--align sequence:"<<prepAlignSequence(ss1.GetSequence(), OffsetForward, 
 		anchor_positions, anchor_length, seq_str_start, seq_str_end)<<endl;
@@ -336,7 +337,7 @@ int main(int argc, char* argv[])
   
   //+++++++++testing alignment
   cout<<"====================="<<endl;
-  
+  cout<<"\t testing alignment........."<<endl;
   //SequenceString p("p","GGGCAAAA");
   //SequenceString s("s","GGGAAAAA");
   

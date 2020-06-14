@@ -1,0 +1,757 @@
+inside the exist:x=0
+Calling command:
+		 ./ngs_umi_barcode -s temp_125.fastq -t -x -p NNNNNNNNNGGGAAA -f0 -g0 -e4 -n1 
+***Input parameters Summary:
+	Sequence file name (R1):"temp_125.fastq".
+	Sequence output file name (R1):"temp_125.fastqout.fastq".
+	Sequence output file name (R1, no UMI):"temp_125.fastqoutNU.fastq".
+	UMI pattern:"NNNNNNNNNGGGAAA".
+	extract umi:1.
+	offset umi:0.
+	mismatch allowd:1
+	trimmed data to be written:TRUE
+	score matrix:nuc44DM1
+	scale matrix scale:1
+	gap open penalty:-0
+	gap extension penalty:-4
+  ****************
+Testing ScoreMatrix:
+	the index: 0
+	(C,N)=5
+parsing results:umi_length,9; anchor length:6
+	umi pos:0,1,2,3,4,5,6,7,8,
+	umi cha:NNNNNNNNN
+	anchor pos:9,10,11,12,13,14,
+	anchor cha:GGGAAA
+	**********************
+anchor string for alignment:GGGAAA
+=============reading 333++++++++++
+...read an empty row (skip!)
+
+finish reading the file........
+	summary: total 125 records read in and 
+		125 sequences store in the vector....
+======>reading sequence data file: 125
+ss1:251-character long SequenceString instance
+M06066:36:000000000-D56WB:1:1101:15723:1332 1:N:0:NGACAGAG+NCATGCGA:CGATAGGGGGGAAAACGGCGAAATCCAAGATTGAAGCAAGGTGACAGGAAACGGGATATCCTCTGNNTGCTGTCCTTTCCTNNNNNNNNTGGAGACGNNNNNNNNTGTTCTGANNNNNNNNTGAGTCTCNNNNNNNNCAGTGACGNNNNNNNNGCCCTCTGNNNNNNNNGAGGGGCTNNNNNNNNCTACAGCGNNNNNNNNAGTGTGGGNNNNNNNNCCCTGCGGNNNNNNNNTTCCCATCNNNNNNNNCC
+
+--align sequence:GGAAAA
+
+	Seq start: 9; end: 14
+=====================
+the pattern string: 10-character long SequenceString instance
+p:GGGATATATA
+
+the subject string: 10-character long SequenceString instance
+s:GGGTATATAT
+
+before
+****doing round (1,1).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:5
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:5; pattern index:1; subject index:1)
+
+****doing round (1,2).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:5
+after+++:...Path Entry...(1 pathes):
+	------(pathID:1; Optimal score:5; pattern index:1; subject index:2)
+
+****doing round (1,3).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:5
+after+++:...Path Entry...(1 pathes):
+	------(pathID:2; Optimal score:5; pattern index:1; subject index:3)
+
+****doing round (1,4).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:1
+after+++:...Path Entry...(1 pathes):
+	------(pathID:2; Optimal score:5; pattern index:1; subject index:3)
+
+****doing round (1,5).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (1,6).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (1,7).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (1,8).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (1,9).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (1,10).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (2,1).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:5
+after+++:...Path Entry...(1 pathes):
+	------(pathID:3; Optimal score:5; pattern index:2; subject index:1)
+
+****doing round (2,2).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:10
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:10; pattern index:2; subject index:2)
+
+****doing round (2,3).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:10
+after+++:...Path Entry...(1 pathes):
+	------(pathID:1; Optimal score:10; pattern index:2; subject index:3)
+
+****doing round (2,4).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:6
+after+++:...Path Entry...(1 pathes):
+	------(pathID:1; Optimal score:10; pattern index:2; subject index:3)
+
+****doing round (2,5).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:2
+after+++:...Path Entry...(1 pathes):
+	------(pathID:1; Optimal score:10; pattern index:2; subject index:3)
+
+****doing round (2,6).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (2,7).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (2,8).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (2,9).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (2,10).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (3,1).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:5
+after+++:...Path Entry...(1 pathes):
+	------(pathID:4; Optimal score:5; pattern index:3; subject index:1)
+
+****doing round (3,2).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:10
+after+++:...Path Entry...(1 pathes):
+	------(pathID:3; Optimal score:10; pattern index:3; subject index:2)
+
+****doing round (3,3).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:15
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:15; pattern index:3; subject index:3)
+
+****doing round (3,4).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:11
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:15; pattern index:3; subject index:3)
+
+****doing round (3,5).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:7
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:15; pattern index:3; subject index:3)
+
+****doing round (3,6).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:3
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:15; pattern index:3; subject index:3)
+
+****doing round (3,7).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (3,8).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (3,9).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (3,10).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (4,1).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:1
+after+++:...Path Entry...(1 pathes):
+	------(pathID:4; Optimal score:5; pattern index:3; subject index:1)
+
+****doing round (4,2).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:6
+after+++:...Path Entry...(1 pathes):
+	------(pathID:3; Optimal score:10; pattern index:3; subject index:2)
+
+****doing round (4,3).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:11
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:15; pattern index:3; subject index:3)
+
+****doing round (4,4).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:11
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:15; pattern index:3; subject index:3)
+
+****doing round (4,5).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:16
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:16; pattern index:4; subject index:5)
+
+****doing round (4,6).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:12
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:16; pattern index:4; subject index:5)
+
+****doing round (4,7).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP_UPLEFT || 		running score:8
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:16; pattern index:4; subject index:5)
+
+****doing round (4,8).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:4
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:16; pattern index:4; subject index:5)
+
+****doing round (4,9).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:5
+after+++:...Path Entry...(1 pathes):
+	------(pathID:5; Optimal score:5; pattern index:4; subject index:9)
+
+****doing round (4,10).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:1
+after+++:...Path Entry...(1 pathes):
+	------(pathID:5; Optimal score:5; pattern index:4; subject index:9)
+
+****doing round (5,1).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (5,2).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:2
+after+++:...Path Entry...(1 pathes):
+	------(pathID:3; Optimal score:10; pattern index:3; subject index:2)
+
+****doing round (5,3).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:7
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:15; pattern index:3; subject index:3)
+
+****doing round (5,4).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:16
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:16; pattern index:5; subject index:4)
+
+****doing round (5,5).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP_&_LEFT || 		running score:12
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:16; pattern index:4; subject index:5)
+
+****doing round (5,6).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:21
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:21; pattern index:5; subject index:6)
+
+****doing round (5,7).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:17
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:21; pattern index:5; subject index:6)
+
+****doing round (5,8).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP_UPLEFT || 		running score:13
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:21; pattern index:5; subject index:6)
+
+****doing round (5,9).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:9
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:21; pattern index:5; subject index:6)
+
+****doing round (5,10).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:10
+after+++:...Path Entry...(1 pathes):
+	------(pathID:5; Optimal score:10; pattern index:5; subject index:10)
+
+****doing round (6,1).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (6,2).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (6,3).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:3
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:15; pattern index:3; subject index:3)
+
+****doing round (6,4).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:12
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:16; pattern index:5; subject index:4)
+
+****doing round (6,5).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:21
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:21; pattern index:6; subject index:5)
+
+****doing round (6,6).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP_&_LEFT || 		running score:17
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:21; pattern index:5; subject index:6)
+
+****doing round (6,7).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:26
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:26; pattern index:6; subject index:7)
+
+****doing round (6,8).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:22
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:26; pattern index:6; subject index:7)
+
+****doing round (6,9).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP_UPLEFT || 		running score:18
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:26; pattern index:6; subject index:7)
+
+****doing round (6,10).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:14
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:26; pattern index:6; subject index:7)
+
+****doing round (7,1).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (7,2).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (7,3).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (7,4).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT_UPLEFT || 		running score:8
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:26; pattern index:6; subject index:7)
+
+****doing round (7,5).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:17
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:21; pattern index:6; subject index:5)
+
+****doing round (7,6).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:26
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:26; pattern index:7; subject index:6)
+
+****doing round (7,7).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP_&_LEFT || 		running score:22
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:26; pattern index:6; subject index:7)
+
+****doing round (7,8).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:31
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:31; pattern index:7; subject index:8)
+
+****doing round (7,9).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:27
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:31; pattern index:7; subject index:8)
+
+****doing round (7,10).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP_UPLEFT || 		running score:23
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:31; pattern index:7; subject index:8)
+
+****doing round (8,1).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (8,2).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (8,3).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (8,4).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:4
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:26; pattern index:6; subject index:7)
+
+****doing round (8,5).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT_UPLEFT || 		running score:13
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:31; pattern index:7; subject index:8)
+
+****doing round (8,6).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:22
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:26; pattern index:7; subject index:6)
+
+****doing round (8,7).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:31
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:31; pattern index:8; subject index:7)
+
+****doing round (8,8).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP_&_LEFT || 		running score:27
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:31; pattern index:7; subject index:8)
+
+****doing round (8,9).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:36
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:36; pattern index:8; subject index:9)
+
+****doing round (8,10).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP || 		running score:32
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:36; pattern index:8; subject index:9)
+
+****doing round (9,1).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (9,2).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (9,3).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (9,4).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:5
+after+++:...Path Entry...(1 pathes):
+	------(pathID:6; Optimal score:5; pattern index:9; subject index:4)
+
+****doing round (9,5).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:9
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:31; pattern index:7; subject index:8)
+
+****doing round (9,6).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT_UPLEFT || 		running score:18
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:36; pattern index:8; subject index:9)
+
+****doing round (9,7).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:27
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:31; pattern index:8; subject index:7)
+
+****doing round (9,8).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:36
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:36; pattern index:9; subject index:8)
+
+****doing round (9,9).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP_&_LEFT || 		running score:32
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:36; pattern index:8; subject index:9)
+
+****doing round (9,10).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:41
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:41; pattern index:9; subject index:10)
+
+****doing round (10,1).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (10,2).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (10,3).
+		running score:0
+after+++:...Path Entry...(0 pathes):
+
+****doing round (10,4).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:1
+after+++:...Path Entry...(1 pathes):
+	------(pathID:6; Optimal score:5; pattern index:9; subject index:4)
+
+****doing round (10,5).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:10
+after+++:...Path Entry...(1 pathes):
+	------(pathID:6; Optimal score:10; pattern index:10; subject index:5)
+
+****doing round (10,6).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:14
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:36; pattern index:8; subject index:9)
+
+****doing round (10,7).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT_UPLEFT || 		running score:23
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:41; pattern index:9; subject index:10)
+
+****doing round (10,8).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: LEFT || 		running score:32
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:36; pattern index:9; subject index:8)
+
+****doing round (10,9).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UPLEFT || 		running score:41
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:41; pattern index:10; subject index:9)
+
+****doing round (10,10).
+Before+++:...Path Entry...(0 pathes):
+
+	|| --link: UP_&_LEFT || 		running score:37
+after+++:...Path Entry...(1 pathes):
+	------(pathID:0; Optimal score:41; pattern index:9; subject index:10)
+
+---total number of pathes:7
+in between
+i:0...
+before doing trace back;
+	(10,9):
+	(9,8):
+	(8,7):
+	(7,6):
+	(6,5):
+	(5,4):
+	(4,3):
+	(3,3):
+	(2,2):
+	(1,1):
+Done with alingment!!!
+before doing the update for recurisive one
+total number of pathes to be checked:0
++++++++++done the trace back 
+i:1...
+before doing trace back;
+	(2,3):
+	(1,2):
+Done with alingment!!!
+before doing the update for recurisive one
+total number of pathes to be checked:0
++++++++++done the trace back 
+i:2...
+before doing trace back;
+	(3,2):
+	(2,1):
+Done with alingment!!!
+before doing the update for recurisive one
+total number of pathes to be checked:0
++++++++++done the trace back 
+i:3...
+before doing trace back;
+	(5,10):
+	(4,9):
+Done with alingment!!!
+before doing the update for recurisive one
+total number of pathes to be checked:0
++++++++++done the trace back 
++++++++++done the multiple trace back
+first alignment
+Alignment Strings 
+Pattern:[0]GGGATATATA
+Subject:[0]GGG-TATATA
+Score:41
+
+p_start:0--p_end:1
+pattern:GG
+s_start:1--s_end:2
+pattern:GG
+subject:GG
+alignment:
+Alignment Strings 
+Pattern:[0]GG
+Subject:[1]GG
+Score:10
+
+---------------testing the adding nodes-----------
+	Testing empty pathelement etry....
+
+...Path Entry...(0 pathes):
+
+	--adding a new path element:..DONE!!
+...Path Entry...(1 pathes):
+	------(pathID:1; Optimal score:20; pattern index:2; subject index:2)
+
+--testing comming nodes:
+--	 a new node:
+...Path Entry...(2 pathes):
+	------(pathID:1; Optimal score:20; pattern index:2; subject index:2)
+	------(pathID:2; Optimal score:15; pattern index:1; subject index:9)
+
+		-- combining....Done
+	---the new commbined nodes pathes:
+...Path Entry...(2 pathes):
+	------(pathID:1; Optimal score:20; pattern index:2; subject index:2)
+	------(pathID:2; Optimal score:15; pattern index:1; subject index:9)
+
+...Path Entry...(2 pathes):
+	------(pathID:1; Optimal score:20; pattern index:2; subject index:2)
+	------(pathID:2; Optimal score:15; pattern index:1; subject index:9)
+
+new pee3 node:...Path Entry...(1 pathes):
+	------(pathID:4; Optimal score:190; pattern index:21; subject index:39)
+after added pee3 to pee, pee is ...Path Entry...(3 pathes):
+	------(pathID:1; Optimal score:20; pattern index:2; subject index:2)
+	------(pathID:2; Optimal score:15; pattern index:1; subject index:9)
+	------(pathID:4; Optimal score:190; pattern index:21; subject index:39)
+
+Testing adding an empty node
+pee is now ...Path Entry...(3 pathes):
+	------(pathID:1; Optimal score:20; pattern index:2; subject index:2)
+	------(pathID:2; Optimal score:15; pattern index:1; subject index:9)
+	------(pathID:4; Optimal score:190; pattern index:21; subject index:39)
+Done!!!
+Thanks for using our program and have a nice day!!

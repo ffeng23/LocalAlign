@@ -741,17 +741,17 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 	
 	p_vec_len_map->push_back(_vecSeq.at(i).GetSequence().length());
 	
-	cout<<"start writing output........"<<endl;
+	//cout<<"start writing output........"<<endl;
 	if(i%numOfSeqsUnit==0||i==_vecSeq.size()-1) //#write once every 1000 sequences
 	{
-	  cout<<"i round:"<<i<<endl;
+	  //cout<<"i round:"<<i<<endl;
 	  //mapBoth first, of course!!!
 	  for(unsigned int s=0;s<g_vec_mapBoth.size();s++)
 	    {
 	      if(g_vec_mapBoth.at(s).size()>0)
 		{
-		  cout<<"------writing at i:"<<i<<endl;
-		  cout<<"vecBoth:"<<g_vec_mapBoth.size()<<endl;
+		  //cout<<"------writing at i:"<<i<<endl;
+		  //cout<<"vecBoth:"<<g_vec_mapBoth.size()<<endl;
 		  string t_fileName=_mapBoth_fname;
 		  if(g_by_isotype_flag)
 		    {
@@ -772,9 +772,9 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 		      g_vec_mapBoth_trim.at(s).clear();
 		    }
 		}
-	      cout<<"\twriting......"<<endl;
+	      //cout<<"\twriting......"<<endl;
 	    }
-	  cout<<"done map both"<<endl;
+	  //cout<<"done map both"<<endl;
 
 	  for(unsigned int s=0;s<g_vec_mapForward.size();s++)
 	    {
@@ -801,7 +801,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 		    }
 		}
 	    }
-	  cout<<"done map forward"<<endl;
+	  //cout<<"done map forward"<<endl;
 	  if( g_vec_mapReverse.at(0).size()>0)
 	      {
 		WriteFasta(_mapReverse_fname, g_vec_mapReverse.at(0), 100, ofstream::app);
@@ -813,7 +813,7 @@ void MappingAdaptors(vector<SequenceString>& _vecForward, vector<SequenceString>
 		WriteFasta(_mapReverse_fname+"_trim.fas", g_vec_mapReverse_trim.at(0), 100,ofstream::app);
 		g_vec_mapReverse_trim.at(0).clear();
 	      }
-	  cout<<"done map reverse"<<endl;
+	  //cout<<"done map reverse"<<endl;
 	  if(g_vec_mapNone.at(0).size()>0)
 	      {
 		WriteFasta(  _mapNone_fname,g_vec_mapNone.at(0), 100, ofstream::app);
