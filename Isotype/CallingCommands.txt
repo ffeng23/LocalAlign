@@ -1,0 +1,1 @@
+../ngsmapping_Isotype -d2 -g-10 -e -10 -n 0.8 -l 18  -p 30 -x  -s /home/feng/Feng/hg/LocalAlign/Isotype/top_1_clone1073_seqs.picked.fa.noIsotype.fa  -f ./isotype_demux_fullLength.fasta
