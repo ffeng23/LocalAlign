@@ -52,3 +52,22 @@ change NGSMapping.cpp to NGSMapping_Adaptor_main.cpp
 1)add code to do reading single record of fasta/fastq
 2)add code to do separated gzip compression untility/resource 
 3)add code to do deep checking for file type.
+
+#update on branching###########
+branch out as feng for working on adding two kinds of localalignments, one regular but faster(?), another one is to do more complicated alignments (more on tracing back) but much slower.
+
+#########update 6/15/2020
+1) still need more work on localalign
+    two things: i) it seems it working on for localalign to find the best/single score for both regular and CT (complicated) local align (LocalAlignment_CT.hpp/cpp). But regular one (LocalAlignment) are much faster.
+    ii) it seems that LocalAlignment_CT work correctly when we are feeding in the strict affine gap model to looking for best multiple alignments. or if we adding in cases where no multiple link backs (multiple link back only happens when gap penality and mismatch are identical???) We need to work more on this.
+        one case to test is this (see NGSMapping_UMI_main.cpp):
+            GGGATATATA
+            GGGTATATAT
+        when we have -g0 -e4 and NUC4.4 mismatch (5 for match and -4 for mismatch), the second best one is a little short "GG" of a score of 10. it seems that the best alignment in this case cut off all other one not optimal??? can we do better to have a "reasonable" second best one like when we have in the -g5 -e4 case?
+        
+    
+#########Update: to do list for now. 
+    1) merge back feng to the master branch.
+    
+    2) separate R1 and R2 input for ngs_isotype mapping???
+    

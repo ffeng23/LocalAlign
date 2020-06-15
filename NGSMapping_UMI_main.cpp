@@ -17,6 +17,7 @@
 #include "SequenceHandler.hpp"
 #include "SequenceHandler_umi.hpp"
 #include "LocalAlignment.hpp"
+#include "LocalAlignment_CT.hpp"
 using namespace std;
 
 static void printUsage(int argc, char* argv[]);
@@ -353,8 +354,8 @@ int main(int argc, char* argv[])
   
   cout<<"the pattern string: "<<p.toString()<<endl;
   cout<<"the subject string: "<<s.toString()<<endl;
-  LocalAlignment ol(&p, &s, sm, gapopen, gapextension
-						,scale,4,0);
+  LocalAlignment_CT ol(&p, &s, sm, gapopen, gapextension
+						,scale,4,0);//last 2 parameter, # of best local alignment found and and type gapmodel, 0 for affine 
 	AlignmentString* aso_arr=ol.GetAlignmentArr(); //pattern is on top; and subject is on bottom.
 	cout<<"first alignment"<<endl;
 	cout<<aso_arr[0].toString()<<endl;
@@ -661,7 +662,7 @@ static void printUsage(int argc, char* argv[])
   
   cout<<"\t\t-n # -- number of mismatch allowed\n"
       <<"\n"; 
-  cout<<"\t\t-p # -- offset/shift allowed.\n"
+  cout<<"\t\t-f # -- offset/shift allowed.\n"
       <<"\n"; 
   cout<<"\t\t-h -- help\n";
   cout<<"\n\t\tv0.1 this code is used to cut off the adaptor and extract umi \n"
