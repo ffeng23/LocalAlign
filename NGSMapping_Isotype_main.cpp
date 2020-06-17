@@ -39,6 +39,7 @@ void printCallingCommand(int argc, char* argv[])
 static string isotypeFile_name("HumanIGConstant_Lib.fas");//input ifle for forward constant 
 
 static string sequenceFile_name;//input file for sequence data
+static string sequenceFile_R2_name;//input file for sequence data
 
 static double matchRateThreshold=0.75; //not too many mismatch 
 static unsigned int MinimumOverlapLength=10;//not too short
@@ -66,14 +67,15 @@ int main(int argc, char* argv[])
 {
 	printCallingCommand(argc, argv);
   //for parsing commandline arguement
-  const char *opts = "hvf:g:e:m:s:k:n:p:l:d:x";
+  const char *opts = "hvf:g:e:m:s:t:k:n:p:l:d:x";
   //f: the input file name forward primer
   //r: the input file name reverse primer
   //d: the mapping type, either FivePrime or ThreePrime
   //g: gap open
   //e: gap extension
   //m: score matrix
-  //s: sequece data file
+  //s: sequece data file R1 (if -t is specified)
+  //t: sequence data file R2 
   //xxxxxnot usedxxxxx t: ***No trimmed data !!!get trimmed data file (1) or no trimmed data (0), no trimmed data
   //k: scale factor
 
@@ -96,14 +98,21 @@ int main(int argc, char* argv[])
     }
   
   //*********get output files
-  string outputFileMap_name=(sequenceFile_name+".mapped.fasta"); //the output file for mapped both files
-  string outputFileNone_name=(sequenceFile_name+".mapNone.fasta");//map none
+  string outputFileR1_name=sequenceFile_name;//+".mapped.fasta"); //the output file for mapped both files
+  string outputFileR2_name=sequenceFile_R2_name;//+".mapNone.fasta");//map none
 
   cout<<"***Input parameters Summary:\n";
   cout<<"\tIsotype file name:\""<<isotypeFile_name<<"\".\n";
-  cout<<"\tsequence data file name:\""<<sequenceFile_name<<"\".\n";
-  cout<<"\tThe output file name : \""<<outputFileMap_name<<"\",\""
-      <<outputFileNone_name<<"\";\n"
+  if(sequenceFile_R2_name.length()<=0)
+		cout<<"\tsequence data file name :\""<<sequenceFile_name<<"\".\n";
+  else 
+  {
+		cout<<"\tsequence data file name (R1) :\""<<sequenceFile_name<<"\".\n";
+	  cout<<"\tsequence R2 data file name (R2):\""<<sequenceFile_R2_name<<"\".\n";
+	  //outputFileR2_name =sequenceFile_R2_name;
+  }
+  cout<<"\tThe output file name : \""<<outputFileR1_name<<"\",\""
+      <<outputFileR2_name<<"\";\n"
       <<"\tmapEnd:"<<mapEnd<<"\n"
       <<"\n";
     
@@ -138,17 +147,39 @@ int main(int argc, char* argv[])
   vector<SequenceString> vec_seq;
   vector<SequenceString> vec_Isotype_seq;//this will hold processed sequences on the forward end
   
+  vector<SequenceString> vec_seq_R2;
   vector<string> vec_seq_Q;
-  
+  vector<string> vec_seq_Q_R2;
+
   //check file type and then decide to do reading 
   //check file format, so far we only read either fastq or gzip'ed fastq
   FileType ft=getFileType(sequenceFile_name);
-  if(ft!=FASTQ&&ft!=GZ_FASTQ&&ft!=FASTA&&ft!=GZ_FASTA)
+  switch (ft)
   {
-	cout<<"ERROR: so far we only process the fastq/fasta or gzip'ed fastq/fasta files"<<endl;
-	return 0;
+	  case FASTQ:
+	  case FASTA:
+	  case GZ_FASTQ:
+	  case GZ_FASTA:
+		//these are good. go ahead
+		break;
+	  case DIR:
+	  case NOT_EXIST:
+	  case UNKNOWN:
+			cout<<"ERROR: the input file ("<<sequenceFile_name<<") is either a directory, or not existing, or in a UNKNOWN format, please check...."<<endl;
+			exit(-1);
+			break;
+	  default:
+			cout<<"ERROR: so far we only process the fastq/fasta or gzip'ed fastq/fasta files"<<endl;
+			exit(-1);  
   }
+//  if(ft!=FASTQ&&ft!=GZ_FASTQ&&ft!=FASTA&&ft!=GZ_FASTA)
+//  {
+//	  
+//	cout<<"ERROR: so far we only process the fastq/fasta or gzip'ed fastq/fasta files"<<endl;
+//	return 0;
+//  }
   unsigned int num;
+	cout<<"Reading the input file (R1).............."<<endl;
   if(ft==FASTQ||ft==GZ_FASTQ)
 	num=ReadFastq(sequenceFile_name, vec_seq, vec_seq_Q, false);
   else 
@@ -157,38 +188,95 @@ int main(int argc, char* argv[])
 		  num=ReadFasta(sequenceFile_name, vec_seq, false);
   }
   cout<<"total number of sequences read: "<<num<<endl;
+
+//reading R2 if it is available.  
+  if(sequenceFile_R2_name.length()>0)
+  {
+	  cout<<"reading the input file (R2,"<< sequenceFile_R2_name<<")....."<<endl;
+			//check file type and then decide to do reading 
+	  //check file format, so far we only read either fastq or gzip'ed fastq
+	  ft=getFileType(sequenceFile_R2_name);
+	    switch (ft)
+		  {
+			  case FASTQ:
+			  case FASTA:
+			  case GZ_FASTQ:
+			  case GZ_FASTA:
+				//these are good. go ahead
+				break;
+			  case DIR:
+			  case NOT_EXIST:
+			  case UNKNOWN:
+					cout<<"ERROR: the input file ("<<sequenceFile_R2_name<<") is either a directory, or not existing, or in a UNKNOWN format, please check...."<<endl;
+					exit(-1);
+					break;
+			  default:
+					cout<<"ERROR: so far we only process the fastq/fasta or gzip'ed fastq/fasta files"<<endl;
+					exit(-1);  
+		  }
+	  /*if(ft!=FASTQ&&ft!=GZ_FASTQ&&ft!=FASTA&&ft!=GZ_FASTA)
+	  {
+		cout<<"ERROR: so far we only process the fastq/fasta or gzip'ed fastq/fasta files"<<endl;
+		return 0;
+	  }*/
+	  
+	  if(ft==FASTQ||ft==GZ_FASTQ)
+		num=ReadFastq(sequenceFile_R2_name, vec_seq_R2, vec_seq_Q_R2, false);
+	  else 
+	  {
+		  if(ft==FASTA||ft==GZ_FASTA)
+			  num=ReadFasta(sequenceFile_R2_name, vec_seq_R2, false);
+	  }
+	  cout<<"total number of sequences read: "<<num<<endl;
+  }
   
   //cout<<"reading sequence data file: "<<ReadFasta(sequenceFile_name, vec_seq)<<endl;
   //cout<<"1/1000:"<<vec_seq.at(0).toString()<<endl;
   
   //cout<<"reading and processing isotype sequences for mapping......"<<endl;
-
+	if(isotypeFile_name.length()<0)
+	{
+		cerr<<"ERROR: no isoytpe file are specified, please check............."<<endl;
+		printUsage(argc, argv);
+		exit(-1);
+	}
   //SetUpByIsotypeOutputFlag(true);
   ft=getFileType(isotypeFile_name);
-  if(ft!=FASTA&&ft!=GZ_FASTA)
+     switch (ft)
+  {
+	  case FASTQ:
+	  case FASTA:
+	  case GZ_FASTQ:
+	  case GZ_FASTA:
+		//these are good. go ahead
+		break;
+	  case DIR:
+	  case NOT_EXIST:
+	  case UNKNOWN:
+			cout<<"ERROR: the input file ("<<isotypeFile_name<<") is either a directory, or not existing, or in a UNKNOWN format, please check...."<<endl;
+			exit(-1);
+			break;
+	  default:
+			cout<<"ERROR: so far we only process the fastq/fasta or gzip'ed fastq/fasta files"<<endl;
+			exit(-1);  
+  }
+/*   if(ft!=FASTA&&ft!=GZ_FASTA)
   {
 	cout<<"ERROR: so far we only process the fasta or fasta files"<<endl;
 	return 0;
-  }
+  }*/
   cout<<"Reading constant library file:"<<ReadFasta(isotypeFile_name, vec_Isotype_seq)<<endl;
 
   //cout<<"first isotype:\n"<<vec_Isotype_seq.at(0).toString()<<endl;
   //cout<<"Second isotype:\n"<<vec_Isotype_seq.at(1).toString()<<endl;
   
-
-  //reverse the Ig constant region sequence
-  /*for(unsigned int i=0;i<vec_forward_seq.size();i++)
-    {
-      vec_forward_seq[i]=ReverseComplement(vec_forward_seq.at(i));
-    }
-  */
- 
 //now we have everything, we just need to do the job, I mean mapping, here.
   MappingIsotypes(vec_seq, vec_Isotype_seq, 
 		  mapEnd,sm, gapopen, gapextension,
 		  matchRateThreshold, MinimumOverlapLength, 
 		  Offset, 
-		  outputFileMap_name, outputFileNone_name,demux
+		  outputFileR1_name, outputFileR2_name,demux,
+		  vec_seq_Q, vec_seq_R2, vec_seq_Q_R2
 		  ); 
   /*
   //test the writting the text table
@@ -239,6 +327,10 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	
 	case 's':
 	  sequenceFile_name=optarg;
+	break;
+	
+	case 't':
+	  sequenceFile_R2_name=optarg;
 	break;
 	
 	case 'm':
@@ -329,9 +421,9 @@ static void printUsage(int argc, char* argv[])
       <<"\tare pair-end and have We try to follow the style of cutadapt. Basically, we will\n"
       <<"\tonly ask for the isotype sequence and then map them to one side \n"
       <<"\tof the sequences, which could be either 5' or 3'\n";
-  cout<<"\tOption string: \"hvf:d::g:e:m:s:k:p:n:l:\" \n";
+  cout<<"\tOption string: \"hvf:d:g:e:m:s:t:k:p:n:l:\" \n";
   cout<<"Usage:\n";
-  cout<<"\t"<<argv[0]<<" -s second sequence file " //[-a adaptor file] [-b barcode file]  \n"
+  cout<<"\t"<<argv[0]<<" [-s sequence file (R1)] [-t sequence file (R2)]\n" // [-b barcode file]  \n"
       <<" [-f isotype sequence file name]"
       <<" [-d mapping type]\n"
       <<"\t  [-m score matrix] [-l MinimumOverlapLength]\n"
@@ -341,7 +433,9 @@ static void printUsage(int argc, char* argv[])
       <<"\t [-x] [-h] [-v]\n\n"
     ;
 
-  cout<<"\t\t-s filename -- the sequence fasta data filename \n"
+  cout<<"\t\t-s filename -- the sequence fasta/q data filename (read 1 if -t is specified)\n"
+      <<"\n";
+  cout<<"\t\t-t filename -- the sequence fasta/q data filename Read2 \n"
       <<"\n";
 
   cout<<"\t\t-f filename -- the isotype sequences fasta filename \n"
@@ -405,9 +499,10 @@ static void printUsage(int argc, char* argv[])
       <<"\t\t\tsummary\n"
       <<"\t\t\t @4/2/2014 by Feng\n"
      ;
-
+	cout<<"\n\t\tUpdate (6/15/2020): add code to allow fastq files and R1 and R2 sepearated input\n";
   //cout<<"\n\t**************************"<<endl;
-  cout<<"\t\t\t*********updated by Feng @ BU 2018\n"; 
+  cout<<"\t\t*********updated by Feng @ BU 2018\n";
+	cout<<"\t\t\tJune 15th 2020\n";
 
 
   exit(-1);

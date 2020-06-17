@@ -24,7 +24,7 @@ bool exist(const char* path) {
     struct stat buf;
 	
     int x= stat(path, &buf);
-	cout<<"inside the exist:x="<<x<<endl;
+	//cout<<"inside the exist:x="<<x<<endl;
     return x==0;
 }
 //use an open file stream to check whther theis is a text file
@@ -488,6 +488,8 @@ FileType getFileType_deep(const string& fname)
 FileType getFileType_byName(const string& fname)
 {
 	const char* f=fname.c_str();
+	if(!exist(f))
+		return NOT_EXIST;
 	//
 	if(is_dir(f))
 	{

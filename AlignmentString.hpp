@@ -11,7 +11,7 @@ public:
   AlignmentString(const string& _pattern, const int& p_start, const int& p_end,
 		  const string& _subject, const int& c_start, const int& c_end,
 		  const string& _pattern_wg, const string& _subject_wg, const double& _score);
-  
+  AlignmentString(const AlignmentString& a);
   //true to set the sub string with gap (true) or without gap(fasle)
   void SetPattern(const string& _pattern, const bool& gapFlag=false);
   void SetSubject(const string& _subject, const bool& gapFlag=false);

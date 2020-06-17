@@ -10,7 +10,7 @@
 
 using namespace std;
 
-enum FileType {GZ, FASTA, FASTQ, TXT, GZ_FASTA, GZ_FASTQ, GZ_TXT, DIR, UNKNOWN};
+enum FileType {GZ, FASTA, FASTQ, TXT, GZ_FASTA, GZ_FASTQ, GZ_TXT, DIR, UNKNOWN, NOT_EXIST};
 
 //get file type, note FileType is user-defined enum.
 //we will do two ways, either by file name, simply check the file name 

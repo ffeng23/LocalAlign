@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <cstring>
 
 #include "Path.hpp"
 #include "GapModel.hpp"
@@ -17,7 +18,7 @@ static bool comparePathElement(Path* p1, Path* p2)
   return p1->GetOptimalValue() > p2->GetOptimalValue();
 }
 
-LocalAlignment::LocalAlignment(SequenceString* _pattern, SequenceString* _subject, 
+LocalAlignment::LocalAlignment(const SequenceString* _pattern, const SequenceString* _subject, 
 			       const ScoreMatrix* _m, const double& _gopen, 
 			       const double& _gextension, const double& _scale, const int& _numOfAlignments, const short& _typeOfGapModel):
   PairwiseAlignment(_pattern, _subject, _m, _gopen, _gextension, _scale,_typeOfGapModel),c_numOfAlignments(_numOfAlignments),
@@ -52,21 +53,50 @@ LocalAlignment::~LocalAlignment()
     }
 }
 
-//this is 
-double* LocalAlignment::GetScoreArr()
+//this one now return a deep copy of score array. 
+//the outer caller need to deinitialize memory  
+double* LocalAlignment::GetScoreArr() const
 {
-  return c_scoreArr;
+	double * temp=new double [this->c_numOfAlignments];
+	memcpy(temp, c_scoreArr, c_numOfAlignments*sizeof(double));
+	
+  return temp;
 }
 
-unsigned int LocalAlignment::GetNumberOfAlignments()
+//this one return a pointer to the object internal alignment array . 
+//use with caution.
+double* LocalAlignment::GetScoreArr_p()
+{
+	double * temp=new double [this->c_numOfAlignments];
+	memcpy(temp, c_scoreArr, c_numOfAlignments*sizeof(double));
+	
+  return temp;
+}
+
+//this one return a pointer to the object internal alignment array . 
+//use with caution.
+AlignmentString* LocalAlignment::GetAlignmentArr_p()
+{
+
+  return c_alignmentArr;
+}
+
+//this one now return a deep copy of score array. 
+//the outer caller need to deinitialize memory  
+unsigned int LocalAlignment::GetNumberOfAlignments() const
 {
   return c_numOfAlignments;
 }
 
-AlignmentString* LocalAlignment::GetAlignmentArr()
+//this one now return a deep copy of score array. 
+//the outer caller need to deinitialize memory  
+AlignmentString* LocalAlignment::GetAlignmentArr() const
 {
-
-  return c_alignmentArr;
+	AlignmentString* temp=new AlignmentString[c_numOfAlignments];
+	//memcpy(temp, this->c_alignmentArr, c_numOfAlignments*sizeof(AlignmentString));
+	for(unsigned i=0;i<c_numOfAlignments;i++)
+		temp[i]=this->c_alignmentArr[i];
+  return temp;
 }
 
 /*

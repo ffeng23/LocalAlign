@@ -50,7 +50,7 @@ class TracebackTable
 {
 public:
   //typeOfAlignment, 0, global;1, overlap; 2, local.
-  TracebackTable(SequenceString* _pattern, SequenceString* _subject, const short& _typeOfAlignment=0);
+  TracebackTable( const SequenceString* _pattern, const SequenceString* _subject, const short& _typeOfAlignment=0);
   ~TracebackTable();
   void SetTableEntry(const unsigned int& _patternIndex, const unsigned int& _subjectIndex, const LinkBack& _link, 
 		const unsigned int& _numOfIndels, const unsigned& _numOfIndels_s=0);

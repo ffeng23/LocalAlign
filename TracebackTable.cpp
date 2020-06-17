@@ -49,7 +49,7 @@ void TracebackTableEntry::SetPathUsageState( const bool& s)
 }
 
 //
-TracebackTable::TracebackTable(SequenceString* _pattern, SequenceString* _subject, const short& _typeOfAlignment):c_tbt(NULL), 
+TracebackTable::TracebackTable(const SequenceString* _pattern, const SequenceString* _subject, const short& _typeOfAlignment):c_tbt(NULL), 
 			     c_lenOfPattern(_pattern->GetLength()), c_lenOfSubject(_subject->GetLength() )
 {
   //now allocate memory

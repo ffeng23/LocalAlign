@@ -9,6 +9,7 @@
 #include "OverlapAlignment.hpp"
 #include "AlignmentString.hpp"
 #include "LocalAlignment.hpp"
+#include "Accessory/FastqHandler.hpp"
 
 //#define debug 
 
@@ -36,18 +37,102 @@ static unsigned int LookUpVectorIndex(const string& _adaptorName, vector<Sequenc
   cout<<"***ERROR: can not find which catogory to store data (IgM/G/D)"<<endl;
   return -1;
 }
-void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence data that we want to find isotypes*/
+
+//this is a helper function to do align with isotype constant sequence and return whether this is a valid alignement
+// valid means, this current alignment is better for score, long enough, within offset, pass matchRate threshold 
+//	return true if this is a good valid alignment and false otherwise
+bool alignConstant( const SequenceString* seq, const SequenceString* iso, 
+		const ScoreMatrix* _sm, const double& _gopen, 
+		 const double& _gextension, const double& _scale,  const short& _gapModel, const mapType& _mtype,
+		 const double& _matchRateThreshold, const unsigned& _minimumOverlapLength, const unsigned& _offset, 
+		 //output now
+		 AlignmentString* bestAlign,   double* bestScore /*either 5' or 3' best score*/
+	)
+	{
+		//cout<<"Isotype set:"<<j<<endl;
+	      //cout<<_vecIsotype.at(j).toString()<<endl;
+		  //flush(cout);
+	      LocalAlignment lal (seq, iso, _sm, _gopen, _gextension
+						, 1 /*scale*/, 1  /*numOfLocalAlignments*/, _gapModel);
+		  //cout<<"\tdone with local alignment...."<<endl;
+		  //flush(cout);
+		  if(lal.GetNumberOfAlignments()==0)
+		  {
+			  return false;//don't do anyting.
+		  }
+	      AlignmentString as=lal.GetAlignment();
+#ifdef debug  
+			cout<<"*****Seq name:"<<seq->GetName()<<endl;
+			cout<<"\talignment score:"<<as.GetScore()<<endl;
+			flush(cout);
+#endif	      
+		  //need to get the match rate
+	      string strPattern=as.GetPattern(true);
+	      string strSubject=as.GetSubject(true);
+#ifdef debug
+	      cout<<"\tstrPattern:"<<strPattern<<endl;
+	      cout<<"\tstrSubject:"<<strSubject<<endl;
+#endif
+	      double match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
+	      //cout<<"\tcompare:"<<CompareStrings(strPattern, strSubject)<<";length():"<<strPattern.length()<<endl;
+#ifdef debug	      
+			cout<<"\tmatch_rate:"<<match_rate<<" match rate thresld:"<<_matchRateThreshold<<endl;
+			cout<<"\tstrPattern.length:"<<strPattern.length()<<"; minimumOverlpLength:"<<_minimumOverlapLength<<endl;
+			cout<<"\toffset threshold:"<<_offset<<endl;
+			flush(cout);
+#endif		
+	      //check the best score and match rate
+	      if(as.GetScore()>*bestScore&&match_rate>_matchRateThreshold&&strPattern.length()>_minimumOverlapLength)
+		{
+#ifdef debug
+			cout<<"length:"<<strPattern.length()<<" and length thresld:"<<_minimumOverlapLength<<endl;
+#endif
+		  //we need to see the offset too, only important to the pattern, here the 
+		  //the pattern is the long one, we align the primer sequence against
+		  //the primer should be in the beginning, not too far --- 5' mapping,
+		  //or the primer is in the end, not too far from the end --- 3' mapping
+		  unsigned temp_offset=as.GetPatternIndexStart();
+		  
+		  if(_mtype==ThreePrime)
+			  temp_offset=seq->GetLength()-as.GetPatternIndexEnd();
+		  //cout<<"the alignment offset :"<<temp_offset<<endl;
+		  if(temp_offset<_offset )
+		    {//we good
+#ifdef debug
+		      cout<<"\t***get one bigger"<<endl;
+			  cout<<"starting offset"<<as.GetPatternIndexStart()<<"and offset:"<<_offset<<endl;
+#endif
+		      *bestScore=as.GetScore();
+		      *bestAlign=as;//with name
+		      
+		      return true;
+		    }
+		}
+			return false;
+	}//end of function alignconstant
+
+
+void MappingIsotypes(const vector<SequenceString>& _vecSeq, /*this is the sequence data that we want to find isotypes*/
 		     vector<SequenceString>& _vecIsotype, /*this is the isotype sequences*/
 		     const mapType& type, /*indicating whether it is 5'prime or 3' prime*/
 		     ScoreMatrix* _sm, const double& _gapOpen, const double& _gapExtension,
 		     const double& _matchRateThreshold, const unsigned _minimumOverlapLength,
 		     const unsigned int& _offset, //const unsigned int& _offsetReverse, 
-		     const string& _map_fname,
-		     const string& _unmap_fname,
-		     const bool& _demux
+		     const string& _R1_fname,
+		     const string& _R2_fname,
+		     const bool& _demux,
+			 const vector<string>& _vecSeq_Q, /*read 1 sequence quality*/
+			 const vector<SequenceString>& _vecSeq_R2, /*R2 sequence data that we want to find isotypes*/
+			 const vector<string>& _vecSeq_Q_R2/*r2 quality.*/
 		     )
 {
-	short gapModel=0; //0, affine gaps;1, 454 gap model.
+		
+//	cout<<"%%%%%%starting "<<endl;
+//			cout<<"\tvecSeq_Q.size():"<<_vecSeq_Q.size()<<endl;
+//			cout<<"\tvecSeq_R2.size():"<<_vecSeq_R2.size()<<endl;
+//			cout<<"\tvecSeq_Q_R2.size():"<<_vecSeq_Q_R2.size()<<endl;
+			
+  short gapModel=0; //0, affine gaps;1, 454 gap model.
   unsigned int numOfSeqsUnit=20000;
   unsigned int timeOfWriting=1;
   int* numOfWritesDone_mapped =new int [_vecIsotype.size()+1];
@@ -63,12 +148,29 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
   //they are the alleles for different isotypes (IgG/M), different subtypes (IgG1/2/3/4) and alleles IgG1*01/*02/*03, etc
   //
   vector<SequenceString>* pt_vec_mapped=new vector<SequenceString>[_vecIsotype.size()+1]; //one more for holding unknown isotype
-  vector<SequenceString>* pt_vec_demux=new vector<SequenceString>[_vecIsotype.size()+1];//holding only the sequences by isotype, 
-                                                                                       //but no mapping as output
-
+  vector<SequenceString>* pt_vec_demux=new vector<SequenceString>[_vecIsotype.size()+1];//holding only the sequences by isotype, //but no mapping as output
+  vector<string>* pt_vec_demux_Q=NULL;
+  if(_vecSeq_Q.size()>0)
+  {
+		pt_vec_demux_Q=new vector<string>[_vecIsotype.size()+1];
+  }
+  vector<SequenceString>* pt_vec_demux_R2=NULL;
+  if(_vecSeq_R2.size()>0)
+  {
+	  pt_vec_demux_R2=new vector<SequenceString>[_vecIsotype.size()+1];
+  }
+  vector<string>* pt_vec_demux_Q_R2=NULL;
+  if(_vecSeq_Q_R2.size()>0)
+  {
+		pt_vec_demux_Q_R2=new vector<string>[_vecIsotype.size()+1];
+  }
+  
   //vector<SequenceString>* pt_vec_mapForward=new vector<SequenceString>[_vecForward.size()+1];//one more for holding unkown isotype
   //vector<SequenceString> vec_mapReverse;
   vector<SequenceString> vec_mapNone;
+  vector<string> vec_mapNone_Q;
+  vector<SequenceString> vec_mapNone_R2;
+  vector<string> vec_mapNone_Q_R2;
   
   //the stats are arranged by isotypes(matched)
   //holding the position where within the subject (isotype) the break is.
@@ -90,8 +192,8 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 
   //now, we need to prepare the output files
   AlignmentString tempAS;
-  AlignmentString* tempAS_arr;
-  unsigned int numOfLocalAlignments=1; //we most likely will do overlap alignment. so this might not be necessary
+  //AlignmentString* tempAS_arr=NULL;
+  //unsigned int numOfLocalAlignments=1; //we most likely will do overlap alignment. so this might not be necessary
   string strPattern;
   string strSubject;
   
@@ -123,6 +225,8 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
       unsigned int 	best5PrimeIndex=0; //what is this for? to remeber index of local alignment? do we need it for overlap alignment
       unsigned int	best3PrimeIndex=0;
 	
+	// the below two was used to indiciate whether a valid aignment was found??
+	//		if not, mapnone was recorded.
       bool 	found5PrimeFlag=false;
       bool	found3PrimeFlag=false;
 	  //cout<<"sequence"<< i<<":"<<endl;
@@ -132,59 +236,31 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	  //flush(cout);
       for(unsigned int j=0;j<_vecIsotype.size();j++)
 	{
+		//note, for each alignment, now when we ask for the tempAS_arr, we ask for a deep copy, meanning we get some 
+		//new memory allocated, so we need to take care of this by deleting/cleaning up.
+		//so that we don't allow memory leak. 
+		//if(tempAS_arr!=NULL) //<-----------
+		//	delete [] tempAS_arr;
+#ifdef debug
+		cout<<"Isotype set:"<<j<<endl;
+	    cout<<"\t"<<_vecIsotype.at(j).toString()<<endl;		  
+		//flush(cout);
+#endif 
 	  //now we need to separate out the two different mapping case, 5' and 3'
 	  if(type==FivePrime)
 	    {
-	      //cout<<"Isotype set:"<<j<<endl;
-	      //cout<<_vecIsotype.at(j).toString()<<endl;
-		  //flush(cout);
-	      LocalAlignment lal (&(_vecSeq.at(i)), &(_vecIsotype.at(j)), _sm, _gapOpen, _gapExtension
-						,1,numOfLocalAlignments, gapModel);
-		  //cout<<"\tdone with local alignment...."<<endl;
-		  flush(cout);
-		  if(lal.GetNumberOfAlignments()==0)
+		
+		  //check to see 
+	      bool currentFlag=alignConstant(&(_vecSeq.at(i)), &(_vecIsotype.at(j)), _sm, _gapOpen, _gapExtension
+					,1, gapModel, FivePrime, 
+					_matchRateThreshold, _minimumOverlapLength, _offset, 
+		 //output now
+		  &best5PrimeAlign,   &best5PrimeScore );
+		  if(currentFlag)
 		  {
-			  continue;//don't do anyting.
+			  found5PrimeFlag=currentFlag;
+			  best5PrimeIndex=j;
 		  }
-	      tempAS_arr=lal.GetAlignmentArr();
-#ifdef debug  
-			cout<<"\talignment score:"<<tempAS_arr[0].GetScore()<<endl;
-			flush(cout);
-#endif	      
-		  //need to get the match rate
-	      strPattern=tempAS_arr[0].GetPattern(true);
-	      strSubject=tempAS_arr[0].GetSubject(true);
-#ifdef debug
-	      cout<<"\tstrPattern:"<<strPattern<<endl;
-	      cout<<"\tstrSubject:"<<strSubject<<endl;
-#endif
-	      match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
-	      //cout<<"\tcompare:"<<CompareStrings(strPattern, strSubject)<<";length():"<<strPattern.length()<<endl;
-#ifdef debug	      
-			cout<<"\tmatch_rate:"<<match_rate<<" match rate thresld:"<<_matchRateThreshold<<endl;
-			flush(cout);
-#endif		
-	      //check the best score and match rate
-	      if(tempAS_arr[0].GetScore()>best5PrimeScore&&match_rate>_matchRateThreshold&&strPattern.length()>_minimumOverlapLength)
-		{
-#ifdef debug
-			cout<<"length:"<<strPattern.length()<<" and length thresld:"<<_minimumOverlapLength<<endl;
-#endif
-		  //we need to see the offset too, only important to the pattern, here the 
-		  //the pattern is the long one, we align the primer sequence against
-		  //the primer should be in the beginning, not too far,
-		  if(tempAS_arr[0].GetPatternIndexStart()<_offset )
-		    {//we good
-#ifdef debug
-		      cout<<"\t***get one bigger"<<endl;
-			  cout<<"starting offset"<<tempAS_arr[0].GetPatternIndexStart()<<"and offset:"<<_offset<<endl;
-#endif
-		      best5PrimeScore=tempAS_arr[0].GetScore();
-		      best5PrimeAlign=tempAS_arr[0];//with name
-		      best5PrimeIndex=j;
-		      found5PrimeFlag=true;
-		    }
-		}
 	    }
 	  else //in this case this is 3' mapping
 	    {
@@ -198,45 +274,30 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		  SequenceString reverseComplementReverse=ReverseComplement(_vecIsotype.at(j));
 #ifdef debug		  
 					  cout<<"\t**after revcomp"<<endl;
-					  cout<<"\t\t "<<_vecIsotype.at(j).toString()<<endl;
+					  
 					  cout<<"\t\t "<<reverseComplementReverse.toString()<<endl;
 #endif
-		  //OverlapAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension,1);
-		  LocalAlignment ola ( &(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension
-					,1,numOfLocalAlignments, gapModel);
-		  //cout<<"after alignment:"<<k<<endl;
-		  //need to get the match rate
-		  if(ola.GetNumberOfAlignments()==0)
+			bool currentFlag=false;
+			if(_vecSeq_R2.size()>0) //there is R2, in this case, we assume the R2 is 3' first. we can simply do the 5' mapping, no revcomp
+			{
+					currentFlag=alignConstant(&(_vecSeq_R2.at(i)), &(_vecIsotype.at(j)), _sm, _gapOpen, _gapExtension
+							,1, gapModel, FivePrime,
+							_matchRateThreshold, _minimumOverlapLength, _offset, 
+				 //output now
+				  &best3PrimeAlign,   &best3PrimeScore );
+			}
+			else{
+					currentFlag=alignConstant(&(_vecSeq.at(i)), &reverseComplementReverse, _sm, _gapOpen, _gapExtension
+							,1, gapModel, ThreePrime,
+							_matchRateThreshold, _minimumOverlapLength, _offset, 
+				 //output now
+				  &best3PrimeAlign,   &best3PrimeScore );
+			}
+		  if(currentFlag)
 		  {
-			  continue;//don't do anyting.
+			  found3PrimeFlag=currentFlag;
+			  best3PrimeIndex=j;
 		  }
-		  tempAS=ola.GetAlignment();
-		  //need to get the match rate
-		  strPattern=tempAS.GetPattern(true);
-		  strSubject=tempAS.GetSubject(true);
-		  match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
-#ifdef debug		  
-					  cout<<"\t\tstrPattern:"<<strPattern<<endl;
-					  cout<<"\t\tstrSubject:"<<strSubject<<endl;
-					  cout<<"\t\tscore:"<<tempAS.GetScore();
-					  cout<<"\t\t***pattern index End:"<<tempAS.GetPatternIndexEnd()<<endl;
-					  cout<<"\t\t***_vecSeq.at(i) length"<<_vecSeq.at(i).GetLength()<<endl;
-#endif
-		  //#check the best score
-		  if(tempAS.GetScore()>best3PrimeScore&&match_rate>_matchRateThreshold&&strPattern.length()>_minimumOverlapLength)
-		    {
-		      //##we need to see the offset too, only important to the pattern, here the 
-		      //	##the pattern is the long one, we align the primer sequence against
-		      //	###the primer should on the both ends, not too far,
-		      if( 
-			 (_vecSeq.at(i).GetLength()-tempAS.GetPatternIndexEnd())<_offset )
-		      {//we good
-			best3PrimeScore=tempAS.GetScore();
-			best3PrimeAlign=tempAS;//with name
-			best3PrimeIndex=j;
-			found3PrimeFlag=true;
-		      }
-		    }
 	    }//for 3 prime mapping
 	}//loop through the isotype sequences 
       
@@ -302,28 +363,69 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	   
 	  pt_vec_map_seq_len[foundIndex].push_back(_vecSeq.at(i).GetLength());
 	  if(_demux)
+	  {
 	    pt_vec_demux[foundIndex].push_back(_vecSeq.at(i));
+		if(_vecSeq_Q.size()>0)
+			pt_vec_demux_Q[foundIndex].push_back(_vecSeq_Q.at(i));
+		if(_vecSeq_R2.size()>0)
+		{
+			pt_vec_demux_R2[foundIndex].push_back(_vecSeq_R2.at(i));
+			if(_vecSeq_Q_R2.size()>0)
+			{
+				pt_vec_demux_Q_R2[foundIndex].push_back(_vecSeq_Q_R2.at(i));
+			}
+		}
+	  }
 	}
 	 
       if(found3PrimeFlag)
-	{ //this part, we need to test, to see whether this is correct
-	  //the rationale is that we revcomp the alignment, then the break part for this revComp is that we get the beginning of the alignment and then used the total length (-1) to get the correct break position (end pos)
-	  pt_vec_map_pos_end[foundIndex].push_back(_vecIsotype.at(foundIndex).GetLength()-1 - best3PrimeAlign.GetSubjectIndexStart());
-	  pt_vec_map_pos_start[foundIndex].push_back(_vecIsotype.at(foundIndex).GetLength()-1 -best3PrimeAlign.GetSubjectIndexEnd());
+	{ 
 
-	  pt_vec_map_pos_end_seq[foundIndex].push_back(best3PrimeAlign.GetPatternIndexEnd());
-	  pt_vec_map_pos_start_seq[foundIndex].push_back(best3PrimeAlign.GetPatternIndexStart());
-	  
-	  strPattern=best3PrimeAlign.GetPattern(true);
-	  strSubject=best3PrimeAlign.GetSubject(true);
-	  match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
-	  
-	  pt_vec_map_match_rate[foundIndex].push_back(match_rate);
-	  pt_vec_map_overlap[foundIndex].push_back(strPattern.length());
+		if(_vecSeq_R2.size()==0) //here we do real map3 end, otherwise we do 5' mapping on R2
+		{
+			  //this part, we need to test, to see whether this is correct
+			  //the rationale is that we revcomp the alignment, then the break part for this revComp is that we get the beginning of the alignment and then used the total length (-1) to get the correct break position (end pos)
+			  pt_vec_map_pos_end[foundIndex].push_back(_vecIsotype.at(foundIndex).GetLength()-1 - best3PrimeAlign.GetSubjectIndexStart());
+			  pt_vec_map_pos_start[foundIndex].push_back(_vecIsotype.at(foundIndex).GetLength()-1 -best3PrimeAlign.GetSubjectIndexEnd());
 
-	  pt_vec_map_seq_len[foundIndex].push_back(_vecSeq.at(i).GetLength());
+			  pt_vec_map_pos_end_seq[foundIndex].push_back(best3PrimeAlign.GetPatternIndexEnd());
+			  pt_vec_map_pos_start_seq[foundIndex].push_back(best3PrimeAlign.GetPatternIndexStart());
+			  
+			  strPattern=best3PrimeAlign.GetPattern(true);
+			  strSubject=best3PrimeAlign.GetSubject(true);
+			  match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
+			  
+			  pt_vec_map_match_rate[foundIndex].push_back(match_rate);
+			  pt_vec_map_overlap[foundIndex].push_back(strPattern.length());
+
+			  pt_vec_map_seq_len[foundIndex].push_back(_vecSeq.at(i).GetLength());
+		}
+		else { // here we are not doing map 3, but instead do map 5 on R2
+			pt_vec_map_pos_end[foundIndex].push_back( best3PrimeAlign.GetSubjectIndexEnd());
+			  pt_vec_map_pos_start[foundIndex].push_back(best3PrimeAlign.GetSubjectIndexStart());
+
+			  pt_vec_map_pos_end_seq[foundIndex].push_back(best3PrimeAlign.GetPatternIndexEnd());
+			  pt_vec_map_pos_start_seq[foundIndex].push_back(best3PrimeAlign.GetPatternIndexStart());
+			  
+			  strPattern=best3PrimeAlign.GetPattern(true);
+			  strSubject=best3PrimeAlign.GetSubject(true);
+			  match_rate=1-CompareStrings(strPattern, strSubject)/((double)strPattern.length());
+			  
+			  pt_vec_map_match_rate[foundIndex].push_back(match_rate);
+			  pt_vec_map_overlap[foundIndex].push_back(strPattern.length());
+
+			  pt_vec_map_seq_len[foundIndex].push_back(_vecSeq_R2.at(i).GetLength());
+		}
 	  if(_demux)
+	  {
 	    pt_vec_demux[foundIndex].push_back(_vecSeq.at(i));
+		if(pt_vec_demux_Q!=NULL)
+			pt_vec_demux_Q[foundIndex].push_back(_vecSeq_Q.at(i));
+		if(pt_vec_demux_R2!=NULL)
+			pt_vec_demux_R2[foundIndex].push_back(_vecSeq_R2.at(i));
+		if(pt_vec_demux_Q_R2!=NULL)
+			pt_vec_demux_Q_R2[foundIndex].push_back(_vecSeq_Q_R2.at(i));
+	  }
 	}
       
 
@@ -332,13 +434,13 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
       //***************************output*****************
       //prepare the aligned for debugging purpose
       //#the forward 
-      string leadingSpaceOriginal("");
-      string leadingSpace5Prime("");
-      string leadingSpace3Prime("");
+      string leadingSpaceOriginal(""); //for sequence
+      string leadingSpace5Prime(""); //for 5' mapping isotype
+      string leadingSpace3Prime(""); //for 3' mapping isotype
       string replaceOne;
-      SequenceString tempLst5Prime;
-      SequenceString tempLst3Prime;
-      SequenceString tempLstSeq;
+      SequenceString tempLst5Prime;  //for 5' isotype
+      SequenceString tempLst3Prime;  //for 3' isotype
+      SequenceString tempLstSeq;  //for sequence 
             
       //cout<<"forwardSet Output read"<<endl;
       if(found5PrimeFlag)
@@ -350,16 +452,16 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	    {
 	      //leadingSpaceOriginalsg=as.character();
 	      for(unsigned int p=0;p<startSubject-startOriginal;p++)
-		{
-		  leadingSpaceOriginal.push_back('-');
-		}
+			{
+			  leadingSpaceOriginal.push_back('-');
+			}
 	    }
 	  else
 	    {
 	      for(unsigned int p=0;p<startOriginal-startSubject;p++)
-		{
-		  leadingSpace5Prime.push_back('-');
-		}
+			{
+			  leadingSpace5Prime.push_back('-');
+			}
 	    }
 	  
 	  //now we need to add the aligned sequence to replace the original one
@@ -375,7 +477,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	  tempLst5Prime.SetSequence(leadingSpace5Prime+replaceOne);
 	  tempLst5Prime.SetName(_vecIsotype.at(best5PrimeIndex).GetName());
 	}
-      else
+    else  //this is not aligned, might be because we do 3' or no alignment possible.
 	{
 	  //#no need to add leading space
 	  tempLst5Prime.SetName("NoMatch");
@@ -383,14 +485,19 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	}
       //############here to do!!!!!!!!!
                   
-      //#the revverse
+      //#the reverse
       //cout<<"reverse set output read"<<endl;
-	if(found3PrimeFlag)
+	if(found3PrimeFlag)  //working on the isotype part, not the sequence part
 	  {
 	    //#now we need to add the aligned sequence to replace the original one
 	    //#we assume the original one is longer than the aligned one, it has to be
 	    //	 #this is the intial part
+		
 	    SequenceString rc3PrimeSeq=ReverseComplement(_vecIsotype.at(best3PrimeIndex));
+		if(_vecSeq_R2.size()>0) //with separated R2. we should map 5' of R2, no need to do revcomp of isotype
+		{
+			rc3PrimeSeq=_vecIsotype.at(best3PrimeIndex);
+		}
 	    replaceOne=rc3PrimeSeq.GetSequence().substr(0, best3PrimeAlign.GetSubjectIndexStart());
 	    //cout<<"\t\t*****subject start:"<<bestReverseAlign.GetSubjectIndexStart()<<";subject end:"<<bestReverseAlign.GetSubjectIndexEnd()<<endl;
 	    //cout<<"\t\t***replaceOne:"<<replaceOne<<endl;
@@ -401,25 +508,26 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	    replaceOne.append( rc3PrimeSeq.GetSequence().substr(best3PrimeAlign.GetSubjectIndexEnd()+1, rc3PrimeSeq.GetLength()));
 	    //cout<<"\t\t***replaceOne333:"<<replaceOne<<endl;
 	    tempLst3Prime.SetName(_vecIsotype.at(best3PrimeIndex).GetName());
+		
 	    //tempLstR.SetSequence(replaceOne);
 	    //#now we need to figure out how the leading space to put in front of reverse one
 	    if(best3PrimeAlign.GetPatternIndexStart() >= best3PrimeAlign.GetSubjectIndexStart())
 	      {
-		unsigned int templen=best3PrimeAlign.GetPatternIndexStart()- best3PrimeAlign.GetSubjectIndexStart();
-		for(unsigned int p=0;p<templen;p++)
-		  {
-		    leadingSpace3Prime.push_back('-');
-		  }
-		tempLst3Prime.SetSequence(leadingSpace3Prime+replaceOne);
-	      }
+				unsigned int templen=best3PrimeAlign.GetPatternIndexStart()- best3PrimeAlign.GetSubjectIndexStart();
+				for(unsigned int p=0;p<templen;p++)
+				  {
+					leadingSpace3Prime.push_back('-');
+				  }
+				tempLst3Prime.SetSequence(leadingSpace3Prime+replaceOne);
+			}
 	    else
 	      {
-		unsigned int templen=best3PrimeAlign.GetSubjectIndexStart()-best3PrimeAlign.GetPatternIndexStart() ;
-		for(unsigned int p=0;p<templen;p++)
-		{
-		  leadingSpaceOriginal.push_back('-');
-		}
-
+				unsigned int templen=best3PrimeAlign.GetSubjectIndexStart()-best3PrimeAlign.GetPatternIndexStart() ;
+				for(unsigned int p=0;p<templen;p++)
+				{
+				  leadingSpaceOriginal.push_back('-');
+				}
+				tempLst3Prime.SetSequence(replaceOne);
 		//#here, in this case, the adaptor+primer is longer than the seqs just by alignment, then we need to simply remove some leading part of the adaptor primer
 		//tempLst3Prime.SetSequence(replaceOne.substr( best3PrimeAlign.GetSubjectIndexStart()-best3PrimeAlign.GetPatternIndexStart(),
 		//					     replaceOne.length()));
@@ -436,20 +544,30 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	//#on the reverse part first
 	//cout<<"seq string output read...."<<endl;
 	//unsigned int spaceCarryOverFTR=0;//####this is the leading space for reverse adaptor primer, because the insertion in the forward alignment
-	tempLstSeq.SetSequence(_vecSeq.at(i).GetSequence());
-	tempLstSeq.SetName(_vecSeq.at(i).GetName());
-	replaceOne=_vecSeq.at(i).GetSequence();
+	if(type==ThreePrime && _vecSeq_R2.size()>0)
+	{
+		//cout<<"in here 3 prime and R2 avail"<<endl;
+		tempLstSeq.SetSequence(_vecSeq_R2.at(i).GetSequence());
+			tempLstSeq.SetName(_vecSeq_R2.at(i).GetName());
+			replaceOne=_vecSeq_R2.at(i).GetSequence();
+	}
+	else {
+			//cout<<"set one for no 3' and R2 available"<<endl;
+			tempLstSeq.SetSequence(_vecSeq.at(i).GetSequence());
+			tempLstSeq.SetName(_vecSeq.at(i).GetName());
+			replaceOne=_vecSeq.at(i).GetSequence();
+	}
 	if(found3PrimeFlag)
 	{
 	  //cout<<"1.."<<endl;
-	  replaceOne=_vecSeq.at(i).GetSequence().substr(0, best3PrimeAlign.GetPatternIndexStart());
+	  replaceOne=replaceOne.substr(0, best3PrimeAlign.GetPatternIndexStart());
 	  //#aligned part
 	  //cout<<"2.."<<endl;
 	  replaceOne.append( best3PrimeAlign.GetPattern(true));
 	  //#last part unaligned
 
 	  //cout<<"3..."<<endl;
-	  replaceOne.append( _vecSeq.at(i).GetSequence().substr(best3PrimeAlign.GetPatternIndexEnd()+1));//nchar(ff[[i]])), sep="");
+	  replaceOne.append( tempLstSeq.GetSequence().substr(best3PrimeAlign.GetPatternIndexEnd()+1));//nchar(ff[[i]])), sep="");
 	  tempLstSeq.SetSequence(replaceOne);
 	  //tempLstSeq.SetName(_vecSeq.at(i).GetName());
 	}
@@ -484,7 +602,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	//tempLstR.SetSequence(leadingSpaceOriginal+tempLstR.GetSequence());//<-paste(tempStr, as.character(tempLstR$seq), sep="");
 	//tempLstR$seq<-paste(leadingSpaceOriginal, tempStr, sep="");
 	tempLstSeq.SetSequence(leadingSpaceOriginal+tempLstSeq.GetSequence());
-	
+	//cout<<"****************tempLstSeq ----:"<<tempLstSeq.GetName()<<"||"<<tempLstSeq.GetSequence()<<endl;
 	//******************write to vectors***************
 	//#now put the sequences to the correct vectors
 	//cout<<"\tready to output strings........"<<endl;
@@ -576,8 +694,6 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	if(found5PrimeFlag)
 	  {
 	    unsigned int found=LookUpVectorIndex(tempLst5Prime.GetName(), _vecIsotype);
-	    
-	    
 	    //check to see whether we need to store the data by isotype
 	    //if(g_by_isotype_flag)
 	    //	{
@@ -622,6 +738,45 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	
 	//now we need to store the data into the correct vectors/files
 	p_vec_map->push_back(tempLstSeq);
+	//cout<<"add tempLstSeq"<<endl;
+	//this following is to write the fastq or R2 if possible. 
+	if(!found5PrimeFlag && !found3PrimeFlag)
+	{
+		if(_vecSeq_R2.size()>0 )
+		{
+			if(type==FivePrime)
+			{//R1 is R1 and R2 is R2
+				cout<<"map none: add Five Primer"<<endl;
+				vec_mapNone_R2.push_back(_vecSeq_R2.at(i));
+				if(_vecSeq_Q_R2.size()>0)
+					vec_mapNone_Q_R2.push_back(_vecSeq_Q_R2.at(i));
+				
+				if(_vecSeq_Q.size()>0)
+				{
+					vec_mapNone_Q.push_back(_vecSeq_Q.at(i));
+				}
+			}
+			else  //for 3' prime map and R1 R2 
+			{//R1 is R2 and R2 is R1, meaning vec_mapNone is taking in R2, now this vec_mapNone_R2 holding R1 now
+					if(_vecSeq_Q.size()>0)
+					{
+						vec_mapNone_Q.push_back(_vecSeq_Q_R2.at(i));
+					}
+					
+					vec_mapNone_R2.push_back(_vecSeq.at(i));
+					if(_vecSeq_Q_R2.size()>0)
+						vec_mapNone_Q_R2.push_back(_vecSeq_Q.at(i));
+			}
+			
+		}
+		else{ //no R2 
+				if(_vecSeq_Q.size()>0)
+				{
+					vec_mapNone_Q.push_back(_vecSeq_Q.at(i));
+				}
+		}
+	}
+	
 	if(found5PrimeFlag)
 	  p_vec_map->push_back(tempLst5Prime);
 	if(found3PrimeFlag)
@@ -671,7 +826,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		    //cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
 		    if(s<_vecIsotype.size())
 		      {
-			t_fileName=_map_fname+ _vecIsotype.at(s).GetName()+".fasta";
+			t_fileName=_R1_fname+ _vecIsotype.at(s).GetName()+".fasta";
 
 			vector<double> temp(pt_vec_map_overlap[s].begin(),pt_vec_map_overlap[s].end());
 			vec_stats[0]= temp;
@@ -711,14 +866,40 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 		      }
 		    else
 		      {
-			t_fileName=_map_fname+ "notFoundIsotype.fasta";
+			t_fileName=_R1_fname+ "notFoundIsotype.fasta";
 		      }
 		    WriteFasta(t_fileName, pt_vec_mapped[s],100, mode);
 		    if(_demux)
 		      {
-			t_fileName=_map_fname+ _vecIsotype.at(s).GetName()+"_demux.fasta";
-			WriteFasta(t_fileName, pt_vec_demux[s],100, mode);
-			pt_vec_demux[s].clear();
+				  if(_vecSeq_Q.size()<=0)
+				  {
+						t_fileName=_R1_fname+ _vecIsotype.at(s).GetName()+"_demux.fasta";
+						WriteFasta(t_fileName, pt_vec_demux[s],100, mode);
+						pt_vec_demux[s].clear();
+				  }else
+				  {
+						t_fileName=_R1_fname+ _vecIsotype.at(s).GetName()+"_demux.fastq";
+						WriteFastq(t_fileName, pt_vec_demux[s],pt_vec_demux_Q[s], mode);
+						pt_vec_demux[s].clear();
+						pt_vec_demux_Q[s].clear();
+				  }
+				  //Read2 
+				  if(_vecSeq_R2.size()>0)
+				  {
+						if(_vecSeq_Q_R2.size()<=0)
+						  {
+								t_fileName=_R2_fname+ _vecIsotype.at(s).GetName()+"_demux.fasta";
+								WriteFasta(t_fileName, pt_vec_demux_R2[s],100, mode);
+								pt_vec_demux[s].clear();
+						  }else   //fastq
+						  {
+								t_fileName=_R2_fname+ _vecIsotype.at(s).GetName()+"_demux.fastq";
+								WriteFastq(t_fileName, pt_vec_demux_R2[s],pt_vec_demux_Q_R2[s], mode);
+								pt_vec_demux_R2[s].clear();
+								pt_vec_demux_Q_R2[s].clear();
+						  }
+				  }
+				  
 		      }
 		    //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
 		    pt_vec_mapped[s].clear();
@@ -739,21 +920,73 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	    //none
 	    if(vec_mapNone.size()>0)
 	      {
-		//cout<<"\t------writing files at i-----:"<<s<<endl;
-		//cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
-		if(numOfWritesDone_unmapped==0)
-		  {
-		    mode=ofstream::trunc;
-		  }
-		else
-		  {
-		    mode=ofstream::app;
-		  }
-		t_fileName=_unmap_fname;
-		WriteFasta(t_fileName, vec_mapNone,100, mode);
-		numOfWritesDone_unmapped++;
-		//#fileCounter_mpBoth<-fileCounter_mpBoth+1;
-		vec_mapNone.clear();
+				//cout<<"\t------writing files at i-----:"<<s<<endl;
+				//cout<<"vecBoth:"<<vec_mapBoth.size()<<endl;
+				if(numOfWritesDone_unmapped==0)
+				  {
+					mode=ofstream::trunc;
+				  }
+				else
+				  {
+					mode=ofstream::app;
+				  }
+				  if(type==ThreePrime&&_vecSeq_R2.size()>0) //R2 is R1 and R1 is R2
+				  {
+					  if(_vecSeq_Q_R2.size()>0)
+					  {
+						t_fileName=_R2_fname+"_MapNone.fastq";
+						WriteFastq(t_fileName, vec_mapNone, vec_mapNone_Q,  mode);
+						
+						t_fileName=_R1_fname+"_MapNone.fastq";
+						WriteFastq(t_fileName, vec_mapNone_R2, vec_mapNone_Q_R2,  mode);
+						vec_mapNone_Q_R2.clear();
+						vec_mapNone_R2.clear();
+						vec_mapNone_Q.clear();
+					  }
+					  else  //fasta R2 and R1
+					  {
+						  t_fileName=_R2_fname+"_MapNone.fasta";
+						WriteFasta(t_fileName, vec_mapNone,100, mode);
+						t_fileName=_R1_fname+"_MapNone.fasta";
+						WriteFasta(t_fileName, vec_mapNone_R2,100, mode);
+						vec_mapNone_R2.clear();
+					  }
+						
+				  }
+				  else  //either no R2 or not Three primer, so R1 is R1 and R2 is R2
+				  {
+					  if(_vecSeq_Q.size()>0)
+					  {
+						t_fileName=_R1_fname+"_MapNone.fastq";
+						WriteFastq(t_fileName, vec_mapNone, vec_mapNone_Q,  mode);
+						vec_mapNone_Q.clear();
+					  }
+					  else
+					  {
+						  t_fileName=_R1_fname+"_MapNone.fasta";
+						  WriteFasta(t_fileName, vec_mapNone,100, mode);
+						  
+					  }
+					  
+					  if(_vecSeq_R2.size()>0)
+					  {
+						  if(_vecSeq_Q_R2.size()>0)
+						  {
+								t_fileName=_R2_fname+"_MapNone.fastq";
+								WriteFastq(t_fileName, vec_mapNone_R2, vec_mapNone_Q_R2,  mode);
+								vec_mapNone_Q_R2.clear();
+								vec_mapNone_R2.clear();
+						  }
+						  else
+						  {
+							  t_fileName=_R2_fname+"_MapNone.fasta";
+								WriteFasta(t_fileName, vec_mapNone_R2,100, mode);
+								vec_mapNone_R2.clear();
+						  }
+					  }
+				  }
+				  numOfWritesDone_unmapped++;
+				  vec_mapNone.clear();
 	      }
 	    
 	    //cout<<"done map both"<<endl;
@@ -800,7 +1033,7 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	  
 	  if(s<_vecIsotype.size())
 	    {
-	      t_fileName=_map_fname+ _vecIsotype.at(s).GetName()+".fasta";
+	      t_fileName=_R1_fname+ _vecIsotype.at(s).GetName()+".fasta";
 	      vector<double> temp(pt_vec_map_overlap[s].begin(),pt_vec_map_overlap[s].end());
 	      vec_stats[0]= temp;
 	      temp.clear();
@@ -838,16 +1071,55 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	    }
 	  else
 	    {
-	      t_fileName=_map_fname+ "notFoundIsotype.fasta";
+	      t_fileName=_R1_fname+ "notFoundIsotype.fasta";
 	    }
 	  //cout<<"writing fasta"<<endl;
 	  // t_fileName=_mapBoth_fname+ _vecForward.at(s).GetName();
 	  WriteFasta(t_fileName, pt_vec_mapped[s],100, mode);
 	  if(_demux)
 	    {
-	      t_fileName=_map_fname+ _vecIsotype.at(s).GetName()+"_demux.fasta";
-	      WriteFasta(t_fileName, pt_vec_demux[s],100, mode);
-	      pt_vec_demux[s].clear();
+			/*cout<<"===========Demuxing............."<<endl;
+			cout<<"\tisotype index:"<<s<<endl;
+			cout<<"\tvecSeq_Q.size():"<<_vecSeq_Q.size()<<endl;
+			cout<<"\tvecSeq_R2.size():"<<_vecSeq_R2.size()<<endl;
+			cout<<"\tvecSeq_Q_R2.size():"<<_vecSeq_Q_R2.size()<<endl;
+			*/
+	      if(_vecSeq_Q.size()<=0)
+				  {
+					  //cout<<"-----write R1 fasta"<<endl;
+						t_fileName=_R1_fname+ _vecIsotype.at(s).GetName()+"_demux.fasta";
+						WriteFasta(t_fileName, pt_vec_demux[s],100, mode);
+						pt_vec_demux[s].clear();
+				  }else
+				  {
+						//cout<<"-----write R1 fastq"<<endl;
+						t_fileName=_R1_fname+ _vecIsotype.at(s).GetName()+"_demux.fastq";
+						WriteFastq(t_fileName, pt_vec_demux[s],pt_vec_demux_Q[s], mode);
+						pt_vec_demux[s].clear();
+						pt_vec_demux_Q[s].clear();
+				  }
+				  //Read2 
+				  if(_vecSeq_R2.size()>0)
+				  {
+						if(_vecSeq_Q_R2.size()<=0)
+						  {
+							  //cout<<"-----write R2 fasta"<<endl;
+								t_fileName=_R2_fname+ _vecIsotype.at(s).GetName()+"_demux.fasta";
+								WriteFasta(t_fileName, pt_vec_demux_R2[s],100, mode);
+								pt_vec_demux[s].clear();
+						  }else   //fastq
+						  {
+								//cout<<"-----write R2 fastq"<<endl;
+								t_fileName=_R2_fname+ _vecIsotype.at(s).GetName()+"_demux.fastq";
+								WriteFastq(t_fileName, pt_vec_demux_R2[s],pt_vec_demux_Q_R2[s], mode);
+								pt_vec_demux_R2[s].clear();
+								pt_vec_demux_Q_R2[s].clear();
+						  }
+				  }
+
+		  //t_fileName=_map_fname+ _vecIsotype.at(s).GetName()+"_demux.fasta";
+	      //WriteFasta(t_fileName, pt_vec_demux[s],100, mode);
+	      //pt_vec_demux[s].clear();
 	    }
 	  //cout<<"writing info"<<endl;
 	  //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
@@ -879,10 +1151,68 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
 	{
 	  mode=ofstream::app;
 	}
-      t_fileName=_unmap_fname;
-      WriteFasta(t_fileName, vec_mapNone,100, mode);
+	if(type==ThreePrime&&_vecSeq_R2.size()>0)//R1 is R2 and R2 is R1
+		  {
+			  if(_vecSeq_Q_R2.size()>0) 
+			  {
+				t_fileName=_R2_fname+"_MapNone.fastq";
+				WriteFastq(t_fileName, vec_mapNone, vec_mapNone_Q,  mode);
+				
+				t_fileName=_R1_fname+"_MapNone.fastq";
+				WriteFastq(t_fileName, vec_mapNone_R2, vec_mapNone_Q_R2,  mode);
+				vec_mapNone_Q_R2.clear();
+				vec_mapNone_R2.clear();
+				vec_mapNone_Q.clear();
+			  }
+			  else  //fasta R2 and R1
+			  {
+				  t_fileName=_R2_fname+"_MapNone.fasta";
+				WriteFasta(t_fileName, vec_mapNone,100, mode);
+				t_fileName=_R1_fname+"_MapNone.fasta";
+				WriteFasta(t_fileName, vec_mapNone_R2,100, mode);
+				vec_mapNone_R2.clear();
+			  }
+				
+		  }
+		  else  //either no R2 or not Three primer, so R1 is R1 and R2 is R2
+		  {
+			  if(_vecSeq_Q.size()>0)
+			  {
+				  //cout<<"Write fastq R1............"<<endl;
+				t_fileName=_R1_fname+"_MapNone.fastq";
+				WriteFastq(t_fileName, vec_mapNone, vec_mapNone_Q,  mode);
+				vec_mapNone_Q.clear();
+			  }
+			  else
+			  {
+				  t_fileName=_R1_fname+"_MapNone.fasta";
+				  WriteFasta(t_fileName, vec_mapNone,100, mode);
+				  
+			  }
+			  
+			  if(_vecSeq_R2.size()>0)
+			  {
+				  if(_vecSeq_Q_R2.size()>0)
+				  {
+						t_fileName=_R2_fname+"_MapNone.fastq";
+						WriteFastq(t_fileName, vec_mapNone_R2, vec_mapNone_Q_R2,  mode);
+						vec_mapNone_Q_R2.clear();
+						vec_mapNone_R2.clear();
+				  }
+				  else
+				  {
+					  t_fileName=_R2_fname+"_MapNone.fasta";
+						WriteFasta(t_fileName, vec_mapNone_R2,100, mode);
+						vec_mapNone_R2.clear();
+				  }
+			  }
+		  }
+		  numOfWritesDone_unmapped++;
+		  vec_mapNone.clear();
+      //t_fileName=_unmap_fname;
+      //WriteFasta(t_fileName, vec_mapNone,100, mode);
       //#fileCounter_mpBoth<-fileCounter_mpBoth+1;
-      vec_mapNone.clear();
+      //vec_mapNone.clear();
     }
   //cout<<"done with one last write"<<endl;
   
@@ -902,5 +1232,17 @@ void MappingIsotypes(vector<SequenceString>& _vecSeq, /*this is the sequence dat
   //delete [] pt_vec_mapForward_pos_end;
 
   delete [] numOfWritesDone_mapped;
+  //if(tempAS_arr!=NULL)
+	//  delete[] tempAS_arr;
+  
+  //for sequence output and quality string if possible
+  delete [] pt_vec_demux;
+  if(pt_vec_demux_Q!=NULL)
+	  delete[] pt_vec_demux_Q;
+  if( pt_vec_demux_R2!=NULL)
+	  delete [] pt_vec_demux_R2;
+  
+  if( pt_vec_demux_Q_R2!=NULL)
+	  delete [] pt_vec_demux_Q_R2;
 }//end of function of map isotype
 

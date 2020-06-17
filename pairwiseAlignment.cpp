@@ -4,7 +4,7 @@ using namespace std;
 
 
 //pairwiseAlignment();
-PairwiseAlignment::PairwiseAlignment(SequenceString* _pattern, SequenceString* _subject, 
+PairwiseAlignment::PairwiseAlignment(const SequenceString* _pattern, const SequenceString* _subject, 
 		    const ScoreMatrix* _m, const double& _gopen, 
 				     const double& _gextension, const double& _scale, const short& _typeOfGapModel):
   c_pattern( _pattern), c_subject (_subject), c_sm( _m), c_gapOpen(_gopen), 

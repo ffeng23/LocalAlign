@@ -18,6 +18,13 @@ AlignmentString::AlignmentString(const string& _pattern, const int& p_start, con
 {
   //empty
 }
+AlignmentString::AlignmentString(const AlignmentString& a):c_pattern(a.c_pattern), 
+   c_subject( a.c_subject), c_pattern_start( a.c_pattern_start), c_pattern_end( a.c_pattern_end),
+   c_subject_start(a.c_subject_start), c_subject_end( a.c_subject_end),
+													     c_pattern_w_gap( a.c_pattern_w_gap), c_subject_w_gap( a.c_subject_w_gap),c_score(a.c_score)
+{
+	//empty
+}
   
   //true to set the sub string with gap (true) or without gap(fasle)
 void AlignmentString::SetPattern(const string& _pattern, const bool& gapFlag)

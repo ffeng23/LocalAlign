@@ -67,7 +67,9 @@ branch out as feng for working on adding two kinds of localalignments, one regul
         
     
 #########Update: to do list for now. 
-    1) merge back feng to the master branch.
+    1) merge back feng to the master branch.  Done
     
     2) separate R1 and R2 input for ngs_isotype mapping???
+        also can it handle fastq files???
+            new branch to work on, feng2Reads
     

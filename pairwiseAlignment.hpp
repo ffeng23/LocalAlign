@@ -20,7 +20,9 @@ class PairwiseAlignment
   //public
 public:
   //pairwiseAlignment();
-  PairwiseAlignment(SequenceString* _pattern, SequenceString* _subject, 
+  //shit!! it seems we now keep a pointer to an outside sequenstirng for pattern and subject. so we have to be
+  //really carefully for the scope and don't let the pattern and subject to get out of the scope earlier.!!!
+  PairwiseAlignment(const SequenceString* _pattern, const SequenceString* _subject, 
 		    const ScoreMatrix* _m=&nuc44, const double& _gopen=-8, 
 		    const double& _gextension=-5, const double& _scale=1,const short& _typeOfGapModel=1);
   
@@ -34,8 +36,8 @@ protected:
   virtual void align()=0;
   virtual void traceBack();
 
-  SequenceString* c_pattern;//this is follwing R style pairwiseAlignment
-  SequenceString* c_subject;//this is following R style pairwiseAlignment
+  const SequenceString* c_pattern;//this is follwing R style pairwiseAlignment
+  const SequenceString* c_subject;//this is following R style pairwiseAlignment
   const ScoreMatrix* c_sm;
   double c_gapOpen;
   double c_gapExtension;

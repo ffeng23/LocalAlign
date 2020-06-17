@@ -30,15 +30,26 @@ private:
 class LocalAlignment: public PairwiseAlignment
 {
 public:
-  LocalAlignment(SequenceString* _pattern, SequenceString* _subject, 
+  //shit!! it seems we now keep a pointer to an outside sequenstirng for pattern and subject. so we have to be
+  //really carefully for the scope and don't let the pattern and subject to get out of the scope earlier.!!!
+  LocalAlignment(const SequenceString * _pattern, const SequenceString * _subject, 
 		 const ScoreMatrix* _m=&nuc44, const double& _gopen=-8, 
 		 const double& _gextension=-5, const double& _scale=1,const int& _numOfAlignments=1, const short& _typeOfGapModel=1);//here we default to 1 454 markov chain model,
   
   virtual ~LocalAlignment();
 
-  double* GetScoreArr();
-  AlignmentString* GetAlignmentArr();
-  unsigned int GetNumberOfAlignments();
+	//this one now return a deep copy of score array. 
+//the outer caller need to deinitialize memory  
+  double* GetScoreArr() const;
+  //this one return a pointer to the object internal alignment array . 
+//use with caution.
+  double* GetScoreArr_p() ;
+  AlignmentString* GetAlignmentArr() const;
+  //this one return a pointer to the object internal alignment array . 
+//use with caution.
+  AlignmentString* GetAlignmentArr_p() ;
+  
+  unsigned int GetNumberOfAlignments() const;
   //void alignLM();
 protected:
 	LocalAlignment(){}; //default one is disabled, since we need to the information for pattern and subject length for
