@@ -499,6 +499,26 @@ static void printUsage(int argc, char* argv[])
       <<"\t\t\tsummary\n"
       <<"\t\t\t @4/2/2014 by Feng\n"
      ;
+	 cout<<"Again, for R2 and R1 inputs, we always have 5' mapping, either on R1 (d1) or R2 (d2). Only when we have on input read file (might be single read or joined R1R2 read) we have the real 3' mapping."
+				<<"\t#-=========illustration\n"
+				<<"\t#single read (5'mapping or 3' mapping)\n"
+				<<"\t     d1\n"
+				<<"\t		===================\n"
+				<<"\t		***\n"
+				<<"\t     d2\n"
+				<<"\t		====================\n"
+				<<"\t                                                 ***\n"
+				<<"\t #double read (always 5'mapping, either on R1 or R2, always assuming no RevComp for sequences)\n"
+				<<"\t	d1\n"
+				<<"\t   R1                                  R2\n"
+				<<"\t   ==============     =====================\n"
+				<<"\t   *****\n"
+				<<"\t\n"
+				<<"\t	d2\n"
+				<<"\t		R1                                         R2\n"
+				<<"\t     =================    =====================\n"
+				<<"\t                                                    *****\n\n";
+		
 	cout<<"\n\t\tUpdate (6/15/2020): add code to allow fastq files and R1 and R2 sepearated input\n";
   //cout<<"\n\t**************************"<<endl;
   cout<<"\t\t*********updated by Feng @ BU 2018\n";

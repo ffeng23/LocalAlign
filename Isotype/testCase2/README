@@ -24,8 +24,30 @@ calling commands :
 ../../ngsmapping_Isotype -d2 -g-8 -e -8 -n 0.8 -l 18  -p 30 -x  -s ./top_1_clone1073_R1.fastq -t ./top_1_clone1073_R2.fastq   -f ../isotype_demux_fullLength.fasta
 
 NOTE: about the input files. Here we started with top_1_clone1073_seqs.picked.fa.noIsotype.fa, then we built the R1 and R2, they are basically the same, except the Read2 name/title is appeneded with _R2 to distinguish R1 and R2. also for read 1 sequence we add some extra AAAA to the end for distinguishing purpose.  The fastq were build by adding @ + and repeat the sequence as the quality. This is the same for R1 and R2, except the distinguishing markers as mentioned above. 
-This way, we have R1 and R2 both should map with isotype sequence at the 5' end. We also have one sequence for each fasta and fastq, which is rev comped for use to tes the d2 map 3 end option. Again, for R2 and R1 inputs, we always have 3' mapping, either on R1 (d1) or R2 (d2). Only when we have on input read file (might be single read or joined R1R2 read) we have the real 3' mapping.
+This way, we have R1 and R2 both should map with isotype sequence at the 5' end. We also have one sequence file for each fasta and fastq, which is rev comped for use to tes the d2 map 3 end option. Again, for R2 and R1 inputs, we always have 5' mapping, either on R1 (d1) or R2 (d2). Only when we have on input read file (might be single read or joined R1R2 read) we have the real 3' mapping.
 
 
 The expecting output is 3 IgG2ab and 3 IgG1 and 0 IgG3 and 5 IgM, and 10 unmapped sequences.
 
+#-=========illustration
+#single read (5'mapping or 3' mapping)
+
+	d1
+		===================
+		***
+	d2
+		====================
+		                 ***
+
+#double read (always 5'mapping, either on R1 or R2, always assuming no RevComp for sequences)
+
+	d1
+		R1			R2
+		=================     =====================
+		*****
+
+	d2
+		R1			R2
+		=================     =====================
+				      *****
+		

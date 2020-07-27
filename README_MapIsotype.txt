@@ -43,3 +43,5 @@ after a little studying, the following parameters are used and might have a bett
 -n 0.8 not too many errors.
 -l 16 minimum 16 match. don't want this to be too short
 -p 350 the point is that no matter where, as long as it shows up. we treat it as a good one.but we might want to have a better way for this like(it should be long enough left for the variable region, such as >100????).
+
+see ./Isotype/testCase2 for tests and explanation of the d2 (3' vs 5' mapping for single read and double read input)
