@@ -4,7 +4,7 @@
 //this is a C++ accessory library to take care of gzip file input and output
 //we rely on the zlib to do uncompression
 
-#include "zlib.h"
+#include <zlib.h>
 #include <string>
 #include <vector> 
 

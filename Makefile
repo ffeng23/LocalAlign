@@ -2,14 +2,17 @@
 ###By Feng 03/08/2014 @bu
 #######v1.0
 
-###Define variables######
+###Define variables###### 
+#GCC= gcc  <------
+GCC = ${CC}
+#GXX = ${GXX}  
+#GXX = g++ <----
 
-GCC = gcc
-GXX = g++
+CFLAG= ${CPPFLAGS} -Wall -g -Werror -O -std=c++11
+#CFLAG=  -Wall -g -Werror -O -std=c++11  <-----#fPIE
 
-CFLAG= -Wall -g -Werror -O -std=c++11
-LOADFLAG=-s -lm -lz
-
+LOADFLAG=  -s -lm -lz ${LDFLAGS} -L/home/ffeng/miniconda3/lib
+#LOADFLAG= -s -lm -lz <----
 CXXFLAG=${CFLAG}
 
 ACCESSDIR=Accessory/
@@ -83,7 +86,6 @@ $(PROG_0): $(OBJS_0)
 $(PROG_1): $(OBJS_1)
 	$(GXX) -o $@ $(CXXFLAG) $(LOADFLAG) $+
 	@echo "******Make complete"; echo "";
-	
 
 $(PROG_2): $(OBJS_2)
 	$(GXX) -o $@ $(CXXFLAG) $(LOADFLAG) $+
@@ -123,7 +125,7 @@ $(PROG_9): $(OBJS_9)
 	$(GXX) -o $@ $(CXXFLAG) $(LOADFLAG) $+
 	@echo "";	
 	@echo "******Make complete"
-		
+
 #$(PROG_1): $(OBJS_1)
 #	$(GXX) -o $@ $(CXXFLAG) $(LOADFLAG) $+
 #	@echo ""

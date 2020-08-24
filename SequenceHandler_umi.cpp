@@ -28,7 +28,8 @@ string GetUmiFromAlignmentString(const AlignmentString& aso)
 			umi.append(1,p_w_gap.at(i));
 		}
 	}
-	return(move(umi));
+	//return(move(umi));
+	return umi;
 }
 
 //based on the mapped umi_anchor position, trim the sequence from the beginning. 
@@ -90,7 +91,8 @@ const string insertUmi2SName_umitools(const string& sname, const string& umi)
 	temp.append(umi);
 	temp.append(sname.substr(in));
 	//sname.insert(in, umi.insert(0,"_T_"));
-	return move(temp);
+	//return move(temp);
+	return temp;
 }
 //we prepare the anchor string for aligning.
 //we assume anchor will not be zerolength
@@ -106,7 +108,8 @@ const string getAnchor(const string &umi_pattern,
 	//get rid of the right extra Ns
 	anchor.assign(move(anchor.substr(0, anchor_positions[anchor_length-1]+1)));
 	anchor.assign(move(anchor.substr(anchor_positions[0])));
-	return move(anchor);
+	//return move(anchor);
+	return anchor;
 }
 /*
 //we prepare the umi string for insertion.

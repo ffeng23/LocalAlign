@@ -402,7 +402,7 @@ FileType getFileType_deep(const string& fname)
 			fclose(f);
 			return UNKNOWN;
 		}
-		fread(&c2, sizeof(char), (size_t)1,f);
+		numRead=fread(&c2, sizeof(char), (size_t)1,f);
 		if(numRead!=1)
 		{
 			cout<<"ERROR: either we reach the end of file too early or an error occured......"<<endl;
