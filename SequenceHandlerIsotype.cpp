@@ -890,7 +890,7 @@ void MappingIsotypes(const vector<SequenceString>& _vecSeq, /*this is the sequen
 						  {
 								t_fileName=_R2_fname+ _vecIsotype.at(s).GetName()+"_demux.fasta";
 								WriteFasta(t_fileName, pt_vec_demux_R2[s],100, mode);
-								pt_vec_demux[s].clear();
+								pt_vec_demux_R2[s].clear();
 						  }else   //fastq
 						  {
 								t_fileName=_R2_fname+ _vecIsotype.at(s).GetName()+"_demux.fastq";

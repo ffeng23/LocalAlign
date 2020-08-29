@@ -6,13 +6,13 @@
 #GCC= gcc  <------
 GCC = ${CC}
 #GXX = ${GXX}  
-#GXX = g++ <----
+GXX = g++ 
 
-CFLAG= ${CPPFLAGS} -Wall -g -Werror -O -std=c++11
-#CFLAG=  -Wall -g -Werror -O -std=c++11  <-----#fPIE
+#CFLAG= ${CPPFLAGS} -Wall -g -Werror -O -std=c++11
+CFLAG=  -Wall -g -Werror -O -std=c++11  
 
-LOADFLAG=  -s -lm -lz ${LDFLAGS} -L/home/ffeng/miniconda3/lib
-#LOADFLAG= -s -lm -lz <----
+#LOADFLAG=  -s -lm -lz ${LDFLAGS} -L/home/ffeng/miniconda3/lib
+LOADFLAG= -s -lm -lz 
 CXXFLAG=${CFLAG}
 
 ACCESSDIR=Accessory/
