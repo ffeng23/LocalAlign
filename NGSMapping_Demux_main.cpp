@@ -202,6 +202,10 @@ int main(int argc, char* argv[])
   string outSeqFileR1_name;  //for demux'ed sequence file 
   string outSeqFileR2_name;  //for demux'ed sequence file 
   size_t pt=0;
+  string orig_sequenceFileR1_name(sequenceFileR1_name);
+  string orig_sequenceFileR2_name(sequenceFileR2_name);
+  string orig_indexFileR1_name(indexFileR1_name);
+  string orig_indexFileR2_name(indexFileR2_name);
   
   //go through the input file names to get rid of the last suffix if it is the gz gzip 
   if(sequenceFileR1_name.length()!=0)
@@ -347,7 +351,7 @@ int main(int argc, char* argv[])
   //------reading in the sequences-----
   if(indexFromSeq)
     {
-		if(sequenceFileR1_name.length()==0)
+		if(orig_sequenceFileR1_name.length()==0)
 		{
 			cout<<"*****ERROR: request to read index from the sequence files, "
 				<<"\tbut the sequence R1 file has not been specified !!!"<<endl;
@@ -355,88 +359,88 @@ int main(int argc, char* argv[])
 		}
       //reading R1
 	  //#now we also want to 
-	  if(!exist(sequenceFileR1_name.c_str()))
+	  if(!exist(orig_sequenceFileR1_name.c_str()))
 		  {
-			cout<<"ERROR: can not find the file \""<<sequenceFileR1_name<<"\""<<endl;
+			cout<<"ERROR: can not find the file \""<<orig_sequenceFileR1_name<<"\""<<endl;
 			exit(-1);
 		  }
-		cout<<"reading sequence data file (Read 1): "<<readFile2SeqStrVector(sequenceFileR1_name, vec_seq1,&vec_seq1_Q)<<"sequences read"<<endl;  
+		cout<<"reading sequence data file (Read 1): "<<readFile2SeqStrVector(orig_sequenceFileR1_name, vec_seq1,&vec_seq1_Q)<<"sequences read"<<endl;  
 		
       if(demux&&pairEnd)  //in this case, we don't have to get index from it, assuming indexes are in the name xxxxx+xxxxxx
 		{
-			if(sequenceFileR2_name.length()==0)
+			if(orig_sequenceFileR2_name.length()==0)
 			{
 				cout<<"*****ERROR: request to do demux for pairEnd data, "
 					<<"\tbut the sequence R2 file has not been specified !!!"<<endl;
 				exit(-1);
 			}
 		  //reading R2
-		  if(!exist(sequenceFileR2_name.c_str()))
+		  if(!exist(orig_sequenceFileR2_name.c_str()))
 		  {
-			cout<<"ERROR: can not find the file \""<<sequenceFileR2_name<<"\""<<endl;
+			cout<<"ERROR: can not find the file \""<<orig_sequenceFileR2_name<<"\""<<endl;
 			exit(-1);
 		  }
-		  cout<<"reading sequence data file (Read 2): "<<readFile2SeqStrVector(sequenceFileR2_name, vec_seq2, &vec_seq2_Q)<<"sequences read"<<endl;
+		  cout<<"reading sequence data file (Read 2): "<<readFile2SeqStrVector(orig_sequenceFileR2_name, vec_seq2, &vec_seq2_Q)<<"sequences read"<<endl;
 		  
 		}
     }
   else //reading
     {
-	  if(indexFileR1_name.length()==0)
+	  if(orig_indexFileR1_name.length()==0)
 		{
 			cout<<"*****ERROR: request to read index from the index files, "
 				<<"\tbut the index R1 file has not been specified !!!"<<endl;
 			exit(-1);
 		}
-	  if(!exist(indexFileR1_name.c_str()))
+	  if(!exist(orig_indexFileR1_name.c_str()))
 		  {
 			cout<<"ERROR: can not find the file \""<<indexFileR1_name<<"\""<<endl;
 			exit(-1);
 		  }
-      cout<<"reading index data file (Read 1): "<<readFile2SeqStrVector(indexFileR1_name, vec_index1, &vec_index1_Q)<<"indexes read"<<endl;
+      cout<<"reading index data file (Read 1): "<<readFile2SeqStrVector(orig_indexFileR1_name, vec_index1, &vec_index1_Q)<<"indexes read"<<endl;
       if(dualIndex)
 		{
-			if(indexFileR2_name.length()==0)
+			if(orig_indexFileR2_name.length()==0)
 			{
 				cout<<"*****ERROR: request to read dual indexes from the index files, "
 					<<"\tbut the index R2 file has not been specified !!!"<<endl;
 				exit(-1);
 			}
-			if(!exist(indexFileR2_name.c_str()))
+			if(!exist(orig_indexFileR2_name.c_str()))
 			  {
-				cout<<"ERROR: can not find the file \""<<indexFileR2_name<<"\""<<endl;
+				cout<<"ERROR: can not find the file \""<<orig_indexFileR2_name<<"\""<<endl;
 				exit(-1);
 			  }
-			cout<<"reading index data file (Read 2): "<<readFile2SeqStrVector(indexFileR2_name, vec_index2, &vec_index2_Q)<<"indexes read"<<endl;
+			cout<<"reading index data file (Read 2): "<<readFile2SeqStrVector(orig_indexFileR2_name, vec_index2, &vec_index2_Q)<<"indexes read"<<endl;
 		}
       if(demux)
 		{
-		  if(sequenceFileR1_name.length()==0)
+		  if(orig_sequenceFileR1_name.length()==0)
 			{
 				cout<<"*****ERROR: request to demux from the sequence files, "
 					<<"\tbut the sequence R1 file has not been specified !!!"<<endl;
 				exit(-1);
 			}
-		  if(!exist(sequenceFileR1_name.c_str()))
+		  if(!exist(orig_sequenceFileR1_name.c_str()))
 		  {
-			cout<<"ERROR: can not find the file \""<<sequenceFileR1_name<<"\""<<endl;
+			cout<<"ERROR: can not find the file \""<<orig_sequenceFileR1_name<<"\""<<endl;
 			exit(-1);
 		  }	
-		  cout<<"reading sequence data file (Read 1): "<<readFile2SeqStrVector(sequenceFileR1_name, vec_seq1, &vec_seq1_Q)<<"sequences read"<<endl;
+		  cout<<"reading sequence data file (Read 1): "<<readFile2SeqStrVector(orig_sequenceFileR1_name, vec_seq1, &vec_seq1_Q)<<"sequences read"<<endl;
 		  if(pairEnd)
 			{
-				if(sequenceFileR2_name.length()==0)
+				if(orig_sequenceFileR2_name.length()==0)
 				{
 					cout<<"*****ERROR: request to demux for pairEnd sequence files, "
 						<<"\tbut the sequence R2 file has not been specified !!!"<<endl;
 					exit(-1);
 				}
-			  if(!exist(sequenceFileR2_name.c_str()))
+			  if(!exist(orig_sequenceFileR2_name.c_str()))
 			  {
-				cout<<"ERROR: can not find the file \""<<sequenceFileR2_name<<"\""<<endl;
+				cout<<"ERROR: can not find the file \""<<orig_sequenceFileR2_name<<"\""<<endl;
 				exit(-1);
 			  }
-			  cout<<"reading index data file (Read 2): "<<readFile2SeqStrVector(sequenceFileR2_name, vec_seq2, &vec_seq2_Q)<<"sequences read"<<endl;
+			  cout<<"reading index data file (Read 2): "<<readFile2SeqStrVector(orig_sequenceFileR2_name, vec_seq2, &vec_seq2_Q)<<"sequences read"<<endl;
 			}
 		}      
     }
