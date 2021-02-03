@@ -240,7 +240,7 @@ void MappingBarcodes(vector<SequenceString>& _vecSeq1, /*this is the sequence da
 
 	cout<<"Start doing mapping.........."<<endl;
   //now everything is OK. let's do the job.
-  unsigned maxNumSeqToWrite=20000;
+  unsigned maxNumSeqToWrite=500000;
   double bestScore=lenOfBarcode+10; //small is better
   unsigned bestBar=0;
   unsigned count=0;
@@ -509,7 +509,15 @@ void MappingBarcodes(vector<SequenceString>& _vecSeq1, /*this is the sequence da
 	cout<<"finish checking for all....ready to do stats........"<<endl;
 	//write the stats for the last round
 	vector<string> header;
-	header.push_back("numOfSeqs");
+    //
+    
+    for(unsigned i =0;i<stats.size()-1;i++)
+    {
+        stringstream oo;
+            oo<<"bar_"<<i;
+        header.push_back(oo.str());
+    }
+    header.push_back("undetermined");
 	WriteTextTableFile(_indexR1_fname+"_Stat1.txt", stats, '\t', true,ios_base::trunc, header);
 	
   delete [] numOfWritesDone;
