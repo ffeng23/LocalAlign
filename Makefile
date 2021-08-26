@@ -31,7 +31,7 @@ SRCS_5=NGSMapping_Demux_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp ${ACCESSDI
 
 SRCS_6=NGSMapping_getBarcode_main.cpp ${ACCESSDIR}FASTQ.cpp ${ACCESSDIR}SequenceString.cpp ${ACCESSDIR}GzTools.cpp ${ACCESSDIR}FastqHandler.cpp ${ACCESSDIR}string_ext.cpp SequenceHandlerBarcode.cpp SequenceHandlerCommon.cpp ${ACCESSDIR}FastaHandler.cpp score.cpp ${ACCESSDIR}FileHandler.cpp
 
-SRCS_7=localAlign_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp ${ACCESSDIR}SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp LocalAlignment.cpp GlobalAlignment.cpp OverlapAlignment.cpp ${ACCESSDIR}FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp TracebackTable.cpp SequenceHandlerCommon.cpp MarkovChainGapModel_454.cpp ${ACCESSDIR}GzTools.cpp ${ACCESSDIR}FileHandler.cpp ${ACCESSDIR}FASTQ.cpp ${ACCESSDIR}FastqHandler.cpp Path.cpp
+SRCS_7=localAlign_main.cpp ${ACCESSDIR}string_ext.cpp score.cpp ${ACCESSDIR}SequenceString.cpp AlignmentString.cpp pairwiseAlignment.cpp LocalAlignment.cpp GlobalAlignment.cpp OverlapAlignment.cpp ${ACCESSDIR}FastaHandler.cpp SequenceHandler.cpp GapModel.cpp AffineGapModel.cpp TracebackTable.cpp SequenceHandlerCommon.cpp MarkovChainGapModel_454.cpp ${ACCESSDIR}GzTools.cpp ${ACCESSDIR}FileHandler.cpp ${ACCESSDIR}FASTQ.cpp ${ACCESSDIR}FastqHandler.cpp Path.cpp LocalAlignment_CT.cpp
 
 SRCS_8=NGS_Concate_main.cpp ${ACCESSDIR}string_ext.cpp ${ACCESSDIR}SequenceString.cpp ${ACCESSDIR}FastaHandler.cpp  ${ACCESSDIR}GzTools.cpp ${ACCESSDIR}FileHandler.cpp ${ACCESSDIR}FASTQ.cpp ${ACCESSDIR}FastqHandler.cpp SequenceHandlerCommon.cpp score.cpp
 

@@ -37,3 +37,9 @@ seq1<-"ACAGGGGCCAGTGGATAGACTGATGGGGGTGTTGTTTTGGCTGAGGAGACTGTGAGAGTGTTGCCTTGGCCCC
 seq2<-DNAString("")
 
 LocalAlign <-    pairwiseAlignment(seq1, seq2, type = "local", substitutionMatrix = NUC44, gapOpening = gapOpening, gapExtension = gapExtension)
+
+gapExtension=-4
+gapOpening=-0
+seq3<-DNAString("GGGATATATA")
+seq4<-DNAString("GGGTATATAT")
+LocalAlign <-    pairwiseAlignment(seq3, seq4, type = "local", substitutionMatrix = NUC44, gapOpening = gapOpening, gapExtension = gapExtension)

@@ -13,6 +13,7 @@
 #include "Path.hpp"
 
 #define DEBUG_D
+#define DEBUG
 
 using namespace std;
 /*static bool comparePathElement(Path* p1, Path* p2)

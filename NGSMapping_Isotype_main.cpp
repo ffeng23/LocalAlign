@@ -61,13 +61,14 @@ static double gapextension=-10;
 static bool gapextensionFlag=false;
 static mapType mapEnd=FivePrime;
 static bool demux=false;
+static string outPath="./";
 //static int trim=0;
 //static bool isotype_flag=false;
 int main(int argc, char* argv[])
 {
 	printCallingCommand(argc, argv);
   //for parsing commandline arguement
-  const char *opts = "hvf:g:e:m:s:t:k:n:p:l:d:x";
+  const char *opts = "hvf:g:e:m:s:t:k:n:p:l:d:xo:";
   //f: the input file name forward primer
   //r: the input file name reverse primer
   //d: the mapping type, either FivePrime or ThreePrime
@@ -97,10 +98,15 @@ int main(int argc, char* argv[])
       exit(-1);
     }
   
+  //cout<<"basename testing:"<<basename(sequenceFile_name)<<endl;
+  
   //*********get output files
-  string outputFileR1_name=sequenceFile_name;//+".mapped.fasta"); //the output file for mapped both files
-  string outputFileR2_name=sequenceFile_R2_name;//+".mapNone.fasta");//map none
+  string outputFileR1_name=basename(sequenceFile_name);//+".mapped.fasta"); //the output file for mapped both files
+  string outputFileR2_name=basename(sequenceFile_R2_name);//+".mapNone.fasta");//map none
 
+    outputFileR1_name=outPath+outputFileR1_name;
+    outputFileR2_name=outPath+outputFileR2_name;
+    
   cout<<"***Input parameters Summary:\n";
   cout<<"\tIsotype file name:\""<<isotypeFile_name<<"\".\n";
   if(sequenceFile_R2_name.length()<=0)
@@ -375,6 +381,13 @@ static void parseArguments(int argc, char **argv, const char *opts)
 	case 'l':
 	  MinimumOverlapLength=atoi(optarg);
 	  break;
+    case 'o':
+        outPath=optarg;
+        if(outPath.back()!='/' && outPath.back()!='\\')
+        {
+            outPath.push_back('/');
+            
+        }
 	case 'e':
 	  gapextension=atoi(optarg);
 	  if(gapextension>0)
@@ -428,7 +441,7 @@ static void printUsage(int argc, char* argv[])
       <<" [-d mapping type]\n"
       <<"\t  [-m score matrix] [-l MinimumOverlapLength]\n"
       <<"\t [-k scale] [-g gapopen panelty] [-e gap extension]\n"
-    //<<"\t [-i]\n"
+        <<"\t [-o file directory]\n"
       <<"\t [-n match rate threshold] [-p offset on forward end] \n"     
       <<"\t [-x] [-h] [-v]\n\n"
     ;
@@ -450,7 +463,8 @@ static void printUsage(int argc, char* argv[])
   cout<<"\t\t-m scorematrix -- the socre matrix name used for the alignment, \n"
       <<"\t\t\tonly support nuc44. nuc44 by default for nucleotide\n"
       <<"\n";
-
+        cout<<"\t\t-o output directory --- the output directory for output files\n"
+            <<"\t\t\t by default the current working directory\n";
   //cout<<"\t\t-t # -- the number 0 indicate no trimmed data to be saved; \n"
   //    <<"\t\t\t  All other number means to save the trimmed data to file\n\n";
 

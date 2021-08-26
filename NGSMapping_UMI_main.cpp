@@ -354,8 +354,10 @@ int main(int argc, char* argv[])
   
   cout<<"the pattern string: "<<p.toString()<<endl;
   cout<<"the subject string: "<<s.toString()<<endl;
-  LocalAlignment_CT ol(&p, &s, sm, gapopen, gapextension
-						,scale,4,0);//last 2 parameter, # of best local alignment found and and type gapmodel, 0 for affine 
+  //LocalAlignment_CT ol(&p, &s, sm, gapopen, gapextension
+  //						,scale,4,0);//last 2 parameter, # of best local alignment found and and type gapmodel, 0 for affine 
+    LocalAlignment ol(&p, &s, sm, gapopen, gapextension
+						,scale,4,0);//last 2 parameter, # of best local alignment found and and type gapmodel, 0 for affine                
 	AlignmentString* aso_arr=ol.GetAlignmentArr(); //pattern is on top; and subject is on bottom.
 	cout<<"first alignment"<<endl;
 	cout<<aso_arr[0].toString()<<endl;

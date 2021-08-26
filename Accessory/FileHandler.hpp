@@ -66,5 +66,7 @@ bool is_text(const string& fname);
 FileType getFileType_deep(const string& fname);
 FileType getFileType_byName(const string& fname);
 
+//return the basename of a file path.
+string basename (const std::string& str);
 
 #endif

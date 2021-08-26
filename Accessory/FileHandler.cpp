@@ -14,6 +14,16 @@ bool is_file(const char* path) {
     return S_ISREG(buf.st_mode);
 }
 
+string basename (const std::string& str)
+{
+  //std::cout << "Splitting: " << str << '\n';
+  std::size_t found = str.find_last_of("/\\");
+  //std::cout << " path: " << str.substr(0,found) << '\n';
+  //std::cout << " file: " << str.substr(found+1) << '\n';
+  return str.substr(found+1);
+}
+
+
 bool is_dir(const char* path) {
     struct stat buf;
     stat(path, &buf);

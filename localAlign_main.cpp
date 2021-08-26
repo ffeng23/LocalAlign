@@ -16,6 +16,7 @@
 #include "OverlapAlignment.hpp"
 #include "Accessory/FastaHandler.hpp"
 #include "SequenceHandler.hpp"
+#include "LocalAlignment_CT.hpp"
 
 using namespace std;
 
@@ -116,6 +117,8 @@ int main(int argc, char* argv[])
   cout<<"Reading input file 1:";
   vector<SequenceString> vec_seq1;
   int num1=ReadFasta(inputFile1_name, vec_seq1);
+  if(num1<0)
+       exit(-1);
   cout<<num1<<" sequence(s) read in"<<endl;
 	if(num1>1)
 	  {
@@ -134,6 +137,8 @@ int main(int argc, char* argv[])
   vector<SequenceString> vec_seq2;
   int num2=ReadFasta(inputFile2_name, vec_seq2);
   cout<<num2<<" sequences(s) read in"<<endl;
+  if(num2<0)
+      exit(-1);
 	if(num2>1)
 	  {
 		  cout<<"\tmore than one sequences read in from the input file,"
@@ -188,6 +193,33 @@ cout<<"\t("<<c1<<","<<c2<<")="<<sm->GetScore('A','A')<<endl;
   cout<<"length is "<<tempString.length()<<endl;
   cout<<"4,1 :" <<tempString.substr(4)<<endl;
 
+
+//
+cout<<"---------------Start testing special cases............."<<endl;
+    cout<<"see notes in ../UMI_barcode/"<<endl;
+     SequenceString p("p","GGGATATATA");
+  SequenceString s("s","GGGTATATAT");
+  
+  cout<<"the pattern string: "<<p.toString()<<endl;
+  cout<<"the subject string: "<<s.toString()<<endl;
+  //LocalAlignment_CT ol(&p, &s, sm, gapopen, gapextension
+  //						,scale,4,0);//last 2 parameter, # of best local alignment found and and type gapmodel, 0 for affine 
+    LocalAlignment_CT ol(&p, &s, sm, gapopen, gapextension
+						,scale,4,0);//last 2 parameter, # of best local alignment found and and type gapmodel, 0 for affine                
+	AlignmentString* aso_arr=ol.GetAlignmentArr(); //pattern is on top; and subject is on bottom.
+	cout<<"first alignment"<<endl;
+	cout<<aso_arr[0].toString()<<endl;
+	AlignmentString aso=aso_arr[1];
+	unsigned p_start=aso.GetPatternIndexStart();
+	unsigned p_end=aso.GetPatternIndexEnd();
+	unsigned s_start=aso.GetSubjectIndexStart();
+	unsigned s_end=aso.GetSubjectIndexEnd();
+	cout<<"p_start:"<<p_start<<"--p_end:"<<p_end<<endl;
+	cout<<"pattern:"<<aso.GetPattern()<<endl;
+	cout<<"s_start:"<<s_start<<"--s_end:"<<s_end<<endl;
+	cout<<"pattern:"<<aso.GetPattern()<<endl;
+	cout<<"subject:"<<aso.GetSubject()<<endl;
+	cout<<"alignment:\n"<<aso.toString()<<endl;
   /*ifstream ifs1_p(inputFile1_name.c_str());
   
   ofstream ofs((outputFile2_name).c_str());
