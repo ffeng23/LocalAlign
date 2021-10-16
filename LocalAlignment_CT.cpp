@@ -12,8 +12,8 @@
 #include "MarkovChainGapModel_454.hpp"
 #include "Path.hpp"
 
-#define DEBUG_D
-#define DEBUG
+//#define DEBUG_D
+//#define DEBUG
 
 using namespace std;
 /*static bool comparePathElement(Path* p1, Path* p2)
@@ -500,8 +500,14 @@ void LocalAlignment_CT::updatePathForMultipleLinks(const unsigned& current_pathI
 //is go through by other path uniquely with higher score during align() and it could also be caused due to 
 //it is a node with multiple pathes, but were taken by previous passing of updating. 
 // PathID is the same as the location/index of the path in the original c_path_vec formed after align();
+// Updated 8/27/2021, add codition so a zero node is always returning true, meaning the "current" path through zero nodes
 bool LocalAlignment_CT::isPathThruThisNode(const unsigned& pathID, const unsigned& index_p, const unsigned& index_s) const 
 {
+    //new add new condition, if this node is a zero node (LINKBACK), then this node is taken!!! return true.
+    if(c_traceback_table->GetLink(index_p, index_s)==ZERO)
+    {
+        return true;
+    }
 	unsigned lenP=c_pattern->GetLength();
 	PathElementEntry* p_pee=&(c_PathElementTable[index_p + index_s*(lenP+1)]);
 	//go throught c_pathID_vec and look for the pathID
@@ -810,16 +816,21 @@ void LocalAlignment_CT::traceBack()
 					);
 		  if(isPathThruThisNode(c_current_path_tk, i-1, j-1))
 		  {
+#ifdef DEBUG
+			  cout<<"\taking  UPLEFT route..."<<endl;
+#endif
 			  c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
 			  c_subject_wg=c_subject->GetSequence().at(j-1)+c_subject_wg;
 			  c_traceback_table->SetPathUsageState(i,j,true);//this one has been used.
-			  
 			  
 			  i--;
 			  j--;
 		  }
 		  else //take the up path, this should be fine, it must have path through this 
 		  {
+#ifdef DEBUG
+			  cout<<"\taking  UP route"<<endl;
+#endif              
 			currentIndex=j;
 			for(unsigned int k =0;k<c_traceback_table->GetNumOfIndels(i, currentIndex);k++)//c_traceback_table[i+currentIndex*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
 			{
@@ -832,13 +843,16 @@ void LocalAlignment_CT::traceBack()
 		  }
 		  break;
 		case LEFT_UPLEFT: 
+#ifdef DEBUG
+		  cout<<"LEFT_UPLEFT"<<endl;
+#endif
 			recordPathInfoToBeRemove(i,j, c_current_path_tk, vec_pathToBeChecked 
 					);
 			if(isPathThruThisNode(c_current_path_tk, i-1, j-1))
 			{
 			//take upleft first, if it allows
 #ifdef DEBUG
-			  cout<<"LEFT_UPLEFT"<<endl;
+			  cout<<"\t taking UPLEFT route"<<endl;
 #endif
 			  c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
 			  c_subject_wg=c_subject->GetSequence().at(j-1)+c_subject_wg;
@@ -849,6 +863,9 @@ void LocalAlignment_CT::traceBack()
 			}
 			else //take the left path, this should be fine, it must have a path through this
 			{
+#ifdef DEBUG
+			  cout<<"\t taking LEFT route"<<endl;
+#endif
 				currentIndex=i;
 			  for(unsigned int k=0;k<c_traceback_table->GetNumOfIndels_s(currentIndex,j);k++)//c_traceback_table[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
 				{
@@ -871,6 +888,9 @@ void LocalAlignment_CT::traceBack()
 		 //take the left first, if it is possible
 		 if(isPathThruThisNode(c_current_path_tk, i, j-1))
 		 {
+#ifdef DEBUG
+			  cout<<"\t taking LEFT route"<<endl;
+#endif             
 			 currentIndex=i;
 		  for(unsigned int k=0;k<c_traceback_table->GetNumOfIndels_s(currentIndex,j);k++)//c_traceback_table[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
 			{
@@ -882,6 +902,9 @@ void LocalAlignment_CT::traceBack()
 		 }
 		 else //so take the up then 
 		 {
+#ifdef DEBUG
+			  cout<<"\t taking UP route"<<endl;
+#endif
 			 currentIndex=j;
 			for(unsigned int k =0;k<c_traceback_table->GetNumOfIndels(i, currentIndex);k++)//c_traceback_table[i+currentIndex*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
 			{
@@ -894,13 +917,16 @@ void LocalAlignment_CT::traceBack()
 		 }
 		  break;
 		case UP_LEFT_UPLEFT:
+#ifdef DEBUG
+			  cout<<"UP_LEFT_UPLEFT"<<endl;
+#endif
 			recordPathInfoToBeRemove(i,j, c_current_path_tk, vec_pathToBeChecked 
 					);
 			if(isPathThruThisNode(c_current_path_tk, i-1, j-1))
 			{
 			//take upleft first, if it allows
 #ifdef DEBUG
-			  cout<<"UP_LEFT_UPLEFT"<<endl;
+			  cout<<"taking UPLEFT route..."<<endl;
 #endif
 			  c_pattern_wg=c_pattern->GetSequence().at(i-1)+c_pattern_wg;
 			  c_subject_wg=c_subject->GetSequence().at(j-1)+c_subject_wg;
@@ -913,6 +939,9 @@ void LocalAlignment_CT::traceBack()
 			{
 				if(isPathThruThisNode(c_current_path_tk, i, j-1))
 				{
+#ifdef DEBUG
+			  cout<<"taking LEFT route..."<<endl;
+#endif                    
 					currentIndex=i;
 				  for(unsigned int k=0;k<c_traceback_table->GetNumOfIndels_s(currentIndex,j);k++)//c_traceback_table[currentIndex+j*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
 					{
@@ -924,6 +953,9 @@ void LocalAlignment_CT::traceBack()
 				}
 				else
 				{
+#ifdef DEBUG
+			  cout<<"taking UP route.........."<<endl;
+#endif                    
 					currentIndex=j;
 					for(unsigned int k =0;k<c_traceback_table->GetNumOfIndels(i, currentIndex);k++)//c_traceback_table[i+currentIndex*(c_pattern->GetLength()+1)].GetNumOfIndels();k++)
 					{
@@ -960,10 +992,10 @@ void LocalAlignment_CT::traceBack()
   //done with trace back, set it to be traced
   	c_path_vec.at(c_current_path_tk)->setTraced();
 #ifdef DEBUG
-	cout<<"before doing the update for recurisive one"<<endl;
+	cout<<"before doing the update for mutltiple links ( recurisive one)"<<endl;
 #endif
   //now we are done for this path track back,
-  //no we need to go through the path list to update incase some node has been take by the current path
+  //no we need to go through the path list to update in case some node has been take by the current path
   updatePathForMultipleLinks(c_current_path_tk, vec_pathToBeChecked);
 #ifdef DEBUG			
   cout<<"+++++++++done the trace back "<<endl;

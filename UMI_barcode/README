@@ -8,3 +8,18 @@ In here we also save the testing examples and calling commands for run tests.
 2)temp22.txt, the calling commands and debugging output. testing non-identical gap penalty and mismatch. 
 3)temp223.txt the calling commands and debugging info. testing identical value between gap penalty and mismatch.
 
+
+
+
+Cases to test:
+../ngs_umi_barcode -s temp_125.fastq -t -x -p NNNNNNNNNGGGAAA -f0 -g0 -e3 -n1 > test.out
+
+
+../ngs_umi_barcode -s temp_125.fastq -t -x -p NNNNNNNNNGGGAAA -f0 -g0 -e4 -n1 > test2.out
+
+../ngs_umi_barcode -s temp_125.fastq -t -x -p NNNNNNNNNGGGAAA -f0 -g4 -e5 -n1 > test3.out   #<- this is the case to see localAlignment_CT is better than regular/original localAlignment, but original one is faster. 
+#we can also switch the pattern and subject. it works. don't remember what makes the changes.
+
+../ngs_umi_barcode -s temp_125.fastq -t -x -p NNNNNNNNNGGGAAA -f0 -g6 -e5 -n1 > test4.out
+
+

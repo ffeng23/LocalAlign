@@ -40,10 +40,26 @@ const string getUMI(const string &umi_pattern,
 // the special cases are dectected as 
 // 				anchor_positions[0]-offset<0
 //				anchor_positions[last]+offset>=seq.length() 
-const string prepAlignSequence(const string& seq, const unsigned& offset, 
+void prepAlignSequence(const string& seq, const unsigned& offset, 
 		const unsigned* const anchor_positions, const unsigned& anchor_length,
-		unsigned& seq_str_start /*output*/, unsigned& seq_str_end /*output*/
+         vector<string>* alignSeq, /*output*/
+		vector<vector<unsigned>>* alignSeq_start /*output*/, vector<vector<unsigned>>* alignSeq_end /*output*/
 		);
+void getSubSeq_recursive(const string& seq, 
+                        const vector<unsigned>& gap_start, //
+                        const vector<unsigned>& gap_end, 
+                        const unsigned & gap_length,
+                        const unsigned* const anchor_positions, 
+                        const unsigned& anchor_length, 
+                     
+                     const unsigned& start ,   //current subseq starting position, will be changing pointing to the new subsequence. 
+                     /*input &output*/ 
+                     const unsigned& current_gap, //current gap index, will be changing too.
+                         vector<string>* alignSeq, 
+                         vector<vector<unsigned>>* alignSeq_start,
+                            vector<vector<unsigned>>* alignSeq_end
+            );
+
 string trimSequenceUmiAnchorFromStart(const string& seq, const unsigned &umi_anchor_end);
 string GetUmiFromAlignmentString(const AlignmentString& aso);
 #endif

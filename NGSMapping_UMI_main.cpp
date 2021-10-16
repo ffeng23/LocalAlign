@@ -280,7 +280,7 @@ int main(int argc, char* argv[])
 	cout<<umi_positions[i]<<",";
   }
   cout<<endl;
-  cout<<"\tumi cha:";
+  cout<<"\tumi char:";
   for(unsigned i=0;i<umi_length;i++)
   {
 	cout<<umi_pattern.at(umi_positions[i]);
@@ -292,7 +292,7 @@ int main(int argc, char* argv[])
 	cout<<anchor_positions[i]<<",";
   }
   cout<<endl;
-  cout<<"\tanchor cha:";
+  cout<<"\tanchor char:";
   for(unsigned i=0;i<anchor_length;i++)
   {
 	cout<<umi_pattern.at(anchor_positions[i]);
@@ -330,101 +330,125 @@ int main(int argc, char* argv[])
   cout<<"**extracted and inserted umi:"<<insertUmi2SName_umitools(ss1.GetName(), "ACATGGG")<<endl;
   */
   cout<<"Showing first sequence:"<<endl;
-  unsigned seq_str_start=0, seq_str_end=0;
-  cout<<"--align sequence:"<<prepAlignSequence(ss1.GetSequence(), OffsetForward, 
-		anchor_positions, anchor_length, seq_str_start, seq_str_end)<<endl;
-  cout		<<"\n\tSeq start: "<<seq_str_start<<"; end: "<<seq_str_end
-		<<endl;
-  
-  //+++++++++testing alignment
-  cout<<"====================="<<endl;
-  cout<<"\t testing alignment........."<<endl;
-  //SequenceString p("p","GGGCAAAA");
-  //SequenceString s("s","GGGAAAAA");
-  
-  //SequenceString p("p","GGGGAAAC");
-  //SequenceString s("s","GGAAAACCT");
-  
-  
-  //SequenceString p("p","GGGGAAAC");
-  //SequenceString s("s","GGGAAAACCT");
-  
-  SequenceString p("p","GGGATATATA");
-  SequenceString s("s","GGGTATATAT");
-  
-  cout<<"the pattern string: "<<p.toString()<<endl;
-  cout<<"the subject string: "<<s.toString()<<endl;
-  //LocalAlignment_CT ol(&p, &s, sm, gapopen, gapextension
-  //						,scale,4,0);//last 2 parameter, # of best local alignment found and and type gapmodel, 0 for affine 
-    LocalAlignment ol(&p, &s, sm, gapopen, gapextension
-						,scale,4,0);//last 2 parameter, # of best local alignment found and and type gapmodel, 0 for affine                
-	AlignmentString* aso_arr=ol.GetAlignmentArr(); //pattern is on top; and subject is on bottom.
-	cout<<"first alignment"<<endl;
-	cout<<aso_arr[0].toString()<<endl;
-	AlignmentString aso=aso_arr[1];
-	unsigned p_start=aso.GetPatternIndexStart();
-	unsigned p_end=aso.GetPatternIndexEnd();
-	unsigned s_start=aso.GetSubjectIndexStart();
-	unsigned s_end=aso.GetSubjectIndexEnd();
-	cout<<"p_start:"<<p_start<<"--p_end:"<<p_end<<endl;
-	cout<<"pattern:"<<aso.GetPattern()<<endl;
-	cout<<"s_start:"<<s_start<<"--s_end:"<<s_end<<endl;
-	cout<<"pattern:"<<aso.GetPattern()<<endl;
-	cout<<"subject:"<<aso.GetSubject()<<endl;
-	cout<<"alignment:\n"<<aso.toString()<<endl;
+  //unsigned seq_str_start=0, seq_str_end=0;
+  vector<string> alignSeq;
+  vector<vector<unsigned> > alignSeq_start;
+  vector<vector<unsigned> > alignSeq_end;
+  prepAlignSequence(ss1.GetSequence(), OffsetForward,  
+		anchor_positions, anchor_length,   
+        &alignSeq, /*output*/ 
+        &alignSeq_start /*output*/, 
+        &alignSeq_end /*output*/);
+        
+  cout<<"--align sequence:"<<alignSeq.size()<<endl;
+  for(unsigned i=0; i<alignSeq.size();i++){
+        cout<<"\n\taligned seq: "<<alignSeq.at(i)	<<endl;
+        cout<<"\t\t";
+        for(unsigned j=0;j<alignSeq_start.at(i).size();j++)
+            cout<<"aligned start:"<<alignSeq_start.at(i).at(j)<<";";
+        cout<<endl;
+        cout<<"\t\t";
+        for(unsigned j=0;j<alignSeq_end.at(i).size();j++)
+            cout<<"aligned end:"<<alignSeq_end.at(i).at(j)<<";";
+        cout<<endl;
+  }
+//#define DEBUG_M
+#ifdef DEBUG_M  
+                  //+++++++++testing alignment
+                  cout<<"====================="<<endl;
+                  cout<<"\t testing alignment........."<<endl;
+                  //SequenceString p("p","GGGCAAAA");
+                  //SequenceString s("s","GGGAAAAA");
+                  
+                  //SequenceString p("p","GGGGAAAC");
+                  //SequenceString s("s","GGAAAACCT");
+                  
+                  
+                  //SequenceString p("p","GGGGAAAC");
+                  //SequenceString s("s","GGGAAAACCT");
+
+
+                  cout<<"*******LocalAlignment_CT: Debugging mode......**********"<<endl;
+                 
+                  SequenceString p("p","GGGATATATA");
+                  SequenceString s("s","GGGTATATAT");
+                  
+                  cout<<"the pattern string: "<<p.toString()<<endl;
+                  cout<<"the subject string: "<<s.toString()<<endl;
+                  LocalAlignment_CT ol( &p,&s, sm, gapopen, gapextension
+                                        ,scale,4,0);//last 2 parameter, # of best local alignment found and and type gapmodel, 0 for affine 
+                  //  LocalAlignment ol(&p, &s, sm, gapopen, gapextension
+                //						,scale,4,0);//last 2 parameter, # of best local alignment found and and type gapmodel, 0 for affine                
+                    AlignmentString* aso_arr=ol.GetAlignmentArr(); //pattern is on top; and subject is on bottom.
+                    cout<<"first alignment"<<endl;
+                    cout<<aso_arr[0].toString()<<endl;
+                    cout<<"---second aligmnet"<<endl;
+                    AlignmentString aso=aso_arr[1];
+                    unsigned p_start=aso.GetPatternIndexStart();
+                    unsigned p_end=aso.GetPatternIndexEnd();
+                    unsigned s_start=aso.GetSubjectIndexStart();
+                    unsigned s_end=aso.GetSubjectIndexEnd();
+                    cout<<"p_start:"<<p_start<<"--p_end:"<<p_end<<endl;
+                    cout<<"pattern:"<<aso.GetPattern()<<endl;
+                    cout<<"s_start:"<<s_start<<"--s_end:"<<s_end<<endl;
+                    cout<<"pattern:"<<aso.GetPattern()<<endl;
+                    cout<<"subject:"<<aso.GetSubject()<<endl;
+                    cout<<"alignment:\n"<<aso.toString()<<endl;
+                    
+                    // ---------start testing the functions for adding nodes.
+                    cout<<"---------------testing the adding nodes-----------\n";
+                    PathElementEntry pee;
+                    cout<<"\tTesting empty pathelement etry....\n"<<endl;
+                    
+                    cout<<pee.toString()<<endl;
+                    cout<<"\t--adding a new path element:";
+                    pee.AddPathInfoNoCheckingDuplication(pee.GetNumberOfPathes(), 1, 20, 2, 2);
+                    cout<<"..DONE!!"<<endl;
+                    cout<<pee.toString()<<endl;
+                    
+                    cout<<"--testing comming nodes:"<<endl;
+                    PathElementEntry pee2(pee);
+                    pee2.AddPathInfoNoCheckingDuplication(pee2.GetNumberOfPathes(), 2, 15, 1, 9);
+                    cout<<"--\t a new node:"<<endl;
+                    cout<<pee2.toString()<<endl;
+                    
+                    cout<<"\t\t-- combining....";
+                    pee.AddPathInfo(pee2);
+                    cout<<"Done"<<endl;
+                    
+                        cout<<"\t---the new commbined nodes pathes:\n"<<pee.toString()<<endl;
+                    
+                    cout<< pee2.toString()<<endl;
+                    
+                    // --- pee3 with 3 entry
+                    PathElementEntry pee3;
+                    pee3.AddPathInfoNoCheckingDuplication(pee3.GetNumberOfPathes(), 4, 190, 21, 39);
+                    cout<<"new pee3 node:"<<pee3.toString();
+                    pee.AddPathInfo(pee3);
+                    cout<<"after added pee3 to pee, pee is "<<pee.toString()<<endl;
+                    
+                    //
+                    cout<<"Testing adding an empty node"<<endl;
+                    PathElementEntry pee4;
+                    pee.AddPathInfo(pee4);
+                    cout<<"pee is now "<<pee.toString();
+                    
+#endif 
 	
-	// ---------start testing the functions for adding nodes.
-	cout<<"---------------testing the adding nodes-----------\n";
-	PathElementEntry pee;
-	cout<<"\tTesting empty pathelement etry....\n"<<endl;
-	
-	cout<<pee.toString()<<endl;
-	cout<<"\t--adding a new path element:";
-	pee.AddPathInfoNoCheckingDuplication(pee.GetNumberOfPathes(), 1, 20, 2, 2);
-	cout<<"..DONE!!"<<endl;
-	cout<<pee.toString()<<endl;
-	
-	cout<<"--testing comming nodes:"<<endl;
-	PathElementEntry pee2(pee);
-	pee2.AddPathInfoNoCheckingDuplication(pee2.GetNumberOfPathes(), 2, 15, 1, 9);
-	cout<<"--\t a new node:"<<endl;
-	cout<<pee2.toString()<<endl;
-	
-	cout<<"\t\t-- combining....";
-	pee.AddPathInfo(pee2);
-	cout<<"Done"<<endl;
-	
-		cout<<"\t---the new commbined nodes pathes:\n"<<pee.toString()<<endl;
-	
-	cout<< pee2.toString()<<endl;
-	
-	// --- pee3 with 3 entry
-	PathElementEntry pee3;
-	pee3.AddPathInfoNoCheckingDuplication(pee3.GetNumberOfPathes(), 4, 190, 21, 39);
-	cout<<"new pee3 node:"<<pee3.toString();
-	pee.AddPathInfo(pee3);
-	cout<<"after added pee3 to pee, pee is "<<pee.toString()<<endl;
-	
-	//
-	cout<<"Testing adding an empty node"<<endl;
-	PathElementEntry pee4;
-	pee.AddPathInfo(pee4);
-	cout<<"pee is now "<<pee.toString();
-	
-	
-	
-/*
+#ifndef DEBUG_M
+  	
+
 	// ******************
-	cout<<"tesiting extracting umi........."<<endl;
-	cout<<"\t Get GetUmiFromAlignmentString:"<<GetUmiFromAlignmentString(aso)<<endl;
-	cout<<"testing trim sequence ....."<<endl;
+    
+	cout<<"testing extracting umi........."<<endl;
+	
 	cout<<"\trimming the sequence at "<<11<<endl;
-	cout<<"\t "<<trimSequenceUmiAnchorFromStart(p.GetSequence(), 11)<<endl;
+	cout<<"\t "<<trimSequenceUmiAnchorFromStart(ss1.GetSequence(), 11)<<endl;
 	
 	// *********testing extracting the umi
 	cout<<"*****************testing extraction umi "<<endl;
 	string ex_umi;
-	bool t=extractUmi(ss1, umi_pattern, 
+bool t=extractUmi(ss1, umi_pattern, 
 				anchor_positions, anchor_length,
 				umi_positions, umi_length,
 				trim, extract, 
@@ -437,7 +461,10 @@ int main(int argc, char* argv[])
 		cout<<"extraction success!!"<<endl;
 	else
 		cout<<"extractoin is not successful"<<endl;
-	cout<<"the extracted umi:"<<ex_umi<<endl;*/
+	cout<<"the extracted umi:"<<ex_umi<<endl;
+    cout<<"the sequence string:"<<ss1.GetSequence()<<endl;
+
+//TODO: 1)test fastq. 2)write the output to different file for sequences with anchor or without anchors
 /*  cout<<"===>reading and processing adaptor sequences for mapping......"<<endl;
   if(trim==1)
     {
@@ -467,6 +494,8 @@ int main(int argc, char* argv[])
   delete [] anchor_positions;
   cout<<"Done!!!"<<endl;
   //ofs.close();
+
+#endif 
 
   //cout<<"Total "<<gene_info.size()<<" genes are processed"<<endl;
   cout<<"Thanks for using our program and have a nice day!!"<<endl;
